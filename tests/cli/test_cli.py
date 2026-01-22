@@ -8,10 +8,12 @@ Goal: Get cli.py from 0% to at least 50% coverage.
 import os
 import subprocess
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 # [20251215_TEST] Ensure CLI subprocess invocations can import code_scalpel without editable install
-os.environ["PYTHONPATH"] = os.pathsep.join([os.path.abspath("src"), os.environ.get("PYTHONPATH", "")]).rstrip(
+_project_root = Path(__file__).resolve().parents[2]
+os.environ["PYTHONPATH"] = os.pathsep.join([str(_project_root / "src"), os.environ.get("PYTHONPATH", "")]).rstrip(
     os.pathsep
 )
 

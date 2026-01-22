@@ -34,9 +34,13 @@ async def test_extract_code_cross_file_deps_is_upgrade_required_in_community(
     # [20260118_BUGFIX] Result may be Pydantic model or dict depending on conversion
     result_dict = result.model_dump() if hasattr(result, "model_dump") else result
 
-    assert result_dict["success"] is False
-    assert result_dict["error"] is not None
-    assert "cross_file_deps" in result_dict["error"] or "PRO" in result_dict["error"]
+    # Extract_code wraps the actual result in 'data' field
+    data = result_dict.get("data", {})
+    assert data["success"] is False
+
+    # Check for tier-gating error message in the nested error field
+    error_msg = data.get("error", "")
+    assert "cross_file_deps" in error_msg or "PRO" in error_msg, f"Expected cross_file_deps error, got: {error_msg}"
 
     # Sanity: no stack trace markers in the user-facing error string
-    assert "Traceback" not in result_dict["error"]
+    assert "Traceback" not in error_msg

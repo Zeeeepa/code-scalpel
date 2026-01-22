@@ -418,7 +418,7 @@ def _write_signed_policy_manifest(policy_dir: Path, secret: str) -> None:
     from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
 
     policy_dir.mkdir(parents=True, exist_ok=True)
-    (policy_dir / "policy.rego").write_text("package test\n\nallow { true }\n", encoding="utf-8")
+    (policy_dir / "policy.rego").write_text("package test\n\nallow if true\n", encoding="utf-8")
 
     policy_files = ["policy.rego"]
     manifest = CryptographicPolicyVerifier.create_manifest(

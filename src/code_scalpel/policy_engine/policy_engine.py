@@ -464,16 +464,27 @@ class PolicyEngine:
         Raises:
             PolicyError: If any policy has invalid Rego
         """
+        import tempfile
+
         for policy in self.policies:
             try:
-                result = subprocess.run(
-                    ["opa", "check", "-"],
-                    input=policy.rule.encode(),
-                    capture_output=True,
-                    timeout=10,
-                )
-                if result.returncode != 0:
-                    raise PolicyError(f"Invalid Rego in policy '{policy.name}': " f"{result.stderr.decode()}")
+                # [20260122_BUGFIX] OPA check doesn't support stdin in v1.12.3+, use temp file
+                with tempfile.NamedTemporaryFile(mode="w", suffix=".rego", delete=False) as f:
+                    f.write(policy.rule)
+                    temp_path = f.name
+
+                try:
+                    result = subprocess.run(
+                        ["opa", "check", temp_path],
+                        capture_output=True,
+                        timeout=10,
+                    )
+                    if result.returncode != 0:
+                        raise PolicyError(f"Invalid Rego in policy '{policy.name}': " f"{result.stderr.decode()}")
+                finally:
+                    import os
+
+                    os.unlink(temp_path)
             except subprocess.TimeoutExpired:
                 raise PolicyError(f"Rego validation timeout for policy '{policy.name}'. Failing CLOSED.")
 

@@ -86,6 +86,18 @@ class ToolResponseEnvelope(BaseModel):
         default=None,
         description="One of: community, pro, enterprise (omitted by default for token efficiency)",
     )
+    tier_applied: str | None = Field(
+        default=None,
+        description="[20260122_FEATURE] Actual tier applied during invocation for metadata tracking",
+    )
+    files_limit_applied: int | None = Field(
+        default=None,
+        description="[20260122_FEATURE] File count limit enforced at this tier",
+    )
+    rules_limit_applied: int | None = Field(
+        default=None,
+        description="[20260122_FEATURE] Rule count limit enforced at this tier",
+    )
     tool_version: str | None = Field(
         default=None,
         description="Semantic version of tool implementation (omitted by default)",
@@ -121,14 +133,42 @@ class ToolResponseEnvelope(BaseModel):
     data: Any | None = Field(default=None, description="Tool-specific payload")
 
     # [20260121_FEATURE] Transparent attribute forwarding for test compatibility
-    def __getattr__(self, name: str) -> Any:
-        """Forward attribute access to data dict for test compatibility.
+    # [20260122_BUGFIX] Preserve legacy stringy error access while keeping structured ToolError.
+    def __getattribute__(self, name: str) -> Any:
+        if name == "error_model":  # Access structured ToolError when needed
+            return super().__getattribute__("__dict__").get("error")
 
-        Allows tests to access result.success instead of result.data['success'].
+        if name == "error":
+            env_error = super().__getattribute__("__dict__").get("error")
+            if isinstance(env_error, ToolError):
+                return env_error.error
+            if env_error is not None:
+                return env_error
+            data_payload = super().__getattribute__("__dict__").get("data")
+            if isinstance(data_payload, dict) and "error" in data_payload:
+                return data_payload.get("error")
+            if hasattr(data_payload, "error"):
+                try:
+                    return data_payload.error
+                except Exception:
+                    return None
+            return None
+
+        return super().__getattribute__(name)
+
+    def __getattr__(self, name: str) -> Any:
+        """Forward attribute access to data payload for test compatibility.
+
+        Allows tests to access result.success instead of result.data['success']
+        or result.data.success. Handles both dict and Pydantic model payloads.
         """
+
         if name in {
             "data",
             "tier",
+            "tier_applied",
+            "files_limit_applied",
+            "rules_limit_applied",
             "tool_version",
             "tool_id",
             "request_id",
@@ -137,14 +177,21 @@ class ToolResponseEnvelope(BaseModel):
             "error",
             "upgrade_hints",
             "warnings",
+            "error_model",
         }:
             # These are envelope fields - use default behavior
             return object.__getattribute__(self, name)
 
-        # Try to get from data dict
+        # Try to get from data payload
         data = object.__getattribute__(self, "data")
+
+        # Handle dict payloads
         if isinstance(data, dict) and name in data:
             return data[name]
+
+        # [20260121_BUGFIX] Handle Pydantic model payloads
+        if hasattr(data, name):
+            return getattr(data, name)
 
         # Fall back to default behavior (raises AttributeError)
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
@@ -180,9 +227,14 @@ def _maybe_get_success_and_error(payload: Any) -> tuple[bool | None, str | None]
     """
 
     try:
+        # [20260122_BUGFIX] Honor ToolError payloads (common in failure paths)
+        if isinstance(payload, ToolError):
+            return False, payload.error
         if isinstance(payload, BaseModel):
             success = getattr(payload, "success", None)
             err = getattr(payload, "error", None)
+            if success is None and err is not None:
+                return False, err
             return (bool(success) if success is not None else None, err)
         if isinstance(payload, dict):
             success = payload.get("success")
@@ -256,26 +308,39 @@ def make_envelope(
     cfg = get_response_config()
     envelope_fields = cfg.get_envelope_fields(tool_id)
 
-    # Normalize tool-specific payload to dict for filtering
-    normalized_data = data
-    try:
-        if isinstance(data, BaseModel):
-            normalized_data = data.model_dump(mode="json", exclude_none=True)
-    except Exception:
-        normalized_data = data
-
-    # Filter tool payload according to config; include error-context fields when error present
+    # [20260122_BUGFIX] Don't convert Pydantic models to dicts - preserve model structure
+    # Only filter dict payloads. Pydantic models are returned as-is to preserve
+    # attribute access (e.g., ref.owners, f.path) which tests and clients expect.
+    filtered_data = data
     try:
         is_error = error is not None
-        if isinstance(normalized_data, dict):
-            filtered_data = filter_tool_response(normalized_data, tool_name=tool_id, tier=tier, is_error=is_error)
-        else:
-            filtered_data = normalized_data
+        if isinstance(data, dict):
+            # Only filter dict payloads
+            filtered_data = filter_tool_response(data, tool_name=tool_id, tier=tier, is_error=is_error)
+        # elif isinstance(data, BaseModel):
+        #     # Keep Pydantic models as-is to preserve attribute access
+        #     filtered_data = data
     except Exception:
-        filtered_data = normalized_data
+        # On filtering error, keep original data
+        filtered_data = data
 
+    # [20260122_BUGFIX] Auto-populate envelope error when payload reports failure
+    if error is None:
+        success, err_msg = _maybe_get_success_and_error(filtered_data)
+        if success is False or isinstance(filtered_data, ToolError):
+            classified = None
+            if isinstance(filtered_data, ToolError):
+                err_msg = filtered_data.error
+                classified = filtered_data.error_code
+            classified = classified or _classify_failure_message(err_msg) or "internal_error"
+            error = ToolError(error=err_msg or "Tool failed", error_code=classified)
+
+    # [20260121_BUGFIX] tier is license/server metadata, not configurable output
+    # Always include tier field regardless of response_config profile
+    # [20260122_FEATURE] Also set tier_applied for metadata tracking
     return ToolResponseEnvelope(
-        tier=tier if "tier" in envelope_fields else None,
+        tier=tier,  # ALWAYS include tier (server metadata, not response content)
+        tier_applied=tier,  # [20260122_FEATURE] Track which tier was applied during invocation
         tool_version=tool_version if "tool_version" in envelope_fields else None,
         tool_id=tool_id if "tool_id" in envelope_fields else None,
         request_id=request_id if "request_id" in envelope_fields else None,
@@ -364,7 +429,9 @@ def envelop_tool_function(
         import inspect as _inspect
 
         _clean_params = [p.replace(annotation=_inspect._empty) for p in sig.parameters.values()]
-        _wrapped.__signature__ = sig.replace(parameters=tuple(_clean_params), return_annotation=_inspect._empty)  # type: ignore[attr-defined]
+        _wrapped.__signature__ = sig.replace(
+            parameters=tuple(_clean_params), return_annotation=_inspect._empty
+        )  # type: ignore[attr-defined]
     except Exception:
         _wrapped.__signature__ = sig  # type: ignore[attr-defined]
 

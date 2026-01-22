@@ -50,8 +50,8 @@ def vulnerable_login(username):
 # [20251225_REFACTOR] Import from new security.analyzers.security_analyzer location
 from code_scalpel.security.analyzers.security_analyzer import (  # noqa: E402
     analyze_security,
-    find_sql_injections,
     find_command_injections,
+    find_sql_injections,
 )
 
 
@@ -233,9 +233,7 @@ def build_query():
     print("\nTaint Flow Analysis:")
     if result.taint_flows:
         for var_name, taint_info in result.taint_flows.items():
-            print(
-                f"  {var_name}: {taint_info.source.name} → {taint_info.propagation_path}"
-            )
+            print(f"  {var_name}: {taint_info.source.name} → {taint_info.propagation_path}")
 
     print("\nDetected Vulnerabilities:")
     print(result.summary())

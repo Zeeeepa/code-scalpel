@@ -10,7 +10,8 @@ before applying them to the main codebase.
 import tempfile
 from pathlib import Path
 
-from code_scalpel.autonomy import FileChange, SandboxExecutorImpl as SandboxExecutor
+from code_scalpel.autonomy import FileChange
+from code_scalpel.autonomy import SandboxExecutorImpl as SandboxExecutor
 
 
 def main():
@@ -21,11 +22,7 @@ def main():
 
         # Create a simple Python project
         (project_path / "calculator.py").write_text(
-            "def add(a, b):\n"
-            "    return a + b\n"
-            "\n"
-            "def multiply(a, b):\n"
-            "    return a * b\n"
+            "def add(a, b):\n" "    return a + b\n" "\n" "def multiply(a, b):\n" "    return a * b\n"
         )
 
         (project_path / "test_calculator.py").write_text(
@@ -89,9 +86,7 @@ def main():
         if result.lint_results:
             print("\n  Lint Results:")
             for lint in result.lint_results:
-                print(
-                    f"    {lint.severity.upper()}: {lint.file}:{lint.line} - {lint.message}"
-                )
+                print(f"    {lint.severity.upper()}: {lint.file}:{lint.line} - {lint.message}")
 
         # Verify original files are unchanged
         original_content = (project_path / "calculator.py").read_text()

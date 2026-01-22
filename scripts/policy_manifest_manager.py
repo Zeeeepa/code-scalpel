@@ -17,8 +17,8 @@ import argparse
 import json
 import os
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -62,9 +62,7 @@ def cmd_sign(args):
         secret = os.environ.get("SCALPEL_MANIFEST_SECRET")
         if not secret:
             print("\nError: No signing secret provided.")
-            print(
-                "Set SCALPEL_MANIFEST_SECRET environment variable or use --secret option."
-            )
+            print("Set SCALPEL_MANIFEST_SECRET environment variable or use --secret option.")
             print("\nGenerate a strong secret:")
             import secrets
 
@@ -117,9 +115,7 @@ def cmd_sign(args):
 
         print("\n📋 Next steps:")
         print(f"   1. Review the manifest: cat {manifest_path}")
-        print(
-            f"   2. Commit to git: git add {manifest_path} && git commit -m 'Update policy manifest'"
-        )
+        print(f"   2. Commit to git: git add {manifest_path} && git commit -m 'Update policy manifest'")
         print("   3. Ensure agents have SCALPEL_MANIFEST_SECRET set")
 
         return 0
@@ -144,9 +140,7 @@ def cmd_verify(args):
     # Check for secret
     if not args.secret and "SCALPEL_MANIFEST_SECRET" not in os.environ:
         print("\nError: No signing secret provided.")
-        print(
-            "Set SCALPEL_MANIFEST_SECRET environment variable or use --secret option."
-        )
+        print("Set SCALPEL_MANIFEST_SECRET environment variable or use --secret option.")
         return 1
 
     secret = args.secret or os.environ["SCALPEL_MANIFEST_SECRET"]
@@ -202,9 +196,7 @@ def cmd_info(args):
     if not manifest_path.exists():
         print(f"Error: Manifest not found: {manifest_path}")
         print("\nCreate a manifest with:")
-        print(
-            f"  python scripts/policy_manifest_manager.py sign --policy-dir {args.policy_dir}"
-        )
+        print(f"  python scripts/policy_manifest_manager.py sign --policy-dir {args.policy_dir}")
         return 1
 
     try:
@@ -308,9 +300,7 @@ def cmd_rotate(args):
 
     # Backup old manifest
     manifest_path = Path(args.policy_dir) / "policy.manifest.json"
-    backup_path = manifest_path.with_suffix(
-        f".json.backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-    )
+    backup_path = manifest_path.with_suffix(f".json.backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}")
     if manifest_path.exists():
         manifest_path.rename(backup_path)
         print(f"✓ Backed up old manifest: {backup_path}")
@@ -328,9 +318,7 @@ def cmd_rotate(args):
     print("\n📋 Next steps:")
     print("   1. Update SCALPEL_MANIFEST_SECRET everywhere:")
     print(f"      export SCALPEL_MANIFEST_SECRET='{args.new_secret}'")
-    print(
-        f"   2. Commit new manifest: git add {new_path} && git commit -m 'Rotate policy secret'"
-    )
+    print(f"   2. Commit new manifest: git add {new_path} && git commit -m 'Rotate policy secret'")
     print("   3. Update CI/CD secrets")
     print("   4. Restart all agents")
 
@@ -360,61 +348,37 @@ Examples:
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     # Sign command
-    sign_parser = subparsers.add_parser(
-        "sign", help="Sign policy files and create manifest"
-    )
-    sign_parser.add_argument(
-        "--policy-dir", default=".code-scalpel", help="Policy directory"
-    )
-    sign_parser.add_argument(
-        "--signed-by", help="Email or name of signer (default: git user.email)"
-    )
-    sign_parser.add_argument(
-        "--secret", help="Signing secret (default: SCALPEL_MANIFEST_SECRET env var)"
-    )
+    sign_parser = subparsers.add_parser("sign", help="Sign policy files and create manifest")
+    sign_parser.add_argument("--policy-dir", default=".code-scalpel", help="Policy directory")
+    sign_parser.add_argument("--signed-by", help="Email or name of signer (default: git user.email)")
+    sign_parser.add_argument("--secret", help="Signing secret (default: SCALPEL_MANIFEST_SECRET env var)")
 
     # Verify command
     verify_parser = subparsers.add_parser("verify", help="Verify policy integrity")
-    verify_parser.add_argument(
-        "--policy-dir", default=".code-scalpel", help="Policy directory"
-    )
+    verify_parser.add_argument("--policy-dir", default=".code-scalpel", help="Policy directory")
     verify_parser.add_argument(
         "--source",
         default="file",
         choices=["file", "git", "env"],
         help="Manifest source",
     )
-    verify_parser.add_argument(
-        "--secret", help="Signing secret (default: SCALPEL_MANIFEST_SECRET env var)"
-    )
-    verify_parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose output"
-    )
+    verify_parser.add_argument("--secret", help="Signing secret (default: SCALPEL_MANIFEST_SECRET env var)")
+    verify_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
     # Info command
     info_parser = subparsers.add_parser("info", help="Show manifest information")
-    info_parser.add_argument(
-        "--policy-dir", default=".code-scalpel", help="Policy directory"
-    )
-    info_parser.add_argument(
-        "--check", action="store_true", help="Check if files still exist"
-    )
+    info_parser.add_argument("--policy-dir", default=".code-scalpel", help="Policy directory")
+    info_parser.add_argument("--check", action="store_true", help="Check if files still exist")
 
     # Rotate command
     rotate_parser = subparsers.add_parser("rotate", help="Rotate signing secret")
-    rotate_parser.add_argument(
-        "--policy-dir", default=".code-scalpel", help="Policy directory"
-    )
+    rotate_parser.add_argument("--policy-dir", default=".code-scalpel", help="Policy directory")
     rotate_parser.add_argument(
         "--old-secret",
         help="Old signing secret (default: SCALPEL_MANIFEST_SECRET env var)",
     )
-    rotate_parser.add_argument(
-        "--new-secret", help="New signing secret (default: auto-generate)"
-    )
-    rotate_parser.add_argument(
-        "--signed-by", help="Email or name of signer (default: from old manifest)"
-    )
+    rotate_parser.add_argument("--new-secret", help="New signing secret (default: auto-generate)")
+    rotate_parser.add_argument("--signed-by", help="Email or name of signer (default: from old manifest)")
 
     args = parser.parse_args()
 

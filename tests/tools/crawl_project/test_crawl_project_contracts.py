@@ -77,8 +77,10 @@ async def test_invalid_tier_env_falls_back_to_community_limits(
 ) -> None:
     from code_scalpel.mcp.tools.context import crawl_project
 
-    monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
+    # Disable license discovery without setting tier -> should fall back to community
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
+    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
 
     result = await crawl_project(root_path=str(large_python_project), include_report=False)
     assert result.success is True

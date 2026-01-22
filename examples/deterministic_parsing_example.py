@@ -40,7 +40,7 @@ Benefits:
 """
 
 # Example refactor of PDGBuilder
-from code_scalpel.parsing import parse_python_code, ParsingError, SanitizationReport
+from code_scalpel.parsing import ParsingError, SanitizationReport, parse_python_code
 
 
 class RefactoredPDGBuilder:

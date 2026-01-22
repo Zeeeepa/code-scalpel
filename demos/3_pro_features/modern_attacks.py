@@ -73,9 +73,7 @@ def ldap_authenticate(username: str, password: str) -> bool:
     ldap_conn = ldap.initialize("ldap://localhost:389")
 
     try:
-        results = ldap_conn.search_s(
-            "dc=example,dc=com", ldap.SCOPE_SUBTREE, search_filter
-        )
+        results = ldap_conn.search_s("dc=example,dc=com", ldap.SCOPE_SUBTREE, search_filter)
         return len(results) > 0
     except Exception:
         return False
@@ -366,8 +364,8 @@ def save_user_to_db(user: dict) -> None:
 
 def nosql_login_secure(username: str, password: str) -> dict:
     """Secure version with parameterized query."""
-    from pymongo import MongoClient
     import bcrypt
+    from pymongo import MongoClient
 
     client = MongoClient("mongodb://localhost:27017/")
     db = client["myapp"]

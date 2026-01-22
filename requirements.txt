@@ -16,6 +16,8 @@ pyyaml
 # openai
 antlr4-python3-runtime
 toml
+# [20260122_BUGFIX] Ensure tomli present for Python <3.11 (architecture integration tests)
+tomli>=2.0.0; python_version < '3.11'
 plotly
 matplotlib
 esprima

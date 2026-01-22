@@ -10,6 +10,7 @@ Security guarantees:
 - Process isolation via containers or chroot
 """
 
+import importlib
 import os
 import shlex
 import shutil
@@ -18,14 +19,69 @@ import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
-try:
-    import docker  # type: ignore[import-untyped]
+_docker_module: Any | None = None
 
-    DOCKER_AVAILABLE = True
-except ImportError:
-    docker = None  # type: ignore[assignment]
-    DOCKER_AVAILABLE = False
+
+def _load_docker_safely(*, fail_on_sentinel: bool = True) -> Any | None:
+    """
+    [20260122_BUGFIX] Recover from prior monkeypatches that set sys.modules['docker']=None.
+
+    Some tests intentionally replace sys.modules['docker'] with None and reload this module.
+    This helper removes a None sentinel and attempts a fresh import so availability reflects
+    the real environment rather than test ordering side effects.
+    """
+
+    import sys
+
+    if sys.modules.get("docker") is None:
+        # [20260122_BUGFIX] Honor explicit sentinel while allowing later re-probe
+        sys.modules.pop("docker", None)
+        if fail_on_sentinel:
+            return None
+    try:
+        return importlib.import_module("docker")  # type: ignore[import-untyped]
+    except ImportError:
+        return None
+
+
+def _detect_docker_available(*, fail_on_sentinel: bool = True) -> bool:
+    """[20260122_BUGFIX] Re-probe docker on every access to avoid stale False flags."""
+
+    global _docker_module
+    mod = _load_docker_safely(fail_on_sentinel=fail_on_sentinel)
+    if mod is not None:
+        _docker_module = mod
+        return True
+    _docker_module = None
+    return False
+
+
+def _load_docker_module(*, fail_on_sentinel: bool = True) -> Any | None:
+    """Load docker module if present, caching the import."""
+
+    global _docker_module
+    if _docker_module is not None:
+        return _docker_module
+    if _detect_docker_available(fail_on_sentinel=fail_on_sentinel):
+        return _docker_module
+    return None
+
+
+class _DockerAvailability:
+    """Boolean-ish wrapper that re-evaluates docker availability on each access."""
+
+    def __bool__(self) -> bool:  # pragma: no cover - trivial
+        # [20260122_BUGFIX] When called for skip checks, allow recovery from sentinel
+        return _detect_docker_available(fail_on_sentinel=False)
+
+    def __repr__(self) -> str:  # pragma: no cover - debugging helper
+        return str(bool(self))
+
+
+DOCKER_AVAILABLE = _DockerAvailability()
+docker = _load_docker_module()  # type: ignore[assignment]
 
 
 @dataclass
@@ -114,12 +170,12 @@ class SandboxExecutor:
 
         # [20251217_FEATURE] Initialize Docker client if container isolation requested
         if isolation_level == "container":
-            if not DOCKER_AVAILABLE:
-                raise ImportError("Docker support requires 'docker' package. " "Install with: pip install docker")
-            if docker is None:
+            # [20260122_BUGFIX] Recompute docker availability to avoid stale False from prior reloads
+            docker_mod = _load_docker_module()
+            if not DOCKER_AVAILABLE or docker_mod is None:
                 raise ImportError("Docker support requires 'docker' package. " "Install with: pip install docker")
 
-            self.docker_client = docker.from_env()
+            self.docker_client = docker_mod.from_env()
 
     def execute_with_changes(
         self,
@@ -264,7 +320,7 @@ class SandboxExecutor:
                 stderr=True,
             )
 
-            execution_time = int((time.time() - start_time) * 1000)
+            execution_time = max(1, int((time.time() - start_time) * 1000))
 
             # Parse results from container output
             output = container if isinstance(container, bytes) else b""

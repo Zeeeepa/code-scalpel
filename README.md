@@ -14,6 +14,8 @@ It is an **MCP (Model Context Protocol) server** designed to be the primary tool
 2. **[✅ Setup Checklist](docs/SETUP_CHECKLIST.md)** — Step-by-step setup in 5 minutes.
 3. **Start using it** — Integrate with Claude, Copilot, or Cursor, then ask your AI assistant to help with your code.
 
+**Want Pro or Enterprise?** Visit [CodeScalpel.dev](https://codescalpel.dev) to learn about beta licensing options.
+
 **Developers?** See [Installation & Integration](#installation--integration) and [Documentation](#documentation) below.
 
 ---
@@ -214,7 +216,21 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## 📄 License
 
-Code Scalpel v1.0.0 is licensed under the **MIT License** - see [LICENSE](LICENSE) for details.
+Code Scalpel uses a **dual-license model**:
+
+- **Community Edition**: [MIT License](LICENSE) (free, open source)
+  - Core functionality with basic limits
+  - Perfect for individual developers and small projects
+  - No license file required
+  
+- **Pro & Enterprise Editions**: Commercial License (currently in Beta)
+  - Pro: Enhanced analysis with expanded limits for teams
+  - Enterprise: Unlimited capabilities, advanced security, compliance reporting
+  - Requires valid signed license token
+
+**Important:** Attempting to circumvent license authentication will void your license and terminate all rights to use Pro/Enterprise features. See [LICENSE](LICENSE) Part 2 for full commercial terms.
+
+For commercial licensing inquiries: https://github.com/3d-tech-solutions/code-scalpel
 
 ---
 

@@ -114,11 +114,7 @@ def demo_basic_extraction():
     print(f"  - Lines: {result.line_start}-{result.line_end}")
     print(f"  - Signature: {result.signature}")
     print(f"  - Decorators: {result.decorators}")
-    print(
-        f"  - Docstring: {result.docstring[:50]}..."
-        if result.docstring
-        else "  - Docstring: None"
-    )
+    print(f"  - Docstring: {result.docstring[:50]}..." if result.docstring else "  - Docstring: None")
     print(f"  - Is Async: {result.is_async}")
     print(f"  - Is Generator: {result.is_generator}")
     print(f"  - Dependencies: {result.dependencies}")

@@ -6,17 +6,18 @@ WARNING: This code contains intentional security vulnerabilities.
 DO NOT use in production. For educational purposes only.
 """
 
+import os
 import sqlite3
 import subprocess
-import os
+from typing import Any
+
 from flask import Flask, request
-from typing import Dict, Any
 
 app = Flask(__name__)
 
 
 # VULNERABILITY 1: SQL Injection (High Severity)
-def get_user_by_id(user_id: str) -> Dict[str, Any]:
+def get_user_by_id(user_id: str) -> dict[str, Any]:
     """
     Fetch user from database by ID.
 
@@ -48,9 +49,7 @@ def login_user(username: str, password: str) -> bool:
     cursor = conn.cursor()
 
     # BAD: Using .format() with user input
-    query = "SELECT * FROM users WHERE username = '{}' AND password = '{}'".format(
-        username, password
-    )
+    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
     cursor.execute(query)
 
     result = cursor.fetchone()
@@ -85,7 +84,7 @@ def read_user_file(filename: str) -> str:
     base_dir = "/var/www/uploads/"
     file_path = base_dir + filename  # User can use ../../../etc/passwd
 
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         return f.read()
 
 
@@ -166,7 +165,7 @@ def connect_to_api():
 
 
 # VULNERABILITY 8: Insecure Deserialization (Critical Severity)
-def load_user_session(session_data: str) -> Dict:
+def load_user_session(session_data: str) -> dict:
     """
     Load user session from cookie.
 
@@ -318,7 +317,7 @@ def add_to_account(account_id: int, amount: float) -> None:
 
 
 # GOOD: Parameterized query prevents SQL injection
-def get_user_by_id_safe(user_id: int) -> Dict[str, Any]:
+def get_user_by_id_safe(user_id: int) -> dict[str, Any]:
     """Secure version using parameterized query."""
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
@@ -368,7 +367,7 @@ def read_user_file_safe(filename: str) -> str:
     if not real_path.startswith(os.path.realpath(base_dir)):
         raise ValueError("Path traversal detected")
 
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         return f.read()
 
 

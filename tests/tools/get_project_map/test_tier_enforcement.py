@@ -43,14 +43,10 @@ class TestTierTransitions:
         # Enterprise: Should have Enterprise feature fields
         ent_result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=True)
 
-        ent_dict = ent_result.model_dump() if hasattr(ent_result, "model_dump") else vars(ent_result)
-
-        # Enterprise feature fields should exist
+        # Enterprise feature fields should exist via __getattr__ forwarding
         ent_features = ["city_map_data", "compliance_overlay", "multi_repo_summary"]
-        available = [f for f in ent_features if f in ent_dict]
-        assert (
-            len(available) > 0
-        ), f"Enterprise should have Enterprise feature fields. Available: {list(ent_dict.keys())}"
+        available = [f for f in ent_features if hasattr(ent_result, f)]
+        assert len(available) > 0, "Enterprise should have Enterprise feature fields"
 
     @pytest.mark.asyncio
     async def test_tier_detail_level_progression(self, community_server, pro_server, enterprise_server, simple_project):

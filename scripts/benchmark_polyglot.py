@@ -5,11 +5,11 @@ Polyglot Performance Benchmark Script
 [20251215_TEST] v2.0.0 - Performance metrics for release evidence.
 """
 
-import time
 import json
+import time
 from pathlib import Path
 
-from code_scalpel.polyglot.extractor import PolyglotExtractor, Language
+from code_scalpel.polyglot.extractor import Language, PolyglotExtractor
 
 # Test code samples
 PYTHON_CODE = '''
@@ -94,9 +94,7 @@ public class TaxCalculator {
 """
 
 
-def benchmark_parse(
-    code: str, file_path: str, language: Language, iterations: int = 10
-) -> dict:
+def benchmark_parse(code: str, file_path: str, language: Language, iterations: int = 10) -> dict:
     """Benchmark parsing performance."""
     times = []
     for _ in range(iterations):
@@ -161,21 +159,15 @@ def main():
     print("-" * 50)
 
     py_parse = benchmark_parse(PYTHON_CODE, "tax.py", Language.PYTHON)
-    print(
-        f"Python:     min={py_parse['min_ms']:.2f}ms  avg={py_parse['avg_ms']:.2f}ms  max={py_parse['max_ms']:.2f}ms"
-    )
+    print(f"Python:     min={py_parse['min_ms']:.2f}ms  avg={py_parse['avg_ms']:.2f}ms  max={py_parse['max_ms']:.2f}ms")
     results["parsing"]["python"] = py_parse
 
     js_parse = benchmark_parse(JS_CODE, "tax.js", Language.JAVASCRIPT)
-    print(
-        f"JavaScript: min={js_parse['min_ms']:.2f}ms  avg={js_parse['avg_ms']:.2f}ms  max={js_parse['max_ms']:.2f}ms"
-    )
+    print(f"JavaScript: min={js_parse['min_ms']:.2f}ms  avg={js_parse['avg_ms']:.2f}ms  max={js_parse['max_ms']:.2f}ms")
     results["parsing"]["javascript"] = js_parse
 
     ts_parse = benchmark_parse(TS_CODE, "tax.ts", Language.TYPESCRIPT)
-    print(
-        f"TypeScript: min={ts_parse['min_ms']:.2f}ms  avg={ts_parse['avg_ms']:.2f}ms  max={ts_parse['max_ms']:.2f}ms"
-    )
+    print(f"TypeScript: min={ts_parse['min_ms']:.2f}ms  avg={ts_parse['avg_ms']:.2f}ms  max={ts_parse['max_ms']:.2f}ms")
     results["parsing"]["typescript"] = ts_parse
 
     java_parse = benchmark_parse(JAVA_CODE, "Tax.java", Language.JAVA)
@@ -190,57 +182,43 @@ def main():
     print("EXTRACTION BENCHMARKS (10 iterations each)")
     print("-" * 50)
 
-    py_ext = benchmark_extraction(
-        PYTHON_CODE, "tax.py", Language.PYTHON, "function", "calculate_tax"
-    )
+    py_ext = benchmark_extraction(PYTHON_CODE, "tax.py", Language.PYTHON, "function", "calculate_tax")
     print(
         f"Python function:     min={py_ext['min_ms']:.2f}ms  avg={py_ext['avg_ms']:.2f}ms  success={py_ext['success']}"
     )
     results["extraction"]["python_function"] = py_ext
 
-    py_cls = benchmark_extraction(
-        PYTHON_CODE, "tax.py", Language.PYTHON, "class", "TaxCalculator"
-    )
+    py_cls = benchmark_extraction(PYTHON_CODE, "tax.py", Language.PYTHON, "class", "TaxCalculator")
     print(
         f"Python class:        min={py_cls['min_ms']:.2f}ms  avg={py_cls['avg_ms']:.2f}ms  success={py_cls['success']}"
     )
     results["extraction"]["python_class"] = py_cls
 
-    js_ext = benchmark_extraction(
-        JS_CODE, "tax.js", Language.JAVASCRIPT, "function", "calculateTax"
-    )
+    js_ext = benchmark_extraction(JS_CODE, "tax.js", Language.JAVASCRIPT, "function", "calculateTax")
     print(
         f"JavaScript function: min={js_ext['min_ms']:.2f}ms  avg={js_ext['avg_ms']:.2f}ms  success={js_ext['success']}"
     )
     results["extraction"]["javascript_function"] = js_ext
 
-    js_cls = benchmark_extraction(
-        JS_CODE, "tax.js", Language.JAVASCRIPT, "class", "TaxCalculator"
-    )
+    js_cls = benchmark_extraction(JS_CODE, "tax.js", Language.JAVASCRIPT, "class", "TaxCalculator")
     print(
         f"JavaScript class:    min={js_cls['min_ms']:.2f}ms  avg={js_cls['avg_ms']:.2f}ms  success={js_cls['success']}"
     )
     results["extraction"]["javascript_class"] = js_cls
 
-    ts_ext = benchmark_extraction(
-        TS_CODE, "tax.ts", Language.TYPESCRIPT, "function", "calculateTax"
-    )
+    ts_ext = benchmark_extraction(TS_CODE, "tax.ts", Language.TYPESCRIPT, "function", "calculateTax")
     print(
         f"TypeScript function: min={ts_ext['min_ms']:.2f}ms  avg={ts_ext['avg_ms']:.2f}ms  success={ts_ext['success']}"
     )
     results["extraction"]["typescript_function"] = ts_ext
 
-    ts_iface = benchmark_extraction(
-        TS_CODE, "tax.ts", Language.TYPESCRIPT, "class", "TaxConfig"
-    )
+    ts_iface = benchmark_extraction(TS_CODE, "tax.ts", Language.TYPESCRIPT, "class", "TaxConfig")
     print(
         f"TypeScript interface: min={ts_iface['min_ms']:.2f}ms  avg={ts_iface['avg_ms']:.2f}ms  success={ts_iface['success']}"
     )
     results["extraction"]["typescript_interface"] = ts_iface
 
-    java_cls = benchmark_extraction(
-        JAVA_CODE, "Tax.java", Language.JAVA, "class", "TaxCalculator"
-    )
+    java_cls = benchmark_extraction(JAVA_CODE, "Tax.java", Language.JAVA, "class", "TaxCalculator")
     print(
         f"Java class:          min={java_cls['min_ms']:.2f}ms  avg={java_cls['avg_ms']:.2f}ms  success={java_cls['success']}"
     )
@@ -269,15 +247,9 @@ def main():
     baseline_parse_ms = 1.5  # Estimated baseline
     baseline_extract_ms = 3.0  # Estimated baseline
 
-    print(
-        f"Python parsing: {py_parse['avg_ms']:.2f}ms (baseline: ~{baseline_parse_ms}ms)"
-    )
-    print(
-        f"Python extraction: {py_ext['avg_ms']:.2f}ms (baseline: ~{baseline_extract_ms}ms)"
-    )
-    print(
-        f"New language support adds {avg_parse - py_parse['avg_ms']:.2f}ms average overhead"
-    )
+    print(f"Python parsing: {py_parse['avg_ms']:.2f}ms (baseline: ~{baseline_parse_ms}ms)")
+    print(f"Python extraction: {py_ext['avg_ms']:.2f}ms (baseline: ~{baseline_extract_ms}ms)")
+    print(f"New language support adds {avg_parse - py_parse['avg_ms']:.2f}ms average overhead")
 
     results["summary"] = {
         "avg_parse_ms": round(avg_parse, 2),
@@ -287,12 +259,7 @@ def main():
     }
 
     # Save results to evidence file
-    evidence_path = (
-        Path(__file__).parent.parent
-        / "release_artifacts"
-        / "v2.0.0"
-        / "v2.0.0_performance_evidence.json"
-    )
+    evidence_path = Path(__file__).parent.parent / "release_artifacts" / "v2.0.0" / "v2.0.0_performance_evidence.json"
     evidence_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(evidence_path, "w") as f:

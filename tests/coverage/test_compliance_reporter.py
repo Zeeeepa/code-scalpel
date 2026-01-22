@@ -90,22 +90,18 @@ class TestPolicyEngine:
         policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir(exist_ok=True)
         policy_file = policy_dir / "policy.yaml"
-
+        # [20260122_BUGFIX] Use OPA v1.12+ compliant Rego syntax
         policy_content = """
-policies:
-  - name: test_policy
-    description: Test policy for unit tests
-    severity: HIGH
-    action: DENY
-    rule: |
-      package test_policy
-
-      default allow = false
-
-      allow {
-        input.type == "allowed_operation"
-      }
-"""
+    policies:
+      - name: test_policy
+        description: Test policy for unit tests
+        severity: HIGH
+        action: DENY
+        rule: |
+          package test_policy
+          default allow = false
+          allow if input.type == "allowed_operation"
+    """
         policy_file.write_text(policy_content)
         return str(policy_file)
 
@@ -129,6 +125,8 @@ policies:
 
 class TestComplianceReporter:
     """Test ComplianceReporter functionality."""
+
+    # [20260122_TEST] Use isolated temp policy to avoid default policy categories
 
     @pytest.fixture
     def temp_policy_file(self, tmp_path):
@@ -354,10 +352,10 @@ policies:
         # PDF should have reasonable size
         assert len(pdf_report) > 100
 
-    def test_empty_audit_log(self):
+    def test_empty_audit_log(self, temp_policy_file):
         """Test report generation with empty audit log."""
         empty_log = AuditLog()
-        engine = PolicyEngine()
+        engine = PolicyEngine(temp_policy_file)
         reporter = ComplianceReporter(empty_log, engine)
 
         time_range = (datetime.now() - timedelta(hours=1), datetime.now())
@@ -368,7 +366,7 @@ policies:
         assert report.policy_violations.total == 0
         assert report.security_posture.score == 100  # Perfect score with no operations
 
-    def test_high_override_rate_recommendation(self):
+    def test_high_override_rate_recommendation(self, temp_policy_file):
         """Test that high override rate generates recommendation."""
         log = AuditLog()
         base_time = datetime.now()
@@ -388,7 +386,7 @@ policies:
                 timestamp=base_time - timedelta(minutes=i + 10),
             )
 
-        engine = PolicyEngine()
+        engine = PolicyEngine(temp_policy_file)
         reporter = ComplianceReporter(log, engine)
 
         time_range = (base_time - timedelta(hours=1), base_time)
@@ -398,7 +396,7 @@ policies:
         rec_titles = [r.title for r in report.recommendations]
         assert any("override rate" in title.lower() for title in rec_titles)
 
-    def test_frequently_violated_policy_recommendation(self):
+    def test_frequently_violated_policy_recommendation(self, temp_policy_file):
         """Test that frequently violated policies generate recommendations."""
         log = AuditLog()
         base_time = datetime.now()
@@ -411,7 +409,7 @@ policies:
                 timestamp=base_time - timedelta(minutes=i),
             )
 
-        engine = PolicyEngine()
+        engine = PolicyEngine(temp_policy_file)
         reporter = ComplianceReporter(log, engine)
 
         time_range = (base_time - timedelta(hours=1), base_time)
@@ -421,7 +419,7 @@ policies:
         rec_titles = [r.title for r in report.recommendations]
         assert any("frequent_policy" in title for title in rec_titles)
 
-    def test_critical_violations_identified(self):
+    def test_critical_violations_identified(self, temp_policy_file):
         """Test that critical violations are properly identified."""
         log = AuditLog()
         base_time = datetime.now()
@@ -438,7 +436,7 @@ policies:
                 timestamp=base_time - timedelta(minutes=i),
             )
 
-        engine = PolicyEngine()
+        engine = PolicyEngine(temp_policy_file)
         reporter = ComplianceReporter(log, engine)
 
         time_range = (base_time - timedelta(hours=1), base_time)
@@ -448,7 +446,7 @@ policies:
         assert len(violations.critical_violations) == 3
         assert "CRITICAL" in violations.by_severity
 
-    def test_multiple_policies_ranking(self):
+    def test_multiple_policies_ranking(self, temp_policy_file):
         """Test ranking of multiple policies by violation count."""
         log = AuditLog()
         base_time = datetime.now()
@@ -477,7 +475,7 @@ policies:
                 timestamp=base_time - timedelta(minutes=i + 20),
             )
 
-        engine = PolicyEngine()
+        engine = PolicyEngine(temp_policy_file)
         reporter = ComplianceReporter(log, engine)
 
         time_range = (base_time - timedelta(hours=1), base_time)
@@ -494,7 +492,7 @@ policies:
         assert ranked_policies[2][0] == "policy_c"  # 3 violations
         assert ranked_policies[2][1] == 3
 
-    def test_strengths_identified(self):
+    def test_strengths_identified(self, temp_policy_file):
         """Test that security strengths are identified."""
         log = AuditLog()
         base_time = datetime.now()
@@ -508,7 +506,7 @@ policies:
         log.log_event("TAMPER_ATTEMPT_DETECTED", {"details": "test"}, timestamp=base_time)
         log.log_event("OPERATION_ALLOWED", {"op": "test"}, timestamp=base_time)
 
-        engine = PolicyEngine()
+        engine = PolicyEngine(temp_policy_file)
         reporter = ComplianceReporter(log, engine)
 
         time_range = (base_time - timedelta(hours=1), base_time + timedelta(minutes=1))
@@ -519,7 +517,7 @@ policies:
         # Should identify at least one strength
         assert any("policy enforcement" in s.lower() for s in strengths)
 
-    def test_weaknesses_identified(self):
+    def test_weaknesses_identified(self, temp_policy_file):
         """Test that security weaknesses are identified."""
         log = AuditLog()
         base_time = datetime.now()
@@ -533,7 +531,7 @@ policies:
                 timestamp=base_time - timedelta(minutes=i),
             )
 
-        engine = PolicyEngine()
+        engine = PolicyEngine(temp_policy_file)
         reporter = ComplianceReporter(log, engine)
 
         time_range = (base_time - timedelta(hours=1), base_time)

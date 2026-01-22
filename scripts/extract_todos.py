@@ -31,15 +31,14 @@ Examples:
     python scripts/extract_todos.py --format csv --output-dir reports/
 """
 
+import csv
+import json
 import os
 import re
-import json
-import csv
-from pathlib import Path
 from collections import defaultdict
-from typing import Dict, List, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
 
 
 @dataclass
@@ -54,7 +53,7 @@ class TodoItem:
     text: str
     module: str  # Top-level module name
     priority: str  # Critical, High, Medium, Low
-    date_tag: Optional[str] = None  # [20260114_*] style tags
+    date_tag: str | None = None  # [20260114_*] style tags
 
 
 class TodoExtractor:
@@ -153,25 +152,19 @@ class TodoExtractor:
     # Pattern for date tags like [20260114_FEATURE]
     DATE_TAG_PATTERN = re.compile(r"\[(\d{8}_\w+)\]")
 
-    def __init__(
-        self, root_dir: str = ".", src_only: bool = False, source_code_only: bool = True
-    ):
+    def __init__(self, root_dir: str = ".", src_only: bool = False, source_code_only: bool = True):
         self.root_dir = Path(root_dir).resolve()
         self.src_dir = self.root_dir / "src" / "code_scalpel"
         self.src_only = src_only
-        self.source_code_only = (
-            source_code_only  # [20260117_FEATURE] Filter to source code
-        )
-        self.todos: List[TodoItem] = []
+        self.source_code_only = source_code_only  # [20260117_FEATURE] Filter to source code
+        self.todos: list[TodoItem] = []
         self.stats = defaultdict(int)
         # [20260117_FEATURE] Track file->lines mapping for removal
-        self.file_todo_lines: Dict[str, List[int]] = defaultdict(list)
+        self.file_todo_lines: dict[str, list[int]] = defaultdict(list)
 
     def _should_skip_dir(self, dir_name: str) -> bool:
         """Check if directory should be skipped."""
-        skip_set = (
-            self.SKIP_DIRS_SOURCE_ONLY if self.source_code_only else self.SKIP_DIRS
-        )
+        skip_set = self.SKIP_DIRS_SOURCE_ONLY if self.source_code_only else self.SKIP_DIRS
         return dir_name in skip_set or dir_name.startswith(".")
 
     def _should_scan_file(self, file_path: Path) -> bool:
@@ -181,7 +174,7 @@ class TodoExtractor:
             return file_path.suffix.lower() in self.SOURCE_CODE_EXTENSIONS
         return file_path.suffix.lower() in self.CODE_EXTENSIONS
 
-    def extract_todos(self) -> List[TodoItem]:
+    def extract_todos(self) -> list[TodoItem]:
         """Extract all TODO items from code files"""
         scan_dir = self.src_dir if self.src_only else self.root_dir
 
@@ -266,9 +259,7 @@ class TodoExtractor:
                 # Pattern: TODO must be 1st/2nd word in comment, followed by : or space or (
                 # [20260118_BUGFIX] Also handle format like "# - TODO [TIER]:" with dash/bullet
                 # [20260119_BUGFIX] Support various TODO comment formats
-                pattern = re.compile(
-                    rf"^#\s*(?:[-*•]\s*)*(?:[a-zA-Z]*\s*)?({re.escape(tag)})(?::|\s|\(|\])"
-                )
+                pattern = re.compile(rf"^#\s*(?:[-*•]\s*)*(?:[a-zA-Z]*\s*)?({re.escape(tag)})(?::|\s|\(|\])")
                 if pattern.search(comment_part):
                     return True
 
@@ -276,22 +267,14 @@ class TodoExtractor:
         if "//" in line:
             slash_pos = line.find("//")
             comment_part = line[slash_pos:]
-            pattern = re.compile(
-                rf"^//\s*(?:[-*•]\s*)*(?:[a-zA-Z]*\s*)?({re.escape(tag)})(?::|\s|\(|\])"
-            )
+            pattern = re.compile(rf"^//\s*(?:[-*•]\s*)*(?:[a-zA-Z]*\s*)?({re.escape(tag)})(?::|\s|\(|\])")
             if pattern.search(comment_part):
                 return True
 
         # Check for /* */ or * line comments
         stripped = line.strip()
-        if (
-            stripped.startswith("/*")
-            or stripped.startswith("*")
-            or stripped.startswith("//")
-        ):
-            pattern = re.compile(
-                rf"^[\*\s/]*(?:[-*•]\s*)*(?:[a-zA-Z]*\s*)?({re.escape(tag)})(?::|\s|\(|\])"
-            )
+        if stripped.startswith("/*") or stripped.startswith("*") or stripped.startswith("//"):
+            pattern = re.compile(rf"^[\*\s/]*(?:[-*•]\s*)*(?:[a-zA-Z]*\s*)?({re.escape(tag)})(?::|\s|\(|\])")
             if pattern.search(stripped):
                 return True
 
@@ -300,7 +283,7 @@ class TodoExtractor:
     def _extract_from_file(self, file_path: Path):
         """Extract TODOs from a single file"""
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 lines = f.readlines()
 
             in_docstring = False
@@ -312,12 +295,8 @@ class TodoExtractor:
 
                 for tag in self.TODO_TAGS:
                     # Match TODOs in docstrings as well as comment markers
-                    if (line_in_docstring and tag in line) or self._tag_in_comment(
-                        line, tag
-                    ):
-                        todo = self._parse_todo_line(
-                            str(file_path), line_num, line, tag
-                        )
+                    if (line_in_docstring and tag in line) or self._tag_in_comment(line, tag):
+                        todo = self._parse_todo_line(str(file_path), line_num, line, tag)
                         if todo:
                             self.todos.append(todo)
                             # [20260117_FEATURE] Track line numbers for removal
@@ -337,9 +316,7 @@ class TodoExtractor:
         except Exception:
             pass  # Silently skip files that can't be read
 
-    def remove_todos_from_files(
-        self, backup: bool = True, dry_run: bool = False
-    ) -> Dict[str, int]:
+    def remove_todos_from_files(self, backup: bool = True, dry_run: bool = False) -> dict[str, int]:
         """
         [20260117_FEATURE] Remove extracted TODO lines from source files.
 
@@ -357,16 +334,14 @@ class TodoExtractor:
                 continue
 
             try:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                with open(file_path, encoding="utf-8", errors="ignore") as f:
                     lines = f.readlines()
 
                 # Sort line numbers in reverse to remove from bottom up
                 lines_to_remove = set(line_numbers)
 
                 if dry_run:
-                    print(
-                        f"[DRY-RUN] Would remove {len(lines_to_remove)} TODO lines from {file_path}"
-                    )
+                    print(f"[DRY-RUN] Would remove {len(lines_to_remove)} TODO lines from {file_path}")
                     removed_counts[file_path] = len(lines_to_remove)
                     continue
 
@@ -384,11 +359,7 @@ class TodoExtractor:
                         removed += 1
                         # Check if this is a standalone comment line (only whitespace + comment)
                         stripped = line.strip()
-                        if (
-                            stripped.startswith("#")
-                            or stripped.startswith("//")
-                            or stripped.startswith("*")
-                        ):
+                        if stripped.startswith("#") or stripped.startswith("//") or stripped.startswith("*"):
                             continue  # Remove entire line
                         # If TODO is inline with code, just remove the TODO part
                         # For now, we remove the entire line - safer approach
@@ -407,9 +378,7 @@ class TodoExtractor:
 
         return removed_counts
 
-    def _parse_todo_line(
-        self, file_path: str, line_num: int, line: str, tag: str
-    ) -> TodoItem:
+    def _parse_todo_line(self, file_path: str, line_num: int, line: str, tag: str) -> TodoItem:
         """Parse a TODO line and extract metadata"""
         # Determine tier
         tier = "UNSPECIFIED"
@@ -605,11 +574,7 @@ class TodoExtractor:
 """
 
         # Sort modules by count
-        module_stats = [
-            (k.replace("module_", ""), v)
-            for k, v in self.stats.items()
-            if k.startswith("module_")
-        ]
+        module_stats = [(k.replace("module_", ""), v) for k, v in self.stats.items() if k.startswith("module_")]
         module_stats.sort(key=lambda x: x[1], reverse=True)
 
         for module, count in module_stats[:20]:  # Top 20
@@ -646,15 +611,13 @@ This document is auto-generated by `scripts/extract_todos.py` as part of the pre
             for priority in ["Critical", "High", "Medium", "Low"]:
                 priority_todos = by_priority[priority]
                 if priority_todos:
-                    report += (
-                        f"### {priority} Priority ({len(priority_todos)} items)\n\n"
-                    )
+                    report += f"### {priority} Priority ({len(priority_todos)} items)\n\n"
                     for todo in priority_todos[:15]:  # Show first 15
                         date_info = f" `{todo.date_tag}`" if todo.date_tag else ""
-                        tier_info = (
-                            f" [{todo.tier}]" if todo.tier != "UNSPECIFIED" else ""
+                        tier_info = f" [{todo.tier}]" if todo.tier != "UNSPECIFIED" else ""
+                        report += (
+                            f"- **[{todo.tag}]**{tier_info} {todo.text[:100]}{'...' if len(todo.text) > 100 else ''}\n"
                         )
-                        report += f"- **[{todo.tag}]**{tier_info} {todo.text[:100]}{'...' if len(todo.text) > 100 else ''}\n"
                         report += f"  - 📁 [{todo.file_path}]({todo.file_path}#L{todo.line_number}){date_info}\n"
                     if len(priority_todos) > 15:
                         report += f"- *... and {len(priority_todos) - 15} more*\n"
@@ -706,9 +669,7 @@ These items should be addressed before release.
         if critical:
             for todo in critical[:30]:
                 report += f"- **[{todo.tag}]** {todo.text[:120]}{'...' if len(todo.text) > 120 else ''}\n"
-                report += (
-                    f"  - 📁 [{todo.file_path}]({todo.file_path}#L{todo.line_number})\n"
-                )
+                report += f"  - 📁 [{todo.file_path}]({todo.file_path}#L{todo.line_number})\n"
             if len(critical) > 30:
                 report += f"\n*... and {len(critical) - 30} more critical items*\n"
         else:
@@ -729,9 +690,7 @@ These items should be addressed soon.
             for todo in high:
                 by_module[todo.module].append(todo)
 
-            for module, todos in sorted(
-                by_module.items(), key=lambda x: len(x[1]), reverse=True
-            )[:10]:
+            for module, todos in sorted(by_module.items(), key=lambda x: len(x[1]), reverse=True)[:10]:
                 report += f"### {module}/ ({len(todos)} items)\n\n"
                 for todo in todos[:5]:
                     report += f"- **[{todo.tag}]** {todo.text[:100]}{'...' if len(todo.text) > 100 else ''}\n"
@@ -759,7 +718,9 @@ These items should be addressed soon.
         for file_path, todos in sorted(by_file.items()):
             report += f"### [{file_path}]({file_path})\n\n"
             for todo in sorted(todos, key=lambda x: x.line_number):
-                report += f"- **L{todo.line_number}** [{todo.tag}] {todo.text[:80]}{'...' if len(todo.text) > 80 else ''}\n"
+                report += (
+                    f"- **L{todo.line_number}** [{todo.tag}] {todo.text[:80]}{'...' if len(todo.text) > 80 else ''}\n"
+                )
             report += "\n"
 
         report += """
@@ -777,26 +738,12 @@ These items should be addressed soon.
             "generated_at": datetime.now().isoformat(),
             "total_items": len(self.todos),
             "stats": {
-                "by_tag": {
-                    k.replace("tag_", ""): v
-                    for k, v in self.stats.items()
-                    if k.startswith("tag_")
-                },
+                "by_tag": {k.replace("tag_", ""): v for k, v in self.stats.items() if k.startswith("tag_")},
                 "by_priority": {
-                    k.replace("priority_", ""): v
-                    for k, v in self.stats.items()
-                    if k.startswith("priority_")
+                    k.replace("priority_", ""): v for k, v in self.stats.items() if k.startswith("priority_")
                 },
-                "by_tier": {
-                    k.replace("tier_", ""): v
-                    for k, v in self.stats.items()
-                    if k.startswith("tier_")
-                },
-                "by_module": {
-                    k.replace("module_", ""): v
-                    for k, v in self.stats.items()
-                    if k.startswith("module_")
-                },
+                "by_tier": {k.replace("tier_", ""): v for k, v in self.stats.items() if k.startswith("tier_")},
+                "by_module": {k.replace("module_", ""): v for k, v in self.stats.items() if k.startswith("module_")},
             },
             "items": [asdict(todo) for todo in self.todos],
         }
@@ -830,12 +777,8 @@ def main():
     """Main entry point"""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Extract and analyze TODO items from Code Scalpel"
-    )
-    parser.add_argument(
-        "--output-dir", default="docs/todo_reports", help="Output directory for reports"
-    )
+    parser = argparse.ArgumentParser(description="Extract and analyze TODO items from Code Scalpel")
+    parser.add_argument("--output-dir", default="docs/todo_reports", help="Output directory for reports")
     parser.add_argument(
         "--format",
         choices=["markdown", "json", "csv", "all"],
@@ -870,9 +813,7 @@ def main():
         action="store_true",
         help="Preview what would be removed without modifying files",
     )
-    parser.add_argument(
-        "--roadmap", action="store_true", help="Generate comprehensive roadmap document"
-    )
+    parser.add_argument("--roadmap", action="store_true", help="Generate comprehensive roadmap document")
 
     args = parser.parse_args()
 
@@ -881,12 +822,8 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # [20260117_REFACTOR] source_code_only is True by default, --include-docs disables it
-    extractor = TodoExtractor(
-        src_only=args.src_only, source_code_only=not args.include_docs
-    )
-    print(
-        f"Extracting TODO/FIXME/HACK items (source_code_only={not args.include_docs})..."
-    )
+    extractor = TodoExtractor(src_only=args.src_only, source_code_only=not args.include_docs)
+    print(f"Extracting TODO/FIXME/HACK items (source_code_only={not args.include_docs})...")
     extractor.extract_todos()
     print(f"Found {len(extractor.todos)} items")
 
@@ -931,9 +868,7 @@ def main():
             print("REMOVING TODOs FROM SOURCE FILES")
         print("=" * 50)
 
-        removed = extractor.remove_todos_from_files(
-            backup=not args.no_backup, dry_run=args.dry_run
-        )
+        removed = extractor.remove_todos_from_files(backup=not args.no_backup, dry_run=args.dry_run)
 
         total_removed = sum(removed.values())
         files_modified = len(removed)

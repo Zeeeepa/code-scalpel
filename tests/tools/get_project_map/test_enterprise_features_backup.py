@@ -34,17 +34,19 @@ class TestEnterpriseFeatureVisualization:
         """Enterprise tier: force_graph field accessible."""
         result = await enterprise_server.get_project_map(project_root=str(flask_project), include_complexity=False)
 
-        # [20260122_BUGFIX] Use hasattr() which works with __getattr__ forwarding
-        assert hasattr(result, "force_graph"), "Enterprise missing force_graph"
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
+        assert "force_graph" in result_dict, f"Enterprise missing force_graph. Available: {list(result_dict.keys())}"
 
     @pytest.mark.asyncio
     async def test_pro_no_city_map(self, pro_server, simple_project):
         """Pro tier: city_map_data not populated."""
         result = await pro_server.get_project_map(project_root=str(simple_project), include_complexity=True)
 
-        # [20260122_BUGFIX] Pro tier may have the field via __getattr__, check if it's None or empty
-        if hasattr(result, "city_map_data"):
-            value = result.city_map_data
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
+        if "city_map_data" in result_dict:
+            value = result_dict["city_map_data"]
             assert value in [
                 None,
                 {},
@@ -60,16 +62,20 @@ class TestEnterpriseFeatureHotspots:
         """Enterprise tier: bug_hotspots field accessible."""
         result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
 
-        # [20260122_BUGFIX] Use hasattr() which works with __getattr__ forwarding
-        assert hasattr(result, "bug_hotspots"), "Enterprise missing bug_hotspots"
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
+        assert "bug_hotspots" in result_dict, f"Enterprise missing bug_hotspots. Available: {list(result_dict.keys())}"
 
     @pytest.mark.asyncio
     async def test_churn_heatmap_accessible(self, enterprise_server, simple_project):
         """Enterprise tier: churn_heatmap field accessible."""
         result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
 
-        # [20260122_BUGFIX] Use hasattr() which works with __getattr__ forwarding
-        assert hasattr(result, "churn_heatmap"), "Enterprise missing churn_heatmap"
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
+        assert (
+            "churn_heatmap" in result_dict
+        ), f"Enterprise missing churn_heatmap. Available: {list(result_dict.keys())}"
 
 
 class TestEnterpriseFeatureMultiRepo:
@@ -80,17 +86,21 @@ class TestEnterpriseFeatureMultiRepo:
         """Enterprise tier: multi_repo_summary field accessible."""
         result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
 
-        # [20260122_BUGFIX] Use hasattr() which works with __getattr__ forwarding
-        assert hasattr(result, "multi_repo_summary"), "Enterprise missing multi_repo_summary"
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
+        assert (
+            "multi_repo_summary" in result_dict
+        ), f"Enterprise missing multi_repo_summary. Available: {list(result_dict.keys())}"
 
     @pytest.mark.asyncio
     async def test_pro_no_multi_repo(self, pro_server, simple_project):
         """Pro tier: multi_repo_summary not populated."""
         result = await pro_server.get_project_map(project_root=str(simple_project), include_complexity=False)
 
-        # [20260122_BUGFIX] Pro tier may have the field via __getattr__, check if it's None or empty
-        if hasattr(result, "multi_repo_summary"):
-            value = result.multi_repo_summary
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
+        if "multi_repo_summary" in result_dict:
+            value = result_dict["multi_repo_summary"]
             assert value in [
                 None,
                 {},
@@ -106,17 +116,21 @@ class TestEnterpriseFeatureCompliance:
         """Enterprise tier: compliance_overlay field accessible."""
         result = await enterprise_server.get_project_map(project_root=str(flask_project), include_complexity=False)
 
-        # [20260122_BUGFIX] Use hasattr() which works with __getattr__ forwarding
-        assert hasattr(result, "compliance_overlay"), "Enterprise missing compliance_overlay"
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
+        assert (
+            "compliance_overlay" in result_dict
+        ), f"Enterprise missing compliance_overlay. Available: {list(result_dict.keys())}"
 
     @pytest.mark.asyncio
     async def test_pro_no_compliance(self, pro_server, flask_project):
         """Pro tier: compliance_overlay not populated."""
         result = await pro_server.get_project_map(project_root=str(flask_project), include_complexity=False)
 
-        # [20260122_BUGFIX] Pro tier may have the field via __getattr__, check if it's None or empty
-        if hasattr(result, "compliance_overlay"):
-            value = result.compliance_overlay
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
+        if "compliance_overlay" in result_dict:
+            value = result_dict["compliance_overlay"]
             assert value in [
                 None,
                 {},
@@ -132,15 +146,19 @@ class TestEnterpriseFeatureCustomMetrics:
         """Enterprise tier: historical_trends field accessible."""
         result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
 
-        # [20260122_BUGFIX] Use hasattr() which works with __getattr__ forwarding
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
         # May be named historical_trends or historical_architecture_trends
-        has_trends = hasattr(result, "historical_trends") or hasattr(result, "historical_architecture_trends")
-        assert has_trends, "Enterprise missing historical trends field"
+        has_trends = "historical_trends" in result_dict or "historical_architecture_trends" in result_dict
+        assert has_trends, f"Enterprise missing historical trends field. Available: {list(result_dict.keys())}"
 
     @pytest.mark.asyncio
     async def test_custom_metrics_accessible(self, enterprise_server, simple_project):
         """Enterprise tier: custom_metrics field accessible."""
         result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
 
-        # [20260122_BUGFIX] Use hasattr() which works with __getattr__ forwarding
-        assert hasattr(result, "custom_metrics"), "Enterprise missing custom_metrics"
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+
+        assert (
+            "custom_metrics" in result_dict
+        ), f"Enterprise missing custom_metrics. Available: {list(result_dict.keys())}"

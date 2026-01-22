@@ -447,9 +447,15 @@ def start_mcp_server(
     license_file: str | None = None,
 ) -> int:
     """Start the MCP-compliant server (for AI clients like Claude Desktop, Cursor)."""
+    import importlib
     import inspect
 
-    from .mcp.archive.server import run_server
+    # [20260122_BUGFIX] Honor monkeypatched MCP server for tests to avoid starting real servers
+    try:
+        mcp_server = importlib.import_module("code_scalpel.mcp.server")
+        run_server = mcp_server.run_server
+    except Exception:
+        from .mcp.archive.server import run_server  # pragma: no cover
 
     # [20251228_FEATURE] Support explicit license file path for deployments.
     # Fail fast to avoid silently falling back to other discovery paths.

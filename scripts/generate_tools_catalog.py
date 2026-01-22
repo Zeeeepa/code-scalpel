@@ -18,16 +18,14 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEEP_DIVE_DIR = REPO_ROOT / "docs" / "tools" / "deep_dive"
 MATRIX_PATH = DEEP_DIVE_DIR / "TOOL_CAPABILITY_MATRIX.md"
 OUTPUT_PATH = REPO_ROOT / "website" / "assets" / "tool_catalog.json"
 
-GITHUB_DEEP_DIVE_BASE = (
-    "https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/tools/deep_dive/"
-)
+GITHUB_DEEP_DIVE_BASE = "https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/tools/deep_dive/"
 
 
 @dataclass(frozen=True)
@@ -35,7 +33,7 @@ class ToolRow:
     name: str
     status: str
     tier: str
-    key_capabilities: List[str]
+    key_capabilities: list[str]
     deep_dive_file: str
 
 
@@ -47,8 +45,8 @@ def _strip_md(text: str) -> str:
     return text.strip()
 
 
-def _parse_matrix_rows(md: str) -> List[ToolRow]:
-    rows: List[ToolRow] = []
+def _parse_matrix_rows(md: str) -> list[ToolRow]:
+    rows: list[ToolRow] = []
 
     in_table = False
     for raw_line in md.splitlines():
@@ -120,7 +118,7 @@ def _extract_heading_section(md: str, heading: str) -> str:
 
 def _first_paragraph(text: str) -> str:
     lines = [ln.rstrip() for ln in text.splitlines()]
-    out: List[str] = []
+    out: list[str] = []
     for ln in lines:
         if ln.strip() == "":
             if out:
@@ -137,8 +135,8 @@ def _first_paragraph(text: str) -> str:
     return _strip_md(" ".join(out))
 
 
-def _parse_bullets(text: str, max_items: int = 6) -> List[str]:
-    items: List[str] = []
+def _parse_bullets(text: str, max_items: int = 6) -> list[str]:
+    items: list[str] = []
     for ln in text.splitlines():
         s = ln.strip()
         if s.startswith("- "):
@@ -176,25 +174,21 @@ def _extract_meta_field(md: str, label: str) -> str:
     return _strip_md(m.group(1)) if m else ""
 
 
-def build_catalog() -> Dict[str, Any]:
+def build_catalog() -> dict[str, Any]:
     matrix_md = MATRIX_PATH.read_text(encoding="utf-8")
     rows = _parse_matrix_rows(matrix_md)
 
-    tools: List[Dict[str, Any]] = []
+    tools: list[dict[str, Any]] = []
     for row in rows:
         deep_dive_path = DEEP_DIVE_DIR / row.deep_dive_file
-        deep_md = (
-            deep_dive_path.read_text(encoding="utf-8")
-            if deep_dive_path.exists()
-            else ""
-        )
+        deep_md = deep_dive_path.read_text(encoding="utf-8") if deep_dive_path.exists() else ""
 
         purpose_block = _extract_heading_section(deep_md, "Purpose Statement")
         benefits_block = _extract_heading_section(deep_md, "Key Benefits")
         when_block = _extract_heading_section(deep_md, "When to Use This Tool")
         not_suitable_block = _extract_heading_section(deep_md, "Not Suitable For")
 
-        tool_obj: Dict[str, Any] = {
+        tool_obj: dict[str, Any] = {
             "name": row.name,
             "status": row.status,
             "tierAvailability": row.tier,
@@ -202,18 +196,12 @@ def build_catalog() -> Dict[str, Any]:
             "purpose": _first_paragraph(purpose_block) if purpose_block else "",
             "keyBenefits": _parse_bullets(benefits_block) if benefits_block else [],
             "whenToUse": _parse_bullets(when_block) if when_block else [],
-            "notSuitableFor": (
-                _parse_bullets(not_suitable_block) if not_suitable_block else []
-            ),
+            "notSuitableFor": (_parse_bullets(not_suitable_block) if not_suitable_block else []),
             "signature": _extract_signature(deep_md),
             "toolVersion": _extract_meta_field(deep_md, "Tool Version"),
             "lastUpdated": _extract_meta_field(deep_md, "Last Updated"),
             "deepDiveFile": row.deep_dive_file,
-            "deepDiveUrl": (
-                f"{GITHUB_DEEP_DIVE_BASE}{row.deep_dive_file}"
-                if row.deep_dive_file
-                else ""
-            ),
+            "deepDiveUrl": (f"{GITHUB_DEEP_DIVE_BASE}{row.deep_dive_file}" if row.deep_dive_file else ""),
         }
 
         tools.append(tool_obj)
@@ -232,9 +220,7 @@ def main() -> None:
     catalog = build_catalog()
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(
-        json.dumps(catalog, indent=2, sort_keys=False) + "\n", encoding="utf-8"
-    )
+    OUTPUT_PATH.write_text(json.dumps(catalog, indent=2, sort_keys=False) + "\n", encoding="utf-8")
 
     print(f"Wrote {OUTPUT_PATH} ({len(catalog['tools'])} tools)")
 

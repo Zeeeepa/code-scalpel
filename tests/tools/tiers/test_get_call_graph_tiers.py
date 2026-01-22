@@ -28,16 +28,16 @@ def helper():
         # community_tier fixture ensures community tier detection
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
-        assert result.success is True
+        assert result.data.success is True
         # Verify metadata fields exist and have correct types
-        assert hasattr(result, "tier_applied")
-        assert hasattr(result, "max_depth_applied")
-        assert hasattr(result, "max_nodes_applied")
-        assert hasattr(result, "advanced_resolution_enabled")
-        assert hasattr(result, "enterprise_metrics_enabled")
+        assert hasattr(result.data, "tier_applied")
+        assert hasattr(result.data, "max_depth_applied")
+        assert hasattr(result.data, "max_nodes_applied")
+        assert hasattr(result.data, "advanced_resolution_enabled")
+        assert hasattr(result.data, "enterprise_metrics_enabled")
 
         # Verify values are reasonable
-        assert result.tier_applied in ("community", "pro", "enterprise")
+        assert result.data.tier_applied in ("community", "pro", "enterprise")
         assert isinstance(result.advanced_resolution_enabled, bool)
         assert isinstance(result.enterprise_metrics_enabled, bool)
 
@@ -50,18 +50,18 @@ def helper():
         # community_tier fixture ensures community tier detection
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
+        assert result.data.success is True
         # max_depth_applied should reflect tier limits
         # Enterprise has None (unlimited), Pro has 50, Community has 3
         if result.tier_applied == "enterprise":
-            assert result.max_depth_applied is None
-            assert result.max_nodes_applied is None
+            assert result.data.max_depth_applied is None
+            assert result.data.max_nodes_applied is None
         elif result.tier_applied == "pro":
-            assert result.max_depth_applied == 50
-            assert result.max_nodes_applied == 500
+            assert result.data.max_depth_applied == 50
+            assert result.data.max_nodes_applied == 500
         else:  # community
-            assert result.max_depth_applied == 3
-            assert result.max_nodes_applied == 50
+            assert result.data.max_depth_applied == 3
+            assert result.data.max_nodes_applied == 50
 
 
 class TestMetadataFieldTypes:
@@ -139,9 +139,9 @@ def level_5():
         # community_tier fixture from conftest.py disables license discovery
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "community"
-        assert result.max_depth_applied == 3  # Community limit
+        assert result.data.success is True
+        assert result.data.tier_applied == "community"
+        assert result.data.max_depth_applied == 3  # Community limit
         # Depth should be clamped to 3 even if requested 10
 
     @pytest.mark.asyncio
@@ -153,10 +153,10 @@ def level_5():
         # pro_tier fixture from conftest.py sets JWT license
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "pro"
-        assert result.max_depth_applied == 50  # Pro limit
-        assert result.max_nodes_applied == 500  # Pro limit
+        assert result.data.success is True
+        assert result.data.tier_applied == "pro"
+        assert result.data.max_depth_applied == 50  # Pro limit
+        assert result.data.max_nodes_applied == 500  # Pro limit
 
     @pytest.mark.asyncio
     async def test_enterprise_tier_unlimited(self, tmp_path, enterprise_tier):
@@ -167,10 +167,10 @@ def level_5():
         # enterprise_tier fixture from conftest.py sets JWT license
         result = await get_call_graph(project_root=str(tmp_path), depth=100)
 
-        assert result.success is True
-        assert result.tier_applied == "enterprise"
-        assert result.max_depth_applied is None  # Unlimited
-        assert result.max_nodes_applied is None  # Unlimited
+        assert result.data.success is True
+        assert result.data.tier_applied == "enterprise"
+        assert result.data.max_depth_applied is None  # Unlimited
+        assert result.data.max_nodes_applied is None  # Unlimited
 
 
 class TestCapabilityFlags:
@@ -185,9 +185,9 @@ class TestCapabilityFlags:
         # community_tier fixture from conftest.py disables license discovery
         result = await get_call_graph(project_root=str(tmp_path))
 
-        assert result.success is True
-        assert result.advanced_resolution_enabled is False
-        assert result.enterprise_metrics_enabled is False
+        assert result.data.success is True
+        assert result.data.advanced_resolution_enabled is False
+        assert result.data.enterprise_metrics_enabled is False
 
     @pytest.mark.asyncio
     async def test_pro_has_advanced_resolution(self, tmp_path, pro_tier):
@@ -198,9 +198,9 @@ class TestCapabilityFlags:
         # pro_tier fixture from conftest.py sets JWT license
         result = await get_call_graph(project_root=str(tmp_path))
 
-        assert result.success is True
-        assert result.advanced_resolution_enabled is True
-        assert result.enterprise_metrics_enabled is False  # Pro doesn't have this
+        assert result.data.success is True
+        assert result.data.advanced_resolution_enabled is True
+        assert result.data.enterprise_metrics_enabled is False  # Pro doesn't have this
 
     @pytest.mark.asyncio
     async def test_enterprise_has_all_features(self, tmp_path, enterprise_tier):
@@ -211,9 +211,9 @@ class TestCapabilityFlags:
         # enterprise_tier fixture from conftest.py sets JWT license
         result = await get_call_graph(project_root=str(tmp_path))
 
-        assert result.success is True
-        assert result.advanced_resolution_enabled is True
-        assert result.enterprise_metrics_enabled is True
+        assert result.data.success is True
+        assert result.data.advanced_resolution_enabled is True
+        assert result.data.enterprise_metrics_enabled is True
 
 
 class TestTruncationMetadata:
@@ -232,10 +232,10 @@ def bar():
 """)
         result = await get_call_graph(project_root=str(tmp_path))
 
-        assert result.success is True
-        assert result.total_nodes is not None
-        assert result.nodes_truncated is False
-        assert result.truncation_warning is None
+        assert result.data.success is True
+        assert result.data.total_nodes is not None
+        assert result.data.nodes_truncated is False
+        assert result.data.truncation_warning is None
 
     @pytest.mark.asyncio
     async def test_truncation_fields_present(self, tmp_path):
@@ -245,12 +245,12 @@ def bar():
 
         result = await get_call_graph(project_root=str(tmp_path))
 
-        assert result.success is True
-        assert hasattr(result, "total_nodes")
-        assert hasattr(result, "total_edges")
-        assert hasattr(result, "nodes_truncated")
-        assert hasattr(result, "edges_truncated")
-        assert hasattr(result, "truncation_warning")
+        assert result.data.success is True
+        assert hasattr(result.data, "total_nodes")
+        assert hasattr(result.data, "total_edges")
+        assert hasattr(result.data, "nodes_truncated")
+        assert hasattr(result.data, "edges_truncated")
+        assert hasattr(result.data, "truncation_warning")
 
     @pytest.mark.asyncio
     async def test_truncation_flag_set_when_exceeding_limits(self, tmp_path, community_tier):
@@ -267,10 +267,10 @@ def bar():
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "community"
-        assert result.nodes_truncated is True
-        assert result.truncation_warning is not None
+        assert result.data.success is True
+        assert result.data.tier_applied == "community"
+        assert result.data.nodes_truncated is True
+        assert result.data.truncation_warning is not None
 
     @pytest.mark.asyncio
     async def test_pro_truncation_when_exceeding_max_nodes(self, tmp_path, pro_tier):
@@ -285,11 +285,11 @@ def bar():
 
         result = await get_call_graph(project_root=str(tmp_path), depth=1000)
 
-        assert result.success is True
-        assert result.tier_applied == "pro"
-        assert result.max_nodes_applied == 500
-        assert result.nodes_truncated is True
-        assert result.truncation_warning is not None
+        assert result.data.success is True
+        assert result.data.tier_applied == "pro"
+        assert result.data.max_nodes_applied == 500
+        assert result.data.nodes_truncated is True
+        assert result.data.truncation_warning is not None
 
 
 class TestEntryPointDetection:
@@ -324,7 +324,7 @@ main();
 
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
-        assert result.tier_applied == "pro"
+        assert result.data.tier_applied == "pro"
         assert any(n.is_entry_point and n.name == "main" for n in result.nodes)
 
     @pytest.mark.asyncio
@@ -340,7 +340,7 @@ main();
 
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
-        assert result.tier_applied == "enterprise"
+        assert result.data.tier_applied == "enterprise"
         assert any(n.is_entry_point and n.name == "main" for n in result.nodes)
 
 
@@ -355,8 +355,8 @@ class TestEnterpriseMetrics:
 
         result = await get_call_graph(project_root=str(tmp_path))
 
-        assert result.success is True
-        assert hasattr(result, "hot_nodes")
+        assert result.data.success is True
+        assert hasattr(result.data, "hot_nodes")
         assert isinstance(result.hot_nodes, list)
 
     @pytest.mark.asyncio
@@ -367,8 +367,8 @@ class TestEnterpriseMetrics:
 
         result = await get_call_graph(project_root=str(tmp_path))
 
-        assert result.success is True
-        assert hasattr(result, "dead_code_candidates")
+        assert result.data.success is True
+        assert hasattr(result.data, "dead_code_candidates")
         assert isinstance(result.dead_code_candidates, list)
 
 
@@ -396,10 +396,10 @@ def main():
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "pro"
-        assert result.total_nodes is not None
-        assert result.total_edges is not None
+        assert result.data.success is True
+        assert result.data.tier_applied == "pro"
+        assert result.data.total_nodes is not None
+        assert result.data.total_edges is not None
         assert all(0.0 <= edge.confidence <= 1.0 for edge in result.edges)
         assert all(
             edge.inference_source in {"static", "type_hint", "class_hierarchy", "pattern_match"}
@@ -421,8 +421,8 @@ def use():
 
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
-        assert result.success is True
-        assert result.tier_applied == "pro"
+        assert result.data.success is True
+        assert result.data.tier_applied == "pro"
         assert any(edge.callee.endswith("Worker.do") for edge in result.edges)
 
 
@@ -453,9 +453,9 @@ def ghost():
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "enterprise"
-        assert result.enterprise_metrics_enabled is True
+        assert result.data.success is True
+        assert result.data.tier_applied == "enterprise"
+        assert result.data.enterprise_metrics_enabled is True
 
         # hub has highest degree; ghost is uncalled dead code
         assert any("hub" in node for node in result.hot_nodes)
@@ -480,9 +480,9 @@ def helper():
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "pro"
-        assert result.advanced_resolution_enabled is True
+        assert result.data.success is True
+        assert result.data.tier_applied == "pro"
+        assert result.data.advanced_resolution_enabled is True
 
         # Pro should detect nested function calls
         callee_list = [edge.callee for edge in result.edges]
@@ -511,9 +511,9 @@ builder.configure().setup()
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "pro"
-        assert result.advanced_resolution_enabled is True
+        assert result.data.success is True
+        assert result.data.tier_applied == "pro"
+        assert result.data.advanced_resolution_enabled is True
         # Pro resolves method chaining
         callee_list = [edge.callee for edge in result.edges]
         assert any("configure" in callee or "setup" in callee for callee in callee_list)
@@ -539,8 +539,8 @@ svc.process()
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "pro"
+        assert result.data.success is True
+        assert result.data.tier_applied == "pro"
 
         # Pro edges should have confidence and inference_source
         for edge in result.edges:
@@ -573,8 +573,8 @@ caller_two()
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "pro"
+        assert result.data.success is True
+        assert result.data.tier_applied == "pro"
 
         # Pro should have multiple edges to utility
         edges_to_utility = [edge for edge in result.edges if "utility" in edge.callee]
@@ -597,10 +597,10 @@ class TestEnterpriseAdvancedGraphAnalysis:
 
         result = await get_call_graph(project_root=str(tmp_path), depth=60)
 
-        assert result.success is True
-        assert result.tier_applied == "enterprise"
+        assert result.data.success is True
+        assert result.data.tier_applied == "enterprise"
         # Enterprise unlimited depth, Pro would be capped at 50
-        assert result.max_depth_applied is None or result.max_depth_applied > 50
+        assert result.data.max_depth_applied is None or result.max_depth_applied > 50
 
     @pytest.mark.asyncio
     async def test_enterprise_unlimited_nodes(self, tmp_path, enterprise_tier):
@@ -616,9 +616,9 @@ class TestEnterpriseAdvancedGraphAnalysis:
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "enterprise"
-        assert result.max_nodes_applied is None, "Enterprise should have unlimited nodes"
+        assert result.data.success is True
+        assert result.data.tier_applied == "enterprise"
+        assert result.data.max_nodes_applied is None, "Enterprise should have unlimited nodes"
         # Should capture all functions
         assert len(result.edges) > 50, "Enterprise should include all edges without truncation"
 
@@ -646,8 +646,8 @@ def func_c():
             include_circular_import_check=True,
         )
 
-        assert result.success is True
-        assert result.tier_applied == "enterprise"
+        assert result.data.success is True
+        assert result.data.tier_applied == "enterprise"
         # Enterprise should detect circular dependency in call structure
         assert len(result.edges) > 0, "Should detect edges in circular structure"
 
@@ -674,8 +674,8 @@ if __name__ == "__main__":
             depth=10,
         )
 
-        assert result.success is True
-        assert result.tier_applied == "enterprise"
+        assert result.data.success is True
+        assert result.data.tier_applied == "enterprise"
         # Enterprise should trace from main through full initialization chain
         assert any("setup" in e.callee for e in result.edges)
 
@@ -703,8 +703,8 @@ def query_database():
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "enterprise"
+        assert result.data.success is True
+        assert result.data.tier_applied == "enterprise"
         # Enterprise should generate comprehensive call graph
         assert len(result.edges) >= 4, "Enterprise should have all function edges"
 
@@ -732,9 +732,9 @@ def unused_function():
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
-        assert result.success is True
-        assert result.tier_applied == "enterprise"
-        assert result.enterprise_metrics_enabled is True
+        assert result.data.success is True
+        assert result.data.tier_applied == "enterprise"
+        assert result.data.enterprise_metrics_enabled is True
 
         # Enterprise identifies hub nodes
         assert len(result.hot_nodes) > 0, "Enterprise should identify hub functions"

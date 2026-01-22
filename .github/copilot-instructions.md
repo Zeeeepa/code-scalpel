@@ -1,4 +1,5 @@
 # Copilot Instructions for Code Scalpel
+> [20260122_DOCS] Always prioritize fixing or updating tests before changing source code.
 
 ## Project Scope and Mission
 

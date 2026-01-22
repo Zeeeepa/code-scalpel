@@ -1,7 +1,5 @@
 """Type stubs for esprima.error_handler - Error handling."""
 
-from typing import Optional
-
 class Error(Exception):
     """Base error class for esprima parsing errors."""
 
@@ -15,9 +13,9 @@ class Error(Exception):
     def __init__(
         self,
         message: str,
-        index: Optional[int] = None,
-        line: Optional[int] = None,
-        column: Optional[int] = None,
+        index: int | None = None,
+        line: int | None = None,
+        column: int | None = None,
     ) -> None: ...
 
 class ErrorHandler:

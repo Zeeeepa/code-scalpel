@@ -52,11 +52,7 @@ public class Calculator {
     if result.success:
         print(f"  Lines: {result.start_line}-{result.end_line}")
         print(f"  Code length: {len(result.code)} chars")
-        print(
-            "\n" + result.code[:200] + "..."
-            if len(result.code) > 200
-            else "\n" + result.code
-        )
+        print("\n" + result.code[:200] + "..." if len(result.code) > 200 else "\n" + result.code)
     else:
         print(f"  Error: {result.error}")
 
@@ -368,9 +364,7 @@ def demo_unified_api():
                 f"  {status} {lang.value:12s} - extracted {target_type} '{target_name}' (lines {result.start_line}-{result.end_line})"
             )
         else:
-            print(
-                f"  {status} {lang.value:12s} - {target_type} '{target_name}': {result.error}"
-            )
+            print(f"  {status} {lang.value:12s} - {target_type} '{target_name}': {result.error}")
 
 
 def main():

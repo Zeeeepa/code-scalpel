@@ -116,9 +116,7 @@ const user: User = { name: 'John' };"""
     analysis = engine.analyze_error(error_output, "typescript", source_code)
 
     print(f"\nError Type: {analysis.error_type.value}")
-    print(
-        f"File: {analysis.file_path}, Line: {analysis.line}, Column: {analysis.column}"
-    )
+    print(f"File: {analysis.file_path}, Line: {analysis.line}, Column: {analysis.column}")
     print(f"Requires Human Review: {analysis.requires_human_review}")
     print(f"\nNumber of Fixes: {len(analysis.fixes)}")
 

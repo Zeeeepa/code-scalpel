@@ -32,12 +32,13 @@ Example Output:
 """
 
 import json
+
 from code_scalpel.graph_engine import (
-    GraphBuilder,
-    create_node_id,
-    EdgeType,
-    HTTPLinkDetector,
     ConfidenceEngine,
+    EdgeType,
+    GraphBuilder,
+    HTTPLinkDetector,
+    create_node_id,
 )
 
 
@@ -55,13 +56,9 @@ def example_1_universal_node_ids():
     # Create node IDs for different languages
     python_handler = create_node_id("python", "app.handlers", "class", "RequestHandler")
 
-    java_controller = create_node_id(
-        "java", "com.example.api", "controller", "UserController", method="getUser"
-    )
+    java_controller = create_node_id("java", "com.example.api", "controller", "UserController", method="getUser")
 
-    ts_function = create_node_id(
-        "typescript", "src/api/client", "function", "fetchUsers"
-    )
+    ts_function = create_node_id("typescript", "src/api/client", "function", "fetchUsers")
 
     print(f"Python class:      {python_handler}")
     print(f"Java method:       {java_controller}")
@@ -82,9 +79,7 @@ def example_2_omni_schema_graph():
     builder = GraphBuilder()
 
     # Add nodes
-    java_endpoint = create_node_id(
-        "java", "com.example.api", "endpoint", "UserController", method="getUser"
-    )
+    java_endpoint = create_node_id("java", "com.example.api", "endpoint", "UserController", method="getUser")
     builder.add_node(java_endpoint, metadata={"route": "/api/users", "method": "GET"})
 
     ts_client = create_node_id("typescript", "src/api/client", "client", "fetchUsers")
@@ -135,10 +130,7 @@ def example_3_confidence_engine():
         level = engine.get_confidence_level(evidence.final_score)
         requires_approval = engine.requires_human_approval(evidence.final_score)
 
-        print(
-            f"{edge_type.value:<25} {evidence.final_score:<12.2f} "
-            f"{level.value:<10} {str(requires_approval):<5}"
-        )
+        print(f"{edge_type.value:<25} {evidence.final_score:<12.2f} " f"{level.value:<10} {str(requires_approval):<5}")
     print()
 
 
@@ -155,15 +147,11 @@ def example_4_cross_boundary_taint():
     builder = GraphBuilder()
 
     # Java POJO field
-    java_field = create_node_id(
-        "java", "com.example.model", "field", "User", method="email"
-    )
+    java_field = create_node_id("java", "com.example.model", "field", "User", method="email")
     builder.add_node(java_field, metadata={"type": "String"})
 
     # TypeScript interface property
-    ts_property = create_node_id(
-        "typescript", "src/types", "property", "UserInterface", method="email"
-    )
+    ts_property = create_node_id("typescript", "src/types", "property", "UserInterface", method="email")
     builder.add_node(ts_property, metadata={"type": "string"})
 
     # Track taint flow with confidence

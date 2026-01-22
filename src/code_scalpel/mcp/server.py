@@ -89,10 +89,15 @@ CURRENT_TIER = "community"
 
 # [20260119_BUGFIX] Restore backward-compatible project root globals for tests and path validation.
 # [20260120_BUGFIX] Use a mutable container to allow dynamic updates from main().
+# [20260122_BUGFIX] Guard against missing CWD during collection (e.g., when parent dir removed).
 # Direct assignment to PROJECT_ROOT creates a new object, but _PROJECT_ROOT_HOLDER[0]
 # can be updated in place and accessed via get_project_root().
-_PROJECT_ROOT_HOLDER: list[Path] = [Path.cwd()]
-PROJECT_ROOT: Path = Path.cwd()  # Backward compat - may be stale after main() runs
+try:
+    _DEFAULT_PROJECT_ROOT = Path.cwd()
+except FileNotFoundError:
+    _DEFAULT_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_PROJECT_ROOT_HOLDER: list[Path] = [_DEFAULT_PROJECT_ROOT]
+PROJECT_ROOT: Path = _PROJECT_ROOT_HOLDER[0]  # Backward compat - may be stale after main() runs
 ALLOWED_ROOTS: list[Path] = []
 
 
@@ -4986,6 +4991,9 @@ from code_scalpel.mcp.helpers.extraction_helpers import (  # noqa: E402, F401
 from code_scalpel.mcp.session import (  # noqa: E402, F401
     _SESSION_AUDIT_TRAIL,
     _SESSION_UPDATE_COUNTS,
+    _add_audit_entry,
+    _get_session_update_count,
+    _increment_session_update_count,
 )
 
 

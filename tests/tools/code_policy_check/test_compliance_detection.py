@@ -4,29 +4,16 @@ Compliance detection tests for code_policy_check Enterprise features.
 [20260105_TEST] Adds coverage for HIPAA, SOC2, GDPR, PCI-DSS findings and PDF generation.
 """
 
-from pathlib import Path
-
 import pytest
 
 from code_scalpel.mcp.server import code_policy_check
-
-LICENSES_DIR = Path(__file__).parent.parent.parent / "licenses"
-ENTERPRISE_LICENSE = LICENSES_DIR / "code_scalpel_license_enterprise_20260101_190754.jwt"
-
-
-@pytest.fixture
-def enterprise_license(monkeypatch):
-    """Force Enterprise tier using bundled license."""
-    monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(ENTERPRISE_LICENSE))
-    yield
-    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
 
 
 class TestComplianceDetection:
     """Enterprise compliance detection should populate reports per standard."""
 
     @pytest.mark.asyncio
-    async def test_detects_enterprise_compliance_findings(self, tmp_path, enterprise_license):
+    async def test_detects_enterprise_compliance_findings(self, tmp_path, enterprise_tier):
         """HIPAA/SOC2/GDPR/PCI rules should appear in compliance_reports."""
         test_file = tmp_path / "compliance_targets.py"
         test_file.write_text("""
@@ -61,7 +48,7 @@ def get_records(request):
             assert score is not None and score >= 0, f"{standard} report should include a score"
 
     @pytest.mark.asyncio
-    async def test_generate_pdf_report_and_score(self, tmp_path, enterprise_license):
+    async def test_generate_pdf_report_and_score(self, tmp_path, enterprise_tier):
         """Enterprise generate_report should set pdf_report and compliance_score."""
         test_file = tmp_path / "compliance_pdf.py"
         test_file.write_text("""

@@ -15,7 +15,10 @@ from code_scalpel.mcp.helpers.session import (
     _SESSION_UPDATE_COUNTS,
     # SessionManager class
     SessionManager,
+    _add_audit_entry,
     _get_audit_trail,
+    _get_session_update_count,
+    _increment_session_update_count,
     add_audit_entry,
     get_audit_trail,
     # Public functions
@@ -31,5 +34,8 @@ __all__ = [
     "add_audit_entry",
     "get_audit_trail",
     "_get_audit_trail",
+    "_add_audit_entry",
+    "_get_session_update_count",
+    "_increment_session_update_count",
     "SessionManager",
 ]

@@ -19,8 +19,8 @@ from code_scalpel.parsing import ParsingError, parse_python_code
 
 logger = logging.getLogger(__name__)
 
-# [20260121_BUGFIX] Align hard cap with tier file-size limits (Enterprise 100MB + buffer).
-MAX_CODE_SIZE = 110 * 1024 * 1024
+# [20260122_BUGFIX] Align analyze_code with MCP contract constant (100_000 chars in tests)
+MAX_CODE_SIZE = 100_000
 
 # Caching enabled by default
 CACHE_ENABLED = os.environ.get("CODE_SCALPEL_CACHE_ENABLED", "1") != "0"

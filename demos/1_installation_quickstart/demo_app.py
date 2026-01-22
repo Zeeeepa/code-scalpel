@@ -11,7 +11,7 @@ we've included enough functions to show the extraction capability.
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 # Configuration and Constants
 TAX_RATES = {
@@ -60,9 +60,7 @@ def calculate_tax(amount: float, state: str) -> float:
     return round(amount * rate, 2)
 
 
-def calculate_total(
-    subtotal: float, state: str, discount_code: Optional[str] = None
-) -> Dict[str, float]:
+def calculate_total(subtotal: float, state: str, discount_code: str | None = None) -> dict[str, float]:
     """
     Calculate order total including tax and discounts.
 
@@ -110,9 +108,7 @@ def apply_discount(amount: float, discount_code: str) -> float:
     return round(amount * rate, 2)
 
 
-def process_payment(
-    amount: float, method: str, payment_details: Dict[str, Any]
-) -> Dict[str, Any]:
+def process_payment(amount: float, method: str, payment_details: dict[str, Any]) -> dict[str, Any]:
     """
     Process payment with given method.
 
@@ -152,7 +148,7 @@ def process_payment(
     }
 
 
-def validate_credit_card(details: Dict[str, str]) -> bool:
+def validate_credit_card(details: dict[str, str]) -> bool:
     """
     Validate credit card details.
 
@@ -204,9 +200,7 @@ def format_currency(amount: float, currency: str = "USD") -> str:
     return f"{symbol}{amount:,.2f}"
 
 
-def calculate_shipping(
-    weight_kg: float, destination: str, express: bool = False
-) -> float:
+def calculate_shipping(weight_kg: float, destination: str, express: bool = False) -> float:
     """
     Calculate shipping cost based on weight and destination.
 
@@ -237,7 +231,7 @@ def calculate_shipping(
     return round(cost, 2)
 
 
-def generate_invoice(order_id: str, items: List[Dict], customer: Dict) -> Dict:
+def generate_invoice(order_id: str, items: list[dict], customer: dict) -> dict:
     """
     Generate invoice for order.
 
@@ -270,7 +264,7 @@ def generate_invoice(order_id: str, items: List[Dict], customer: Dict) -> Dict:
     return invoice
 
 
-def send_confirmation_email(email: str, order_data: Dict) -> bool:
+def send_confirmation_email(email: str, order_data: dict) -> bool:
     """
     Send order confirmation email to customer.
 
@@ -289,7 +283,7 @@ def send_confirmation_email(email: str, order_data: Dict) -> bool:
     return True
 
 
-def log_transaction(transaction_data: Dict) -> None:
+def log_transaction(transaction_data: dict) -> None:
     """
     Log transaction for audit purposes.
 
@@ -305,7 +299,7 @@ def log_transaction(transaction_data: Dict) -> None:
     logging.info(f"Transaction logged: {json.dumps(log_entry)}")
 
 
-def get_customer_order_history(customer_id: str) -> List[Dict]:
+def get_customer_order_history(customer_id: str) -> list[dict]:
     """
     Retrieve customer's order history.
 

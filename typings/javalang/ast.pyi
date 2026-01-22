@@ -1,6 +1,5 @@
 # Type stubs for javalang.ast module
-from typing import Optional, Tuple
 
 class Node:
-    position: Optional[Tuple[int, int]]
+    position: tuple[int, int] | None
     def __init__(self) -> None: ...

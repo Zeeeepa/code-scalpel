@@ -1,13 +1,13 @@
 """Type stubs for esprima.nodes - AST node definitions."""
 
-from typing import Dict, List, Optional, Union
+from typing import Union
 
 class SourceLocation:
     """Source location information."""
 
     start: Position
     end: Position
-    source: Optional[str]
+    source: str | None
 
 class Position:
     """Position in source code."""
@@ -19,16 +19,16 @@ class Node:
     """Base class for all AST nodes."""
 
     type: str
-    loc: Optional[SourceLocation]
-    range: Optional[List[int]]
-    parent: Optional["Node"]
+    loc: SourceLocation | None
+    range: list[int] | None
+    parent: Node | None
 
     def __init__(self) -> None: ...
 
 class Program(Node):
     """Root node of the AST."""
 
-    body: List[Union["Statement", "ModuleDeclaration"]]
+    body: list[Union[Statement, ModuleDeclaration]]
     sourceType: str  # "script" or "module"
 
 class Statement(Node):
@@ -61,7 +61,7 @@ class ExpressionStatement(Statement):
     expression: Expression
 
 class BlockStatement(Statement):
-    body: List[Statement]
+    body: list[Statement]
 
 class EmptyStatement(Statement):
     pass
@@ -74,41 +74,41 @@ class WithStatement(Statement):
     body: Statement
 
 class ReturnStatement(Statement):
-    argument: Optional[Expression]
+    argument: Expression | None
 
 class LabeledStatement(Statement):
-    label: "Identifier"
+    label: Identifier
     body: Statement
 
 class BreakStatement(Statement):
-    label: Optional["Identifier"]
+    label: Identifier | None
 
 class ContinueStatement(Statement):
-    label: Optional["Identifier"]
+    label: Identifier | None
 
 class IfStatement(Statement):
     test: Expression
     consequent: Statement
-    alternate: Optional[Statement]
+    alternate: Statement | None
 
 class SwitchStatement(Statement):
     discriminant: Expression
-    cases: List["SwitchCase"]
+    cases: list[SwitchCase]
 
 class SwitchCase(Node):
-    test: Optional[Expression]
-    consequent: List[Statement]
+    test: Expression | None
+    consequent: list[Statement]
 
 class ThrowStatement(Statement):
     argument: Expression
 
 class TryStatement(Statement):
     block: BlockStatement
-    handler: Optional["CatchClause"]
-    finalizer: Optional[BlockStatement]
+    handler: CatchClause | None
+    finalizer: BlockStatement | None
 
 class CatchClause(Node):
-    param: Optional[Pattern]
+    param: Pattern | None
     body: BlockStatement
 
 class WhileStatement(Statement):
@@ -120,50 +120,50 @@ class DoWhileStatement(Statement):
     test: Expression
 
 class ForStatement(Statement):
-    init: Optional[Union["VariableDeclaration", Expression]]
-    test: Optional[Expression]
-    update: Optional[Expression]
+    init: Union[VariableDeclaration, Expression] | None
+    test: Expression | None
+    update: Expression | None
     body: Statement
 
 class ForInStatement(Statement):
-    left: Union["VariableDeclaration", Pattern]
+    left: Union[VariableDeclaration, Pattern]
     right: Expression
     body: Statement
 
 class ForOfStatement(Statement):
-    left: Union["VariableDeclaration", Pattern]
+    left: Union[VariableDeclaration, Pattern]
     right: Expression
     body: Statement
     await_: bool
 
 # Declarations
 class FunctionDeclaration(Declaration):
-    id: Optional["Identifier"]
-    params: List[Pattern]
+    id: Identifier | None
+    params: list[Pattern]
     body: BlockStatement
     generator: bool
     async_: bool
     expression: bool
 
 class VariableDeclaration(Declaration):
-    declarations: List["VariableDeclarator"]
+    declarations: list[VariableDeclarator]
     kind: str  # "var", "let", "const"
 
 class VariableDeclarator(Node):
     id: Pattern
-    init: Optional[Expression]
+    init: Expression | None
 
 class ClassDeclaration(Declaration):
-    id: Optional["Identifier"]
-    superClass: Optional[Expression]
-    body: "ClassBody"
+    id: Identifier | None
+    superClass: Expression | None
+    body: ClassBody
 
 class ClassBody(Node):
-    body: List["MethodDefinition"]
+    body: list[MethodDefinition]
 
 class MethodDefinition(Node):
     key: Expression
-    value: "FunctionExpression"
+    value: FunctionExpression
     kind: str  # "constructor", "method", "get", "set"
     computed: bool
     static: bool
@@ -175,16 +175,16 @@ class Identifier(Expression, Pattern):
 class Literal(Expression):
     value: Union[str, bool, int, float, None]
     raw: str
-    regex: Optional[Dict[str, str]]
+    regex: dict[str, str] | None
 
 class ThisExpression(Expression):
     pass
 
 class ArrayExpression(Expression):
-    elements: List[Optional[Expression]]
+    elements: list[Expression | None]
 
 class ObjectExpression(Expression):
-    properties: List["Property"]
+    properties: list[Property]
 
 class Property(Node):
     key: Expression
@@ -195,36 +195,36 @@ class Property(Node):
     computed: bool
 
 class FunctionExpression(Expression):
-    id: Optional[Identifier]
-    params: List[Pattern]
+    id: Identifier | None
+    params: list[Pattern]
     body: BlockStatement
     generator: bool
     async_: bool
     expression: bool
 
 class ArrowFunctionExpression(Expression):
-    id: Optional[Identifier]
-    params: List[Pattern]
+    id: Identifier | None
+    params: list[Pattern]
     body: Union[BlockStatement, Expression]
     generator: bool
     async_: bool
     expression: bool
 
 class ClassExpression(Expression):
-    id: Optional[Identifier]
-    superClass: Optional[Expression]
+    id: Identifier | None
+    superClass: Expression | None
     body: ClassBody
 
 class TaggedTemplateExpression(Expression):
     tag: Expression
-    quasi: "TemplateLiteral"
+    quasi: TemplateLiteral
 
 class TemplateLiteral(Expression):
-    quasis: List["TemplateElement"]
-    expressions: List[Expression]
+    quasis: list[TemplateElement]
+    expressions: list[Expression]
 
 class TemplateElement(Node):
-    value: Dict[str, str]
+    value: dict[str, str]
     tail: bool
 
 class MemberExpression(Expression, Pattern):
@@ -242,12 +242,12 @@ class MetaProperty(Expression):
 
 class CallExpression(Expression):
     callee: Union[Expression, Super]
-    arguments: List[Expression]
+    arguments: list[Expression]
     optional: bool
 
 class NewExpression(Expression):
     callee: Expression
-    arguments: List[Expression]
+    arguments: list[Expression]
 
 class SpreadElement(Node):
     argument: Expression
@@ -281,7 +281,7 @@ class ConditionalExpression(Expression):
     alternate: Expression
 
 class YieldExpression(Expression):
-    argument: Optional[Expression]
+    argument: Expression | None
     delegate: bool
 
 class AssignmentExpression(Expression):
@@ -290,17 +290,17 @@ class AssignmentExpression(Expression):
     right: Expression
 
 class SequenceExpression(Expression):
-    expressions: List[Expression]
+    expressions: list[Expression]
 
 class AssignmentPattern(Pattern):
     left: Pattern
     right: Expression
 
 class ArrayPattern(Pattern):
-    elements: List[Optional[Pattern]]
+    elements: list[Pattern | None]
 
 class ObjectPattern(Pattern):
-    properties: List["AssignmentProperty"]
+    properties: list[AssignmentProperty]
 
 class AssignmentProperty(Node):
     key: Expression
@@ -313,9 +313,7 @@ class RestElement(Pattern):
 
 # Module declarations
 class ImportDeclaration(ModuleDeclaration):
-    specifiers: List[
-        Union["ImportSpecifier", "ImportDefaultSpecifier", "ImportNamespaceSpecifier"]
-    ]
+    specifiers: list[Union[ImportSpecifier, ImportDefaultSpecifier, ImportNamespaceSpecifier]]
     source: Literal
 
 class ImportSpecifier(Node):
@@ -330,15 +328,15 @@ class ImportNamespaceSpecifier(Node):
 
 class ExportAllDeclaration(ModuleDeclaration):
     source: Literal
-    exported: Optional[Identifier]
+    exported: Identifier | None
 
 class ExportDefaultDeclaration(ModuleDeclaration):
     declaration: Union[Declaration, Expression]
 
 class ExportNamedDeclaration(ModuleDeclaration):
-    declaration: Optional[Declaration]
-    specifiers: List["ExportSpecifier"]
-    source: Optional[Literal]
+    declaration: Declaration | None
+    specifiers: list[ExportSpecifier]
+    source: Literal | None
 
 class ExportSpecifier(Node):
     exported: Identifier

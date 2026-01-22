@@ -100,9 +100,7 @@ def execute_command(user_input):
         print(f"  Attempt {i+1}: {step} (vulnerabilities: {vulnerabilities})")
 
     print("\n=== LangGraph Integration Demo Complete ===")
-    print(
-        "The graph automatically routes through analyze → generate → validate → apply/escalate"
-    )
+    print("The graph automatically routes through analyze → generate → validate → apply/escalate")
 
 except ImportError as e:
     print(f"Error: {e}")

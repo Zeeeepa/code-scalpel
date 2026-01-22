@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 def example_1_extract_java():
     """Extract Java method - shows the proper API."""
-    from code_scalpel.polyglot import PolyglotExtractor, Language
+    from code_scalpel.polyglot import Language, PolyglotExtractor
 
     print("\n" + "=" * 70)
     print(" EXAMPLE 1: Extract Java Method ".center(70, "="))
@@ -65,7 +65,7 @@ public class Calculator {
 
 def example_2_extract_javascript():
     """Extract JavaScript function - async and arrow functions."""
-    from code_scalpel.polyglot import PolyglotExtractor, Language
+    from code_scalpel.polyglot import Language, PolyglotExtractor
 
     print("\n" + "=" * 70)
     print(" EXAMPLE 2: Extract JavaScript Functions ".center(70, "="))
@@ -98,7 +98,7 @@ const formatCurrency = (value) => `$${value.toFixed(2)}`;
 
 def example_3_extract_typescript():
     """Extract TypeScript function with types."""
-    from code_scalpel.polyglot import PolyglotExtractor, Language
+    from code_scalpel.polyglot import Language, PolyglotExtractor
 
     print("\n" + "=" * 70)
     print(" EXAMPLE 3: Extract TypeScript with Types ".center(70, "="))
@@ -138,7 +138,7 @@ class UserService {
 
 def example_4_auto_detect():
     """Demonstrate automatic language detection."""
-    from code_scalpel.polyglot import detect_language, Language
+    from code_scalpel.polyglot import Language, detect_language
 
     print("\n" + "=" * 70)
     print(" EXAMPLE 4: Automatic Language Detection ".center(70, "="))
@@ -200,7 +200,7 @@ public class Math {
 
 def example_6_error_handling():
     """Demonstrate error handling."""
-    from code_scalpel.polyglot import PolyglotExtractor, Language
+    from code_scalpel.polyglot import Language, PolyglotExtractor
 
     print("\n" + "=" * 70)
     print(" EXAMPLE 6: Error Handling ".center(70, "="))
