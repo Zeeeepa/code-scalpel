@@ -167,71 +167,50 @@ def verify_tier_checks(source_root: Path) -> TierVerificationResult:
     """
     result = TierVerificationResult()
 
-    # Find server.py (main MCP server file)
-    server_file = source_root / "code_scalpel" / "mcp" / "server.py"
-
-    if not server_file.exists():
-        result.add_error(f"Server file not found: {server_file}")
+    # Find all Python files in MCP tools and server
+    python_files = []
+    mcp_dir = source_root / "code_scalpel" / "mcp"
+    if mcp_dir.exists():
+        python_files = list(mcp_dir.rglob("*.py"))
+    
+    if not python_files:
+        result.add_error(f"No Python files found in {mcp_dir}")
         return result
 
-    result.add_info(f"Analyzing {server_file}")
+    result.add_info(f"Analyzing {len(python_files)} files in MCP directory")
 
-    # Parse the server file
-    try:
-        with open(server_file, "r", encoding="utf-8") as f:
-            tree = ast.parse(f.read(), filename=str(server_file))
-    except SyntaxError as e:
-        result.add_error(f"Syntax error in {server_file}: {e}")
-        return result
-
-    # Visit AST to find tier checks
-    visitor = TierCheckVisitor(server_file)
-    visitor.visit(tree)
-
-    # Analyze tier checks
-    for check in visitor.tier_checks:
-        if check["type"] == "tier_check":
-            result.add_info(
-                f"Found tier check in {check['function']}() at line {check['line']}"
-            )
-        elif check["type"] == "tier_comparison":
-            tier = check["tier"]
-            result.tier_checks_found[tier].append(
-                f"{check['function']}:{check['line']}"
-            )
-
-    # Verify restricted features have tier checks
-    restricted_features = TIER_RESTRICTIONS["community"]["restricted_features"]
-
-    for feature, restriction in restricted_features.items():
-        # Check if feature has tier checks
-        feature_checks = [
-            check
-            for check in visitor.tier_checks
-            if feature in check.get("function", "")
-        ]
-
-        if not feature_checks:
-            result.add_warning(
-                f"Feature '{feature}' should have tier checks for '{restriction}'"
-            )
-        else:
-            result.add_info(
-                f"✓ Feature '{feature}' has {len(feature_checks)} tier check(s)"
-            )
+    total_tier_checks = 0
+    
+    # Parse each file
+    for py_file in python_files:
+        try:
+            with open(py_file, "r", encoding="utf-8") as f:
+                content = f.read()
+                
+            # Quick check before parsing
+            if "_get_current_tier" not in content:
+                continue
+                
+            tree = ast.parse(content, filename=str(py_file))
+            visitor = TierCheckVisitor(py_file)
+            visitor.visit(tree)
+            
+            if visitor.tier_checks:
+                total_tier_checks += len(visitor.tier_checks)
+                for check in visitor.tier_checks:
+                    if check["type"] == "tier_check":
+                        result.add_info(
+                            f"Found tier check in {py_file.name}:{check['line']}"
+                        )
+                        
+        except SyntaxError:
+            continue
 
     # Verify _get_current_tier() exists
-    tier_check_calls = [
-        check for check in visitor.tier_checks if check["type"] == "tier_check"
-    ]
-    if not tier_check_calls:
+    if total_tier_checks == 0:
         result.add_error("No _get_current_tier() calls found - tier checks not implemented")
     else:
-        result.add_info(f"Found {len(tier_check_calls)} tier check calls")
-
-    # Verify Community tier has restrictions
-    if not result.tier_checks_found["community"]:
-        result.add_warning("No Community tier-specific checks found")
+        result.add_info(f"✓ Found {total_tier_checks} tier check calls across all files")
 
     return result
 

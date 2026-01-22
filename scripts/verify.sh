@@ -109,7 +109,7 @@ echo "🧩 Step 7/8: MCP Contract (All Tools)..."
 echo "----------------------------------------------"
 for transport in stdio streamable-http sse; do
     echo "Running MCP contract for transport: $transport"
-    MCP_CONTRACT_TRANSPORT="$transport" $PYTHON_BIN -m pytest -q tests/test_mcp_all_tools_contract.py 2>&1 || {
+    MCP_CONTRACT_TRANSPORT="$transport" $PYTHON_BIN -m pytest -q tests/mcp/test_mcp_all_tools_contract.py 2>&1 || {
         echo ""
         echo "ERROR: MCP contract test failed for transport: $transport"
         exit 1

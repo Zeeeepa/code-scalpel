@@ -287,9 +287,7 @@ class ScalpelSecurityScanTool(BaseTool):
 # ============================================================================
 
 
-def create_scalpel_fix_crew() -> (
-    Any
-):  # [20260121_BUGFIX] Avoid module-as-type pyright errors
+def create_scalpel_fix_crew() -> Any:  # [20260121_BUGFIX] Avoid module-as-type pyright errors
     """
     Create CrewAI crew for Code Scalpel operations.
 
@@ -308,7 +306,7 @@ def create_scalpel_fix_crew() -> (
         Configured Crew with Error Analyzer, Fix Generator, and Validator agents.
     """
     # Error Analyzer Agent
-    error_analyzer = Agent(
+    error_analyzer = Agent(  # type: ignore[misc]
         role="Error Analyzer",
         goal="Analyze code errors and identify root causes",
         backstory="Expert at parsing error messages and understanding code issues",
@@ -317,7 +315,7 @@ def create_scalpel_fix_crew() -> (
     )
 
     # Fix Generator Agent
-    fix_generator = Agent(
+    fix_generator = Agent(  # type: ignore[misc]
         role="Fix Generator",
         goal="Generate correct code fixes based on error analysis",
         backstory="Expert at writing minimal, correct code patches",
@@ -326,7 +324,7 @@ def create_scalpel_fix_crew() -> (
     )
 
     # Validator Agent
-    validator = Agent(
+    validator = Agent(  # type: ignore[misc]
         role="Fix Validator",
         goal="Validate fixes don't break existing functionality",
         backstory="Expert at testing code changes in isolation",
@@ -335,25 +333,25 @@ def create_scalpel_fix_crew() -> (
     )
 
     # Tasks
-    analyze_task = Task(
+    analyze_task = Task(  # type: ignore[misc]
         description="Analyze the error message and identify the root cause",
         agent=error_analyzer,
         expected_output="Error analysis with categorization and affected code location",
     )
 
-    generate_task = Task(
+    generate_task = Task(  # type: ignore[misc]
         description="Generate a fix for the identified error",
         agent=fix_generator,
         expected_output="Code diff that fixes the error",
     )
 
-    validate_task = Task(
+    validate_task = Task(  # type: ignore[misc]
         description="Validate the fix in a sandbox environment",
         agent=validator,
         expected_output="Validation result with test outcomes",
     )
 
-    return Crew(
+    return Crew(  # type: ignore[misc]
         agents=[error_analyzer, fix_generator, validator],
         tasks=[analyze_task, generate_task, validate_task],
         verbose=True,

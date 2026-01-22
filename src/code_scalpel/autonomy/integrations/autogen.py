@@ -255,7 +255,7 @@ def create_scalpel_autogen_agents(
         )
 
     # Coder agent with fix generation tools
-    coder = AssistantAgent(
+    coder = AssistantAgent(  # type: ignore[misc]
         name="ScalpelCoder",
         system_message="""You are a code fixer that uses Code Scalpel tools.
 

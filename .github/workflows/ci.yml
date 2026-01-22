@@ -317,7 +317,7 @@ jobs:
     - name: Verify tier checks present
       run: |
         echo "Verifying tier restriction checks are in place..."
-        grep -r "_get_current_tier()" src/code_scalpel/mcp/server.py || (echo "ERROR: Tier checks missing" && exit 1)
+        grep -r "_get_current_tier()" src/code_scalpel/ || (echo "ERROR: Tier checks missing" && exit 1)
         echo "✓ Tier checks verified"
 
   mcp-contract:
@@ -354,7 +354,7 @@ jobs:
         MCP_CONTRACT_TRANSPORT: ${{ matrix.transport }}
         MCP_CONTRACT_ARTIFACT_DIR: ${{ runner.temp }}/mcp-contract/${{ matrix.transport }}
       run: |
-        pytest -q tests/test_mcp_all_tools_contract.py
+        pytest -q tests/mcp/test_mcp_all_tools_contract.py
 
     - name: Upload MCP contract evidence
       if: always()
