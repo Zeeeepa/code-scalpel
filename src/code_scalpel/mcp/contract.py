@@ -120,6 +120,37 @@ class ToolResponseEnvelope(BaseModel):
     )
     data: Any | None = Field(default=None, description="Tool-specific payload")
 
+    # [20260121_FEATURE] Transparent attribute forwarding for test compatibility
+    def __getattr__(self, name: str) -> Any:
+        """Forward attribute access to data dict for test compatibility.
+
+        Allows tests to access result.success instead of result.data['success'].
+        """
+        if name in {
+            "data",
+            "tier",
+            "tool_version",
+            "tool_id",
+            "request_id",
+            "capabilities",
+            "duration_ms",
+            "error",
+            "upgrade_hints",
+            "warnings",
+        }:
+            # These are envelope fields - use default behavior
+            return object.__getattribute__(self, name)
+
+        # Try to get from data dict
+        data = object.__getattribute__(self, "data")
+        if isinstance(data, dict) and name in data:
+            return data[name]
+
+        # Fall back to default behavior (raises AttributeError)
+        raise AttributeError(
+            f"'{type(self).__name__}' object has no attribute '{name}'"
+        )
+
 
 def _classify_exception(exc: BaseException) -> ErrorCode:
     # Keep classification conservative; do not leak details.

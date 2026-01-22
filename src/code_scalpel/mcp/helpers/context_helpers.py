@@ -1546,19 +1546,22 @@ def _get_file_context_sync(
         imports_truncated = total_imports > 20
 
         semantic_summary = None
+        # [20260128_BUGFIX] Cast parse tree to Module for docstring-dependent enrichments.
         if "semantic_summarization" in cap_set:
-            doc = ast.get_docstring(tree) or ""
+            module_tree = cast(ast.Module, tree)
+            doc = ast.get_docstring(module_tree) or ""
             semantic_summary = summary
             if doc:
                 semantic_summary = f"{summary}. Docstring: {doc.strip()}"
 
         intent_tags: list[str] = []
         if "intent_extraction" in cap_set:
+            module_tree = cast(ast.Module, tree)
             tag_source = " ".join(
                 [path.stem]
                 + function_names
                 + class_names
-                + [ast.get_docstring(tree) or ""]
+                + [ast.get_docstring(module_tree) or ""]
             )
             for token in re.findall(r"[A-Za-z]{3,}", tag_source):
                 lowered = token.lower()
@@ -1598,11 +1601,16 @@ def _get_file_context_sync(
         doc_coverage: float | None = None
         maintainability_index: float | None = None
 
+        # [20260128_BUGFIX] Normalize tree type before quality metric helpers.
         if "code_smell_detection" in cap_set:
-            code_smells = _detect_code_smells(tree, code, lines)
+            module_tree = cast(ast.Module, tree)
+            code_smells = _detect_code_smells(module_tree, code, lines)
 
         if "documentation_coverage" in cap_set:
-            doc_coverage = _calculate_doc_coverage(tree, function_names, class_names)
+            module_tree = cast(ast.Module, tree)
+            doc_coverage = _calculate_doc_coverage(
+                module_tree, function_names, class_names
+            )
 
         if {"maintainability_index", "maintainability_metrics"} & cap_set:
             maintainability_index = _calculate_maintainability_index(

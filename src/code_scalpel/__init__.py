@@ -171,10 +171,6 @@ __all__ = [
     "update_function_in_file",
     "update_class_in_file",
     "update_method_in_file",
-    # MCP Server
-    "create_app",
-    "run_server",
-    "MCPServerConfig",
     # Autonomy (v3.0.0)
     "ErrorToDiffEngine",
     "ErrorType",

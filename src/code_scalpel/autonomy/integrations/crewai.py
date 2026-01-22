@@ -10,15 +10,22 @@ This module provides CrewAI agents and tools that:
 - Apply fixes with security scanning
 """
 
-try:
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
     from crewai import Agent, Crew, Task
     from crewai.tools import BaseTool
     from pydantic import BaseModel, Field
-except ImportError as e:
-    raise ImportError(
-        "CrewAI is required for this integration. "
-        "Install it with: pip install crewai"
-    ) from e
+else:
+    try:
+        from crewai import Agent, Crew, Task
+        from crewai.tools import BaseTool
+        from pydantic import BaseModel, Field
+    except ImportError as e:  # pragma: no cover - runtime dependency guard
+        raise ImportError(
+            "CrewAI is required for this integration. "
+            "Install it with: pip install crewai"
+        ) from e
 
 
 class CodeInput(BaseModel):
@@ -280,7 +287,9 @@ class ScalpelSecurityScanTool(BaseTool):
 # ============================================================================
 
 
-def create_scalpel_fix_crew() -> Crew:
+def create_scalpel_fix_crew() -> (
+    Any
+):  # [20260121_BUGFIX] Avoid module-as-type pyright errors
     """
     Create CrewAI crew for Code Scalpel operations.
 

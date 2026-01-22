@@ -49,4 +49,12 @@ async def test_spring_jpa_taint_flow_detected(sink_call, expected_line):
     result = await security_scan(code=code)
     assert result.success
     assert result.has_vulnerabilities
-    assert any((vuln.line == expected_line for vuln in result.vulnerabilities))
+    # Vulnerabilities are dicts with 'line' key
+    assert any(
+        (
+            vuln["line"] == expected_line
+            if isinstance(vuln, dict)
+            else vuln.line == expected_line
+        )
+        for vuln in result.vulnerabilities
+    )

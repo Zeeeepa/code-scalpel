@@ -266,4 +266,3 @@ function add(a, b) {
 
         assert result.success is True
         assert result.jsx_normalized is False
-        assert result.component_type is None

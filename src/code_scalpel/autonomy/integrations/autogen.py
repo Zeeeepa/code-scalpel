@@ -9,15 +9,18 @@ This module provides AutoGen agents with Code Scalpel tools that:
 - Validate fixes in Docker sandbox
 """
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-try:
+if TYPE_CHECKING:
     from autogen import AssistantAgent, UserProxyAgent
-except ImportError as e:
-    raise ImportError(
-        "AutoGen is required for this integration. "
-        "Install it with: pip install pyautogen"
-    ) from e
+else:
+    try:
+        from autogen import AssistantAgent, UserProxyAgent
+    except ImportError as e:  # pragma: no cover - runtime dependency guard
+        raise ImportError(
+            "AutoGen is required for this integration. "
+            "Install it with: pip install pyautogen"
+        ) from e
 
 
 # ============================================================================
@@ -204,7 +207,7 @@ def scalpel_validate_impl(code: str) -> dict[str, Any]:
 
 def create_scalpel_autogen_agents(
     llm_config: dict[str, Any] | None = None,
-) -> tuple[AssistantAgent, UserProxyAgent]:
+) -> tuple[Any, Any]:  # [20260121_BUGFIX] Avoid module-as-type pyright errors
     """
     Create AutoGen agents with Code Scalpel tools.
 
