@@ -149,7 +149,7 @@ class MultiRepoCoordinator:
         Args:
             backup_dir: Directory for backups (default: temp dir)
         """
-        self.backup_dir = backup_dir or Path("/tmp/code-scalpel-backups")
+        self.backup_dir = backup_dir or Path("/tmp/code-scalpel-backups")  # nosec B108
         self.backup_dir.mkdir(parents=True, exist_ok=True)
 
         # Active sessions

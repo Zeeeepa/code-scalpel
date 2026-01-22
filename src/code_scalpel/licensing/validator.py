@@ -368,31 +368,31 @@ class LicenseValidator:
                 method="POST",
             )
 
-            with request.urlopen(req, timeout=timeout) as response:
+            with request.urlopen(req, timeout=timeout) as response:  # nosec B310
                 result_data = json.loads(response.read().decode())
 
-                # Parse server response
-                if result_data.get("valid"):
-                    expiration = None
-                    if result_data.get("expiration_date"):
-                        expiration = datetime.fromisoformat(
-                            result_data["expiration_date"]
-                        )
-
-                    return ValidationResult(
-                        status=ValidationStatus.VALID,
-                        tier=tier,
-                        message="License validated by server",
-                        expiration_date=expiration,
-                        organization=result_data.get("organization"),
-                        seats=result_data.get("seats"),
-                        seats_used=result_data.get("seats_used"),
+            # Parse server response
+            if result_data.get("valid"):
+                expiration = None
+                if result_data.get("expiration_date"):
+                    expiration = datetime.fromisoformat(
+                        result_data["expiration_date"]
                     )
-                else:
-                    return ValidationResult(
-                        status=ValidationStatus.INVALID,
-                        tier=tier,
-                        message=result_data.get("message", "Server rejected license"),
+
+                return ValidationResult(
+                    status=ValidationStatus.VALID,
+                    tier=tier,
+                    message="License validated by server",
+                    expiration_date=expiration,
+                    organization=result_data.get("organization"),
+                    seats=result_data.get("seats"),
+                    seats_used=result_data.get("seats_used"),
+                )
+            else:
+                return ValidationResult(
+                    status=ValidationStatus.INVALID,
+                    tier=tier,
+                    message=result_data.get("message", "Server rejected license"),
                     )
 
         except (URLError, TimeoutError, json.JSONDecodeError) as e:

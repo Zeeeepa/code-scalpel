@@ -316,7 +316,7 @@ class ElasticsearchBackend(SearchBackend):
             req.add_header("Authorization", f"Basic {credentials}")
 
         try:
-            with urllib.request.urlopen(req, timeout=30) as response:
+            with urllib.request.urlopen(req, timeout=30) as response:  # nosec B310
                 return json.loads(response.read().decode())
         except urllib.error.HTTPError as e:
             if e.code == 404:

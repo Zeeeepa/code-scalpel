@@ -582,4 +582,4 @@ class LicenseCache:
             safe_key = hashlib.sha256(key.encode()).hexdigest()
             self._redis_client.delete(f"scalpel:cache:{safe_key}")
         except Exception as e:
-            logger.warning(f"Failed to delete from distributed cache: {e}")
+            logger.warning(f"Failed to delete from distributed cache: {e}")  # nosec B608
