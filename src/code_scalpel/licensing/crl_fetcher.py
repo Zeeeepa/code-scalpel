@@ -79,7 +79,9 @@ def fetch_crl_token(url: str, timeout_seconds: float = 10.0) -> str:
         headers={"User-Agent": "code-scalpel/CRLFetcher"},
         method="GET",
     )
-    with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:  # nosec B310  # type: ignore
+    with urllib.request.urlopen(
+        req, timeout=timeout_seconds
+    ) as resp:  # nosec B310  # type: ignore
         body = resp.read().decode("utf-8", errors="replace")
     token = body.strip()
     if not token:

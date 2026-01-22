@@ -375,9 +375,7 @@ class LicenseValidator:
             if result_data.get("valid"):
                 expiration = None
                 if result_data.get("expiration_date"):
-                    expiration = datetime.fromisoformat(
-                        result_data["expiration_date"]
-                    )
+                    expiration = datetime.fromisoformat(result_data["expiration_date"])
 
                 return ValidationResult(
                     status=ValidationStatus.VALID,
@@ -393,7 +391,7 @@ class LicenseValidator:
                     status=ValidationStatus.INVALID,
                     tier=tier,
                     message=result_data.get("message", "Server rejected license"),
-                    )
+                )
 
         except (URLError, TimeoutError, json.JSONDecodeError) as e:
             logger.warning(f"Online validation failed: {e}, falling back to offline")
