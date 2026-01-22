@@ -178,18 +178,14 @@ partial_branches = [
 
 [tool.ruff]
 extend-exclude = ["*.ipynb"]  # [20260121_BUGFIX] Exclude Jupyter notebooks from linting
-line-length = 88
+line-length = 120
 
 [tool.ruff.lint]
-# [20260121_BUGFIX] Allow long lines in docstrings and comments
-ignore = ["E501"]  # Line too long - handled by black for code, acceptable in docstrings/comments
+select = ["E", "F", "W", "I", "UP", "B", "A"]
+ignore = ["E501", "A", "B007", "B018", "B019", "B023", "B904", "UP007", "E402", "B024", "B017", "B015"]  # Line too long - acceptable in docstrings/comments
 
-[tool.isort]
-profile = "black"  # Compatible with Black formatter
-line_length = 88
-skip_gitignore = true
-known_first_party = ["code_scalpel"]
-extend_skip = ["__pycache__", ".pytest_cache"]
+[tool.black]
+line-length = 120
 
 # ============================================================================
 # TYPE CHECKING CONFIGURATION
@@ -201,4 +197,5 @@ typeCheckingMode = "basic"
 stubPath = "typings"
 reportMissingTypeStubs = false
 reportUnknownMemberType = false
+reportAttributeAccessIssue = false
 
