@@ -16,7 +16,7 @@ from code_scalpel.surgical_extractor import (
     SurgicalExtractor,
     extract_with_context,
 )
-from code_scalpel.surgical_patcher import SurgicalPatcher
+from code_scalpel.surgery import SurgicalPatcher
 
 
 class TestCrossFileResolution:

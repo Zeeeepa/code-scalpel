@@ -24,6 +24,7 @@ Migration Guide:
 """
 
 # [20251224_REFACTOR] Import from submodules
+# [20260309_BUGFIX] Re-export analyze_code for analysis namespace parity with tests.
 from .code_analyzer import (
     AnalysisLanguage,
     AnalysisLevel,
@@ -32,6 +33,7 @@ from .code_analyzer import (
     CodeAnalyzer,
     DeadCodeItem,
     RefactorSuggestion,
+    analyze_code,
 )
 from .core import CodeAnalysisToolkit
 from .project_crawler import (
@@ -52,6 +54,7 @@ __all__ = [
     "AnalysisLanguage",
     "DeadCodeItem",
     "RefactorSuggestion",
+    "analyze_code",
     # Project Crawler
     "ProjectCrawler",
     "CrawlResult",
