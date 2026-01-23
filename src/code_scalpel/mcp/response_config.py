@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_CONFIG = {
     "global": {
         "profile": "minimal",
+        "include_tool_id": False,  # [20260122_FEATURE] When True, always include tool_id in envelope
         "exclude_empty_arrays": True,
         "exclude_empty_objects": True,
         "exclude_null_values": True,
@@ -38,7 +39,18 @@ DEFAULT_CONFIG = {
     },
     "profiles": {
         "minimal": {
-            "envelope": {"include": []},
+            "envelope": {
+                "include": [
+                    "tier",
+                    "tool_version",
+                    "tool_id",
+                    "request_id",
+                    "capabilities",
+                    "duration_ms",
+                    "error",
+                    "upgrade_hints",
+                ]
+            },
             "common_exclusions": [
                 "success",
                 "server_version",
@@ -108,7 +120,7 @@ class ResponseConfig:
         search_paths = [
             Path.cwd() / ".code-scalpel" / "response_config.json",
             Path.home() / ".config" / "code-scalpel" / "response_config.json",
-            Path(__file__).parent.parent.parent / ".code-scalpel" / "response_config.json",
+            Path(__file__).parent.parent.parent.parent / ".code-scalpel" / "response_config.json",
         ]
 
         for path in search_paths:
@@ -227,6 +239,15 @@ class ResponseConfig:
     def should_exclude_null_values(self) -> bool:
         """Check if null values should be excluded."""
         return self.config["global"].get("exclude_null_values", True)
+
+    def should_include_tool_id(self) -> bool:
+        """Check if tool_id should always be included in envelope.
+
+        [20260122_FEATURE] When true, tool_id is always included regardless of profile.
+        This is useful for debugging and contract compliance testing.
+        Default: False (uses profile-based behavior).
+        """
+        return self.config["global"].get("include_tool_id", False)
 
     def should_exclude_default_values(self) -> bool:
         """Check if default values should be excluded."""

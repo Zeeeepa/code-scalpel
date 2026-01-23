@@ -1,4 +1,52 @@
 """
+Test session helpers.
+
+Ensure tests run even when the process working directory has been removed
+by earlier test steps or external factors. This mirrors defensive handling
+so that `pytest.MonkeyPatch.chdir()` can safely call `os.getcwd()`.
+
+[20260122_TEST] Create session guard to reset CWD if missing.
+"""
+
+import os
+from pathlib import Path
+
+
+def pytest_sessionstart(session) -> None:
+    """Ensure process CWD is valid at the start of the test session.
+
+    If `os.getcwd()` raises (directory removed), change CWD to the
+    repository root (two levels up from the tests/ directory).
+    """
+    try:
+        os.getcwd()
+    except (FileNotFoundError, OSError):
+        project_root = Path(__file__).resolve().parent.parent
+        try:
+            os.chdir(project_root)
+        except Exception:
+            # Best-effort only; if this fails, let tests surface the error.
+            pass
+
+
+def pytest_runtest_setup(item) -> None:
+    """Before each test, ensure current working directory exists.
+
+    This helps when earlier tests change into temporary directories that
+    have since been removed; `monkeypatch.chdir()` calls `os.getcwd()` and
+    would otherwise raise `FileNotFoundError`.
+    """
+    try:
+        os.getcwd()
+    except (FileNotFoundError, OSError):
+        project_root = Path(__file__).resolve().parent.parent
+        try:
+            os.chdir(project_root)
+        except Exception:
+            pass
+
+
+"""
 Pytest configuration and fixtures for Code Scalpel tests.
 
 [20251213_FEATURE] v1.5.2 - OSV client test isolation fixtures with proper mock cleanup.
@@ -7,12 +55,10 @@ Pytest configuration and fixtures for Code Scalpel tests.
 """
 
 import json
-import os
 import sys
 import time
 import urllib.error
 import warnings
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest

@@ -237,6 +237,8 @@ Copy `.env.example` to `.env` and update with your actual secrets.
 - [Governance Configuration](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/governance_guide.md)
 - [Change Budgeting Guide](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/guides/change_budgeting.md)
 - [Tamper Resistance](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/security/tamper_resistance.md)
+- [Code Scalpel Directory Configuration](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/configuration/Code_Scalpel_Directory_Configuration.md)
+- [Configuration Guide](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/configuration/Configuration_Guide.md)
 
 ## Cryptographic Verification (Optional)
 

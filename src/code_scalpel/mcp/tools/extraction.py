@@ -6,6 +6,7 @@ contract expectations (tier metadata and standardized envelope).
 
 from __future__ import annotations
 
+import sys
 import time
 
 from mcp.server.fastmcp import Context
@@ -176,6 +177,12 @@ async def update_symbol(
                 error="update_symbol helper not loaded",
             )
         else:
+            # Trace wrapper entry to stderr to aid debugging stdio hangs
+            try:
+                print("[MCP TRACE] wrapper.update_symbol: calling helper", file=sys.stderr)
+            except Exception:
+                pass
+
             result = await _update_symbol(
                 file_path=file_path,
                 target_type=target_type,
@@ -185,6 +192,10 @@ async def update_symbol(
                 new_name=new_name,
                 create_backup=create_backup,
             )
+            try:
+                print("[MCP TRACE] wrapper.update_symbol: helper returned", file=sys.stderr)
+            except Exception:
+                pass
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
         return make_envelope(

@@ -527,7 +527,14 @@ def _find_config_file() -> str | None:
     """Search for pyproject.toml in current and parent directories."""
     import os
 
-    current = os.getcwd()
+    try:
+        current = os.getcwd()
+    except (FileNotFoundError, OSError):
+        # Current working directory may have been removed by tests that
+        # change into a temporary directory then delete it. Fall back to
+        # the directory containing this module so the search can continue
+        # without raising an exception.
+        current = os.path.dirname(os.path.abspath(__file__))
 
     # Search up to 10 levels
     for _ in range(10):  # pragma: no branch

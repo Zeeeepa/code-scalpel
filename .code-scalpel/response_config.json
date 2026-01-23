@@ -4,6 +4,7 @@
   "description": "MCP response configuration for token efficiency - controls output verbosity for all tools independent of tier",
   "global": {
     "profile": "debug",
+    "include_tool_id": true,
     "exclude_empty_arrays": true,
     "exclude_empty_objects": true,
     "exclude_null_values": true,
@@ -27,7 +28,7 @@
     "minimal": {
       "description": "Bare minimum for LLM understanding - maximum token efficiency (~50-100 tokens)",
       "envelope": {
-        "include": []
+        "include": ["tier", "tool_version", "tool_id", "request_id", "capabilities", "duration_ms", "error", "upgrade_hints"]
       },
       "common_exclusions": [
         "server_version",

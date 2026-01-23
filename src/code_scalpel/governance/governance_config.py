@@ -343,8 +343,15 @@ class GovernanceConfigLoader:
         Returns:
             Modified configuration dict
         """
-        autonomy = config.get("autonomy", {})
-        gov = autonomy.get("governance", {})
+        # Support both nested and top-level governance shapes
+        if "autonomy" in config and isinstance(config.get("autonomy"), dict):
+            autonomy = config.get("autonomy", {})
+            gov = autonomy.get("governance", {})
+        elif "governance" in config and isinstance(config.get("governance"), dict):
+            gov = config.get("governance", {})
+        else:
+            autonomy = config.get("autonomy", {})
+            gov = autonomy.get("governance", {})
 
         # Change Budgeting overrides
         cb = gov.get("change_budgeting", {})
@@ -397,7 +404,13 @@ class GovernanceConfigLoader:
         Raises:
             TypeError: If configuration values have wrong types
         """
-        gov = config_data.get("autonomy", {}).get("governance", {})
+        # Support two config shapes for backward compatibility:
+        # 1) {"autonomy": {"governance": { ... }}}
+        # 2) {"governance": { ... }} (legacy / simpler format used in tests)
+        if "governance" in config_data:
+            gov = config_data.get("governance", {})
+        else:
+            gov = config_data.get("autonomy", {}).get("governance", {})
 
         return GovernanceConfig(
             change_budgeting=ChangeBudgetingConfig(**gov.get("change_budgeting", {})),

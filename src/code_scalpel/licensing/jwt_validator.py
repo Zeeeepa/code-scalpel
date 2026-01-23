@@ -67,6 +67,17 @@ class _LicenseValidationCacheEntry:
 _LICENSE_VALIDATION_CACHE: _LicenseValidationCacheEntry | None = None
 
 
+def clear_license_cache() -> None:
+    """
+    Clear the module-level license validation cache.
+
+    [20260122_TEST] Used by tests to ensure tier detection respects
+    environment variable overrides by clearing cached license state.
+    """
+    global _LICENSE_VALIDATION_CACHE
+    _LICENSE_VALIDATION_CACHE = None
+
+
 def _utcnow_naive() -> datetime:
     # [20251228_BUGFIX] Avoid deprecated datetime.utcnow() while preserving
     # existing naive-UTC behavior across the licensing stack.

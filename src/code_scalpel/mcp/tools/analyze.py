@@ -33,6 +33,7 @@ async def analyze_code(code: str, language: str = "auto", file_path: str | None 
         result = await asyncio.to_thread(_analyze_code_sync, code, language, file_path)
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
+
         return make_envelope(
             data=result,
             tool_id="analyze_code",

@@ -570,3 +570,71 @@ python -c "from code_scalpel.mcp.tools import register_tools; register_tools(); 
 # Full test suite
 pytest tests/mcp/ -v
 ```
+
+---
+
+## Validation Results (2026-01-22)
+
+### Phase 1: Registry Verification ✅
+- **22 tools** registered and verified
+- **10 resources** (6 static + 4 templates) registered
+- **6 prompts** registered
+- `test_mcp_resources.py`: 29 passed
+- `test_workflow_prompts.py`: 25 passed
+
+### Phase 2: Contract Compliance ⚠️
+- **Issue Found**: `tool_id` field is None when using "minimal" response profile
+- The default "minimal" profile excludes envelope metadata fields for token efficiency
+- Contract tests expect `tool_id` to always be present
+- **Resolution Options**:
+  1. Update contract tests to use "debug" profile
+  2. Always include `tool_id` regardless of profile
+  3. Update test assertions to handle minimal profile
+
+### Phase 3: Tier System ⚠️
+- `test_tier_boundary_limits.py`: 25 passed, 12 failed
+- `test_tier_limited_upgrade_errors.py`: 1 passed
+- **Issue Found**: Tier not being applied correctly in some test scenarios
+  - Tests expecting "pro" or "enterprise" receiving "community"
+  - License validation during tests may not be picking up test licenses
+
+### Phase 4: Session & Governance ✅
+- Session tracking helpers in `helpers/session.py` functional
+- Governance enforcement in `governance.py` operational
+
+### Phase 5: Transport Validation ⚠️
+- `test_mcp_tools_stdio_invocation.py`: 1 failed (90s timeout)
+- Some tools taking longer than expected in test scenarios
+- stdio transport fundamentally works (server starts correctly)
+
+### Phase 6: Supporting Features ✅
+- `test_path_resolver.py`: All 40 tests passed
+- `test_mcp_auto_init.py`: 4 passed
+- `test_mcp_logging.py`: 16 passed
+- Total: **60 passed**
+
+### Phase 7: Full Test Suite
+```
+pytest tests/mcp/ results:
+- 469 passed
+- 24 failed (mostly tier-related)
+- 21 errors (fixture issues in test_stage5c_tool_validation.py)
+- 20 skipped
+- Duration: 822.57s (13:42)
+```
+
+### Summary of Issues
+
+| Issue | Category | Severity | Status |
+|-------|----------|----------|--------|
+| `tool_id` None in minimal profile | Contract | Medium | Needs decision |
+| Tier not applied in tests | Tier System | High | Investigation needed |
+| Test timeouts (90s) | Performance | Medium | Specific tools slow |
+| test_stage5c_tool_validation errors | Test Fixtures | Medium | Fixture setup issue |
+
+### Recommendations
+
+1. **Contract Profile Decision**: Decide whether `tool_id` should always be included (breaks token efficiency) or tests should use "debug" profile
+2. **Tier Test Investigation**: Verify license discovery during tests is working correctly
+3. **Performance Profiling**: Identify which tools are slow and optimize
+4. **Test Fixture Updates**: Fix fixture issues in stage5c validation tests

@@ -412,12 +412,17 @@ def load_budget_config(config_path: str | None = None) -> dict[str, Any]:
 
     config_file = Path(config_path)
 
-    # Default configuration structure
-    default_config = {
-        "max_files_read": 100,
-        "max_tokens_per_session": 50000,
-        "max_api_calls_per_hour": 1000,
+    # Default configuration structure (budget-style expected by callers/tests)
+    default_budget = {
+        "max_files": 5,
+        "max_lines_per_file": 100,
+        "max_total_lines": 300,
+        "max_complexity_increase": 10,
+        "allowed_file_patterns": ["*.py", "*.ts", "*.java"],
+        "forbidden_paths": [".git/", "node_modules/", "__pycache__/"],
     }
+
+    default_config = {"default": default_budget}
 
     if not config_file.exists():
         # Return default configuration
@@ -432,8 +437,35 @@ def load_budget_config(config_path: str | None = None) -> dict[str, Any]:
             config = tomllib.load(cast(BinaryIO, f))
 
     # [20251227_BUGFIX] Return default if file doesn't have expected structure
-    limits = config.get("limits", {}) if config else {}
-    if not limits:
+    # Expect configuration to define budgets under a top-level key like
+    # 'limits' or 'budgets' or directly as profile keys. Normalize to
+    # {'default': { ... }} shape for consumers.
+    if not config:
         return default_config
 
-    return limits
+    # Accept several possible shapes for backward compatibility
+    if isinstance(config, dict):
+        # Already in expected profile shape
+        if "default" in config and isinstance(config["default"], dict):
+            return config
+
+        # Support legacy 'limits' or 'budgets' sections by wrapping them
+        if "limits" in config and isinstance(config["limits"], dict):
+            limits = config["limits"]
+            # If limits contain change-budget keys, treat them as the default
+            flat_budget_keys = {"max_files", "max_lines_per_file", "max_total_lines", "max_complexity_increase"}
+            if flat_budget_keys.intersection(limits.keys()):
+                return {"default": limits}
+            # Otherwise the file contains agent/session limits; return the
+            # standard default change-budget configuration
+            return default_config
+        if "budgets" in config and isinstance(config["budgets"], dict):
+            return {"default": config["budgets"]}
+
+        # If the file is a flat mapping of budget keys, treat it as the default
+        flat_budget_keys = {"max_files", "max_lines_per_file", "max_total_lines", "max_complexity_increase"}
+        if flat_budget_keys.intersection(config.keys()):
+            return {"default": config}
+
+    # Fallback to default
+    return default_config

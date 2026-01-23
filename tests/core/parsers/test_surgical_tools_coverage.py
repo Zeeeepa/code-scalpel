@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
+from code_scalpel.surgery import SurgicalPatcher
 from code_scalpel.surgical_extractor import (
     ContextualExtraction,
     CrossFileResolution,
@@ -16,7 +17,6 @@ from code_scalpel.surgical_extractor import (
     SurgicalExtractor,
     extract_with_context,
 )
-from code_scalpel.surgery import SurgicalPatcher
 
 
 class TestCrossFileResolution:

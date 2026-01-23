@@ -8,8 +8,6 @@ These tests verify the core functionality of the CodeAnalyzer including:
 - Refactoring operations
 """
 
-import os
-import sys
 import unittest
 
 from code_scalpel.analysis import (

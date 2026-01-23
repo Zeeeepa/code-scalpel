@@ -8,6 +8,7 @@ v0.3.1: Now includes taint-based SecurityAnalyzer and SymbolicAnalyzer.
 """
 
 import asyncio
+import logging
 import warnings
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -152,6 +153,7 @@ class CrewAIScalpel:
             result.error = f"Syntax error: {str(e)}"
             result.analysis = {"parsed": False, "error": str(e)}
         except Exception as e:
+            logging.getLogger("code_scalpel.crewai").exception("ScalpelSecurityScanTool failed")
             result.success = False
             result.error = f"Analysis error: {str(e)}"
             result.analysis = {"parsed": False, "error": str(e)}
@@ -327,40 +329,42 @@ class CrewAIScalpel:
             - taint_flows: Data flow paths from sources to sinks
             - risk_level: Overall risk assessment
         """
+        # Use the new taint-based SecurityAnalyzer (v0.3.0+)
         try:
-            # Use the new taint-based SecurityAnalyzer (v0.3.0+)
-            try:
-                from ..symbolic_execution_tools import analyze_security as taint_analyze
+            from ..symbolic_execution_tools import analyze_security as taint_analyze
 
-                result = taint_analyze(code)
+            result = taint_analyze(code)
 
-                vulnerabilities = [v.to_dict() for v in result.vulnerabilities]
+            vulnerabilities = [v.to_dict() for v in result.vulnerabilities]
 
-                return {
-                    "success": True,
-                    "vulnerabilities": vulnerabilities,
-                    "vulnerability_count": result.vulnerability_count,
-                    "has_vulnerabilities": result.has_vulnerabilities,
-                    "sql_injections": len(result.get_sql_injections()),
-                    "xss": len(result.get_xss()),
-                    "command_injections": len(result.get_command_injections()),
-                    "path_traversals": len(result.get_path_traversals()),
-                    "risk_level": self._calculate_risk_from_vulns(vulnerabilities),
-                    "summary": (result.summary() if result.has_vulnerabilities else "No vulnerabilities detected"),
-                }
-            except ImportError:
-                # Fallback to AST-based analysis if symbolic tools not available
-                tree = self.analyzer.parse_to_ast(code)
-                security_issues = self.analyzer.find_security_issues(tree)
+            return {
+                "success": True,
+                "vulnerabilities": vulnerabilities,
+                "vulnerability_count": result.vulnerability_count,
+                "has_vulnerabilities": result.has_vulnerabilities,
+                "sql_injections": len(result.get_sql_injections()),
+                "xss": len(result.get_xss()),
+                "command_injections": len(result.get_command_injections()),
+                "path_traversals": len(result.get_path_traversals()),
+                "risk_level": self._calculate_risk_from_vulns(vulnerabilities),
+                "summary": (result.summary() if result.has_vulnerabilities else "No vulnerabilities detected"),
+            }
+        except ImportError:
+            # Fallback to AST-based analysis if symbolic tools not available
+            tree = self.analyzer.parse_to_ast(code)
+            security_issues = self.analyzer.find_security_issues(tree)
 
-                return {
-                    "success": True,
-                    "issues": security_issues,
-                    "risk_level": self._calculate_risk_level(security_issues),
-                    "recommendations": self._get_security_recommendations(security_issues),
-                    "analyzer": "ast-based (fallback)",
-                }
+            return {
+                "success": True,
+                "issues": security_issues,
+                "risk_level": self._calculate_risk_level(security_issues),
+                "recommendations": self._get_security_recommendations(security_issues),
+                "analyzer": "ast-based (fallback)",
+            }
         except Exception as e:
+            # Log full traceback to help diagnose intermittent environment
+            # or file-not-found errors observed in CI/local test runs.
+            logging.getLogger("code_scalpel.crewai").exception("analyze_security failed")
             return {
                 "success": False,
                 "error": str(e),

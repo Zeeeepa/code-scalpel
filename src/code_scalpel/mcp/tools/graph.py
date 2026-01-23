@@ -32,6 +32,31 @@ def _get_current_tier() -> str:
     return get_tier()
 
 
+def _coerce_int(value):
+    """Coerce common numeric inputs to int when possible."""
+    if value is None:
+        return None
+    if isinstance(value, int):
+        return value
+    try:
+        # Handles numeric strings and floats like '3' or '3.0'
+        return int(float(value))
+    except Exception:
+        return value
+
+
+def _coerce_float(value):
+    """Coerce common numeric inputs to float when possible."""
+    if value is None:
+        return None
+    if isinstance(value, float):
+        return value
+    try:
+        return float(value)
+    except Exception:
+        return value
+
+
 async def _get_call_graph_tool(
     project_root: str | None = None,
     entry_point: str | None = None,
@@ -468,9 +493,15 @@ async def _get_cross_file_dependencies_tool(
     caps = get_tool_capabilities("get_cross_file_dependencies", tier) or {}
     limits = caps.get("limits", {}) or {}
 
+    # Coerce numeric inputs in case MCP transport serialized them as strings
+    max_depth = _coerce_int(max_depth)
+    confidence_decay_factor = _coerce_float(confidence_decay_factor)
+    max_files = _coerce_int(max_files)
+    timeout_seconds = _coerce_float(timeout_seconds)
+
     max_depth_limit = limits.get("max_depth")
     effective_max_depth = max_depth
-    if max_depth_limit is not None and max_depth > max_depth_limit:
+    if max_depth_limit is not None and (max_depth is None or _coerce_int(max_depth) > _coerce_int(max_depth_limit)):
         effective_max_depth = int(max_depth_limit)
 
     max_files_limit = limits.get("max_files")
@@ -577,6 +608,12 @@ async def _cross_file_security_scan_tool(
 
     tier = _get_current_tier()
     caps = get_tool_capabilities("cross_file_security_scan", tier)
+
+    # Coerce numeric inputs in case MCP transport serialized them as strings
+    max_depth = _coerce_int(max_depth)
+    timeout_seconds = _coerce_float(timeout_seconds)
+    max_modules = _coerce_int(max_modules)
+    confidence_threshold = _coerce_float(confidence_threshold)
 
     result = await asyncio.to_thread(
         _cross_file_security_scan_sync,

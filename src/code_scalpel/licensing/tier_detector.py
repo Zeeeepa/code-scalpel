@@ -5,10 +5,11 @@ Tier Detector - Detect current license tier from environment and configuration.
 
 DETECTION PRIORITY ORDER:
 1. Environment variable: CODE_SCALPEL_TIER
-2. License key extraction: SCALPEL-{TIER}-{DATA} format
-3. Config file: .code-scalpel/license.json
-4. Organization hierarchy: CODE_SCALPEL_ORGANIZATION env var
-5. Default: COMMUNITY tier
+2. License file: CODE_SCALPEL_LICENSE_PATH (JWT validation)
+3. License key extraction: SCALPEL-{TIER}-{DATA} format
+4. Config file: .code-scalpel/license.json
+5. Organization hierarchy: CODE_SCALPEL_ORGANIZATION env var
+6. Default: COMMUNITY tier
 
 FEATURES IMPLEMENTED:
 - Multi-source tier detection (environment, config, license, organization)
@@ -63,8 +64,11 @@ class TierDetector:
 
     Priority order:
     1. Environment variable CODE_SCALPEL_TIER (highest)
-    2. Config file .code-scalpel/license.json
-    3. Default to COMMUNITY (lowest)
+    2. License file CODE_SCALPEL_LICENSE_PATH (JWT validation)
+    3. License key extraction from passed key
+    4. Config file .code-scalpel/license.json
+    5. Organization-based detection
+    6. Default to COMMUNITY (lowest)
     """
 
     ENV_VAR = "CODE_SCALPEL_TIER"
@@ -112,7 +116,14 @@ class TierDetector:
             self._cached_result = validated
             return validated
 
-        # Priority 2: License key tier extraction
+        # Priority 2: License file
+        license_file_tier = self._detect_from_license_file()
+        if license_file_tier:
+            validated = self._validate_and_log_tier(license_file_tier)
+            self._cached_result = validated
+            return validated
+
+        # Priority 3: License key tier extraction
         if license_key:
             license_tier = self._detect_from_license_key(license_key)
             if license_tier:
@@ -120,14 +131,14 @@ class TierDetector:
                 self._cached_result = validated
                 return validated
 
-        # Priority 3: Config file
+        # Priority 4: Config file
         config_tier = self._detect_from_config()
         if config_tier:
             validated = self._validate_and_log_tier(config_tier)
             self._cached_result = validated
             return validated
 
-        # Priority 4: Organization-based detection
+        # Priority 5: Organization-based detection
         org_tier = self._detect_from_organization()
         if org_tier:
             validated = self._validate_and_log_tier(org_tier)
@@ -166,6 +177,24 @@ class TierDetector:
         else:
             logger.warning(f"Invalid tier '{tier_value}' in {self.ENV_VAR}, ignoring")
             return None
+
+    def _detect_from_license_file(self) -> TierDetectionResult | None:
+        """Detect tier from license file."""
+        try:
+            from code_scalpel.licensing.jwt_validator import get_current_tier as jwt_get_current_tier
+
+            tier = jwt_get_current_tier()
+            if tier != "community":  # Only return if it's not the default
+                logger.debug(f"Detected tier '{tier}' from license file")
+                return TierDetectionResult(
+                    tier=tier,
+                    source="license_file",
+                    confidence=0.95,
+                    details="Validated from JWT license file",
+                )
+        except Exception as e:
+            logger.debug(f"License file detection failed: {e}")
+        return None
 
     def _detect_from_config(self) -> TierDetectionResult | None:
         """Detect tier from config file."""
@@ -315,7 +344,7 @@ class TierDetector:
         # Validate tier is one of the known tiers
         valid_tiers = {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}
         if result.tier not in valid_tiers:
-            logger.error(f"Invalid tier '{result.tier}' detected from {result.source}. " f"Valid tiers: {valid_tiers}")
+            logger.error(f"Invalid tier '{result.tier}' detected from {result.source}. Valid tiers: {valid_tiers}")
             # Return default tier on validation failure
             return TierDetectionResult(
                 tier=Tier.COMMUNITY,
@@ -326,9 +355,7 @@ class TierDetector:
             )
 
         # Log tier detection with full context
-        log_msg = (
-            f"Tier detected: {result.tier.upper()} " f"(source: {result.source}, confidence: {result.confidence:.2f})"
-        )
+        log_msg = f"Tier detected: {result.tier.upper()} (source: {result.source}, confidence: {result.confidence:.2f})"
         if result.organization:
             log_msg += f" [org: {result.organization}]"
         if result.license_key:
@@ -341,13 +368,12 @@ class TierDetector:
         # Additional validation warnings
         if result.tier in {Tier.PRO, Tier.ENTERPRISE} and not result.license_key:
             logger.warning(
-                f"{result.tier.upper()} tier detected but no license key found. " "License validation may fail."
+                f"{result.tier.upper()} tier detected but no license key found. License validation may fail."
             )
 
         if result.tier == Tier.ENTERPRISE and not result.organization:
             logger.warning(
-                "ENTERPRISE tier detected but no organization specified. "
-                "Organization-specific features may not work."
+                "ENTERPRISE tier detected but no organization specified. Organization-specific features may not work."
             )
 
         result.is_validated = True
@@ -473,3 +499,28 @@ def get_current_tier() -> str:
     """
     detector = TierDetector()
     return detector.get_tier_string()
+
+
+def clear_tier_cache() -> None:
+    """
+    Clear all tier-related caches to allow fresh detection.
+
+    [20260122_TEST] This function clears both the jwt_validator cache
+    and config_loader cache to ensure environment variable overrides
+    take effect in tests.
+    """
+    # Clear jwt_validator cache
+    try:
+        from code_scalpel.licensing.jwt_validator import clear_license_cache
+
+        clear_license_cache()
+    except ImportError:
+        pass
+
+    # Clear config_loader cache
+    try:
+        from code_scalpel.licensing.config_loader import clear_config_cache
+
+        clear_config_cache()
+    except (ImportError, AttributeError):
+        pass

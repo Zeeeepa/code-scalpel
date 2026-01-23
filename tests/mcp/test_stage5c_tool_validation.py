@@ -15,6 +15,7 @@ import os
 import pytest
 
 from code_scalpel.licensing import get_current_tier
+from code_scalpel.licensing.tier_detector import clear_tier_cache
 
 
 @pytest.mark.asyncio
@@ -24,14 +25,32 @@ class TestStage5CToolValidation:
     @pytest.fixture(autouse=True)
     def verify_tier(self, monkeypatch):
         """Ensure deterministic Community tier for test isolation."""
+        # [20260122_FIX] Clear tier cache before setting env vars to ensure
+        # fresh detection respects the test's environment overrides.
+        clear_tier_cache()
+
+        # [20260122_FIX] Remove any license path set by session fixtures.
+        # The session-scoped set_default_license_path fixture may have set
+        # CODE_SCALPEL_LICENSE_PATH to an enterprise license, which would
+        # override the CODE_SCALPEL_TIER env var via license file detection.
+        monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
+        monkeypatch.delenv("CODE_SCALPEL_LICENSE_CRL_PATH", raising=False)
+
         # [20260111_FIX] Use monkeypatch for proper test isolation instead of
         # module-level os.environ.setdefault which polluted subsequent test sessions.
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
         monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
         monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
+
+        # Clear again after env vars set to force re-detection
+        clear_tier_cache()
+
         tier = get_current_tier()
         assert tier == "community", f"Expected community tier, got {tier}"
         yield
+
+        # Cleanup: clear cache after test to avoid polluting other tests
+        clear_tier_cache()
 
     async def test_analyze_code_community_limits(self):
         """Test analyze_code respects community tier limits."""

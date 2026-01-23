@@ -11,15 +11,9 @@ from typing import TYPE_CHECKING, Any
 from mcp.server.fastmcp import Context
 
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
-from code_scalpel.licensing.tier_detector import get_current_tier
 from code_scalpel.mcp.helpers.security_helpers import validate_path_security
-from code_scalpel.mcp.helpers.session import (
-    # [20260121_REFACTOR] Removed get_session_update_count and increment_session_update_count
-    # Per-call model no longer needs stateful session tracking
-    add_audit_entry,
-)
+from code_scalpel.mcp.helpers.session import add_audit_entry
 from code_scalpel.mcp.models.core import ContextualExtractionResult, PatchResultModel
-from code_scalpel.mcp.path_resolver import resolve_path
 from code_scalpel.parsing import ParsingError, parse_python_code
 
 if TYPE_CHECKING:
@@ -113,6 +107,9 @@ async def _extract_polyglot(
     Returns:
         ContextualExtractionResult with extracted code
     """
+    from code_scalpel.licensing.tier_detector import get_current_tier
+    from code_scalpel.mcp.path_resolver import resolve_path
+
     # [20251221_FEATURE] v3.1.0 - Use UnifiedExtractor instead of PolyglotExtractor
     # [20251228_BUGFIX] Avoid deprecated shim imports.
     from code_scalpel.surgery.unified_extractor import Language, UnifiedExtractor
@@ -121,7 +118,6 @@ async def _extract_polyglot(
         return _extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
 
     try:
-
         # Create extractor from file or code
         if file_path is not None:
             resolved_path = resolve_path(file_path, str(_get_project_root()))
@@ -194,6 +190,7 @@ def _create_extractor(
     Returns (extractor, None) on success, (None, error_result) on failure.
     """
     from code_scalpel import SurgicalExtractor
+    from code_scalpel.mcp.path_resolver import resolve_path
 
     if file_path is None and code is None:
         return None, _extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
@@ -410,10 +407,12 @@ async def _extract_code_impl(
             include_cross_file_deps=True
         )
     """
+    from code_scalpel.licensing.tier_detector import get_current_tier
+    from code_scalpel.mcp.path_resolver import resolve_path
+
     # [20251215_FEATURE] v2.0.0 - Roots capability support
     # Fetch allowed roots from client for security boundary enforcement
     # (Deprecated: roots fetching moved to session initialization)
-
     # [20251228_BUGFIX] Avoid deprecated shim imports.
     from code_scalpel.surgery.surgical_extractor import (
         ContextualExtraction,
@@ -544,10 +543,12 @@ async def _extract_code_impl(
         # Optional advanced extraction features (Python only)
         def _load_source_for_adv() -> str:
             if file_path is not None:
-                from code_scalpel.mcp.path_resolver import resolve_path
-
-                resolved = resolve_path(file_path, str(_get_project_root()))
-                return Path(resolved).read_text(encoding="utf-8")
+                try:
+                    resolved = resolve_path(file_path, str(_get_project_root()))
+                    return Path(resolved).read_text(encoding="utf-8")
+                except Exception:
+                    return code or ""
+            return code or ""
             return code or ""
 
         if variable_promotion:
@@ -771,6 +772,8 @@ async def rename_symbol(
         merge_limits,
     )
     from code_scalpel.licensing.features import get_tool_capabilities
+    from code_scalpel.licensing.tier_detector import get_current_tier
+    from code_scalpel.mcp.path_resolver import resolve_path
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
     warnings: list[str] = []
@@ -955,6 +958,9 @@ async def update_symbol(
             - Atomic write prevents corruption on crash
             - Original indentation preserved
     """
+    from code_scalpel.licensing.tier_detector import get_current_tier
+    from code_scalpel.mcp.path_resolver import resolve_path
+
     # [20251228_BUGFIX] Avoid deprecated shim imports.
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
@@ -1333,19 +1339,12 @@ async def update_symbol(
         # Save the changes
         backup_path = patcher.save(backup=create_backup)
 
-        # [20260121_BUGFIX] Make filesystem sync non-blocking to prevent test hangs
-        # os.sync() can block indefinitely in some test environments due to I/O contention.
-        # Skip it in test environments or wrap with timeout.
-        import os as os_module
-        import sys
-
-        if hasattr(os_module, "sync") and "pytest" not in sys.modules:
-            # Only call sync() if NOT in test environment (no pytest loaded)
-            try:
-                os_module.sync()
-            except Exception:
-                # If sync fails, continue anyway - it's not critical for correctness
-                pass
+        # [20260122_BUGFIX] Remove os.sync() entirely - it can hang indefinitely
+        # in various environments (Docker, WSL, network filesystems, CI).
+        # The patcher.save() already does proper file flush, and os.sync() is
+        # not necessary for correctness.
+        # Previous code attempted to skip in pytest environments, but subprocess
+        # servers don't have pytest loaded, causing hangs.
 
         # [20251230_FEATURE] v3.5.0 - Pro tier: Update cross-file references
         if "cross_file_updates" in capabilities:

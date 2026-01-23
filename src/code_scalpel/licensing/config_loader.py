@@ -197,6 +197,20 @@ _config_cache_mtime_ns: int = -1
 _config_cache_size: int = -1
 
 
+def clear_config_cache() -> None:
+    """
+    Clear the config cache to force re-loading from disk.
+
+    [20260122_TEST] Used by tests to ensure fresh config loading
+    after environment changes.
+    """
+    global _config_cache, _config_cache_path, _config_cache_mtime_ns, _config_cache_size
+    _config_cache = None
+    _config_cache_path = None
+    _config_cache_mtime_ns = -1
+    _config_cache_size = -1
+
+
 def get_cached_limits() -> dict[str, dict[str, dict[str, Any]]]:
     """
     Get cached limits config, loading if not already cached.

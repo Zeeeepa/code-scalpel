@@ -12,6 +12,7 @@ tool implementations can remain focused on their domain logic.
 from __future__ import annotations
 
 import inspect
+import sys
 import time
 import uuid
 from collections.abc import Awaitable, Callable
@@ -338,6 +339,21 @@ def make_envelope(
     # [20260121_BUGFIX] tier is license/server metadata, not configurable output
     # Always include tier field regardless of response_config profile
     # [20260122_FEATURE] Also set tier_applied for metadata tracking
+    # Lightweight trace for debugging stdio invocations
+    try:
+        print(f"[MCP TRACE] make_envelope tool_id={tool_id} data_is_none={filtered_data is None}", file=sys.stderr)
+    except Exception:
+        pass
+    try:
+        if error is not None:
+            # Print structured error for debugging intermittent tool failures
+            try:
+                print(f"[MCP TRACE] make_envelope error={error.error} code={error.error_code}", file=sys.stderr)
+            except Exception:
+                print(f"[MCP TRACE] make_envelope error={error}", file=sys.stderr)
+    except Exception:
+        pass
+
     return ToolResponseEnvelope(
         tier=tier,  # ALWAYS include tier (server metadata, not response content)
         tier_applied=tier,  # [20260122_FEATURE] Track which tier was applied during invocation
@@ -347,7 +363,7 @@ def make_envelope(
         capabilities=(["envelope-v1"] if "capabilities" in envelope_fields else None),
         duration_ms=duration_ms if "duration_ms" in envelope_fields else None,
         error=error,  # Always include errors; clients expect them
-        upgrade_hints=upgrade_hints if "upgrade_hints" in envelope_fields else None,
+        upgrade_hints=(upgrade_hints or []) if "upgrade_hints" in envelope_fields else None,
         warnings=warnings or [],
         data=filtered_data,
     )
@@ -429,9 +445,7 @@ def envelop_tool_function(
         import inspect as _inspect
 
         _clean_params = [p.replace(annotation=_inspect._empty) for p in sig.parameters.values()]
-        _wrapped.__signature__ = sig.replace(
-            parameters=tuple(_clean_params), return_annotation=_inspect._empty
-        )  # type: ignore[attr-defined]
+        _wrapped.__signature__ = sig.replace(parameters=tuple(_clean_params), return_annotation=_inspect._empty)  # type: ignore[attr-defined]
     except Exception:
         _wrapped.__signature__ = sig  # type: ignore[attr-defined]
 
