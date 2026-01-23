@@ -46,13 +46,14 @@ max_file_size_mb = 100
 # ----------------------------------------------------------------------------
 
 [community.get_file_context]
-max_file_size_mb = 1
+# [20260123_FIX] Renamed to match features.py - this is an OUTPUT limit (lines returned)
+max_context_lines = 500
 
 [pro.get_file_context]
-max_file_size_mb = 10
+max_context_lines = 2000
 
 [enterprise.get_file_context]
-# max_file_size_mb unlimited - omit
+# max_context_lines unlimited - omit
 
 # ----------------------------------------------------------------------------
 
@@ -122,7 +123,7 @@ max_nodes = 500
 # ----------------------------------------------------------------------------
 
 [community.get_cross_file_dependencies]
-max_depth = 1
+max_depth = 2
 max_files = 50
 # timeout_seconds inherited from [global] - NOT a tier limit
 
