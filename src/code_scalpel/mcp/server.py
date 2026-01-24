@@ -5094,12 +5094,31 @@ def run_server(
     # [20251215_BUGFIX] Configure logging to stderr before anything else
     _configure_logging(transport)
 
-    # [20260116_REFACTOR] Register tools, resources, and prompts from dedicated modules
-    from code_scalpel.mcp.tools import register_tools
-    import code_scalpel.mcp.resources  # noqa: F401 - registers @mcp.resource handlers
-    import code_scalpel.mcp.prompts  # noqa: F401 - registers @mcp.prompt handlers
+    # Debug: emit startup parameters to stderr so test harness can capture flow
+    try:
+        print(
+            f"DEBUG: run_server called transport={transport!r} host={host!r} port={port!r} allow_lan={allow_lan!r} root_path={root_path!r} tier={tier!r}",
+            file=sys.stderr,
+        )
+    except Exception:
+        # Best-effort debug; do not fail startup if printing fails
+        pass
 
-    register_tools()
+    # [20260116_REFACTOR] Register tools, resources, and prompts from dedicated modules
+    try:
+        from code_scalpel.mcp.tools import register_tools
+        import code_scalpel.mcp.resources  # noqa: F401 - registers @mcp.resource handlers
+        import code_scalpel.mcp.prompts  # noqa: F401 - registers @mcp.prompt handlers
+
+        register_tools()
+        print("DEBUG: register_tools completed", file=sys.stderr)
+    except Exception:
+        import traceback
+
+        print("ERROR: Exception during tool/resource registration:", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        # Re-raise after logging so caller/test harness sees the failure
+        raise
 
     # [20260117_SECURITY] Authoritative startup tier selection
     # Uses the centralized authorization helper so remote verifier decisions
@@ -5164,6 +5183,12 @@ def run_server(
             file=sys.stderr,
         )
 
+    # Debug: confirm auto-init result
+    try:
+        print(f"DEBUG: auto_init result={init_result}", file=sys.stderr)
+    except Exception:
+        pass
+
     # [20251215_BUGFIX] Print to stderr for stdio transport
     output = sys.stderr if transport == "stdio" else sys.stdout
     print(f"Code Scalpel MCP Server v{__version__}", file=output)
@@ -5216,9 +5241,61 @@ def run_server(
         # [20251215_FEATURE] Register HTTP health endpoint for Docker health checks
         _register_http_health_endpoint(mcp, host, port, ssl_certfile, ssl_keyfile)
 
-        mcp.run(transport=transport)
+        try:
+            print(f"DEBUG: starting mcp.run transport={transport}", file=sys.stderr)
+            mcp.run(transport=transport)
+        except Exception:
+            import traceback
+
+            print(
+                "ERROR: Exception while running MCP (HTTP transport):", file=sys.stderr
+            )
+            traceback.print_exc(file=sys.stderr)
+            raise
     else:
-        mcp.run()
+        try:
+            print("DEBUG: starting mcp.run (stdio)", file=sys.stderr)
+            # Emit FastMCP settings and stdio TTY info for troubleshooting
+            try:
+                settings = getattr(mcp, "settings", None)
+                print(f"DEBUG: mcp has settings: {settings}", file=sys.stderr)
+                if settings is not None:
+                    # Print common settings attributes if present
+                    for attr in (
+                        "host",
+                        "port",
+                        "transport",
+                        "ssl_certfile",
+                        "ssl_keyfile",
+                    ):
+                        try:
+                            print(
+                                f"DEBUG: mcp.settings.{attr} = {getattr(settings, attr, None)}",
+                                file=sys.stderr,
+                            )
+                        except Exception:
+                            pass
+            except Exception:
+                pass
+
+            try:
+                print(
+                    f"DEBUG: sys.stdin.isatty={sys.stdin.isatty()} sys.stdout.isatty={sys.stdout.isatty()}",
+                    file=sys.stderr,
+                )
+            except Exception:
+                pass
+
+            # Explicitly pass transport so FastMCP uses stdio even when stdout is a pipe
+            mcp.run(transport=transport)
+        except Exception:
+            import traceback
+
+            print(
+                "ERROR: Exception while running MCP (stdio transport):", file=sys.stderr
+            )
+            traceback.print_exc(file=sys.stderr)
+            raise
 
 
 def _apply_tier_tool_filter(tier: str) -> None:
