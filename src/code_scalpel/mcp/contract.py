@@ -120,6 +120,38 @@ class ToolResponseEnvelope(BaseModel):
     )
     data: Any | None = Field(default=None, description="Tool-specific payload")
 
+    # [20260124_COMPAT] Backward compatibility: delegate attribute access to data payload
+    # This allows tests using `result.success` to work with envelope wrapping
+    def __getattr__(self, name: str) -> Any:
+        """Delegate attribute access to data payload for backward compatibility.
+
+        Allows `envelope.success` to work as `envelope.data.success` when
+        `success` is not a direct attribute of the envelope.
+
+        Also computes common derived properties that were previously computed
+        on Pydantic models but are lost when model_dump() converts to dict.
+        """
+        # Avoid infinite recursion - only delegate if data exists and has the attr
+        data = object.__getattribute__(self, "data")
+        if data is not None:
+            # [20260124_COMPAT] Handle computed properties that are lost in model_dump()
+            # These were @property methods on the original Pydantic models
+            if isinstance(data, dict):
+                # Compute *_count from corresponding lists if the list exists
+                if name == "function_count" and "functions" in data:
+                    return len(data["functions"])
+                if name == "class_count" and "classes" in data:
+                    return len(data["classes"])
+                if name == "import_count" and "imports" in data:
+                    return len(data["imports"])
+                if name in data:
+                    return data[name]
+            if hasattr(data, name):
+                return getattr(data, name)
+        raise AttributeError(
+            f"'{type(self).__name__}' object has no attribute '{name}'"
+        )
+
 
 def _classify_exception(exc: BaseException) -> ErrorCode:
     # Keep classification conservative; do not leak details.
