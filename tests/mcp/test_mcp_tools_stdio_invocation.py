@@ -266,6 +266,18 @@ async def test_mcp_stdio_invokes_all_tools(tmp_path: Path):
     )
 
     async with _strict_stdio_client(params) as (read, write):
+        # Monkeypatch ClientSession.call_tool to log tool names before invoking.
+        orig_call_tool = ClientSession.call_tool
+
+        async def _logged_call_tool(self, *args, **kwargs):
+            import sys
+
+            tool = args[0] if args else kwargs.get("tool")
+            print(f"TEST-DEBUG: calling tool {tool}", file=sys.stderr)
+            return await orig_call_tool(self, *args, **kwargs)
+
+        ClientSession.call_tool = _logged_call_tool
+
         async with ClientSession(read, write) as session:
             await session.initialize()
 

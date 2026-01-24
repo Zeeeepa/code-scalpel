@@ -9,6 +9,9 @@ from __future__ import annotations
 import time
 
 from mcp.server.fastmcp import Context
+from code_scalpel.mcp.debug import debug_print
+import sys
+import traceback
 
 from code_scalpel.mcp.helpers import extraction_helpers as _helpers
 from code_scalpel.mcp.models.core import PatchResultModel
@@ -169,6 +172,9 @@ async def update_symbol(
     """Safely replace a function, class, or method in a file."""
     started = time.perf_counter()
     try:
+        debug_print(
+            f"DEBUG:update_symbol: start file_path={file_path!r} target_type={target_type!r} target_name={target_name!r} operation={operation!r}"
+        )
         if _update_symbol is None:
             result = PatchResultModel(
                 success=False,
@@ -178,24 +184,52 @@ async def update_symbol(
                 error="update_symbol helper not loaded",
             )
         else:
-            result = await _update_symbol(
-                file_path=file_path,
-                target_type=target_type,
-                target_name=target_name,
-                new_code=new_code,
-                operation=operation,
-                new_name=new_name,
-                create_backup=create_backup,
-            )
+            try:
+                debug_print("DEBUG:update_symbol: calling helper _update_symbol")
+                result = await _update_symbol(
+                    file_path=file_path,
+                    target_type=target_type,
+                    target_name=target_name,
+                    new_code=new_code,
+                    operation=operation,
+                    new_name=new_name,
+                    create_backup=create_backup,
+                )
+            except Exception:
+                debug_print("ERROR:update_symbol: exception in helper _update_symbol:")
+                traceback.print_exc(file=sys.stderr)
+                raise
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
-        return make_envelope(
-            data=result,
-            tool_id="update_symbol",
-            tool_version=_pkg_version,
-            tier=tier,
-            duration_ms=duration_ms,
+        debug_print(
+            f"DEBUG:update_symbol: helper returned, preparing envelope (duration_ms={duration_ms})"
         )
+        try:
+            env = make_envelope(
+                data=result,
+                tool_id="update_symbol",
+                tool_version=_pkg_version,
+                tier=tier,
+                duration_ms=duration_ms,
+            )
+            debug_print("DEBUG:update_symbol: envelope created successfully")
+            return env
+        except Exception as exc:
+            # Log full traceback and return an error envelope so the MCP
+            # transport can still send a valid JSON response back to the client.
+            debug_print("ERROR:update_symbol: exception while creating envelope:")
+            traceback.print_exc(file=sys.stderr)
+            # Use a generic internal_error code when the contract's ErrorCode
+            # union does not include a custom serialization error string.
+            error_obj = ToolError(error=str(exc), error_code="internal_error")
+            return make_envelope(
+                data=None,
+                tool_id="update_symbol",
+                tool_version=_pkg_version,
+                tier=tier,
+                duration_ms=duration_ms,
+                error=error_obj,
+            )
     except Exception as exc:
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()

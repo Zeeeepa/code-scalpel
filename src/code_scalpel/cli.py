@@ -463,7 +463,15 @@ def start_mcp_server(
     """Start the MCP-compliant server (for AI clients like Claude Desktop, Cursor)."""
     import inspect
 
-    from .mcp.archive.server import run_server
+    # Prefer archive.server if present; fall back to mcp.server for older layouts.
+    try:
+        from .mcp.archive.server import run_server
+    except Exception:
+        try:
+            from .mcp.server import run_server
+        except Exception:
+            # Let the original ImportError propagate with clear message
+            raise
 
     # [20251228_FEATURE] Support explicit license file path for deployments.
     # Fail fast to avoid silently falling back to other discovery paths.
@@ -487,12 +495,16 @@ def start_mcp_server(
     protocol = "https" if use_https else "http"
 
     if transport == "stdio":
-        # NOTE: CLI tests expect this banner on stdout.
-        # The MCP stdio integration tests invoke `code_scalpel.mcp.server` directly.
-        print("Starting Code Scalpel MCP Server (stdio transport)")
-        print("   This server communicates via stdin/stdout.")
-        print("   Add to your Claude Desktop config or use with MCP Inspector.")
-        print("\nPress Ctrl+C to stop.\n")
+        # For stdio transport, avoid writing informational banners to stdout
+        # because stdout is reserved for the MCP JSON-RPC stream. Use stderr
+        # for human-facing messages to avoid corrupting the protocol.
+        print("Starting Code Scalpel MCP Server (stdio transport)", file=sys.stderr)
+        print("   This server communicates via stdin/stdout.", file=sys.stderr)
+        print(
+            "   Add to your Claude Desktop config or use with MCP Inspector.",
+            file=sys.stderr,
+        )
+        print("\nPress Ctrl+C to stop.\n", file=sys.stderr)
     else:
         print(
             f"Starting Code Scalpel MCP Server ({protocol.upper()} transport) on {host}:{port}"

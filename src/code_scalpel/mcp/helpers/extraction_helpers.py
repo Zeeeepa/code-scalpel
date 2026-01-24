@@ -123,7 +123,6 @@ async def _extract_polyglot(
         )
 
     try:
-
         # Create extractor from file or code
         if file_path is not None:
             resolved_path = resolve_path(file_path, str(_get_project_root()))
@@ -1009,6 +1008,14 @@ async def update_symbol(
             - Atomic write prevents corruption on crash
             - Original indentation preserved
     """
+    import sys
+
+    print(
+        f"DEBUG:update_symbol: start file_path={file_path} target_type={target_type} target_name={target_name} operation={operation}",
+        file=sys.stderr,
+        flush=True,
+    )
+
     # [20251228_BUGFIX] Avoid deprecated shim imports.
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
@@ -1168,6 +1175,9 @@ async def update_symbol(
     # Load the file
     try:
         resolved = resolve_path(file_path, str(_get_project_root()))
+        from code_scalpel.mcp.debug import debug_print
+
+        debug_print(f"DEBUG:update_symbol: resolved path {resolved}")
         resolved_path = Path(resolved)
         validate_path_security(resolved_path, _get_project_root())
         file_path = str(resolved_path)
@@ -1411,33 +1421,35 @@ async def update_symbol(
             )
 
         # Save the changes
+        debug_print("DEBUG:update_symbol: before patcher.save()")
         backup_path = patcher.save(backup=create_backup)
+        debug_print(
+            f"DEBUG:update_symbol: patcher.save() returned backup_path={backup_path}"
+        )
 
-        # [20260121_BUGFIX] Make filesystem sync non-blocking to prevent test hangs
-        # os.sync() can block indefinitely in some test environments due to I/O contention.
-        # Skip it in test environments or wrap with timeout.
-        import os as os_module
-        import sys
-
-        if hasattr(os_module, "sync") and "pytest" not in sys.modules:
-            # Only call sync() if NOT in test environment (no pytest loaded)
-            try:
-                os_module.sync()
-            except Exception:
-                # If sync fails, continue anyway - it's not critical for correctness
-                pass
+        # [20260124_BUGFIX] Removed os.sync() - it can block indefinitely on WSL2
+        # with mounted Windows filesystems and provides no correctness benefit.
+        # patcher.save() already flushes to disk.
+        debug_print("DEBUG:update_symbol: skipped os.sync (removed for reliability)")
 
         # [20251230_FEATURE] v3.5.0 - Pro tier: Update cross-file references
         if "cross_file_updates" in capabilities:
             try:
+                debug_print(
+                    "DEBUG:update_symbol: starting _update_cross_file_references"
+                )
                 cross_file_updates = await _update_cross_file_references(
                     file_path, target_type, target_name, new_code
+                )
+                debug_print(
+                    f"DEBUG:update_symbol: cross_file_updates={cross_file_updates}"
                 )
                 if cross_file_updates["files_updated"] > 0:
                     warnings.append(
                         f"Updated {cross_file_updates['files_updated']} files with reference changes"
                     )
             except Exception as e:
+                debug_print(f"DEBUG:update_symbol: cross-file update exception: {e}")
                 warnings.append(f"Cross-file update warning: {str(e)}")
 
         # [20250101_FEATURE] v1.0 roadmap: Pro post-update hook
@@ -1546,6 +1558,8 @@ async def update_symbol(
                     "backup_path": backup_path,
                 },
             )
+
+        debug_print("DEBUG:update_symbol: completed successfully")
 
         return PatchResultModel(
             success=True,

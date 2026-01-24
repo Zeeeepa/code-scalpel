@@ -850,6 +850,13 @@ def main():
             "code_scalpel.mcp.server",
             SimpleNamespace(run_server=fake_run_server),
         )
+        # The CLI imports from code_scalpel.mcp.archive.server in some codepaths;
+        # ensure that path is also mocked for in-process tests.
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.mcp.archive.server",
+            SimpleNamespace(run_server=fake_run_server),
+        )
 
         exit_code = cli.start_mcp_server(
             transport="sse", host="127.0.0.1", port=7777, allow_lan=True, root_path=None
@@ -879,11 +886,15 @@ def main():
         )
 
         exit_code = cli.start_mcp_server()
-        output = capsys.readouterr().out
+        captured = capsys.readouterr()
+
+        # Banner may be printed to stdout or stderr depending on runtime
+        # (we prefer stderr for stdio transport to avoid corrupting stdout).
+        combined = (captured.out or "") + (captured.err or "")
 
         assert exit_code == 0
         assert called.get("transport") == "stdio"
-        assert "stdio transport" in output
+        assert "stdio transport" in combined
 
     def test_analyze_file_json_output(self, tmp_path):
         """Test file analysis with JSON output."""
