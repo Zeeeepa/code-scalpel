@@ -154,6 +154,9 @@ class JWTLicenseData:
     is_expired: bool = False
     days_until_expiration: Optional[int] = None
     raw_claims: Optional[Dict] = None
+    # Diagnostic fields: unverified header and claims to help with troubleshooting
+    diagnostic_header: Optional[Dict] = None
+    diagnostic_unverified_claims: Optional[Dict] = None
 
     @property
     def is_in_grace_period(self) -> bool:
@@ -777,21 +780,122 @@ BwIDAQAB
 
         except InvalidSignatureError:
             logger.error("Invalid license signature - token may be tampered")
-            return self._create_invalid_license(
-                "Invalid signature - license may be tampered"
+            # Attempt to decode header/claims without verifying signature
+            header = None
+            claims = None
+            try:
+                header = jwt.get_unverified_header(token)
+            except Exception:
+                header = None
+            try:
+                # PyJWT decode with signature verification turned off
+                claims = jwt.decode(
+                    token,
+                    options={"verify_signature": False},
+                )
+            except Exception:
+                claims = None
+
+            return JWTLicenseData(
+                tier="community",
+                customer_id="",
+                organization=None,
+                features=set(),
+                expiration=_utcnow_naive(),
+                issued_at=_utcnow_naive(),
+                seats=None,
+                is_valid=False,
+                error_message="Invalid signature - license may be tampered",
+                diagnostic_header=(header if isinstance(header, dict) else None),
+                diagnostic_unverified_claims=(
+                    claims if isinstance(claims, dict) else None
+                ),
             )
 
         except DecodeError as e:
             logger.error(f"Failed to decode license token: {e}")
-            return self._create_invalid_license(f"Invalid token format: {e}")
+            # Try to surface unverified header for diagnostics
+            header = None
+            try:
+                header = jwt.get_unverified_header(token)
+            except Exception:
+                header = None
+            return JWTLicenseData(
+                tier="community",
+                customer_id="",
+                organization=None,
+                features=set(),
+                expiration=_utcnow_naive(),
+                issued_at=_utcnow_naive(),
+                seats=None,
+                is_valid=False,
+                error_message=f"Invalid token format: {e}",
+                diagnostic_header=(header if isinstance(header, dict) else None),
+            )
 
         except InvalidTokenError as e:
             logger.error(f"Invalid license token: {e}")
-            return self._create_invalid_license(f"Invalid token: {e}")
+            # Provide unverified claims when possible for troubleshooting
+            header = None
+            claims = None
+            try:
+                header = jwt.get_unverified_header(token)
+            except Exception:
+                header = None
+            try:
+                claims = jwt.decode(
+                    token,
+                    options={"verify_signature": False},
+                )
+            except Exception:
+                claims = None
+            return JWTLicenseData(
+                tier="community",
+                customer_id="",
+                organization=None,
+                features=set(),
+                expiration=_utcnow_naive(),
+                issued_at=_utcnow_naive(),
+                seats=None,
+                is_valid=False,
+                error_message=f"Invalid token: {e}",
+                diagnostic_header=(header if isinstance(header, dict) else None),
+                diagnostic_unverified_claims=(
+                    claims if isinstance(claims, dict) else None
+                ),
+            )
 
         except Exception as e:
             logger.error(f"Unexpected error validating license: {e}")
-            return self._create_invalid_license(f"Validation error: {e}")
+            # Attempt to extract unverified metadata for diagnostics
+            header = None
+            claims = None
+            try:
+                header = jwt.get_unverified_header(token)
+            except Exception:
+                header = None
+            try:
+                claims = jwt.decode(
+                    token,
+                    options={"verify_signature": False},
+                )
+            except Exception:
+                claims = None
+            return JWTLicenseData(
+                tier="community",
+                customer_id="",
+                organization=None,
+                features=set(),
+                expiration=_utcnow_naive(),
+                issued_at=_utcnow_naive(),
+                seats=None,
+                is_valid=False,
+                error_message=f"Validation error: {e}",
+                diagnostic_header=(header if isinstance(header, dict) else None),
+                diagnostic_unverified_claims=(
+                    claims if isinstance(claims, dict) else None
+                ),
+            )
 
     def validate(self) -> JWTLicenseData:
         """
@@ -1068,4 +1172,7 @@ def get_license_info() -> Dict:
         "is_in_grace_period": license_data.is_in_grace_period,
         "days_until_expiration": license_data.days_until_expiration,
         "error_message": license_data.error_message,
+        # Diagnostic metadata to help operators debug invalid licenses
+        "diagnostic_header": license_data.diagnostic_header,
+        "diagnostic_unverified_claims": license_data.diagnostic_unverified_claims,
     }
