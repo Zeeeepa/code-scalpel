@@ -307,6 +307,11 @@ BwIDAQAB
         candidates.extend(directory.glob("license*.jwt"))
         # Also look for *.license.jwt (repo/dev naming like enterprise.license.jwt)
         candidates.extend(directory.glob("*.license.jwt"))
+        # [20260123_FEATURE] Support beta/enterprise naming: code_scalpel_*_beta_*.jwt
+        candidates.extend(directory.glob("code_scalpel_*_beta_*.jwt"))
+        # [20260123_FEATURE] Support tier-named files: code_scalpel_enterprise*.jwt, code_scalpel_pro*.jwt
+        candidates.extend(directory.glob("code_scalpel_enterprise*.jwt"))
+        candidates.extend(directory.glob("code_scalpel_pro*.jwt"))
 
         if not candidates:
             return None
@@ -330,12 +335,28 @@ BwIDAQAB
         explicit_path = os.getenv(LICENSE_PATH_ENV_VAR)
         if explicit_path:
             path = Path(explicit_path).expanduser()
+            # If user supplied a file, return it
             if path.exists() and path.is_file():
                 logger.debug(f"Found license file from {LICENSE_PATH_ENV_VAR}: {path}")
                 return path
-            logger.debug(
-                f"{LICENSE_PATH_ENV_VAR} is set but not a readable file: {path}"
-            )
+            # If user supplied a directory, scan it for license candidates
+            if path.exists() and path.is_dir():
+                logger.debug(
+                    f"{LICENSE_PATH_ENV_VAR} points to a directory, scanning for license files: {path}"
+                )
+                candidate = self._scan_directory_for_license(path)
+                if candidate:
+                    logger.debug(
+                        f"Found license in explicit directory {path}: {candidate}"
+                    )
+                    return candidate
+                logger.debug(
+                    f"No license found in directory provided by {LICENSE_PATH_ENV_VAR}: {path}"
+                )
+            else:
+                logger.debug(
+                    f"{LICENSE_PATH_ENV_VAR} is set but not a readable file or directory: {path}"
+                )
 
         if os.getenv(DISABLE_LICENSE_DISCOVERY_ENV_VAR, "0").strip() == "1":
             logger.debug(
