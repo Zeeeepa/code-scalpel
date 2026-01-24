@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "1.0.0"
+version = "1.0.1"
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}
@@ -190,6 +190,21 @@ line_length = 88
 skip_gitignore = true
 known_first_party = ["code_scalpel"]
 extend_skip = ["__pycache__", ".pytest_cache"]
+
+# [20260123_FEATURE] Black configuration - exclude third-party and build artifacts
+[tool.black]
+line-length = 88
+extend-exclude = '''
+/(
+    node_modules
+    | \.eggs
+    | build
+    | dist
+    | \.git
+    | \.venv
+    | vscode-extension/node_modules
+)/
+'''
 
 # ============================================================================
 # TYPE CHECKING CONFIGURATION
