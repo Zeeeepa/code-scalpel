@@ -263,3 +263,4 @@ examples/.internal/
 .internal/
 .pypirc
 *.archive
+.code-scalpel/audit.jsonl
