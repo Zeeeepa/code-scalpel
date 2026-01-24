@@ -118,6 +118,101 @@ Code Scalpel is NOT a fork or wrapper of the `scalpel` Python library. It's a co
 | **Offline Capable** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
 | **Reproducible** | ✅ Deterministic | ✅ Deterministic | ✅ Deterministic | ⚠️ Variable |
 
+## Installation Options
+
+### 🚀 Recommended: Claude Code / Claude Desktop (stdio transport)
+
+**One-liner installation:**
+```bash
+claude mcp add codescalpel --transport stdio uvx codescalpel mcp
+```
+
+**Why this method?**
+- ✅ Simplest setup (one command)
+- ✅ Automatic updates via PyPI
+- ✅ Works offline after initial download
+- ✅ No infrastructure required
+- ✅ Zero configuration
+
+**Requirements:**
+- Python 3.10+ installed
+- `uvx` installed (comes with Python via `pip install uv`)
+- Claude Code or Claude Desktop
+
+**What happens:**
+1. Claude runs `uvx codescalpel mcp` when you ask for code analysis
+2. All 22 tools become available in your AI assistant
+3. Your code is analyzed locally; no data sent to external servers
+
+---
+
+### Alternative: Manual Configuration
+
+If you prefer to edit configuration files manually:
+
+**Claude Desktop (macOS/Windows/Linux):**
+Edit `~/.claude/claude_desktop_config.json` and add:
+```json
+{
+  "mcpServers": {
+    "codescalpel": {
+      "command": "uvx",
+      "args": ["codescalpel", "mcp"]
+    }
+  }
+}
+```
+
+**VS Code / Cursor:**
+Edit `.vscode/mcp.json` in your workspace:
+```json
+{
+  "mcpServers": {
+    "codescalpel": {
+      "command": "uvx",
+      "args": ["codescalpel", "mcp"]
+    }
+  }
+}
+```
+
+---
+
+### Advanced: HTTP Transport (Future)
+
+For enterprise deployments with single-sign-on, we'll soon support HTTP transport with OAuth 2.1:
+```bash
+codescalpel mcp --http --port 8593 --ssl-cert cert.pem --ssl-key key.pem
+```
+
+This is currently in beta. [Get in touch](https://github.com/3D-Tech-Solutions/code-scalpel/issues) if you need this feature.
+
+---
+
+### Troubleshooting
+
+**"Command not found: uvx"?**
+```bash
+pip install uv
+```
+
+**MCP server not showing up in Claude?**
+1. Restart Claude Code or Claude Desktop
+2. Check that `uvx codescalpel` works in your terminal:
+   ```bash
+   uvx codescalpel --version
+   ```
+3. If still not working, try manual configuration (see above)
+
+**Debug mode:**
+Enable verbose logging:
+```bash
+export SCALPEL_MCP_OUTPUT=DEBUG
+claude mcp add codescalpel --transport stdio uvx codescalpel mcp
+```
+
+---
+
 ## Release Information
 **Launch Date**: January 2026
 **Version**: v1.0.0
@@ -125,4 +220,15 @@ Code Scalpel is NOT a fork or wrapper of the `scalpel` Python library. It's a co
 
 Code Scalpel is built for the new era of **Agentic Engineering**. It is not just a linter; it is the sensory and actuator system for the next generation of AI developers.
 
-*(Installation and usage documentation will be available upon release)*
+---
+
+## Documentation
+
+- **[Getting Started](docs/getting_started/getting_started.md)** - Detailed setup guide
+- **[Configuration Guide](wiki/Configuration.md)** - All configuration options
+- **[API Reference](src/code_scalpel/mcp/README.md)** - Complete tool documentation
+- **[Security Analysis](src/code_scalpel/security/README.md)** - How vulnerability detection works
+
+## Community
+
+Have questions? [Open an issue](https://github.com/3D-Tech-Solutions/code-scalpel/issues) or [start a discussion](https://github.com/3D-Tech-Solutions/code-scalpel/discussions).
