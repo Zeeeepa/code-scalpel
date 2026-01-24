@@ -15,21 +15,18 @@ def temp_project(tmp_path):
 
     # Main module with functions/classes
     main_py = tmp_path / "main.py"
-    main_py.write_text(
-        """
+    main_py.write_text("""
 def old_function():
     return "hello"
 
 class OldClass:
     def old_method(self):
         return "method"
-""".strip()
-    )
+""".strip())
 
     # File that imports from main
     utils_py = tmp_path / "utils.py"
-    utils_py.write_text(
-        """
+    utils_py.write_text("""
 from main import old_function, OldClass
 
 def use_old():
@@ -38,19 +35,16 @@ def use_old():
 def use_class():
     obj = OldClass()
     return obj.old_method()
-""".strip()
-    )
+""".strip())
 
     # Another file with module import
     helper_py = tmp_path / "helper.py"
-    helper_py.write_text(
-        """
+    helper_py.write_text("""
 import main
 
 def call_it():
     return main.old_function()
-""".strip()
-    )
+""".strip())
 
     return tmp_path
 

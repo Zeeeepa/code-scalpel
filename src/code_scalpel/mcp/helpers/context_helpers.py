@@ -1547,7 +1547,7 @@ def _get_file_context_sync(
 
         semantic_summary = None
         if "semantic_summarization" in cap_set:
-            doc = ast.get_docstring(tree) or ""
+            doc = ast.get_docstring(tree) or ""  # type: ignore
             semantic_summary = summary
             if doc:
                 semantic_summary = f"{summary}. Docstring: {doc.strip()}"
@@ -1558,7 +1558,7 @@ def _get_file_context_sync(
                 [path.stem]
                 + function_names
                 + class_names
-                + [ast.get_docstring(tree) or ""]
+                + [ast.get_docstring(tree) or ""]  # type: ignore
             )
             for token in re.findall(r"[A-Za-z]{3,}", tag_source):
                 lowered = token.lower()
@@ -1599,10 +1599,10 @@ def _get_file_context_sync(
         maintainability_index: float | None = None
 
         if "code_smell_detection" in cap_set:
-            code_smells = _detect_code_smells(tree, code, lines)
+            code_smells = _detect_code_smells(tree, code, lines)  # type: ignore
 
         if "documentation_coverage" in cap_set:
-            doc_coverage = _calculate_doc_coverage(tree, function_names, class_names)
+            doc_coverage = _calculate_doc_coverage(tree, function_names, class_names)  # type: ignore
 
         if {"maintainability_index", "maintainability_metrics"} & cap_set:
             maintainability_index = _calculate_maintainability_index(

@@ -199,13 +199,11 @@ def use_helper():
         """Test cross-file resolution for a class target."""
         # Create a simple file
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 class MyClass:
     def method(self):
         return 42
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies(
@@ -225,27 +223,23 @@ class MyClass:
 
         # Create models.py with a class
         models_file = pkg_dir / "models.py"
-        models_file.write_text(
-            """
+        models_file.write_text("""
 class TaxRate:
     RATE = 0.1
     
     @staticmethod
     def get():
         return TaxRate.RATE
-"""
-        )
+""")
 
         # Create main.py that imports from models
         main_file = pkg_dir / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from .models import TaxRate
 
 def calculate_tax(amount):
     return TaxRate.get() * amount
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("calculate_tax")
@@ -259,25 +253,21 @@ def calculate_tax(amount):
         """Test resolving from X import Y style imports."""
         # Create helper.py
         helper_file = tmp_path / "helper.py"
-        helper_file.write_text(
-            """
+        helper_file.write_text("""
 def helper_function():
     return 42
 
 CONFIG = {"key": "value"}
-"""
-        )
+""")
 
         # Create main.py
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from helper import helper_function, CONFIG
 
 def use_helper():
     return helper_function() + len(CONFIG)
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("use_helper")
@@ -291,23 +281,19 @@ def use_helper():
         """Test resolving import X style imports."""
         # Create utils.py
         utils_file = tmp_path / "utils.py"
-        utils_file.write_text(
-            """
+        utils_file.write_text("""
 def utility():
     return "utility"
-"""
-        )
+""")
 
         # Create main.py
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 import utils
 
 def use_utils():
     return utils.utility()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("use_utils")
@@ -317,14 +303,12 @@ def use_utils():
     def test_resolve_cross_file_unresolved_module(self, tmp_path):
         """Test that unresolved imports are tracked."""
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from nonexistent_module import Something
 
 def use_something():
     return Something()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("use_something")
@@ -340,24 +324,20 @@ def use_something():
         level2_file.write_text("def deep(): return 'deep'")
 
         level1_file = tmp_path / "level1.py"
-        level1_file.write_text(
-            """
+        level1_file.write_text("""
 from level2 import deep
 
 def middle():
     return deep()
-"""
-        )
+""")
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from level1 import middle
 
 def top():
     return middle()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
 
@@ -375,14 +355,12 @@ def top():
         helper_file.write_text("def original(): return 1")
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from helper import original as aliased
 
 def use_aliased():
     return aliased()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("use_aliased")
@@ -395,14 +373,12 @@ def use_aliased():
         helper_file.write_text("def func(): pass")
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from helper import *
 
 def use_func():
     return func()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("use_func")
@@ -413,14 +389,12 @@ def use_func():
     def test_resolve_cross_file_handles_file_read_error(self, tmp_path):
         """Test handling when external file can't be read."""
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from helper import func
 
 def use_func():
     return func()
-"""
-        )
+""")
 
         # Create helper.py then make it unreadable
         helper_file = tmp_path / "helper.py"
@@ -453,14 +427,12 @@ def use_func():
         config_file.write_text("SETTINGS = {'debug': True}")
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from config import SETTINGS
 
 def get_setting():
     return SETTINGS['debug']
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("get_setting")
@@ -477,15 +449,13 @@ class TestBuildImportMap:
     def test_build_import_map_from_import(self, tmp_path):
         """Test mapping from X import Y style."""
         file_path = tmp_path / "test.py"
-        file_path.write_text(
-            """
+        file_path.write_text("""
 from models import User, Item
 from utils import helper as h
 
 def func():
     pass
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(file_path))
         extractor._ensure_parsed()
@@ -498,16 +468,14 @@ def func():
     def test_build_import_map_regular_import(self, tmp_path):
         """Test mapping import X style."""
         file_path = tmp_path / "test.py"
-        file_path.write_text(
-            """
+        file_path.write_text("""
 import os
 import json as j
 import collections.abc
 
 def func():
     pass
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(file_path))
         extractor._ensure_parsed()
@@ -530,11 +498,9 @@ class TestResolveModulePath:
         pkg_dir.mkdir()
         (pkg_dir / "__init__.py").write_text("")
         (pkg_dir / "sibling.py").write_text("def sibling(): pass")
-        (pkg_dir / "main.py").write_text(
-            """
+        (pkg_dir / "main.py").write_text("""
 from . import sibling
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(pkg_dir / "main.py"))
         extractor._ensure_parsed()
@@ -552,11 +518,9 @@ from . import sibling
         (pkg_dir / "__init__.py").write_text("")
         (sub_dir / "__init__.py").write_text("")
         (pkg_dir / "parent.py").write_text("def parent(): pass")
-        (sub_dir / "child.py").write_text(
-            """
+        (sub_dir / "child.py").write_text("""
 from .. import parent
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(sub_dir / "child.py"))
         extractor._ensure_parsed()
@@ -1194,14 +1158,12 @@ class TestResolveSymbolNotFoundInFile:
 
         # Create main.py that imports a non-existent symbol
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from helper import nonexistent_func
 
 def use_it():
     return nonexistent_func()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("use_it")
@@ -1234,14 +1196,12 @@ class TestResolveModulePathParentTraversal:
 
         # Create main.py in subdir
         main_file = sub_dir / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from package.utils import utility
 
 def use_util():
     return utility()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         extractor._ensure_parsed()
@@ -1351,25 +1311,19 @@ class TestDepthExceededInCrossFile:
         """Test that max_depth is respected in cross-file resolution."""
         # Create deep chain
         (tmp_path / "level3.py").write_text("def l3(): return 3")
-        (tmp_path / "level2.py").write_text(
-            """
+        (tmp_path / "level2.py").write_text("""
 from level3 import l3
 def l2(): return l3()
-"""
-        )
-        (tmp_path / "level1.py").write_text(
-            """
+""")
+        (tmp_path / "level1.py").write_text("""
 from level2 import l2
 def l1(): return l2()
-"""
-        )
+""")
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from level1 import l1
 def main(): return l1()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
 
@@ -1392,14 +1346,12 @@ class TestRelativeImportNoModule:
         (pkg_dir / "sibling.py").write_text("def sib(): pass")
 
         main_file = pkg_dir / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from . import sibling
 
 def use_sib():
     return sibling.sib()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         extractor._ensure_parsed()
@@ -1472,38 +1424,30 @@ class TestResolveSymbolDepthExceeded:
     def test_cross_file_recursive_depth_limit(self, tmp_path):
         """Test recursive resolution stops at depth limit."""
         # Create files that reference each other
-        (tmp_path / "a.py").write_text(
-            """
+        (tmp_path / "a.py").write_text("""
 from b import b_func
 
 def a_func():
     return b_func()
-"""
-        )
-        (tmp_path / "b.py").write_text(
-            """
+""")
+        (tmp_path / "b.py").write_text("""
 from c import c_func
 
 def b_func():
     return c_func()
-"""
-        )
-        (tmp_path / "c.py").write_text(
-            """
+""")
+        (tmp_path / "c.py").write_text("""
 def c_func():
     return 42
-"""
-        )
+""")
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from a import a_func
 
 def main():
     return a_func()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
 
@@ -1526,14 +1470,12 @@ class TestResolveSymbolNotFoundAnywhere:
         helper_file.write_text("# Empty module")
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from helper import some_thing
 
 def use_thing():
     return some_thing()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("use_thing")
@@ -1566,14 +1508,12 @@ class TestResolveModuleParentInitFile:
 
         # Create main.py at subsub level
         main_file = subsub / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 import pkg.utils
 
 def use_util():
     return pkg.utils.helper()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         extractor._ensure_parsed()
@@ -1698,25 +1638,21 @@ class TestResolveCrossFileSymbolVariants:
         """Test importing a symbol that doesn't exist in the module."""
         # Create external module with some content
         ext_file = tmp_path / "external.py"
-        ext_file.write_text(
-            """
+        ext_file.write_text("""
 # This module has functions but not the one being imported
 def actual_func():
     return 1
 
 ACTUAL_VAR = 2
-"""
-        )
+""")
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from external import nonexistent_symbol
 
 def use_nonexistent():
     return nonexistent_symbol()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         result = extractor.resolve_cross_file_dependencies("use_nonexistent")
@@ -1738,14 +1674,12 @@ class TestDepthExceededEarlyReturn:
         ext_file.write_text("def external_func(): return 1")
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from external import external_func
 
 def main():
     return external_func()
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
 
@@ -1777,14 +1711,12 @@ class TestParentDirectoryTraversal:
         (deep / "__init__.py").write_text("")
 
         main_file = deep / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 import pkg
 
 def use_pkg():
     return pkg.PKG_INIT
-"""
-        )
+""")
 
         extractor = SurgicalExtractor.from_file(str(main_file))
         extractor._ensure_parsed()

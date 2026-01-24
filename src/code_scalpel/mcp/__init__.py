@@ -51,7 +51,7 @@ from .mcp_logging import (
 
 if TYPE_CHECKING:
     # Make `mcp` visible to type checkers without eagerly importing at runtime.
-    from .archive.server import mcp as mcp
+    from .server import mcp as mcp
 else:
     mcp: Any
 
@@ -59,7 +59,7 @@ else:
 def _load_server():
     # Import lazily to avoid runpy warnings when executing the module as a script
     # (python -m code_scalpel.mcp.server).
-    from .archive import server as _server
+    from . import server as _server
 
     return _server
 

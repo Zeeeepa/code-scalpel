@@ -132,8 +132,7 @@ class TestGetProjectMapSync:
     @pytest.fixture
     def simple_project(self, tmp_path):
         """Create a simple project structure."""
-        (tmp_path / "main.py").write_text(
-            """
+        (tmp_path / "main.py").write_text("""
 def main():
     helper()
 
@@ -142,14 +141,11 @@ def helper():
 
 if __name__ == "__main__":
     main()
-"""
-        )
-        (tmp_path / "utils.py").write_text(
-            """
+""")
+        (tmp_path / "utils.py").write_text("""
 def utility():
     return 42
-"""
-        )
+""")
         return tmp_path
 
     @pytest.fixture
@@ -162,12 +158,10 @@ def utility():
         pkg = tmp_path / "pkg"
         pkg.mkdir()
         (pkg / "__init__.py").write_text("")
-        (pkg / "module.py").write_text(
-            """
+        (pkg / "module.py").write_text("""
 def process():
     pass
-"""
-        )
+""")
 
         # Subpackage
         subpkg = pkg / "sub"
@@ -217,8 +211,7 @@ def process():
 
     def test_sync_calculates_complexity(self, tmp_path):
         """Test sync function calculates complexity."""
-        (tmp_path / "complex.py").write_text(
-            """
+        (tmp_path / "complex.py").write_text("""
 def complex_func(x):
     if x > 0:
         if x > 10:
@@ -229,8 +222,7 @@ def complex_func(x):
             while x:
                 x -= 1
     return x
-"""
-        )
+""")
         result = _get_project_map_sync(str(tmp_path), True, 5, False)
 
         # Should have complexity score
@@ -241,8 +233,7 @@ def complex_func(x):
     def test_sync_flags_complexity_hotspots(self, tmp_path):
         """Test sync function flags complexity hotspots."""
         # Create a very complex file
-        (tmp_path / "hotspot.py").write_text(
-            """
+        (tmp_path / "hotspot.py").write_text("""
 def mega_complex(a, b, c, d, e):
     if a:
         if b:
@@ -257,8 +248,7 @@ def mega_complex(a, b, c, d, e):
                                         if i % 2:
                                             pass
     return a and b and c and d and e
-"""
-        )
+""")
         result = _get_project_map_sync(str(tmp_path), True, 5, False)
         assert len(result.complexity_hotspots) >= 1
 
@@ -291,21 +281,17 @@ class TestGetProjectMapAsync:
     @pytest.fixture
     def sample_project(self, tmp_path):
         """Create a sample project."""
-        (tmp_path / "main.py").write_text(
-            """
+        (tmp_path / "main.py").write_text("""
 def main():
     run()
 
 def run():
     pass
-"""
-        )
-        (tmp_path / "config.py").write_text(
-            """
+""")
+        (tmp_path / "config.py").write_text("""
 class Config:
     DEBUG = True
-"""
-        )
+""")
         return tmp_path
 
     @pytest.mark.asyncio
@@ -372,15 +358,13 @@ class TestEntryPointDetection:
     @pytest.mark.asyncio
     async def test_click_command_detected(self, tmp_path):
         """Test @click.command decorated function is detected."""
-        (tmp_path / "cli.py").write_text(
-            """
+        (tmp_path / "cli.py").write_text("""
 import click
 
 @click.command()
 def cli():
     pass
-"""
-        )
+""")
         result = await get_project_map(project_root=str(tmp_path))
         entry_funcs = [ep.split(":")[-1] for ep in result.entry_points]
         assert "cli" in entry_funcs
@@ -388,8 +372,7 @@ def cli():
     @pytest.mark.asyncio
     async def test_flask_route_detected(self, tmp_path):
         """Test @app.route decorated function is detected."""
-        (tmp_path / "web.py").write_text(
-            """
+        (tmp_path / "web.py").write_text("""
 from flask import Flask
 app = Flask(__name__)
 
@@ -400,8 +383,7 @@ def index():
 @app.get("/api")
 def api():
     return {}
-"""
-        )
+""")
         result = await get_project_map(project_root=str(tmp_path))
         entry_funcs = [ep.split(":")[-1] for ep in result.entry_points]
         assert "index" in entry_funcs
@@ -498,18 +480,15 @@ class TestIntegrationScenarios:
         app = tmp_path / "app"
         app.mkdir()
 
-        (app / "__init__.py").write_text(
-            """
+        (app / "__init__.py").write_text("""
 from flask import Flask
 
 def create_app():
     app = Flask(__name__)
     return app
-"""
-        )
+""")
 
-        (app / "routes.py").write_text(
-            """
+        (app / "routes.py").write_text("""
 from flask import Blueprint
 
 bp = Blueprint("main", __name__)
@@ -524,11 +503,9 @@ def api():
 
 def get_data():
     return {"status": "ok"}
-"""
-        )
+""")
 
-        (app / "models.py").write_text(
-            """
+        (app / "models.py").write_text("""
 class User:
     def __init__(self, name):
         self.name = name
@@ -536,8 +513,7 @@ class User:
 class Post:
     def __init__(self, title):
         self.title = title
-"""
-        )
+""")
 
         result = await get_project_map(project_root=str(tmp_path))
 
@@ -557,8 +533,7 @@ class Post:
     @pytest.mark.asyncio
     async def test_cli_application(self, tmp_path):
         """Test with CLI application structure."""
-        (tmp_path / "cli.py").write_text(
-            """
+        (tmp_path / "cli.py").write_text("""
 import click
 
 @click.group()
@@ -581,8 +556,7 @@ def execute():
 
 def process():
     pass
-"""
-        )
+""")
 
         result = await get_project_map(project_root=str(tmp_path))
 
@@ -600,8 +574,7 @@ def process():
 
         (src / "__init__.py").write_text("")
 
-        (src / "data.py").write_text(
-            """
+        (src / "data.py").write_text("""
 def load_data(path):
     pass
 
@@ -610,11 +583,9 @@ def clean_data(df):
 
 def transform(df):
     pass
-"""
-        )
+""")
 
-        (src / "model.py").write_text(
-            """
+        (src / "model.py").write_text("""
 class Model:
     def fit(self, X, y):
         pass
@@ -626,18 +597,15 @@ def train_model(data):
     model = Model()
     model.fit(data["X"], data["y"])
     return model
-"""
-        )
+""")
 
-        (src / "evaluate.py").write_text(
-            """
+        (src / "evaluate.py").write_text("""
 def calculate_metrics(y_true, y_pred):
     pass
 
 def plot_results(metrics):
     pass
-"""
-        )
+""")
 
         result = await get_project_map(project_root=str(tmp_path))
 

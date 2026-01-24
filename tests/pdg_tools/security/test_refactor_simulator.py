@@ -791,13 +791,11 @@ def calculate_tax(amount, rate=0.1):
         # Create a temp project with a test file
         with tempfile.TemporaryDirectory() as tmpdir:
             test_file = Path(tmpdir) / "test_utils.py"
-            test_file.write_text(
-                """
+            test_file.write_text("""
 def test_calculate_tax():
     from utils import calculate_tax
     assert calculate_tax(100) == 10
-"""
-            )
+""")
 
             original = "def calculate_tax(amount): return amount * 0.1"
             new_code = "def different_func(): pass"

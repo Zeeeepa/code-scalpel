@@ -52,7 +52,7 @@ echo ""
 
 echo "🔎 Step 3/8: Type Check (Pyright)..."
 echo "----------------------------------------------"
-$PYTHON_BIN -m pip show pyright >/dev/null 2>&1 || {
+pyright --version >/dev/null 2>&1 || {
     echo ""
     echo "ERROR: pyright is not installed. Install dev deps: pip install -e '.[dev]' && pip install pyright"
     exit 1
@@ -67,7 +67,7 @@ echo ""
 
 echo "🛡️  Step 4/8: Security Scan (Bandit)..."
 echo "----------------------------------------------"
-$PYTHON_BIN -m pip show bandit >/dev/null 2>&1 || {
+bandit --version >/dev/null 2>&1 || {
     echo ""
     echo "ERROR: bandit is not installed. Install dev deps: pip install -e '.[dev]' && pip install bandit"
     exit 1
@@ -82,7 +82,7 @@ echo ""
 
 echo "🧾 Step 5/8: Dependency Audit (pip-audit)..."
 echo "----------------------------------------------"
-$PYTHON_BIN -m pip show pip-audit >/dev/null 2>&1 || {
+pip-audit --version >/dev/null 2>&1 || {
     echo ""
     echo "ERROR: pip-audit is not installed. Install dev deps: pip install -e '.[dev]' && pip install pip-audit"
     exit 1

@@ -11,8 +11,12 @@ import sys
 from types import SimpleNamespace
 
 # [20251215_TEST] Ensure CLI subprocess invocations can import code_scalpel without editable install
+# Use path relative to this test file to avoid cwd issues
+test_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(test_dir))
+src_path = os.path.join(project_root, "src")
 os.environ["PYTHONPATH"] = os.pathsep.join(
-    [os.path.abspath("src"), os.environ.get("PYTHONPATH", "")]
+    [src_path, os.environ.get("PYTHONPATH", "")]
 ).rstrip(os.pathsep)
 
 
@@ -635,15 +639,13 @@ class TestCLIInProcess:
     def test_analyze_file_with_dead_code(self, tmp_path):
         """Test analyzing a file with dead code for detection."""
         test_file = tmp_path / "dead_code.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def unused_function():
     return "never called"
 
 def main():
     return 42
-"""
-        )
+""")
 
         result = subprocess.run(
             [sys.executable, "-m", "code_scalpel.cli", "analyze", str(test_file)],
@@ -917,8 +919,7 @@ def main():
     def test_analyze_complex_code(self, tmp_path):
         """Test analyzing more complex code with all features."""
         test_file = tmp_path / "complex.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import os
 
 class Calculator:
@@ -940,8 +941,7 @@ def main():
     calc = Calculator()
     calc.add(5).add(10)
     return calc.get_value()
-"""
-        )
+""")
 
         result = subprocess.run(
             [sys.executable, "-m", "code_scalpel.cli", "analyze", str(test_file)],

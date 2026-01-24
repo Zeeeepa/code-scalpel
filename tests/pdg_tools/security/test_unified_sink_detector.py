@@ -105,13 +105,11 @@ class TestSQLInjectionDetection:
     def test_python_sql_injection_100_percent_confidence(self):
         """Python cursor.execute should be detected with 1.0 confidence."""
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             import sqlite3
             user_input = input()
             cursor.execute("SELECT * FROM users WHERE id=" + user_input)
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=0.8)
 
@@ -124,12 +122,10 @@ class TestSQLInjectionDetection:
     def test_python_sqlalchemy_execute_detected(self):
         """SQLAlchemy session.execute should be detected."""
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             from sqlalchemy import create_engine
             session.execute("SELECT * FROM users")
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=0.8)
 
@@ -141,12 +137,10 @@ class TestSQLInjectionDetection:
     def test_typescript_sql_injection_detected(self):
         """TypeScript connection.query should be detected."""
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             const query = "SELECT * FROM users WHERE id=" + userId;
             connection.query(query);
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "typescript", min_confidence=0.8)
 
@@ -322,12 +316,10 @@ class TestMinimumConfidenceFiltering:
     def test_high_confidence_filter(self):
         """Filtering at 1.0 should only return perfect matches."""
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             cursor.execute(query)
             open(filename)
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=1.0)
 
@@ -338,13 +330,11 @@ class TestMinimumConfidenceFiltering:
     def test_medium_confidence_filter(self):
         """Filtering at 0.8 should include most sinks."""
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             cursor.execute(query)
             open(filename)
             session.execute(query)
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=0.8)
 
@@ -529,8 +519,7 @@ class TestFalsePositiveRate:
     def test_clean_python_code_no_false_positives(self):
         """Clean Python code should not trigger false positives."""
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             def calculate_total(items):
                 total = 0
                 for item in items:
@@ -539,8 +528,7 @@ class TestFalsePositiveRate:
             
             def format_name(first, last):
                 return f"{first} {last}"
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=0.8)
 
