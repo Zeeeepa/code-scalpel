@@ -268,7 +268,7 @@ def role():
         base_dir=tmp_path,
         filename="license.jwt",
     )
-    env["CODE_SCALPEL_LICENSE_PATH"] = str(expired_path)
+    env.setdefault("CODE_SCALPEL_LICENSE_PATH", str(expired_path))
 
     async with _stdio_session(project_root=tmp_path, extra_env=env) as session:
         payload = await session.call_tool(
