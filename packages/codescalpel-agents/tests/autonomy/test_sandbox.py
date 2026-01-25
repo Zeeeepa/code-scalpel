@@ -160,7 +160,7 @@ class TestSandboxExecutorInit:
         # Re-import to pick up the mocked docker
         from importlib import reload
 
-        import code_scalpel.autonomy.sandbox as sandbox_module
+        import codescalpel_agents.autonomy.sandbox as sandbox_module
 
         reload(sandbox_module)
 
@@ -567,7 +567,7 @@ class TestContainerExecution:
 
         # Skip if docker not importable
         try:
-            import code_scalpel.autonomy.sandbox as sandbox_module
+            import codescalpel_agents.autonomy.sandbox as sandbox_module
 
             if not sandbox_module.DOCKER_AVAILABLE:
                 pytest.skip("Docker package not available")

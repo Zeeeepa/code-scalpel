@@ -62,7 +62,7 @@ def test_execute_ooda_loop_halts_on_failed_observe():
 
 
 def test_observe_file_records_failed_operation(monkeypatch):
-    from code_scalpel.agents import base_agent
+    from codescalpel_agents.agents import base_agent
 
     # [20251214_TEST] Simulate tool error to ensure context logs failure.
     async def boom(_path):

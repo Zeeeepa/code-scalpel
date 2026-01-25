@@ -1,6 +1,6 @@
 import asyncio
 
-import code_scalpel.agents.base_agent as base_agent
+import codescalpel_agents.agents.base_agent as base_agent
 
 
 class DummyAgent(base_agent.BaseCodeAnalysisAgent):

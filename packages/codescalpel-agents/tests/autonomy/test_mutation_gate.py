@@ -14,7 +14,7 @@ Tests P1 Acceptance Criteria:
 
 from unittest.mock import Mock
 
-from code_scalpel.autonomy import MutationTestGate
+from codescalpel_agents.autonomy import MutationTestGate
 
 # [20251217_BUGFIX] Use stub classes for mutation_gate tests
 from codescalpel_agents.autonomy.stubs import (

@@ -743,7 +743,7 @@ class TestBaseAgentCoverage:
     @pytest.mark.asyncio
     async def test_apply_safe_change_with_mock(self, agent):
         """Test apply_safe_change with mocked update_symbol (lines 240-242)."""
-        import code_scalpel.agents.base_agent as base_module
+        import codescalpel_agents.agents.base_agent as base_module
 
         original = base_module.update_symbol
         base_module.update_symbol = AsyncMock(

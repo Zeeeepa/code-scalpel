@@ -58,7 +58,7 @@ class TestBaseCodeAnalysisAgent:
     async def test_observe_file_success(self, agent):
         """Test successful file observation."""
         # Mock the get_file_context function
-        import code_scalpel.agents.base_agent as base_module
+        import codescalpel_agents.agents.base_agent as base_module
 
         original_get_file_context = base_module.get_file_context
         base_module.get_file_context = AsyncMock(
@@ -84,7 +84,7 @@ class TestBaseCodeAnalysisAgent:
     @pytest.mark.asyncio
     async def test_observe_file_failure(self, agent):
         """Test file observation failure."""
-        import code_scalpel.agents.base_agent as base_module
+        import codescalpel_agents.agents.base_agent as base_module
 
         original_get_file_context = base_module.get_file_context
         base_module.get_file_context = AsyncMock(
@@ -105,7 +105,7 @@ class TestBaseCodeAnalysisAgent:
     @pytest.mark.asyncio
     async def test_find_symbol_usage_success(self, agent):
         """Test successful symbol reference finding."""
-        import code_scalpel.agents.base_agent as base_module
+        import codescalpel_agents.agents.base_agent as base_module
 
         original_get_symbol_references = base_module.get_symbol_references
         base_module.get_symbol_references = AsyncMock(
@@ -145,7 +145,7 @@ class TestBaseCodeAnalysisAgent:
     @pytest.mark.asyncio
     async def test_extract_function_success(self, agent):
         """Test successful function extraction."""
-        import code_scalpel.agents.base_agent as base_module
+        import codescalpel_agents.agents.base_agent as base_module
 
         original_extract_code = base_module.extract_code
         base_module.extract_code = AsyncMock(
@@ -166,7 +166,7 @@ class TestBaseCodeAnalysisAgent:
     @pytest.mark.asyncio
     async def test_simulate_change_success(self, agent):
         """Test successful change simulation."""
-        import code_scalpel.agents.base_agent as base_module
+        import codescalpel_agents.agents.base_agent as base_module
 
         original_simulate_refactor = base_module.simulate_refactor
         base_module.simulate_refactor = AsyncMock(
@@ -185,7 +185,7 @@ class TestBaseCodeAnalysisAgent:
     @pytest.mark.asyncio
     async def test_apply_safe_change_success(self, agent):
         """Test successful safe change application."""
-        import code_scalpel.agents.base_agent as base_module
+        import codescalpel_agents.agents.base_agent as base_module
 
         original_update_symbol = base_module.update_symbol
         base_module.update_symbol = AsyncMock(

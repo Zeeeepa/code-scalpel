@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from code_scalpel.autonomy import AutonomyAuditTrail
+from codescalpel_agents.autonomy import AutonomyAuditTrail
 
 # =============================================================================
 # Fixtures

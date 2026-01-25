@@ -4,7 +4,7 @@ from typing import Any, Dict
 # [20251214_REFACTOR] Remove unused test imports flagged by ruff.
 import pytest
 
-import code_scalpel.agents.base_agent as base_agent
+import codescalpel_agents.agents.base_agent as base_agent
 from codescalpel_agents.agents.base_agent import BaseCodeAnalysisAgent
 
 
