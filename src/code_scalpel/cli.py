@@ -460,7 +460,22 @@ def start_mcp_server(
     ssl_keyfile: str | None = None,
     license_file: str | None = None,
 ) -> int:
-    """Start the MCP-compliant server (for AI clients like Claude Desktop, Cursor)."""
+    """Start the MCP-compliant server (for AI clients like Claude Desktop, Cursor).
+
+    [20260125_FEATURE] Phase 3: Transport Optimization
+    - TIER 1 (PRIMARY): stdio - optimized for local clients (Claude Desktop, Cursor)
+      * Direct bidirectional pipe communication
+      * Zero network overhead
+      * Minimal latency (microseconds)
+      * No SSL/TLS complexity
+      * Default and recommended for Claude Desktop integration
+
+    - TIER 2 (FALLBACK): HTTP (sse or streamable-http) - for network deployments
+      * Required for remote/network clients
+      * Higher latency due to network stack
+      * Optional HTTPS support (--ssl-cert, --ssl-key)
+      * Useful for Docker, Kubernetes, multi-machine setups
+    """
     import inspect
 
     # Prefer archive.server if present; fall back to mcp.server for older layouts.
@@ -765,9 +780,9 @@ Examples:
   code-scalpel analyze myfile.py --json       Output as JSON
   code-scalpel scan myfile.py                 Security vulnerability scan
   code-scalpel scan myfile.py --json          Security scan with JSON output
-  code-scalpel mcp                            Start MCP server (stdio, for Claude Desktop)
-  code-scalpel mcp --http --port 8080         Start MCP server (HTTP transport)
-  code-scalpel mcp --http --allow-lan         Start MCP server with LAN access
+  code-scalpel mcp                            TIER 1: Start MCP server (stdio, Claude Desktop)
+  code-scalpel mcp --http --port 8080         TIER 2: Start MCP server (HTTP fallback)
+  code-scalpel mcp --http --allow-lan         TIER 2: Start MCP server (HTTP with LAN)
   code-scalpel mcp --http --ssl-cert cert.pem --ssl-key key.pem  HTTPS for production/Claude
   code-scalpel server --port 5000             Start REST API server (legacy)
   code-scalpel version                        Show version info
@@ -834,19 +849,22 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
     )
 
     # MCP command (Model Context Protocol - recommended)
+    # [20260125_FEATURE] Phase 3: stdio is Tier 1 (primary, most optimized)
+    # HTTP (sse/streamable-http) is Tier 2 fallback for network deployments
     mcp_parser = subparsers.add_parser(
-        "mcp", help="Start MCP server (for Claude Desktop, Cursor)"
+        "mcp",
+        help="Start MCP server (for Claude Desktop, Cursor) - TIER 1: stdio (recommended)",
     )
     mcp_parser.add_argument(
         "--transport",
         choices=["stdio", "sse", "streamable-http"],
         default="stdio",
-        help="Transport type (default: stdio)",
+        help="Transport type (default: stdio for Claude Desktop, Cursor) - TIER 1: stdio (optimized), TIER 2: sse/streamable-http (fallback)",
     )
     mcp_parser.add_argument(
         "--http",
         action="store_true",
-        help="Use HTTP transport (alias for --transport sse)",
+        help="TIER 2: Use HTTP transport (fallback for network deployments, less optimized than stdio)",
     )
     mcp_parser.add_argument(
         "--host",

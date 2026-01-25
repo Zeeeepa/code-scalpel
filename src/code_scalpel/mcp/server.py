@@ -162,6 +162,21 @@ def _configure_logging(transport: str = "stdio"):
 logger = logging.getLogger(__name__)
 
 
+# [20260125_FEATURE] Phase 3: Performance optimization - conditional debug output
+def _debug_print(msg: str) -> None:
+    """Print debug message only if SCALPEL_MCP_OUTPUT=DEBUG.
+
+    This avoids unnecessary stderr I/O during normal operation, improving
+    stdio transport latency. Debug messages are only emitted when explicitly
+    requested via environment variable.
+    """
+    if os.environ.get("SCALPEL_MCP_OUTPUT", "").upper() == "DEBUG":
+        try:
+            print(msg, file=sys.stderr)
+        except Exception:
+            pass
+
+
 # =============================================================================
 # [20260116_FEATURE] License-Gated Tier System
 # Restored from archive/server.py - Proper license validation with downgrade capability
@@ -5095,14 +5110,9 @@ def run_server(
     _configure_logging(transport)
 
     # Debug: emit startup parameters to stderr so test harness can capture flow
-    try:
-        print(
-            f"DEBUG: run_server called transport={transport!r} host={host!r} port={port!r} allow_lan={allow_lan!r} root_path={root_path!r} tier={tier!r}",
-            file=sys.stderr,
-        )
-    except Exception:
-        # Best-effort debug; do not fail startup if printing fails
-        pass
+    _debug_print(
+        f"DEBUG: run_server called transport={transport!r} host={host!r} port={port!r} allow_lan={allow_lan!r} root_path={root_path!r} tier={tier!r}"
+    )
 
     # [20260116_REFACTOR] Register tools, resources, and prompts from dedicated modules
     try:
@@ -5111,7 +5121,7 @@ def run_server(
         import code_scalpel.mcp.prompts  # noqa: F401 - registers @mcp.prompt handlers
 
         register_tools()
-        print("DEBUG: register_tools completed", file=sys.stderr)
+        _debug_print("DEBUG: register_tools completed")
     except Exception:
         import traceback
 
@@ -5184,10 +5194,7 @@ def run_server(
         )
 
     # Debug: confirm auto-init result
-    try:
-        print(f"DEBUG: auto_init result={init_result}", file=sys.stderr)
-    except Exception:
-        pass
+    _debug_print(f"DEBUG: auto_init result={init_result}")
 
     # [20251215_BUGFIX] Print to stderr for stdio transport
     output = sys.stderr if transport == "stdio" else sys.stdout
@@ -5254,11 +5261,11 @@ def run_server(
             raise
     else:
         try:
-            print("DEBUG: starting mcp.run (stdio)", file=sys.stderr)
+            _debug_print("DEBUG: starting mcp.run (stdio)")
             # Emit FastMCP settings and stdio TTY info for troubleshooting
             try:
                 settings = getattr(mcp, "settings", None)
-                print(f"DEBUG: mcp has settings: {settings}", file=sys.stderr)
+                _debug_print(f"DEBUG: mcp has settings: {settings}")
                 if settings is not None:
                     # Print common settings attributes if present
                     for attr in (
@@ -5269,9 +5276,8 @@ def run_server(
                         "ssl_keyfile",
                     ):
                         try:
-                            print(
-                                f"DEBUG: mcp.settings.{attr} = {getattr(settings, attr, None)}",
-                                file=sys.stderr,
+                            _debug_print(
+                                f"DEBUG: mcp.settings.{attr} = {getattr(settings, attr, None)}"
                             )
                         except Exception:
                             pass
@@ -5279,9 +5285,8 @@ def run_server(
                 pass
 
             try:
-                print(
-                    f"DEBUG: sys.stdin.isatty={sys.stdin.isatty()} sys.stdout.isatty={sys.stdout.isatty()}",
-                    file=sys.stderr,
+                _debug_print(
+                    f"DEBUG: sys.stdin.isatty={sys.stdin.isatty()} sys.stdout.isatty={sys.stdout.isatty()}"
                 )
             except Exception:
                 pass

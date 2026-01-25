@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-25T17:10:47.586359",
+  "timestamp": "2026-01-25T17:18:37.780659",
   "checks": {
     "black": {
       "status": "passed",
@@ -10,8 +10,8 @@
       "output": "No linting issues found"
     },
     "pyright": {
-      "status": "failed",
-      "output": "/mnt/k/backup/Develop/code-scalpel/src/code_scalpel/cli.py\n  /mnt/k/backup/Develop/code-scalpel/src/code_scalpel/cli.py:432:47 - error: \"run_server\" is unknown import symbol (reportAttributeAccessIssue)\n1 error, 0 warnings, 0 informations\n"
+      "status": "passed",
+      "output": "No type errors found"
     },
     "mcp_contracts": {
       "status": "passed",

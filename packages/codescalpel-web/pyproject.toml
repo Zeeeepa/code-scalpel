@@ -48,7 +48,7 @@ dev = [
 ]
 
 [project.scripts]
-codescalpel-web = "codescalpel_web.server:main"
+codescalpel-web = "codescalpel_web.cli:main"
 
 [tool.setuptools]
 packages = ["codescalpel_web"]
