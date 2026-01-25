@@ -5287,7 +5287,7 @@ def run_server(
                 pass
 
             # Explicitly pass transport so FastMCP uses stdio even when stdout is a pipe
-            mcp.run(transport=transport)
+            mcp.run(transport=transport)  # type: ignore[arg-type]
         except Exception:
             import traceback
 

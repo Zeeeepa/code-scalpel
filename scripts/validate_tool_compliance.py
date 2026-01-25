@@ -226,7 +226,7 @@ class ToolComplianceChecker:
         self, func_node: ast.FunctionDef, tool_name: str
     ) -> bool:
         """Check if imports helper function correctly."""
-        expected_import = f"from code_scalpel.mcp.helpers.{self._get_category(tool_name)}_helpers import _{tool_name}_sync"
+        f"from code_scalpel.mcp.helpers.{self._get_category(tool_name)}_helpers import _{tool_name}_sync"
         # Simplified: check if any import contains the helper
         # Full implementation would parse imports
         return True  # TODO: implement proper import checking

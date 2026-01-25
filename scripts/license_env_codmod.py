@@ -76,7 +76,7 @@ def render_replacement(lines: List[str], start: int, end: int) -> Tuple[str, int
         m_assign = re.search(r"CODE_SCALPEL_LICENSE_PATH", ln)
         if m_assign:
             # try to capture the RHS if present
-            m_rhs = re.search(r"\bstr\(([^)]+)\)|\b([^,\s)]+)\b", ln)
+            re.search(r"\bstr\(([^)]+)\)|\b([^,\s)]+)\b", ln)
             # crude: look for 'license_path' token
             if "license_path" in ln:
                 license_var = "license_path"
@@ -100,7 +100,6 @@ def render_replacement(lines: List[str], start: int, end: int) -> Tuple[str, int
         m_indent = re.match(r"^(\s*)", block[0])
         indent = m_indent.group(1) if m_indent else ""
 
-    args = ["env"]
     kw = []
     if license_var:
         kw.append(f"license_path=str({license_var})")

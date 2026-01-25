@@ -189,22 +189,26 @@ __all__ = [
     "update_class_in_file",
     "update_method_in_file",
     # MCP Server
-    "create_app",
-    "run_server",
-    "MCPServerConfig",
+    # [20260125_BUGFIX] These are available via __getattr__ for lazy-loading
+    # noinspection PyUnresolvedReference
+    "create_app",  # type: ignore[reportUnsupportedDunderAll]
+    "run_server",  # type: ignore[reportUnsupportedDunderAll]
+    "MCPServerConfig",  # type: ignore[reportUnsupportedDunderAll]
     # Autonomy (v3.0.0)
-    "ErrorToDiffEngine",
-    "ErrorType",
-    "ErrorAnalysis",
-    "FixHint",
-    "ParsedError",
+    # [20260125_BUGFIX] These are available via __getattr__ for lazy-loading from agents package
+    # noinspection PyUnresolvedReference
+    "ErrorToDiffEngine",  # type: ignore[reportUnsupportedDunderAll]
+    "ErrorType",  # type: ignore[reportUnsupportedDunderAll]
+    "ErrorAnalysis",  # type: ignore[reportUnsupportedDunderAll]
+    "FixHint",  # type: ignore[reportUnsupportedDunderAll]
+    "ParsedError",  # type: ignore[reportUnsupportedDunderAll]
     # MCP tool convenience wrappers
     "extract_code",
     "security_scan",
     "symbolic_execute",
     "generate_unit_tests",
     "simulate_refactor",
-]
+]  # type: ignore[reportUnsupportedDunderAll]
 
 
 # [20251228_FEATURE] Provide sync wrappers around async MCP tool functions.
