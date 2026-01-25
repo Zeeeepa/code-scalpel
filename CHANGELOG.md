@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Planned for v1.0.3+
+- Unified publication workflow (single trigger for all targets)
+- Version auto-detection from pyproject.toml
+- Automated release notes generation from commits
+- Multi-platform smoke tests post-release
+
+---
+
+## [1.0.2] - TBD
+
+### Planned Release Improvements
+- Enhanced publication automation
+- Streamlined release process documentation
+- Multi-platform release verification
+- Release notes best practices
+
+**Status**: Planning phase
+
+---
+
+## [1.0.1] - 2025-01-25
+
+### Added
+- Tier-based request/response governance (Community/Pro/Enterprise)
+- Parameter clamping with applied limits metadata
+- Comprehensive refactor validation report
+- Installation guide for Claude Desktop (INSTALLING_FOR_CLAUDE.md)
+- Release guide documentation (RELEASING.md)
+- Release notes template for future releases (RELEASE_NOTES_TEMPLATE.md)
+- Enhanced backward compatibility documentation (STABLE PUBLIC API designation)
+
+### Fixed
+- Version synchronization: __init__.py now matches pyproject.toml (1.0.1)
+- Deprecated datetime.datetime.now() → datetime.now(timezone.utc) in licensing module (6 locations)
+- Removed version mismatch between package version strings
+
+### Changed
+- Enhanced polyglot module deprecation notice with v3.3.0 timeline
+- Improved error handling consistency across all 22 MCP tools
+- Better tier enforcement validation with get_tool_capabilities()
+
+### Documentation
+- Added REFACTOR_VALIDATION_REPORT.md with tool compliance matrix (100% pass rate)
+- Enhanced stability markers for backward-compatible exports
+- Clear deprecation timelines (v2.0.0, v3.3.0)
+- Comprehensive MCP protocol compliance documentation
+
+### Verified
+- All 22 tools pass 13-point compliance criteria (100%)
+- Zero duplicate implementations (old + new)
+- Zero deprecated imports in active source code
+- All helper functions properly mapped
+
+**Release Date**: 2025-01-25
+**See also**: [RELEASE_NOTES_v1.0.1.md](docs/release_notes/RELEASE_NOTES_v1.0.1.md)
+
+---
+
 ## [1.0.0] - 2026-01-17
 
 ### Initial Public Release

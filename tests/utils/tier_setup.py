@@ -166,3 +166,30 @@ def tier_context(tier: Tier, *, skip_if_missing: bool = False):
         else:
             os.environ["CODE_SCALPEL_TIER"] = prev_tier
         clear_tier_caches()
+
+
+def populate_subprocess_license_env(
+    env: dict, *, license_path: str | None = None, secret: str | None = None
+) -> None:
+    """Populate an env dict used for subprocess invocations with license keys.
+
+    Args:
+        env: mutable environment mapping used by subprocess callers
+        license_path: path to a license JWT file (string) or None to disable
+        secret: HS256 secret key for test licenses (optional)
+
+    This centralizes subprocess env population so tests don't duplicate
+    the exact set of environment variables needed to enable HS256 validation.
+    """
+    if license_path:
+        env.setdefault("CODE_SCALPEL_ALLOW_HS256", "1")
+        if secret:
+            env.setdefault("CODE_SCALPEL_SECRET_KEY", secret)
+        env.setdefault("CODE_SCALPEL_LICENSE_PATH", str(license_path))
+        env.setdefault("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    else:
+        # Explicitly disable discovery to avoid picking up stray licenses on disk
+        env.setdefault("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+        env.pop("CODE_SCALPEL_LICENSE_PATH", None)
+        env.pop("CODE_SCALPEL_SECRET_KEY", None)
+        env.setdefault("CODE_SCALPEL_ALLOW_HS256", "0")

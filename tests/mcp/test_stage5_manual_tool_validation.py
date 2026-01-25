@@ -37,8 +37,9 @@ def _pythonpath_env(repo_root: Path) -> dict[str, str]:
     env.pop("CODE_SCALPEL_TIER", None)
     env.pop("SCALPEL_TIER", None)
     # Ensure determinism even if license files exist on disk.
-    env.setdefault("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
-    env.pop("CODE_SCALPEL_LICENSE_PATH", None)
+    from tests.utils.tier_setup import populate_subprocess_license_env
+
+    populate_subprocess_license_env(env, license_path=None)
     return env
 
 

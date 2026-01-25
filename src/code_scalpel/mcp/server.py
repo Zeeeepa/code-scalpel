@@ -5464,18 +5464,29 @@ if __name__ == "__main__":
 
 
 # ============================================================================
-# BACKWARD-COMPATIBLE RE-EXPORTS
+# BACKWARD-COMPATIBLE RE-EXPORTS (STABLE PUBLIC API)
+# ============================================================================
 # [20260116_REFACTOR] Re-export tool, resource, and prompt functions for backward compatibility
 # Tools, resources, and prompts have been moved to dedicated modules but are
 # re-exported here so existing code (e.g., tests) continues to work.
 #
-# [20260117_DEPRECATE] These re-exports are DEPRECATED. New code should import from:
-#     from code_scalpel.mcp import <symbol>
-# This section will be removed in a future major release.
+# [20260125_STABILITY] IMPORTANT: These re-exports form the stable public API
+# for Code Scalpel v1.0.1 and beyond. DO NOT REMOVE without:
+# 1. 2+ release cycles of deprecation warnings
+# 2. Clear migration path in CHANGELOG and documentation
+# 3. Support for existing external integrations
+#
+# External users may depend on importing tools directly from:
+#     from code_scalpel.mcp.server import analyze_code, security_scan, etc.
+#
+# [20260117_DEPRECATE] New code should import from the new locations:
+#     from code_scalpel.mcp.tools.analyze import analyze_code
+#     from code_scalpel.mcp.tools.security import security_scan
+# But keep these re-exports for backward compatibility.
 # ============================================================================
 
 # [20260119_REFACTOR] Explicit __all__ to silence Pylance "not accessed" warnings
-# These are intentional re-exports for backward compatibility
+# These are intentional re-exports for backward compatibility - KEEP THESE
 __all__ = [
     # Server functions
     "run_server",

@@ -1,18 +1,34 @@
 # Code Scalpel: Surgical Code Operations for AI Agents
 
-**Coming January 2026 | v1.0 Public Release Preview**
+**Latest Release: v1.0.1 | January 25, 2026**
 
 Code Scalpel is the bridge between **Generative AI** and **Reliable Software Engineering**.
 
 It is an **MCP (Model Context Protocol) server** designed to be the primary toolset for AI agents (like Claude, GitHub Copilot, and Cursor) to perceive, analyze, and modify codebases with surgical precision.
 
+## Quick Installation
+
+### For Claude Desktop / VSCode / Cursor Users
+
+```bash
+uvx code-scalpel mcp
+```
+
+Then follow the [Installation Guide for Claude](docs/INSTALLING_FOR_CLAUDE.md) to integrate with your AI assistant.
+
+**Or see all [Installation Options](#installation-options) below.**
+
+---
+
 ## Quick Start (3 Steps)
 
 **New to Code Scalpel?** Start here:
 
-1. **[📖 Beginner's Guide](docs/BEGINNER_GUIDE.md)** — No software experience needed. Plain English explanation of what Code Scalpel is and how to use it.
-2. **[✅ Setup Checklist](docs/SETUP_CHECKLIST.md)** — Step-by-step checklist to get up and running in 5 minutes.
+1. **[📖 Installation Guide for Claude](docs/INSTALLING_FOR_CLAUDE.md)** — Complete setup guide for Claude Desktop, VSCode, and Cursor with step-by-step instructions.
+2. **[✅ Setup Checklist](docs/SETUP_CHECKLIST.md)** — Quick checklist to get up and running in 5 minutes.
 3. **Start asking your AI assistant** — Ask Claude, Copilot, or Cursor to help you with your code.
+
+**Maintainers?** See [Release Guide](docs/RELEASING.md) for publishing to PyPI, GitHub, and VS Code Marketplace.
 
 **Developers?** See [Installation Options](#installation-options) and [Docs](#documentation) below.
 

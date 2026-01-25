@@ -23,7 +23,7 @@ For AI agent integrations:
 # These are convenience APIs used by tier/tooling validation tests.
 
 # [20251225_RELEASE] v3.3.0 - Project Reorganization (Phases 1-4)
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 

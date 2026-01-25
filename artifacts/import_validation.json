@@ -1,0 +1,572 @@
+{
+  "files": [
+    {
+      "file": "code_scalpel/cli.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 432,
+          "text": "from .integrations.rest_api_server import run_server"
+        },
+        {
+          "line": 468,
+          "text": "from .mcp.archive.server import run_server"
+        },
+        {
+          "line": 471,
+          "text": "from .mcp.server import run_server"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/autonomy/engine.py",
+      "category": "other",
+      "deprecated_imports": [
+        {
+          "line": 21,
+          "text": "from code_scalpel.governance import GovernanceConfig, GovernanceConfigLoader",
+          "pattern": "from code_scalpel\\.governance import"
+        }
+      ],
+      "fix_suggestions": [
+        {
+          "original": "from code_scalpel.governance import GovernanceConfig, GovernanceConfigLoader",
+          "suggested": "from code_scalpel.mcp.governance import"
+        }
+      ],
+      "relative_imports": []
+    },
+    {
+      "file": "code_scalpel/config/init_config.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 319,
+          "text": "from ..policy_engine.crypto_verify import CryptographicPolicyVerifier"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/config/__init__.py",
+      "category": "other",
+      "deprecated_imports": [
+        {
+          "line": 9,
+          "text": "from code_scalpel.governance import (",
+          "pattern": "from code_scalpel\\.governance import"
+        }
+      ],
+      "fix_suggestions": [
+        {
+          "original": "from code_scalpel.governance import (",
+          "suggested": "from code_scalpel.mcp.governance import"
+        }
+      ],
+      "relative_imports": []
+    },
+    {
+      "file": "code_scalpel/hooks/claude_hooks.py",
+      "category": "other",
+      "deprecated_imports": [
+        {
+          "line": 224,
+          "text": "from code_scalpel.governance import UnifiedGovernance",
+          "pattern": "from code_scalpel\\.governance import"
+        },
+        {
+          "line": 359,
+          "text": "from code_scalpel.governance import GovernanceContext, Operation",
+          "pattern": "from code_scalpel\\.governance import"
+        },
+        {
+          "line": 362,
+          "text": "from code_scalpel.governance import FileChange",
+          "pattern": "from code_scalpel\\.governance import"
+        }
+      ],
+      "fix_suggestions": [
+        {
+          "original": "from code_scalpel.governance import UnifiedGovernance",
+          "suggested": "from code_scalpel.mcp.governance import"
+        },
+        {
+          "original": "from code_scalpel.governance import GovernanceContext, Operation",
+          "suggested": "from code_scalpel.mcp.governance import"
+        },
+        {
+          "original": "from code_scalpel.governance import FileChange",
+          "suggested": "from code_scalpel.mcp.governance import"
+        }
+      ],
+      "relative_imports": []
+    },
+    {
+      "file": "code_scalpel/integrations/autogen.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 66,
+          "text": "from ..ast_tools.analyzer import ASTAnalyzer"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/integrations/crewai.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 71,
+          "text": "from ..ast_tools.analyzer import ASTAnalyzer"
+        },
+        {
+          "line": 267,
+          "text": "from ..symbolic_execution_tools import SymbolicAnalyzer"
+        },
+        {
+          "line": 354,
+          "text": "from ..symbolic_execution_tools import analyze_security as taint_analyze"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/integrations/__init__.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 19,
+          "text": "from .rest_api_server import MCPServerConfig, create_app"
+        },
+        {
+          "line": 20,
+          "text": "from .rest_api_server import run_server as run_rest_server"
+        },
+        {
+          "line": 69,
+          "text": "from .rest_api_server import MCPServerConfig, create_app"
+        },
+        {
+          "line": 70,
+          "text": "from .rest_api_server import run_server as run_rest_server"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/mcp/__init__.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 54,
+          "text": "from .server import mcp as mcp"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/symbolic_execution_tools/engine.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 20,
+          "text": "from ..ir.nodes import IRFunctionDef, IRModule"
+        },
+        {
+          "line": 21,
+          "text": "from ..ir.normalizers.java_normalizer import JavaNormalizer"
+        },
+        {
+          "line": 22,
+          "text": "from ..ir.normalizers.javascript_normalizer import JavaScriptNormalizer"
+        },
+        {
+          "line": 23,
+          "text": "from ..ir.normalizers.python_normalizer import PythonNormalizer"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/symbolic_execution_tools/ir_interpreter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 62,
+          "text": "from ..ir.nodes import ("
+        },
+        {
+          "line": 86,
+          "text": "from ..ir.operators import BinaryOperator, BoolOperator, CompareOperator, UnaryOperator"
+        },
+        {
+          "line": 819,
+          "text": "from ..ir.operators import AugAssignOperator"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/autonomy/integrations/autogen.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 93,
+          "text": "from ...ast_tools.analyzer import ASTAnalyzer"
+        },
+        {
+          "line": 137,
+          "text": "from ...ast_tools.analyzer import ASTAnalyzer"
+        },
+        {
+          "line": 174,
+          "text": "from ...symbolic_execution_tools import analyze_security"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/autonomy/integrations/crewai.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 65,
+          "text": "from ...ast_tools.analyzer import ASTAnalyzer"
+        },
+        {
+          "line": 152,
+          "text": "from ...ast_tools.analyzer import ASTAnalyzer"
+        },
+        {
+          "line": 192,
+          "text": "from ...ast_tools.analyzer import ASTAnalyzer"
+        },
+        {
+          "line": 261,
+          "text": "from ...symbolic_execution_tools import analyze_security"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/autonomy/integrations/langgraph.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 41,
+          "text": "from ...ast_tools.analyzer import ASTAnalyzer"
+        },
+        {
+          "line": 159,
+          "text": "from ...symbolic_execution_tools import analyze_security"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/adapters/cpp_adapter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 8,
+          "text": "from ..interface import IParser, ParseResult"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/adapters/csharp_adapter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 9,
+          "text": "from ..interface import IParser, ParseResult"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/adapters/go_adapter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 8,
+          "text": "from ..interface import IParser, ParseResult"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/adapters/javascript_adapter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 3,
+          "text": "from ..interface import IParser, Language, ParseResult"
+        },
+        {
+          "line": 7,
+          "text": "from ..base_parser import ParseResult as BaseParseResult"
+        },
+        {
+          "line": 8,
+          "text": "from ..javascript_parsers.javascript_parsers_esprima import ("
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/adapters/java_adapter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 3,
+          "text": "from ..interface import IParser, Language, ParseResult"
+        },
+        {
+          "line": 7,
+          "text": "from ..java_parsers import TreeSitterJavaParser"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/adapters/kotlin_adapter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 9,
+          "text": "from ..interface import IParser, ParseResult"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/adapters/php_adapter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 9,
+          "text": "from ..interface import IParser, ParseResult"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/adapters/ruby_adapter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 9,
+          "text": "from ..interface import IParser, ParseResult"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/adapters/swift_adapter.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 9,
+          "text": "from ..interface import IParser, ParseResult"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/cpp_parsers/cpp_parsers_Clang-Static-Analyzer.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 14,
+          "text": "from .. import base_parser"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/javascript_parsers/javascript_parsers_esprima.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 62,
+          "text": "from ..base_parser import BaseParser, Language, ParseResult, PreprocessorConfig"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/code_parsers/java_parsers/java_parsers_javalang.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 35,
+          "text": "from ..base_parser import BaseParser, Language, ParseResult, PreprocessorConfig"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/integrations/protocol_analyzers/grpc/contract_analyzer.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 40,
+          "text": "from ..schema.drift_detector import ("
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/ir/normalizers/base.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 11,
+          "text": "from ..nodes import IRModule, IRNode"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/ir/normalizers/javascript_normalizer.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 30,
+          "text": "from ..nodes import (  # [20251215_FEATURE] v2.0.0 - New IR nodes for polyglot support"
+        },
+        {
+          "line": 65,
+          "text": "from ..operators import ("
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/ir/normalizers/java_normalizer.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 21,
+          "text": "from ..nodes import (  # [20251214_FEATURE] Add location tracking for polyglot extraction; [20251215_FEATURE] v2.0.0 - Additional nodes for complete Java support"
+        },
+        {
+          "line": 42,
+          "text": "from ..operators import BinaryOperator"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/ir/normalizers/python_normalizer.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 16,
+          "text": "from ..nodes import ("
+        },
+        {
+          "line": 48,
+          "text": "from ..operators import ("
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/ir/normalizers/tree_sitter_visitor.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 46,
+          "text": "from ..nodes import IRNode, SourceLocation"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/ir/normalizers/typescript_normalizer.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 20,
+          "text": "from ..nodes import ("
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/security/analyzers/security_analyzer.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 62,
+          "text": "from ..secrets.secret_scanner import SecretScanner"
+        },
+        {
+          "line": 314,
+          "text": "from ...symbolic_execution_tools.engine import SymbolicAnalyzer"
+        },
+        {
+          "line": 315,
+          "text": "from ...symbolic_execution_tools.type_inference import InferredType"
+        }
+      ]
+    },
+    {
+      "file": "code_scalpel/security/secrets/secret_scanner.py",
+      "category": "other",
+      "deprecated_imports": [],
+      "fix_suggestions": [],
+      "relative_imports": [
+        {
+          "line": 23,
+          "text": "from ..analyzers.taint_tracker import (  # [20251214_FEATURE] v2.0.0 - Variable name patterns"
+        }
+      ]
+    }
+  ],
+  "critical_findings": [],
+  "summary": {
+    "total_files_checked": 396,
+    "files_with_issues": 35,
+    "critical_findings": 0,
+    "total_deprecated_imports": 5,
+    "total_fix_suggestions": 5
+  }
+}

@@ -1,7 +1,16 @@
 """
 Code Scalpel Polyglot Module - Multi-language code analysis.
 
-[20251224_DEPRECATION] v3.2.0 - This module is DEPRECATED.
+⚠️  DEPRECATED MODULE - REMOVAL SCHEDULED FOR v3.3.0
+
+[20251224_DEPRECATION] This module is DEPRECATED since v3.2.0.
+Functionality has been migrated to code_parsers/ for architectural consistency.
+
+REMOVAL TIMELINE:
+- v3.1.x: Active deprecation warnings (current)
+- v3.2.x: Warnings intensify, migration recommended
+- v3.3.0: MODULE WILL BE REMOVED - backward-compatible aliases deleted
+
 Functionality has been migrated to code_parsers/ for architectural consistency:
     - polyglot/extractor.py → code_parsers/extractor.py
     - polyglot/typescript/* → code_parsers/typescript_parsers/
@@ -11,12 +20,12 @@ Functionality has been migrated to code_parsers/ for architectural consistency:
 
 This module provides backward-compatible aliases that will be removed in v3.3.0.
 
-Migration Guide:
-    # Old imports (deprecated):
+MIGRATION GUIDE (migrate before v3.3.0):
+    # Old imports (DEPRECATED - will break in v3.3.0):
     from code_scalpel.polyglot import PolyglotExtractor, Language
     from code_scalpel.polyglot.extractor import detect_language
 
-    # New imports (recommended):
+    # New imports (use now):
     from code_scalpel.code_parsers import PolyglotExtractor, Language
     from code_scalpel.code_parsers.extractor import detect_language
     from code_scalpel.code_parsers.typescript_parsers import TypeScriptParser
