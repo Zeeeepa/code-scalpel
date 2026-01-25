@@ -17,7 +17,7 @@ Usage:
 __version__ = "1.0.2"
 
 try:
-    from .server import create_app, run_server, MCPServerConfig
+    from .server import MCPServerConfig, create_app, run_server
 except ImportError:
     create_app = None
     run_server = None

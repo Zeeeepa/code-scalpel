@@ -11,7 +11,6 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-import json
 from datetime import datetime
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -86,7 +85,7 @@ def smoke_tests(proc):
         if isinstance(params, dict) and params.get("overview"):
             arguments = {}
         req_line = send_jsonrpc(
-            proc, f"tools/call", {"name": method, "arguments": arguments}, id_val=i
+            proc, "tools/call", {"name": method, "arguments": arguments}, id_val=i
         )
         resp_line = read_response(proc, timeout=15.0)
         entry = {"method": method, "req": req_line, "resp": resp_line}

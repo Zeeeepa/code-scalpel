@@ -11,7 +11,6 @@ Tests integration of:
 """
 
 import pytest
-
 from code_scalpel.governance.change_budget import FileChange
 from code_scalpel.governance.change_budget import Operation as BudgetOperation
 from code_scalpel.governance.unified_governance import (

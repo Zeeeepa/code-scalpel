@@ -3,7 +3,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-
 from code_scalpel.policy_engine.policy_engine import (
     Operation,
     PolicyDecision,

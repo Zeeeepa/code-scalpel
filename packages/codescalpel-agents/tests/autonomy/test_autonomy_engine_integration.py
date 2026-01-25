@@ -17,9 +17,9 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from code_scalpel.governance import GovernanceConfigLoader
 
 from codescalpel_agents.autonomy.engine import AutonomyEngine, BlastRadiusCalculator
-from code_scalpel.governance import GovernanceConfigLoader
 
 
 class TestAutonomyEngineIntegration:

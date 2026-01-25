@@ -16,8 +16,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-from codescalpel_agents.autonomy.audit import AutonomyAuditTrail
-from codescalpel_agents.autonomy.fix_loop import FixLoop, FixLoopResult
 from code_scalpel.governance import GovernanceConfig, GovernanceConfigLoader
 from code_scalpel.governance.change_budget import (
     BudgetDecision,
@@ -25,6 +23,9 @@ from code_scalpel.governance.change_budget import (
     FileChange,
     Operation,
 )
+
+from codescalpel_agents.autonomy.audit import AutonomyAuditTrail
+from codescalpel_agents.autonomy.fix_loop import FixLoop, FixLoopResult
 
 
 @dataclass

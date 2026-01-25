@@ -73,14 +73,20 @@ from codescalpel_agents.autonomy.mutation_gate import (
 )
 
 # [20251217_FEATURE] Sandboxed Execution
-from codescalpel_agents.autonomy.sandbox import ExecutionTestResult, FileChange, LintResult
+from codescalpel_agents.autonomy.sandbox import (
+    ExecutionTestResult,
+    FileChange,
+    LintResult,
+)
 from codescalpel_agents.autonomy.sandbox import SandboxExecutor as SandboxExecutorImpl
 from codescalpel_agents.autonomy.sandbox import SandboxResult as SandboxResultImpl
 
 # [20251217_FEATURE] Stubs for external implementations (aliased to avoid conflicts)
 from codescalpel_agents.autonomy.stubs import ErrorAnalysis as StubErrorAnalysis
 from codescalpel_agents.autonomy.stubs import ErrorToDiffEngine as StubErrorToDiffEngine
-from codescalpel_agents.autonomy.stubs import ExecutionTestResult as StubExecutionTestResult
+from codescalpel_agents.autonomy.stubs import (
+    ExecutionTestResult as StubExecutionTestResult,
+)
 from codescalpel_agents.autonomy.stubs import FileChange as StubFileChange
 from codescalpel_agents.autonomy.stubs import FixHint as StubFixHint
 from codescalpel_agents.autonomy.stubs import SandboxExecutor as StubSandboxExecutor

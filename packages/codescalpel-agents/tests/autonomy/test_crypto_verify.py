@@ -9,7 +9,6 @@ import os
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from code_scalpel.policy_engine.crypto_verify import (
     CryptographicPolicyVerifier,
     PolicyManifest,

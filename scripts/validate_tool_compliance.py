@@ -17,13 +17,12 @@ Exit codes:
 
 import argparse
 import ast
-import asyncio
 import csv
 import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 # Expected tools from mcp_validate_22_tools.py
 EXPECTED_TOOLS = {

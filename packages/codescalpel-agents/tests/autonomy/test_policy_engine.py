@@ -16,7 +16,6 @@ import subprocess
 from datetime import datetime, timedelta
 
 import pytest
-
 from code_scalpel.policy_engine import (
     Operation,
     Policy,
@@ -49,7 +48,7 @@ policies:
     description: "Prevent agents from introducing raw SQL queries"
     rule: |
       package scalpel.security
-      
+
       deny[msg] {
         input.operation == "code_edit"
         contains(input.code, "SELECT")
@@ -74,7 +73,7 @@ policies:
     description: "Policy with invalid Rego"
     rule: |
       package scalpel.security
-      
+
       deny[msg {  # Missing closing bracket
         input.operation == "code_edit"
         msg = "Invalid syntax"
@@ -230,7 +229,7 @@ policies:
     description: "Test policy"
     rule: |
       package scalpel.security
-      
+
       deny[msg] {
         input.operation == "code_edit"
         msg = "Test"
@@ -587,7 +586,7 @@ policies:
     description: "Block all forms of SQL injection"
     rule: |
       package scalpel.security
-      
+
       deny[msg] {
         input.operation == "code_edit"
         contains(input.code, "SELECT")

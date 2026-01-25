@@ -219,7 +219,6 @@ class TestOSVClientUncoveredLines:
     def test_query_with_timeout(self):
         """Cover timeout handling."""
         import requests
-
         from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()

@@ -17,7 +17,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
-
 from code_scalpel.policy_engine import (
     AuditLog,
     Operation,

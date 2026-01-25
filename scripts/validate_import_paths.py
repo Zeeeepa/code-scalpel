@@ -21,7 +21,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set
+from typing import Dict, List, Any, Optional
 
 
 class ImportPathValidator:

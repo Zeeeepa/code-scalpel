@@ -12,7 +12,6 @@ Tests cover:
 """
 
 import pytest
-
 from code_scalpel.integrations.protocol_analyzers.kafka.taint_tracker import (
     KafkaAnalysisResult,
     KafkaConsumer,
@@ -106,20 +105,20 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 @Service
 public class UserEventService {
-    
+
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
-    
+
     @KafkaListener(topics = "user-events")
     public void handleUserEvent(String message) {
         processEvent(message);
     }
-    
+
     @KafkaListener(topics = {"orders", "payments"})
     public void handleOrders(String message) {
         processOrder(message);
     }
-    
+
     public void sendEvent(String data) {
         kafkaTemplate.send("user-events", data);
     }
@@ -815,10 +814,10 @@ producer = KafkaProducer(
 
 def handle_request():
     user_input = request.get_json()  # TAINT SOURCE
-    
+
     # Process and send to Kafka - TAINTED!
     producer.send("user-events", value=user_input)
-    
+
     # This is safe
     producer.send("metrics", value={"count": 1})
 """
