@@ -429,7 +429,7 @@ def start_server(host: str = "127.0.0.1", port: int = 5000) -> int:
     [20251223_SECURITY] Default binding is localhost-only.
     Use --host 0.0.0.0 to allow LAN access on trusted networks.
     """
-    from .integrations.rest_api_server import run_server
+    from .integrations.rest_api_server import run_server  # type: ignore[reportAttributeAccessIssue]
 
     print(f"Starting Code Scalpel REST API Server on {host}:{port}")
     print(f"   Health check: http://{host}:{port}/health")
