@@ -136,7 +136,12 @@ def vulnerable(request):
         result = await security_scan(code)
         assert result.success is True
         assert result.has_vulnerabilities is True
-        assert any("SQL" in v.type for v in result.vulnerabilities)
+        # Handle both dict and object forms (due to envelope wrapping converting to dict)
+        vuln_types = [
+            v.get("type") if isinstance(v, dict) else v.type
+            for v in result.vulnerabilities
+        ]
+        assert any("SQL" in vt for vt in vuln_types)
 
     async def test_scan_command_injection(self):
         """Test detecting command injection."""
@@ -151,7 +156,11 @@ def run_command(request):
         result = await security_scan(code)
         assert result.success is True
         assert result.has_vulnerabilities is True
-        assert any("Command" in v.type for v in result.vulnerabilities)
+        vuln_types = [
+            v.get("type") if isinstance(v, dict) else v.type
+            for v in result.vulnerabilities
+        ]
+        assert any("Command" in vt for vt in vuln_types)
 
     async def test_scan_eval_injection(self):
         """Test detecting eval injection."""
@@ -179,9 +188,11 @@ def connect():
         result = await security_scan(code)
         assert result.success is True
         assert result.has_vulnerabilities is True
-        assert any(
-            "Secret" in v.type or "Hardcoded" in v.type for v in result.vulnerabilities
-        )
+        vuln_types = [
+            v.get("type") if isinstance(v, dict) else v.type
+            for v in result.vulnerabilities
+        ]
+        assert any("Secret" in vt or "Hardcoded" in vt for vt in vuln_types)
 
     async def test_scan_empty_code(self):
         """Test scanning empty code."""

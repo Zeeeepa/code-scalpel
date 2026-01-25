@@ -130,6 +130,9 @@ class ToolResponseEnvelope(BaseModel):
 
         Also computes common derived properties that were previously computed
         on Pydantic models but are lost when model_dump() converts to dict.
+
+        [20260125_BUGFIX] When envelope.error is None but tool returns error in data,
+        delegate to data.error for backward compatibility with tests.
         """
         # Avoid infinite recursion - only delegate if data exists and has the attr
         data = object.__getattribute__(self, "data")
@@ -151,6 +154,32 @@ class ToolResponseEnvelope(BaseModel):
         raise AttributeError(
             f"'{type(self).__name__}' object has no attribute '{name}'"
         )
+
+    def __getattribute__(self, name: str) -> Any:
+        """Override attribute access to delegate error/success to data when needed.
+
+        [20260125_BUGFIX] When accessing .error or .success on the envelope,
+        if they are None or unset, check if they exist in data payload for
+        backward compatibility with code written before envelope wrapping.
+        """
+        # Use object.__getattribute__ to avoid recursion
+        value = object.__getattribute__(self, name)
+
+        # For backward compatibility: if error/success are being accessed and
+        # are None/not meaningful, delegate to data
+        if name in ("error", "success") and value is None:
+            try:
+                data = object.__getattribute__(self, "data")
+                if data is not None:
+                    if isinstance(data, dict):
+                        if name in data:
+                            return data[name]
+                    elif hasattr(data, name):
+                        return getattr(data, name)
+            except AttributeError:
+                pass
+
+        return value
 
 
 def _classify_exception(exc: BaseException) -> ErrorCode:
