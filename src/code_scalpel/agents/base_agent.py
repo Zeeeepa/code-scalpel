@@ -102,9 +102,12 @@ class BaseCodeAnalysisAgent(ABC):
 
         Handles both real ToolResponseEnvelope objects and mocked ones.
         """
-        # Check if it's a ToolResponseEnvelope by checking for 'data' and Pydantic markers
-        # (real ToolResponseEnvelope will be a Pydantic BaseModel)
-        if hasattr(result, "data") and hasattr(result, "__pydantic_model__"):
+        # Check if it's a ToolResponseEnvelope by checking for 'data' and Pydantic v2 markers
+        if (
+            hasattr(result, "data")
+            and hasattr(result, "__pydantic_fields__")
+            and hasattr(result, "tool_id")
+        ):
             # It's a real ToolResponseEnvelope
             data = result.data
             if isinstance(data, dict):
