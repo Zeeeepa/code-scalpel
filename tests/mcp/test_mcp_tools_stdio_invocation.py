@@ -8,6 +8,7 @@ import anyio
 import mcp.types as mcp_types
 import pytest
 from anyio.streams.text import TextReceiveStream
+from tests.utils.license_helpers import populate_subprocess_env
 from mcp import StdioServerParameters
 from mcp.client.session import ClientSession
 from mcp.shared.message import SessionMessage
@@ -60,7 +61,7 @@ def _with_hs256_test_license_env(
     # passed to `anyio.open_process`, so populate the minimal vars here.
     env["CODE_SCALPEL_ALLOW_HS256"] = "1"
     env.setdefault("CODE_SCALPEL_SECRET_KEY", secret)
-    env.setdefault("CODE_SCALPEL_LICENSE_PATH", str(license_path))
+    env["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
     env.setdefault("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
 
@@ -260,7 +261,13 @@ async def test_mcp_stdio_invokes_all_tools(tmp_path: Path):
 
     env = _pythonpath_env(repo_root)
     # Populate subprocess env using helper (keeps test logic in one place).
-    _with_hs256_test_license_env(env, tmp_path, tier="enterprise")
+    # Prefer using reusable helper from tests.utils.tier_setup for subprocess env
+    try:
+        # Populate subprocess env using helper (keeps test logic in one place).
+        populate_subprocess_env(env, tmp_path, state="enterprise")
+    except Exception:
+        # Fallback to local helper
+        _with_hs256_test_license_env(env, tmp_path, tier="enterprise")
     env["SCALPEL_MANIFEST_SECRET"] = policy_secret
 
     params = StdioServerParameters(
