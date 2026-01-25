@@ -230,8 +230,11 @@ class TestCLILicenseInstall:
         dest = tmp_path / "installed.jwt"
 
         env = os.environ.copy()
-        env["CODE_SCALPEL_ALLOW_HS256"] = "1"
-        env["CODE_SCALPEL_SECRET_KEY"] = "test_secret_key_12345"
+        # Use centralized test fixture env keys when invoking subprocesses.
+        # Prefer centralized test fixtures in `tests.conftest.use_license` when
+        # possible; subprocess-based CLI tests still need minimal env flags here.
+        env.setdefault("CODE_SCALPEL_ALLOW_HS256", "1")
+        env.setdefault("CODE_SCALPEL_SECRET_KEY", "test_secret_key_12345")
 
         result = subprocess.run(
             [
@@ -270,8 +273,8 @@ class TestCLILicenseInstall:
         dest.write_text("already")
 
         env = os.environ.copy()
-        env["CODE_SCALPEL_ALLOW_HS256"] = "1"
-        env["CODE_SCALPEL_SECRET_KEY"] = "test_secret_key_12345"
+        env.setdefault("CODE_SCALPEL_ALLOW_HS256", "1")
+        env.setdefault("CODE_SCALPEL_SECRET_KEY", "test_secret_key_12345")
 
         result = subprocess.run(
             [

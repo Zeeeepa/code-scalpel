@@ -1,0 +1,14 @@
+{
+  "tool": "get_call_graph",
+  "primary_module": "src/code_scalpel/ast_tools/call_graph.py",
+  "tier_availability": "All tiers (Community, Pro, Enterprise)",
+  "overview": "The `get_call_graph` tool generates call graphs showing function relationships, entry points, and circular dependencies across codebases. Call graphs are fundamental for understanding program structure, enabling refactoring impact analysis, dead code detection, and security auditing (tracking data flow paths to sensitive sinks).",
+  "generated_at": "2026-01-24T22:22:18.810635Z",
+  "tests": {
+    "happy_path": {
+      "note": "Auto-generated; fill in params as needed"
+    },
+    "edge_cases": [],
+    "invalid_inputs": []
+  }
+}

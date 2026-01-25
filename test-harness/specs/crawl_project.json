@@ -1,0 +1,14 @@
+{
+  "tool": "crawl_project",
+  "primary_module": "src/code_scalpel/analysis/project_crawler.py",
+  "tier_availability": "All tiers (Community, Pro, Enterprise)",
+  "overview": "The `crawl_project` tool analyzes entire project directories, providing structure, complexity, and (Enterprise) compliance-oriented signals.",
+  "generated_at": "2026-01-24T22:22:18.810635Z",
+  "tests": {
+    "happy_path": {
+      "note": "Auto-generated; fill in params as needed"
+    },
+    "edge_cases": [],
+    "invalid_inputs": []
+  }
+}

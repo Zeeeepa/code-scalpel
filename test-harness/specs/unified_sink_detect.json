@@ -1,0 +1,14 @@
+{
+  "tool": "unified_sink_detect",
+  "primary_module": "src/code_scalpel/mcp/server.py",
+  "tier_availability": "All tiers (Community, Pro, Enterprise)",
+  "overview": "The `unified_sink_detect` tool detects dangerous sinks (eval, execute, system, etc.) across multiple languages with confidence thresholds and CWE mapping.",
+  "generated_at": "2026-01-24T22:22:18.810635Z",
+  "tests": {
+    "happy_path": {
+      "note": "Auto-generated; fill in params as needed"
+    },
+    "edge_cases": [],
+    "invalid_inputs": []
+  }
+}

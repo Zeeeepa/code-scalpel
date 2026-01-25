@@ -1,0 +1,14 @@
+{
+  "tool": "code_policy_check",
+  "primary_module": "src/code_scalpel/policy_engine/code_policy_check/analyzer.py",
+  "tier_availability": "Community, Pro, Enterprise",
+  "overview": "The `code_policy_check` tool checks code against style guides, best practices, and compliance standards. Tiered feature set from basic style checks to comprehensive compliance auditing.",
+  "generated_at": "2026-01-24T22:22:18.810635Z",
+  "tests": {
+    "happy_path": {
+      "note": "Auto-generated; fill in params as needed"
+    },
+    "edge_cases": [],
+    "invalid_inputs": []
+  }
+}

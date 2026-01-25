@@ -55,6 +55,9 @@ def _with_hs256_test_license_env(
     license_path = tmp_path / f"license_{tier}.jwt"
     license_path.write_text(token + "\n", encoding="utf-8")
 
+    # Prefer tests to use the centralized `use_license` fixture where possible.
+    # For subprocess-based tests we still need to set env values in the dict
+    # passed to `anyio.open_process`, so populate the minimal vars here.
     env["CODE_SCALPEL_ALLOW_HS256"] = "1"
     env["CODE_SCALPEL_SECRET_KEY"] = secret
     env["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)

@@ -1,0 +1,14 @@
+{
+  "tool": "get_symbol_references",
+  "primary_module": "src/code_scalpel/mcp/server.py",
+  "tier_availability": "All tiers (Community, Pro, Enterprise)",
+  "overview": "The `get_symbol_references` tool finds all references to a symbol (function, class, variable) across the project for safe refactoring and impact analysis.",
+  "generated_at": "2026-01-24T22:22:18.810635Z",
+  "tests": {
+    "happy_path": {
+      "note": "Auto-generated; fill in params as needed"
+    },
+    "edge_cases": [],
+    "invalid_inputs": []
+  }
+}

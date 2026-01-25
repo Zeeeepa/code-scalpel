@@ -1,0 +1,14 @@
+{
+  "tool": "get_cross_file_dependencies",
+  "primary_module": null,
+  "tier_availability": "All tiers (Community, Pro, Enterprise)",
+  "overview": "The `get_cross_file_dependencies` tool analyzes import/require statements and traces dependency chains across file boundaries with confidence scoring. It extracts complete code context for AI-assisted editing by following import chains and providing confidence-decayed scores for deep dependencies.",
+  "generated_at": "2026-01-24T22:22:18.810635Z",
+  "tests": {
+    "happy_path": {
+      "note": "Auto-generated; fill in params as needed"
+    },
+    "edge_cases": [],
+    "invalid_inputs": []
+  }
+}

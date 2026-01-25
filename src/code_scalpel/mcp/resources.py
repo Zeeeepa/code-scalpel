@@ -479,25 +479,53 @@ async def get_code_resource(language: str, module: str, symbol: str) -> str:
                 }
             )
 
-        # Return full result with metadata
+        # Unwrap tool envelope when callers return a ToolResponseEnvelope so
+        # resource templates remain compatible with both older direct result
+        # models and the newer envelope-wrapped tool outputs.
+        payload = result
+        # If the tool returned an envelope, prefer the inner data payload.
+        try:
+            if hasattr(result, "data") and result.data is not None:
+                payload = result.data
+        except Exception:
+            payload = result
+
+        # Helper to read an attribute from either an object or a dict fallback.
+        def _get(attr, default=None):
+            try:
+                if hasattr(payload, attr):
+                    return getattr(payload, attr)
+            except Exception:
+                pass
+            try:
+                if isinstance(payload, dict):
+                    return payload.get(attr, default)
+            except Exception:
+                pass
+            try:
+                return getattr(result, attr)
+            except Exception:
+                return default
+
+        full_code = _get("full_code", "")
         return json.dumps(
             {
                 "uri": f"code:///{language}/{module}/{symbol}",
                 "mimeType": get_mime_type(language),
-                "code": result.full_code,
+                "code": full_code,
                 "metadata": {
                     "file_path": str(file_path),
                     "language": language,
                     "module": module,
                     "symbol": symbol,
-                    "line_start": result.line_start,
-                    "line_end": result.line_end,
-                    "token_estimate": result.token_estimate,
+                    "line_start": _get("line_start"),
+                    "line_end": _get("line_end"),
+                    "token_estimate": _get("token_estimate", 0),
                     # JSX/TSX metadata
-                    "jsx_normalized": result.jsx_normalized,
-                    "is_server_component": result.is_server_component,
-                    "is_server_action": result.is_server_action,
-                    "component_type": result.component_type,
+                    "jsx_normalized": _get("jsx_normalized", False),
+                    "is_server_component": _get("is_server_component", False),
+                    "is_server_action": _get("is_server_action", False),
+                    "component_type": _get("component_type"),
                 },
             },
             indent=2,

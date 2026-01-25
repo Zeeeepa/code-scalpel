@@ -1,0 +1,14 @@
+{
+  "tool": "cross_file_security_scan",
+  "primary_module": "src/code_scalpel/security/analyzers/cross_file_taint.py",
+  "tier_availability": "All tiers (Community, Pro, Enterprise)",
+  "overview": "The `cross_file_security_scan` tool tracks tainted data flow across file and module boundaries. Essential for detecting vulnerabilities that span multiple files.",
+  "generated_at": "2026-01-24T22:22:18.810635Z",
+  "tests": {
+    "happy_path": {
+      "note": "Auto-generated; fill in params as needed"
+    },
+    "edge_cases": [],
+    "invalid_inputs": []
+  }
+}

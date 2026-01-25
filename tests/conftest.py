@@ -453,3 +453,42 @@ def hs256_license_state_paths(tmp_path, write_hs256_license_jwt, write_hs256_crl
         "expired": expired,
         "revoked": (revoked_license, revoked_crl),
     }
+
+
+@pytest.fixture(scope="function")
+def use_license(monkeypatch, hs256_license_state_paths, set_hs256_license_env):
+    """Helper to apply a named HS256 license state for a test.
+
+    Usage:
+        use_license("valid")      # valid license
+        use_license("expired")    # expired license
+        use_license("revoked")    # revoked license + crl
+        use_license("missing")    # no license
+
+    This centralizes env var setup so tests can opt-in to the desired
+    license scenario without duplicating monkeypatch logic.
+    """
+
+    def _apply(state: str = "valid") -> None:
+        state = (state or "valid").lower()
+        if state not in hs256_license_state_paths:
+            raise ValueError(f"Unknown license state: {state}")
+
+        if state == "missing" or hs256_license_state_paths[state] is None:
+            # Ensure license discovery is disabled for missing state
+            monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
+            monkeypatch.delenv("CODE_SCALPEL_SECRET_KEY", raising=False)
+            monkeypatch.delenv("CODE_SCALPEL_LICENSE_CRL_PATH", raising=False)
+            monkeypatch.setenv("CODE_SCALPEL_ALLOW_HS256", "0")
+            return
+
+        if state == "revoked":
+            lic_path, crl_path = hs256_license_state_paths["revoked"]
+            set_hs256_license_env(license_path=str(lic_path), crl_path=str(crl_path))
+            return
+
+        # valid or expired
+        path = hs256_license_state_paths[state]
+        set_hs256_license_env(license_path=str(path))
+
+    return _apply

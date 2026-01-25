@@ -1,0 +1,14 @@
+{
+  "tool": "simulate_refactor",
+  "primary_module": "src/code_scalpel/generators/refactor_simulator.py",
+  "tier_availability": "All tiers (Community, Pro, Enterprise)",
+  "overview": "The `simulate_refactor` tool verifies code changes are safe before applying them by detecting security issues and structural changes that could break functionality.",
+  "generated_at": "2026-01-24T22:22:18.810635Z",
+  "tests": {
+    "happy_path": {
+      "note": "Auto-generated; fill in params as needed"
+    },
+    "edge_cases": [],
+    "invalid_inputs": []
+  }
+}
