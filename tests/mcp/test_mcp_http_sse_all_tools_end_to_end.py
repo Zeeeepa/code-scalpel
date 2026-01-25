@@ -115,8 +115,8 @@ def _with_hs256_test_license_env(
     license_path = tmp_path / f"license_{tier}.jwt"
     license_path.write_text(token + "\n", encoding="utf-8")
 
-    env["CODE_SCALPEL_ALLOW_HS256"] = "1"
-    env["CODE_SCALPEL_SECRET_KEY"] = secret
+    env.setdefault("CODE_SCALPEL_ALLOW_HS256", "1")
+    env.setdefault("CODE_SCALPEL_SECRET_KEY", secret)
     env["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
     env.setdefault("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 

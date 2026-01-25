@@ -59,8 +59,8 @@ def _with_hs256_test_license_env(
     # For subprocess-based tests we still need to set env values in the dict
     # passed to `anyio.open_process`, so populate the minimal vars here.
     env["CODE_SCALPEL_ALLOW_HS256"] = "1"
-    env["CODE_SCALPEL_SECRET_KEY"] = secret
-    env["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
+    env.setdefault("CODE_SCALPEL_SECRET_KEY", secret)
+    env.setdefault("CODE_SCALPEL_LICENSE_PATH", str(license_path))
     env.setdefault("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
 
@@ -259,6 +259,7 @@ async def test_mcp_stdio_invokes_all_tools(tmp_path: Path):
     _write_signed_policy_manifest(paths["policy_dir"], policy_secret)
 
     env = _pythonpath_env(repo_root)
+    # Populate subprocess env using helper (keeps test logic in one place).
     _with_hs256_test_license_env(env, tmp_path, tier="enterprise")
     env["SCALPEL_MANIFEST_SECRET"] = policy_secret
 
