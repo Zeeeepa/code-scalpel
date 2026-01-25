@@ -1510,9 +1510,13 @@ class MyClass:
         assert result.success is True
         assert result.language == "python"
         assert result.line_count > 0
-        # [20260104_BUGFIX] Functions/classes are FunctionInfo/ClassInfo objects
-        function_names = [f.name if hasattr(f, "name") else f for f in result.functions]
-        class_names = [c.name if hasattr(c, "name") else c for c in result.classes]
+        # [20260104_BUGFIX] Functions/classes may be dicts (from envelope) or objects
+        function_names = [
+            f["name"] if isinstance(f, dict) else f.name for f in result.functions
+        ]
+        class_names = [
+            c["name"] if isinstance(c, dict) else c.name for c in result.classes
+        ]
         assert "helper_function" in function_names
         assert "MyClass" in class_names
         assert "os" in result.imports
@@ -1643,7 +1647,20 @@ def create_user(name):
 
         assert result.success is True
         assert result.total_references >= 2  # Definition + 1 usage
-        assert any(ref.is_definition for ref in result.references)
+        # References may be dicts (from envelope) or objects
+        for ref in result.references:
+            ref_dict = ref if isinstance(ref, dict) else ref
+            is_def = (
+                ref_dict.get("is_definition")
+                if isinstance(ref, dict)
+                else ref.is_definition
+            )
+            if is_def:
+                break
+        assert any(
+            (r.get("is_definition") if isinstance(r, dict) else r.is_definition)
+            for r in result.references
+        )
 
     async def test_symbol_not_found(self, tmp_path):
         """Test behavior when symbol is not found."""
@@ -1682,9 +1699,11 @@ result = target_function()
 
         assert result.success is True
         # All references should have context
+        # References may be dicts (from envelope) or objects
         for ref in result.references:
-            assert ref.context != ""
-            assert "target_function" in ref.context
+            context = ref.get("context") if isinstance(ref, dict) else ref.context
+            assert context != ""
+            assert "target_function" in context
 
 
 # ============================================================================
@@ -1831,7 +1850,11 @@ def func_b():
 
         assert result.success is False
         assert result.error is not None
-        assert "not found" in result.error.lower()
+        # error may be a string or ToolError object; extract string either way
+        error_msg = (
+            result.error.error if hasattr(result.error, "error") else result.error
+        )
+        assert "not found" in error_msg.lower()
 
     async def test_invalid_project_root(self):
         """Test handling of invalid project root."""
