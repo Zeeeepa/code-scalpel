@@ -266,4 +266,10 @@ function add(a, b) {
 
         assert result.success is True
         assert result.jsx_normalized is False
-        assert result.component_type is None
+        # component_type may not be present if filtered out - access safely
+        component_type = (
+            result.data.get("component_type")
+            if isinstance(result.data, dict)
+            else getattr(result, "component_type", None)
+        )
+        assert component_type is None

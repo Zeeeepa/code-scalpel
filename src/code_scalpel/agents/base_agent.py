@@ -102,13 +102,9 @@ class BaseCodeAnalysisAgent(ABC):
 
         Handles both real ToolResponseEnvelope objects and mocked ones.
         """
-        # Check if it has both 'data' and 'tool_id' AND 'data' is not auto-generated
-        # (real ToolResponseEnvelope will have tool_id as a real attribute)
-        if (
-            hasattr(result, "data")
-            and hasattr(result, "tool_id")
-            and "tool_id" in getattr(result, "__dict__", {})
-        ):
+        # Check if it's a ToolResponseEnvelope by checking for 'data' and Pydantic markers
+        # (real ToolResponseEnvelope will be a Pydantic BaseModel)
+        if hasattr(result, "data") and hasattr(result, "__pydantic_model__"):
             # It's a real ToolResponseEnvelope
             data = result.data
             if isinstance(data, dict):
@@ -183,15 +179,7 @@ class BaseCodeAnalysisAgent(ABC):
             result = await simulate_refactor(original_code, new_code)
             self.context.add_operation("simulate_change", result, True)
             # Return the data payload, not the envelope
-            return (
-                result.data
-                if isinstance(result.data, dict)
-                else (
-                    result.data.model_dump()
-                    if hasattr(result.data, "model_dump")
-                    else result.data
-                )
-            )
+            return self._extract_envelope_data(result)
         except Exception as e:
             self.logger.error(f"Failed to simulate change: {e}")
             self.context.add_operation("simulate_change", str(e), False)
