@@ -283,7 +283,8 @@ class ResponseConfig:
             # Many MCP clients (and our contract tests) depend on `success` being present
             # in the tool-specific payload, even when token-efficiency exclusions are
             # enabled.
-            if key == "success":
+            # [20260125_BUGFIX] Also preserve backup_path for update_symbol contract.
+            if key in ("success", "backup_path"):
                 filtered[key] = value
                 continue
 

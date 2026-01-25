@@ -97,6 +97,32 @@ class BaseCodeAnalysisAgent(ABC):
         self.logger.addHandler(handler)
         self.logger.setLevel(logging.INFO)
 
+    def _extract_envelope_data(self, result: Any) -> Dict[str, Any]:
+        """Extract data from a ToolResponseEnvelope or return as-is.
+
+        Handles both real ToolResponseEnvelope objects and mocked ones.
+        """
+        # Check if it has both 'data' and 'tool_id' AND 'data' is not auto-generated
+        # (real ToolResponseEnvelope will have tool_id as a real attribute)
+        if (
+            hasattr(result, "data")
+            and hasattr(result, "tool_id")
+            and "tool_id" in getattr(result, "__dict__", {})
+        ):
+            # It's a real ToolResponseEnvelope
+            data = result.data
+            if isinstance(data, dict):
+                return data
+            elif hasattr(data, "model_dump"):
+                return data.model_dump()
+            else:
+                return data
+        # If it has model_dump (likely a mock or old Pydantic model), call it
+        elif callable(getattr(result, "model_dump", None)):
+            return result.model_dump()
+        # Otherwise return as-is (should be a dict)
+        return result
+
     # MCP Tool Integration Methods
 
     async def observe_file(self, file_path: str) -> Dict[str, Any]:
@@ -104,7 +130,7 @@ class BaseCodeAnalysisAgent(ABC):
         try:
             result = await get_file_context(file_path)
             self.context.add_operation("observe_file", result, result.success)
-            return result.model_dump()
+            return self._extract_envelope_data(result)
         except Exception as e:
             self.logger.error(f"Failed to observe file {file_path}: {e}")
             self.context.add_operation("observe_file", str(e), False)
@@ -117,7 +143,7 @@ class BaseCodeAnalysisAgent(ABC):
         try:
             result = await get_symbol_references(symbol_name, project_root)
             self.context.add_operation("find_symbol_usage", result, result.success)
-            return result.model_dump()
+            return self._extract_envelope_data(result)
         except Exception as e:
             self.logger.error(f"Failed to find symbol {symbol_name}: {e}")
             self.context.add_operation("find_symbol_usage", str(e), False)
@@ -130,7 +156,7 @@ class BaseCodeAnalysisAgent(ABC):
 
             result = await security_scan(code)
             self.context.add_operation("analyze_security", result, True)
-            return result.model_dump()
+            return self._extract_envelope_data(result)
         except Exception as e:
             self.logger.error(f"Failed to analyze security: {e}")
             self.context.add_operation("analyze_security", str(e), False)
@@ -143,7 +169,7 @@ class BaseCodeAnalysisAgent(ABC):
         try:
             result = await extract_code(file_path, "function", function_name)
             self.context.add_operation("extract_function", result, result.success)
-            return result.model_dump()
+            return self._extract_envelope_data(result)
         except Exception as e:
             self.logger.error(f"Failed to extract function {function_name}: {e}")
             self.context.add_operation("extract_function", str(e), False)
@@ -156,7 +182,16 @@ class BaseCodeAnalysisAgent(ABC):
         try:
             result = await simulate_refactor(original_code, new_code)
             self.context.add_operation("simulate_change", result, True)
-            return result.model_dump()
+            # Return the data payload, not the envelope
+            return (
+                result.data
+                if isinstance(result.data, dict)
+                else (
+                    result.data.model_dump()
+                    if hasattr(result.data, "model_dump")
+                    else result.data
+                )
+            )
         except Exception as e:
             self.logger.error(f"Failed to simulate change: {e}")
             self.context.add_operation("simulate_change", str(e), False)
@@ -169,7 +204,7 @@ class BaseCodeAnalysisAgent(ABC):
         try:
             result = await update_symbol(file_path, target_type, target_name, new_code)
             self.context.add_operation("apply_change", result, result.success)
-            return result.model_dump()
+            return self._extract_envelope_data(result)
         except Exception as e:
             self.logger.error(f"Failed to apply change: {e}")
             self.context.add_operation("apply_change", str(e), False)

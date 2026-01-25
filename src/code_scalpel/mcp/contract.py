@@ -292,7 +292,10 @@ def make_envelope(
     normalized_data = data
     try:
         if isinstance(data, BaseModel):
-            normalized_data = data.model_dump(mode="json", exclude_none=True)
+            # [20260125_BUGFIX] Don't exclude None values before filtering - some fields
+            # like backup_path need to be preserved even when None for contract compliance.
+            # The response filter will decide whether to exclude them based on config.
+            normalized_data = data.model_dump(mode="json", exclude_none=False)
     except Exception:
         normalized_data = data
 

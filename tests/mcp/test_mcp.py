@@ -393,10 +393,11 @@ class TestMCPIntegration:
 
     async def test_large_code_rejection(self):
         """Test rejection of code exceeding size limit."""
-        from code_scalpel.mcp.server import MAX_CODE_SIZE, analyze_code
+        from code_scalpel.mcp.helpers.analyze_helpers import MAX_CODE_SIZE
+        from code_scalpel.mcp.tools.analyze import analyze_code
 
         # Create code exceeding limit
-        large_code = "x = 1\n" * (MAX_CODE_SIZE // 5)
+        large_code = "x = 1\n" * ((MAX_CODE_SIZE // 6) + 1)  # +1 to exceed limit
         result = await analyze_code(large_code)
         assert result.success is False
         assert "size" in result.error.lower() or "exceed" in result.error.lower()
