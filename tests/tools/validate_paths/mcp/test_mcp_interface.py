@@ -281,9 +281,12 @@ class TestValidatePathsMCPEnterpriseTierInterface:
         monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
         tool = mcp._tool_manager._tools.get("validate_paths")
-        result = await tool.fn(paths=["../escape.txt"], project_root=str(tmp_path))
-        assert hasattr(result, "traversal_vulnerabilities")
-        assert hasattr(result, "boundary_violations")
+        response = await tool.fn(paths=["../escape.txt"], project_root=str(tmp_path))
+        # tool.fn() returns a ToolResponseEnvelope, unwrap it to get the PathValidationResult
+        result = response.data
+        # result is a dict, check for the fields
+        assert "traversal_vulnerabilities" in result
+        assert "boundary_violations" in result
 
 
 if __name__ == "__main__":

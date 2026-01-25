@@ -5,7 +5,16 @@ import time
 
 import pytest
 
-from code_scalpel.mcp import server as mcp_server
+from code_scalpel.mcp.tools.policy import validate_paths
+from code_scalpel.mcp.models.policy import PathValidationResult
+
+
+def _unwrap_envelope_data(envelope_result):
+    """Extract data from ToolResponseEnvelope, handling both dict and model types."""
+    data = envelope_result.data
+    if isinstance(data, dict):
+        return data
+    return data.model_dump() if hasattr(data, "model_dump") else data
 
 
 @pytest.mark.asyncio
@@ -16,7 +25,7 @@ async def test_validate_paths_offloads_and_does_not_block_loop(monkeypatch):
     def slow_validate_paths_sync(paths, project_root, tier, capabilities):
         call_started.set()
         time.sleep(0.2)
-        return mcp_server.PathValidationResult(
+        return PathValidationResult(
             success=False,
             accessible=[],
             inaccessible=list(paths),
@@ -30,9 +39,13 @@ async def test_validate_paths_offloads_and_does_not_block_loop(monkeypatch):
             security_score=None,
         )
 
-    monkeypatch.setattr(mcp_server, "_validate_paths_sync", slow_validate_paths_sync)
+    # Patch the function in the module that actually uses it (policy.py)
+    monkeypatch.setattr(
+        "code_scalpel.mcp.tools.policy._validate_paths_sync",
+        slow_validate_paths_sync,
+    )
 
-    slow_task = asyncio.create_task(mcp_server.validate_paths(paths=["/tmp/slow"]))
+    slow_task = asyncio.create_task(validate_paths(paths=["/tmp/slow"]))
     heartbeat = asyncio.create_task(asyncio.sleep(0.05))
 
     await call_started.wait()
@@ -40,7 +53,9 @@ async def test_validate_paths_offloads_and_does_not_block_loop(monkeypatch):
     await asyncio.wait_for(heartbeat, timeout=0.2)
 
     result = await asyncio.wait_for(slow_task, timeout=1.0)
-    assert result.inaccessible == ["/tmp/slow"]
+    # validate_paths returns a ToolResponseEnvelope, unwrap it
+    data = _unwrap_envelope_data(result)
+    assert data.get("inaccessible") == ["/tmp/slow"]
 
 
 @pytest.mark.asyncio
@@ -52,12 +67,12 @@ async def test_validate_paths_handles_concurrent_requests():
         ["/tmp/d", "/tmp/e", "/tmp/f"],
     ]
 
-    results = await asyncio.gather(
-        *(mcp_server.validate_paths(paths=batch) for batch in batches)
-    )
+    results = await asyncio.gather(*(validate_paths(paths=batch) for batch in batches))
 
     for batch, result in zip(batches, results, strict=False):
-        total = len(result.accessible) + len(result.inaccessible)
+        total = len(_unwrap_envelope_data(result).get("accessible", [])) + len(
+            _unwrap_envelope_data(result).get("inaccessible", [])
+        )
         assert total == len(batch)
 
 
@@ -67,7 +82,7 @@ async def test_validate_paths_timeout_propagates_cleanly(monkeypatch):
 
     def very_slow_validate_paths_sync(paths, project_root, tier, capabilities):
         time.sleep(1.0)
-        return mcp_server.PathValidationResult(
+        return PathValidationResult(
             success=False,
             accessible=[],
             inaccessible=list(paths),
@@ -82,13 +97,12 @@ async def test_validate_paths_timeout_propagates_cleanly(monkeypatch):
         )
 
     monkeypatch.setattr(
-        mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync
+        "code_scalpel.mcp.tools.policy._validate_paths_sync",
+        very_slow_validate_paths_sync,
     )
 
     with pytest.raises(asyncio.TimeoutError):
-        await asyncio.wait_for(
-            mcp_server.validate_paths(paths=["/tmp/very-slow"]), timeout=0.05
-        )
+        await asyncio.wait_for(validate_paths(paths=["/tmp/very-slow"]), timeout=0.05)
 
 
 @pytest.mark.asyncio
@@ -97,7 +111,7 @@ async def test_validate_paths_timeout_respects_tier_limit(monkeypatch):
 
     def very_slow_validate_paths_sync(paths, project_root, tier, capabilities):
         time.sleep(1.0)
-        return mcp_server.PathValidationResult(
+        return PathValidationResult(
             success=False,
             accessible=[],
             inaccessible=list(paths),
@@ -112,7 +126,8 @@ async def test_validate_paths_timeout_respects_tier_limit(monkeypatch):
         )
 
     monkeypatch.setattr(
-        mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync
+        "code_scalpel.mcp.tools.policy._validate_paths_sync",
+        very_slow_validate_paths_sync,
     )
 
     tier_limits = {
@@ -120,14 +135,15 @@ async def test_validate_paths_timeout_respects_tier_limit(monkeypatch):
         "limits": {"timeout_seconds": 0.05},
     }
     monkeypatch.setattr(
-        mcp_server, "get_tool_capabilities", lambda tool, tier: tier_limits
+        "code_scalpel.licensing.features.get_tool_capabilities",
+        lambda tool, tier: tier_limits,
     )
 
     timeout_seconds = tier_limits["limits"]["timeout_seconds"]
 
     with pytest.raises(asyncio.TimeoutError):
         await asyncio.wait_for(
-            mcp_server.validate_paths(paths=["/tmp/very-slow-tiered"]),
+            validate_paths(paths=["/tmp/very-slow-tiered"]),
             timeout=timeout_seconds,
         )
 
@@ -137,7 +153,7 @@ async def test_validate_paths_10_concurrent_requests(monkeypatch):
     """Ten concurrent calls should complete and return the right counts."""
 
     def fast_validate_paths_sync(paths, project_root, tier, capabilities):
-        return mcp_server.PathValidationResult(
+        return PathValidationResult(
             success=False,
             accessible=[],
             inaccessible=list(paths),
@@ -151,15 +167,18 @@ async def test_validate_paths_10_concurrent_requests(monkeypatch):
             security_score=None,
         )
 
-    monkeypatch.setattr(mcp_server, "_validate_paths_sync", fast_validate_paths_sync)
-
-    batches = [[f"/tmp/p-{i}-{j}" for j in range(3)] for i in range(10)]
-    results = await asyncio.gather(
-        *(mcp_server.validate_paths(paths=batch) for batch in batches)
+    monkeypatch.setattr(
+        "code_scalpel.mcp.tools.policy._validate_paths_sync",
+        fast_validate_paths_sync,
     )
 
+    batches = [[f"/tmp/p-{i}-{j}" for j in range(3)] for i in range(10)]
+    results = await asyncio.gather(*(validate_paths(paths=batch) for batch in batches))
+
     for batch, result in zip(batches, results, strict=False):
-        total = len(result.accessible) + len(result.inaccessible)
+        total = len(_unwrap_envelope_data(result).get("accessible", [])) + len(
+            _unwrap_envelope_data(result).get("inaccessible", [])
+        )
         assert total == len(batch)
 
 
@@ -168,7 +187,7 @@ async def test_validate_paths_100_sequential_requests(monkeypatch):
     """One hundred sequential calls should not degrade or leak state."""
 
     def fast_validate_paths_sync(paths, project_root, tier, capabilities):
-        return mcp_server.PathValidationResult(
+        return PathValidationResult(
             success=False,
             accessible=[],
             inaccessible=list(paths),
@@ -182,12 +201,17 @@ async def test_validate_paths_100_sequential_requests(monkeypatch):
             security_score=None,
         )
 
-    monkeypatch.setattr(mcp_server, "_validate_paths_sync", fast_validate_paths_sync)
+    monkeypatch.setattr(
+        "code_scalpel.mcp.tools.policy._validate_paths_sync",
+        fast_validate_paths_sync,
+    )
 
     for i in range(100):
         batch = [f"/tmp/seq-{i}"]
-        result = await mcp_server.validate_paths(paths=batch)
-        total = len(result.accessible) + len(result.inaccessible)
+        result = await validate_paths(paths=batch)
+        total = len(_unwrap_envelope_data(result).get("accessible", [])) + len(
+            _unwrap_envelope_data(result).get("inaccessible", [])
+        )
         assert total == len(batch)
 
 
@@ -196,7 +220,7 @@ async def test_validate_paths_response_time_small_medium_large(monkeypatch):
     """Small/medium/large batches should complete within generous bounds."""
 
     def fast_validate_paths_sync(paths, project_root, tier, capabilities):
-        return mcp_server.PathValidationResult(
+        return PathValidationResult(
             success=False,
             accessible=[],
             inaccessible=list(paths),
@@ -210,10 +234,12 @@ async def test_validate_paths_response_time_small_medium_large(monkeypatch):
             security_score=None,
         )
 
-    monkeypatch.setattr(mcp_server, "_validate_paths_sync", fast_validate_paths_sync)
     monkeypatch.setattr(
-        mcp_server,
-        "get_tool_capabilities",
+        "code_scalpel.mcp.tools.policy._validate_paths_sync",
+        fast_validate_paths_sync,
+    )
+    monkeypatch.setattr(
+        "code_scalpel.licensing.features.get_tool_capabilities",
         lambda tool, tier: {"capabilities": [], "limits": {"max_paths": None}},
     )
 
@@ -227,9 +253,11 @@ async def test_validate_paths_response_time_small_medium_large(monkeypatch):
 
     for key, paths in batches.items():
         start = time.monotonic()
-        result = await mcp_server.validate_paths(paths=paths)
+        result = await validate_paths(paths=paths)
         duration = time.monotonic() - start
-        total = len(result.accessible) + len(result.inaccessible)
+        total = len(_unwrap_envelope_data(result).get("accessible", [])) + len(
+            _unwrap_envelope_data(result).get("inaccessible", [])
+        )
         assert total == len(paths)
         assert (
             duration < thresholds[key]
