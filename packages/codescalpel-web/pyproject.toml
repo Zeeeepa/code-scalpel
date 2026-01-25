@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codescalpel-web"
+version = "1.0.2"
+description = "Web and REST API integrations for Code Scalpel MCP"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Timmothy Escolopio", email = "time@3dtechsolutions.us"}
+]
+keywords = [
+    "code-analysis",
+    "rest-api",
+    "mcp",
+    "flask",
+    "web-integration",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Quality Assurance",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+dependencies = [
+    "codescalpel>=1.0.2",
+    "flask>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-timeout>=2.3.1",
+    "black>=24.0.0",
+    "ruff>=0.4.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+codescalpel-web = "codescalpel_web.server:main"
+
+[tool.setuptools]
+packages = ["codescalpel_web"]
+package-dir = {"" = "src"}
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]  # Line too long (handled by black)
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

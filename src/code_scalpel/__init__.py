@@ -23,7 +23,7 @@ For AI agent integrations:
 # These are convenience APIs used by tier/tooling validation tests.
 
 # [20251225_RELEASE] v3.3.0 - Project Reorganization (Phases 1-4)
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 
@@ -58,19 +58,35 @@ from .ast_tools import (
     build_ast_from_file,
 )
 
-# Autonomy (Error-to-Diff Engine) - v3.0.0
-# [20251217_FEATURE] v3.0.0 Autonomy - Error-to-Diff Engine
-from .autonomy import ErrorAnalysis, ErrorToDiffEngine, ErrorType, FixHint, ParsedError
 
-# REST API Server (legacy) - LAZY IMPORT
-# [20260112_BUGFIX] Flask is optional (code-scalpel[web]). Use lazy imports to avoid
-# crash on bare `pip install code-scalpel`. Users who need REST API should either:
-# 1. Install: pip install code-scalpel[web]
-# 2. Import directly: from code_scalpel.integrations.rest_api_server import run_server
+# Autonomy (Error-to-Diff Engine) - v3.0.0 - NOW IN SEPARATE PACKAGE
+# [20251225_REFACTOR] Autonomy moved to code-scalpel[agents] package (codescalpel_agents)
+# Use lazy import for backward compatibility
+def _get_autonomy_import(name: str):
+    """Lazy loader for autonomy features (moved to codescalpel-agents package)."""
+    try:
+        import codescalpel_agents.autonomy as autonomy_module
+
+        return getattr(autonomy_module, name)
+    except ImportError as e:
+        raise ImportError(
+            "Autonomy features require the agents package. Install with: pip install code-scalpel[agents]"
+        ) from e
 
 
 def __getattr__(name: str):
-    """Lazy loader for optional dependencies (Flask REST API)."""
+    """Lazy loader for optional dependencies (Autonomy, Flask REST API)."""
+    # Autonomy exports (moved to codescalpel-agents)
+    if name in (
+        "ErrorAnalysis",
+        "ErrorToDiffEngine",
+        "ErrorType",
+        "FixHint",
+        "ParsedError",
+    ):
+        return _get_autonomy_import(name)
+
+    # REST API server (moved to codescalpel-web, but kept here for backward compat)
     if name in ("MCPServerConfig", "create_app", "run_server"):
         try:
             from .integrations import rest_api_server
@@ -80,6 +96,7 @@ def __getattr__(name: str):
             raise ImportError(
                 "REST API server requires Flask. Install with: pip install code-scalpel[web]"
             ) from e
+
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

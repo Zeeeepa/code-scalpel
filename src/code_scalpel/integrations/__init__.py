@@ -1,82 +1,48 @@
-# [20251230_REFACTOR] MCP-first: keep integrations importable without optional deps.
-# This module lazily imports agent/web integrations only when accessed.
-
+# [20260125_REFACTOR] Core integrations module for protocol analysis only.
+# Agent and web integrations have been moved to separate packages:
+# - codescalpel-agents: AutoGen, CrewAI, LangChain integrations
+# - codescalpel-web: Flask REST API server
+#
+# This module now contains only protocol analyzers (Claude, GraphQL, gRPC, etc.)
+# which are part of the core Code Scalpel functionality.
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-# [20251230_REFACTOR] MCP-first: keep integrations importable without optional deps.
-# This module lazily imports agent/web integrations only when accessed.
-
-
 if TYPE_CHECKING:
-    # Agent integrations
-    from .autogen import AnalysisResult, AutogenCodeAnalysisAgent, AutogenScalpel
-    from .crewai import CrewAIScalpel, RefactorResult
+    pass
 
-    # Legacy REST API server (Flask)
-    from .rest_api_server import MCPServerConfig, create_app
-    from .rest_api_server import run_server as run_rest_server
-
-__all__ = [
-    # Autogen integration
-    "AutogenScalpel",
-    "AutogenCodeAnalysisAgent",  # Backward compatibility alias
-    "AnalysisResult",
-    # CrewAI integration
-    "CrewAIScalpel",
-    "RefactorResult",
-    # REST API Server (legacy, not MCP-compliant)
-    "create_app",
-    "run_rest_server",
-    "MCPServerConfig",
-]
+__all__ = []
 
 
 def __getattr__(name: str) -> Any:
-    """Lazy attribute loading for optional integrations (PEP 562)."""
-    if name in {"AutogenScalpel", "AutogenCodeAnalysisAgent", "AnalysisResult"}:
-        try:
-            from .autogen import (
-                AnalysisResult,
-                AutogenCodeAnalysisAgent,
-                AutogenScalpel,
-            )
-        except ImportError as e:  # pragma: no cover
-            raise ImportError(
-                "AutoGen integration requires optional dependencies. "
-                'Install with: pip install "code-scalpel[agents]"'
-            ) from e
-        return {
-            "AutogenScalpel": AutogenScalpel,
-            "AutogenCodeAnalysisAgent": AutogenCodeAnalysisAgent,
-            "AnalysisResult": AnalysisResult,
-        }[name]
+    """Lazy attribute loading for deprecated integration packages.
 
-    if name in {"CrewAIScalpel", "RefactorResult"}:
-        try:
-            from .crewai import CrewAIScalpel, RefactorResult
-        except ImportError as e:  # pragma: no cover
-            raise ImportError(
-                "CrewAI integration requires optional dependencies. "
-                'Install with: pip install "code-scalpel[agents]"'
-            ) from e
-        return {"CrewAIScalpel": CrewAIScalpel, "RefactorResult": RefactorResult}[name]
+    Agent and web integrations have moved to separate packages.
+    Please install and import from:
+    - codescalpel-agents for agent framework integrations
+    - codescalpel-web for REST API server
+    """
+    deprecated_agents = {
+        "AutogenScalpel",
+        "AutogenCodeAnalysisAgent",
+        "AnalysisResult",
+        "CrewAIScalpel",
+        "RefactorResult",
+    }
+    deprecated_web = {"MCPServerConfig", "create_app", "run_rest_server"}
 
-    if name in {"MCPServerConfig", "create_app", "run_rest_server"}:
-        try:
-            from .rest_api_server import MCPServerConfig, create_app
-            from .rest_api_server import run_server as run_rest_server
-        except ImportError as e:  # pragma: no cover
-            raise ImportError(
-                "The legacy REST API server requires Flask. "
-                'Install with: pip install "code-scalpel[web]"'
-            ) from e
-        return {
-            "MCPServerConfig": MCPServerConfig,
-            "create_app": create_app,
-            "run_rest_server": run_rest_server,
-        }[name]
+    if name in deprecated_agents:
+        raise ImportError(
+            f"'{name}' has been moved to codescalpel-agents package. "
+            f"Install with: pip install codescalpel-agents"
+        )
+
+    if name in deprecated_web:
+        raise ImportError(
+            f"'{name}' has been moved to codescalpel-web package. "
+            f"Install with: pip install codescalpel-web"
+        )
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
