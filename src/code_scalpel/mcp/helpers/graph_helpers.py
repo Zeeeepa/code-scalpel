@@ -2237,6 +2237,24 @@ def _get_cross_file_dependencies_sync(
         if max_depth_limit is not None and transitive_depth > max_depth_limit:
             transitive_depth = int(max_depth_limit)
 
+        # [20260127_FIX] Filter extracted_symbols to enforce tier depth limit.
+        # Remove any symbols that exceed the tier-clamped transitive_depth.
+        extracted_symbols = [
+            sym for sym in extracted_symbols if sym.depth <= transitive_depth
+        ]
+        # Recalculate file order based on filtered symbols
+        file_order = []
+        for sym in extracted_symbols:
+            if sym.file not in file_order:
+                file_order.append(sym.file)
+        # Regenerate combined code if filtered
+        if include_code and extracted_symbols:
+            combined_parts = []
+            for sym in extracted_symbols:
+                combined_parts.append(f"# From {sym.file}")
+                combined_parts.append(sym.code)
+            combined_code = "\n\n".join(combined_parts)
+
         coupling_score: float | None = None
         if coupling_enabled:
             unique_files = len(file_order) if file_order else 0

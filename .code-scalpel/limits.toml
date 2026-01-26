@@ -123,7 +123,7 @@ max_nodes = 500
 # ----------------------------------------------------------------------------
 
 [community.get_cross_file_dependencies]
-max_depth = 2
+max_depth = 1
 max_files = 50
 # timeout_seconds inherited from [global] - NOT a tier limit
 

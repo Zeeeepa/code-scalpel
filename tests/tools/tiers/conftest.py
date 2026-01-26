@@ -161,3 +161,61 @@ def community_tier():
         yield {"tier": "community", "license_path": None, "is_mocked": False}
     finally:
         clear_tier_caches()
+
+
+@pytest.fixture
+def tier_limits():
+    """
+    Fixture that loads tier limits from configuration (limits.toml).
+
+    Provides a mapping of tier -> tool -> limits dict.
+    This ensures tests read from the actual configuration, not hardcoded values.
+
+    [20260127_FEATURE] Decouples tests from hardcoded limit values.
+    When limits.toml changes, tests automatically adapt.
+
+    Supports all 22 Code Scalpel tools.
+
+    Example:
+        def test_something(tier_limits):
+            max_depth = tier_limits["community"]["get_cross_file_dependencies"]["max_depth"]
+            assert result.transitive_depth <= max_depth
+    """
+    from code_scalpel.licensing.features import get_tool_capabilities
+
+    tiers = ["community", "pro", "enterprise"]
+    # All 22 tools from limits.toml
+    tools = [
+        "analyze_code",
+        "code_policy_check",
+        "crawl_project",
+        "cross_file_security_scan",
+        "extract_code",
+        "generate_unit_tests",
+        "get_call_graph",
+        "get_cross_file_dependencies",
+        "get_file_context",
+        "get_graph_neighborhood",
+        "get_project_map",
+        "get_symbol_references",
+        "rename_symbol",
+        "scan_dependencies",
+        "security_scan",
+        "simulate_refactor",
+        "symbolic_execute",
+        "type_evaporation_scan",
+        "unified_sink_detect",
+        "update_symbol",
+        "validate_paths",
+        "verify_policy_integrity",
+    ]
+
+    limits_dict = {}
+    for tier in tiers:
+        limits_dict[tier] = {}
+        for tool in tools:
+            capabilities = get_tool_capabilities(tool, tier) or {}
+            limits = capabilities.get("limits", {}) or {}
+            limits_dict[tier][tool] = limits
+
+    return limits_dict

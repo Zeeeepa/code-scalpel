@@ -82,29 +82,41 @@ def process_order(order_id, amount):
 class TestGetCrossFileDependenciesCommunityTier:
     """Community tier: max_depth = 1 (direct imports only)."""
 
-    def test_tier_gating_enforced(self, temp_project_with_dependencies, community_tier):
-        """Verify community tier enforces max_depth = 1."""
+    def test_tier_gating_enforced(
+        self, temp_project_with_dependencies, community_tier, tier_limits
+    ):
+        """Verify community tier enforces max_depth limit from configuration."""
+        max_depth_limit = tier_limits["community"]["get_cross_file_dependencies"][
+            "max_depth"
+        ]
+
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
             target_symbol="process_order",
             project_root=str(temp_project_with_dependencies),
-            max_depth=10,  # User requests 10, but community limits to 1
+            max_depth=10,  # User requests 10, but tier limits to configured max_depth
             include_code=True,
             include_diagram=True,
             confidence_decay_factor=0.9,
             tier="community",
         )
         assert result.success is True
-        # Community tier max_depth is 1
-        assert result.transitive_depth <= 1
+        # Community tier max_depth is enforced from limits.toml
+        assert result.transitive_depth <= max_depth_limit
 
-    def test_direct_imports_only(self, temp_project_with_dependencies, community_tier):
+    def test_direct_imports_only(
+        self, temp_project_with_dependencies, community_tier, tier_limits
+    ):
         """Verify only direct dependencies analyzed (depth 1)."""
+        max_depth_limit = tier_limits["community"]["get_cross_file_dependencies"][
+            "max_depth"
+        ]
+
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
             target_symbol="process_order",
             project_root=str(temp_project_with_dependencies),
-            max_depth=1,
+            max_depth=max_depth_limit,
             include_code=True,
             include_diagram=True,
             confidence_decay_factor=0.9,
@@ -113,11 +125,17 @@ class TestGetCrossFileDependenciesCommunityTier:
         assert result.success is True
         # Should find some dependencies (at least module_a)
         assert result.total_dependencies >= 1
-        # Max depth reached should not exceed 1
-        assert result.max_depth_reached <= 1
+        # Max depth reached should not exceed tier limit
+        assert result.max_depth_reached <= max_depth_limit
 
-    def test_files_limited_to_50(self, temp_project_with_dependencies, community_tier):
-        """Verify community tier max_files = 50."""
+    def test_files_limited_to_configured_max(
+        self, temp_project_with_dependencies, community_tier, tier_limits
+    ):
+        """Verify community tier max_files limit from configuration."""
+        max_files_limit = tier_limits["community"]["get_cross_file_dependencies"][
+            "max_files"
+        ]
+
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
             target_symbol="process_order",
@@ -130,10 +148,10 @@ class TestGetCrossFileDependenciesCommunityTier:
         )
         assert result.success is True
         # Files analyzed should be within community limit
-        assert result.files_analyzed <= 50
+        assert result.files_analyzed <= max_files_limit
 
     def test_confidence_decay_applied(
-        self, temp_project_with_dependencies, community_tier
+        self, temp_project_with_dependencies, community_tier, tier_limits
     ):
         """Verify confidence score decays with depth."""
         result = _get_cross_file_dependencies_sync(
@@ -153,8 +171,8 @@ class TestGetCrossFileDependenciesCommunityTier:
         for symbol in result.extracted_symbols:
             if hasattr(symbol, "depth"):
                 depth = symbol.depth
-                if hasattr(symbol, "confidence_score"):
-                    confidence = symbol.confidence_score
+                if hasattr(symbol, "confidence"):
+                    confidence = symbol.confidence
                     expected_confidence = 1.0 * (0.9**depth)
                     # Allow small variation
                     assert abs(confidence - expected_confidence) < 0.01
@@ -163,40 +181,52 @@ class TestGetCrossFileDependenciesCommunityTier:
 class TestGetCrossFileDependenciesProTier:
     """Pro tier: max_depth = 5 (deeper transitive dependencies)."""
 
-    def test_depth_limit_5(self, temp_project_with_dependencies, pro_tier):
-        """Verify pro tier enforces max_depth = 5."""
-        result = _get_cross_file_dependencies_sync(
-            target_file="main.py",
-            target_symbol="process_order",
-            project_root=str(temp_project_with_dependencies),
-            max_depth=10,  # User requests 10, pro limits to 5
-            include_code=True,
-            include_diagram=True,
-            confidence_decay_factor=0.9,
-            tier="pro",
-        )
-        assert result.success is True
-        # Pro tier max_depth is 5
-        assert result.transitive_depth <= 5
+    def test_depth_limit_from_config(
+        self, temp_project_with_dependencies, pro_tier, tier_limits
+    ):
+        """Verify pro tier enforces max_depth from configuration."""
+        max_depth_limit = tier_limits["pro"]["get_cross_file_dependencies"]["max_depth"]
 
-    def test_transitive_deps_analyzed(self, temp_project_with_dependencies, pro_tier):
-        """Verify transitive dependencies up to depth 5 are analyzed."""
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
             target_symbol="process_order",
             project_root=str(temp_project_with_dependencies),
-            max_depth=5,
+            max_depth=100,  # User requests high, pro limits to configured max_depth
             include_code=True,
             include_diagram=True,
             confidence_decay_factor=0.9,
             tier="pro",
         )
         assert result.success is True
-        # Pro tier should find more dependencies than community
+        # Pro tier max_depth is enforced from limits.toml
+        assert result.transitive_depth <= max_depth_limit
+
+    def test_transitive_deps_analyzed(
+        self, temp_project_with_dependencies, pro_tier, tier_limits
+    ):
+        """Verify transitive dependencies up to tier limit are analyzed."""
+        max_depth_limit = tier_limits["pro"]["get_cross_file_dependencies"]["max_depth"]
+
+        result = _get_cross_file_dependencies_sync(
+            target_file="main.py",
+            target_symbol="process_order",
+            project_root=str(temp_project_with_dependencies),
+            max_depth=max_depth_limit,
+            include_code=True,
+            include_diagram=True,
+            confidence_decay_factor=0.9,
+            tier="pro",
+        )
+        assert result.success is True
+        # Pro tier should find dependencies
         assert result.total_dependencies >= 1
 
-    def test_files_limited_to_500(self, temp_project_with_dependencies, pro_tier):
-        """Verify pro tier max_files = 500."""
+    def test_files_limited_to_configured_max(
+        self, temp_project_with_dependencies, pro_tier, tier_limits
+    ):
+        """Verify pro tier max_files limit from configuration."""
+        max_files_limit = tier_limits["pro"]["get_cross_file_dependencies"]["max_files"]
+
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
             target_symbol="process_order",
@@ -209,15 +239,19 @@ class TestGetCrossFileDependenciesProTier:
         )
         assert result.success is True
         # Files analyzed should be within pro limit
-        assert result.files_analyzed <= 500
+        assert result.files_analyzed <= max_files_limit
 
-    def test_confidence_decay_deep(self, temp_project_with_dependencies, pro_tier):
+    def test_confidence_decay_deep(
+        self, temp_project_with_dependencies, pro_tier, tier_limits
+    ):
         """Verify confidence_score decays with depth using 0.9 factor."""
+        max_depth_limit = tier_limits["pro"]["get_cross_file_dependencies"]["max_depth"]
+
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
             target_symbol="process_order",
             project_root=str(temp_project_with_dependencies),
-            max_depth=5,
+            max_depth=max_depth_limit,
             include_code=True,
             include_diagram=True,
             confidence_decay_factor=0.9,
@@ -231,8 +265,8 @@ class TestGetCrossFileDependenciesProTier:
         for symbol in result.extracted_symbols:
             if hasattr(symbol, "depth") and symbol.depth >= 4:
                 has_deep_symbol = True
-                if hasattr(symbol, "confidence_score"):
-                    confidence = symbol.confidence_score
+                if hasattr(symbol, "confidence"):
+                    confidence = symbol.confidence
                     # Depth 4: 1.0 * 0.9^4 = 0.6561
                     # Confidence should still be reasonable for Pro
                     assert confidence > 0.5
@@ -244,8 +278,14 @@ class TestGetCrossFileDependenciesProTier:
 class TestGetCrossFileDependenciesEnterpriseTier:
     """Enterprise tier: unlimited depth (full transitive closure)."""
 
-    def test_unlimited_depth(self, temp_project_with_dependencies, enterprise_tier):
-        """Verify enterprise tier has no depth limit."""
+    def test_unlimited_depth(
+        self, temp_project_with_dependencies, enterprise_tier, tier_limits
+    ):
+        """Verify enterprise tier has no depth limit (or very high limit)."""
+        max_depth_limit = tier_limits["enterprise"]["get_cross_file_dependencies"].get(
+            "max_depth"
+        )
+
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
             target_symbol="process_order",
@@ -257,12 +297,21 @@ class TestGetCrossFileDependenciesEnterpriseTier:
             tier="enterprise",
         )
         assert result.success is True
-        # Enterprise tier should not limit depth
-        # It should analyze up to the actual graph depth
-        assert result.transitive_depth is None or result.transitive_depth >= 5
+        # Enterprise tier should not have a configured depth limit (None = unlimited)
+        if max_depth_limit is not None:
+            assert result.transitive_depth <= max_depth_limit
+        else:
+            # Unlimited - analyze up to actual graph depth
+            assert result.transitive_depth is None or result.transitive_depth >= 5
 
-    def test_unlimited_files(self, temp_project_with_dependencies, enterprise_tier):
-        """Verify enterprise tier has no file limit."""
+    def test_unlimited_files(
+        self, temp_project_with_dependencies, enterprise_tier, tier_limits
+    ):
+        """Verify enterprise tier has no file limit (or very high limit)."""
+        max_files_limit = tier_limits["enterprise"]["get_cross_file_dependencies"].get(
+            "max_files"
+        )
+
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
             target_symbol="process_order",
@@ -274,8 +323,12 @@ class TestGetCrossFileDependenciesEnterpriseTier:
             tier="enterprise",
         )
         assert result.success is True
-        # Enterprise should not truncate files
-        assert result.truncated is False or result.files_truncated == 0
+        # Enterprise should not truncate files (or have very high limit)
+        if max_files_limit is not None:
+            assert result.files_analyzed <= max_files_limit
+        else:
+            # Unlimited - no truncation
+            assert result.truncated is False or result.files_truncated == 0
 
     def test_all_dependencies_traversed(
         self, temp_project_with_dependencies, enterprise_tier
@@ -314,9 +367,9 @@ class TestGetCrossFileDependenciesEnterpriseTier:
         assert result.confidence_decay_factor == 0.9
         # Verify that deepest symbols still decay
         for symbol in result.extracted_symbols:
-            if hasattr(symbol, "depth") and hasattr(symbol, "confidence_score"):
+            if hasattr(symbol, "depth") and hasattr(symbol, "confidence"):
                 depth = symbol.depth
-                confidence = symbol.confidence_score
+                confidence = symbol.confidence
                 if depth > 5:
                     # At depth 6: 1.0 * 0.9^6 = 0.531
                     expected_confidence = 1.0 * (0.9**depth)

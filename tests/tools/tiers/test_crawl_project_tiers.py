@@ -50,7 +50,6 @@ async def test_crawl_project_community_multilanguage_and_limits(
 
 @pytest.mark.skip(reason="cache_hits field not implemented in ProjectCrawlResult")
 async def test_crawl_project_pro_cache_hits(tmp_path: Path, pro_tier):
-
     root = tmp_path / "proj"
     root.mkdir()
 
@@ -74,7 +73,6 @@ async def test_crawl_project_pro_cache_hits(tmp_path: Path, pro_tier):
 async def test_crawl_project_enterprise_compliance_best_effort(
     tmp_path: Path, enterprise_tier
 ):
-
     root = tmp_path / "proj"
     root.mkdir()
 
@@ -95,7 +93,6 @@ async def test_crawl_project_enterprise_compliance_best_effort(
 async def test_crawl_project_enterprise_custom_rules_config(
     tmp_path: Path, enterprise_tier
 ):
-
     root = tmp_path / "proj"
     root.mkdir()
 
@@ -114,6 +111,6 @@ async def test_crawl_project_enterprise_custom_rules_config(
 
     result = await crawl_project(root_path=str(root), include_report=False)
     assert result.success is True
-    paths = {f.path for f in result.files}
+    paths = {f["path"] for f in result.files}
     assert "a.py" in paths
     assert "b.js" not in paths
