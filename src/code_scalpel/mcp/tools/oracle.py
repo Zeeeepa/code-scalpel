@@ -17,7 +17,7 @@ from pathlib import Path
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
 from code_scalpel import __version__ as _pkg_version
 from code_scalpel.mcp.protocol import _get_current_tier
-from code_scalpel.oracle.spec_generator import SpecGenerator
+from code_scalpel.oracle.oracle_pipeline import OraclePipeline
 
 logger = logging.getLogger(__name__)
 
@@ -76,20 +76,23 @@ def _write_perfect_code_sync(
     # Get current tier for limits
     tier = _get_current_tier()
 
-    # Generate specification
-    generator = SpecGenerator()
+    # Get project root
+    from code_scalpel.mcp.server import get_project_root
+
+    repo_root = get_project_root()
+
+    # Generate specification using OraclePipeline
     try:
-        spec = generator.generate_constraint_spec(
+        pipeline = OraclePipeline(repo_root, tier)
+        spec = pipeline.generate_constraint_spec(
             file_path=file_path,
             instruction=instruction,
-            graph=None,  # TODO: Get graph from context
             governance_config=None,  # TODO: Load from .code-scalpel/governance.yaml
-            tier=tier,
         )
 
-        return spec.markdown
+        return spec
 
-    except (FileNotFoundError, SyntaxError) as e:
+    except (FileNotFoundError, SyntaxError):
         raise
     except Exception as e:
         logger.error(f"Error generating constraint spec for {file_path}: {e}")

@@ -26,6 +26,42 @@
 default_timeout_seconds = 120  # Generous safeguard for all tiers
 
 # ============================================================================
+# SCANNER CONFIGURATION (Tier-Based Data Volume Limits)
+# ============================================================================
+# [20260126_ORACLE] Universal scanner limits that apply to ALL crawling tools.
+# These limits define the "perception layer" for each tier:
+# - Community: Can see shallow context (good for local refactoring)
+# - Pro: Can see project-wide context (good for safe refactoring)
+# - Enterprise: Can see everything (good for large monoliths)
+#
+# These limits are inherited by:
+# - ProjectCrawler (for project discovery)
+# - Oracle tools (write_perfect_code, enforce_topology, predict_regression_risk)
+# - Any tool that needs to understand project context
+
+[community.scanner]
+# Community tier: Limited visibility (safety net)
+# Good for: Single-file refactoring, local validation
+max_files = 50        # Stop after 50 files
+max_depth = 2         # Only follow imports 2 levels deep
+max_symbol_count = 1000
+
+[pro.scanner]
+# Pro tier: Full project visibility
+# Good for: Cross-file refactoring, architecture changes, confident decisions
+max_files = 2000      # Up to 2000 files
+max_depth = 10        # Follow imports 10 levels deep
+max_symbol_count = 50000
+
+[enterprise.scanner]
+# Enterprise tier: Unlimited visibility
+# Good for: Large monoliths, complete safety with zero blindspots
+# (Limits are omitted to indicate "unlimited" per [global] processing)
+max_files = 100000
+max_depth = 50
+max_symbol_count = 1000000
+
+# ============================================================================
 # GROUP 1: ANALYSIS & DISCOVERY
 # ============================================================================
 
@@ -371,18 +407,27 @@ test_frameworks = "all"
 # ============================================================================
 # GROUP 5: ORACLE TOOLS (AI-ASSISTED CODE GENERATION)
 # ============================================================================
-# [20260126_FEATURE] Oracle constraint specification generation
+# [20260126_ORACLE_PHASE1B] Refactored to be tier-agnostic.
+# Oracle is now a universal right: ALL tiers can use it.
+# The tier-based limits come implicitly from the scanner limits above:
+# - Community: Sees shallow context (50 files, depth 2) → safer but less informed specs
+# - Pro: Sees project context (2000 files, depth 10) → full architectural insights
+# - Enterprise: Sees everything (100k files, depth 50) → complete safety for large monoliths
+#
+# This design implements "Safety is not an Upsell":
+# All users get accurate constraint specs, just with tiered visibility depth.
+#
+# NOTE: Do NOT add [community.write_perfect_code] with allow_use=false.
+# That is explicit feature gating. We use implicit tiering via scanner limits instead.
 
 [pro.write_perfect_code]
-max_file_size_mb = 10
-max_graph_depth = 5
-max_context_lines = 200
+# Pro tier: Full Oracle with project-wide visibility
+# Inherits: max_files=2000, max_depth=10 from [pro.scanner]
 cache_ttl_seconds = 300
 
 [enterprise.write_perfect_code]
-max_file_size_mb = 100
-max_graph_depth = -1  # unlimited
-max_context_lines = 1000
+# Enterprise tier: Oracle with complete visibility
+# Inherits: max_files=100000, max_depth=50 from [enterprise.scanner]
 cache_ttl_seconds = 300
 
 # ============================================================================
