@@ -933,6 +933,7 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
         "community": {
             "enabled": True,
             "capabilities": {
+                "basic_compliance",
                 "style_guide_checking",
                 "pep8_validation",
                 "eslint_rules",
@@ -947,6 +948,8 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
         "pro": {
             "enabled": True,
             "capabilities": {
+                "basic_compliance",
+                "extended_compliance",
                 "style_guide_checking",
                 "pep8_validation",
                 "eslint_rules",
@@ -966,6 +969,12 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
         "enterprise": {
             "enabled": True,
             "capabilities": {
+                "basic_compliance",
+                "extended_compliance",
+                "hipaa_compliance",
+                "soc2_compliance",
+                "gdpr_compliance",
+                "pci_dss_compliance",
                 "style_guide_checking",
                 "pep8_validation",
                 "eslint_rules",
@@ -975,10 +984,6 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
                 "security_patterns",
                 "custom_rules",
                 "compliance_auditing",
-                "hipaa_checks",
-                "soc2_checks",
-                "gdpr_checks",
-                "pci_dss_checks",
                 "pdf_certification",
                 "audit_trail",
             },
