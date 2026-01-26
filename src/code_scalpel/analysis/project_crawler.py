@@ -34,9 +34,10 @@ import os
 import re
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from fnmatch import fnmatch
 from pathlib import Path
 from typing import Any, TypedDict
+
+from .project_walker import ProjectWalker
 
 
 class CrawlResultDict(TypedDict, total=False):
@@ -367,7 +368,6 @@ class ProjectCrawler:
         )
         self.parallelism = parallelism
         self.enable_cache = enable_cache
-        self._gitignore_patterns: list[str] = []
 
         self._cache_dir = self.root_path / ".scalpel_cache"
         self._cache_file = self._cache_dir / "crawl_cache_v1.json"
@@ -380,20 +380,8 @@ class ProjectCrawler:
         if not self.root_path.is_dir():
             raise ValueError(f"Path is not a directory: {self.root_path}")
 
-        # [20251225_FEATURE] Minimal .gitignore support for tiered crawling.
-        if self.respect_gitignore:
-            gitignore_file = self.root_path / ".gitignore"
-            if gitignore_file.exists() and gitignore_file.is_file():
-                for raw in gitignore_file.read_text(
-                    encoding="utf-8", errors="ignore"
-                ).splitlines():
-                    line = raw.strip()
-                    if not line or line.startswith("#"):
-                        continue
-                    if line.startswith("!"):
-                        # Negation patterns are intentionally ignored in this minimal implementation.
-                        continue
-                    self._gitignore_patterns.append(line)
+        # [20260126_FEATURE] ProjectWalker handles .gitignore support
+        # Removed duplicate gitignore loading - ProjectWalker handles this
 
         if self.enable_cache:
             self._cache_dir.mkdir(exist_ok=True)
@@ -544,7 +532,6 @@ class ProjectCrawler:
         if not self.enable_cache:
             return
         try:
-
             st = file_path.stat()
             key = self._cache_key_for(rel_path)
             files = self._cache.setdefault("files", {})
@@ -591,27 +578,11 @@ class ProjectCrawler:
         except Exception:
             return
 
-    def _is_gitignored(self, rel_path: Path, *, is_dir: bool) -> bool:
-        if not self._gitignore_patterns:
-            return False
-        rel_posix = rel_path.as_posix().lstrip("./")
-        for pattern in self._gitignore_patterns:
-            pat = pattern
-            if pat.endswith("/"):
-                if not is_dir:
-                    continue
-                pat = pat[:-1]
-            if "/" in pat:
-                if fnmatch(rel_posix, pat):
-                    return True
-            else:
-                if fnmatch(rel_path.name, pat):
-                    return True
-        return False
-
     def crawl(self) -> CrawlResult:
         """
         Crawl the project and analyze all Python files.
+
+        Uses ProjectWalker for efficient file discovery and filtering.
 
         Returns:
             CrawlResult with analysis data for all files
@@ -621,45 +592,23 @@ class ProjectCrawler:
             timestamp=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         )
 
+        # [20260126_FEATURE] Use ProjectWalker for file discovery
+        # This replaces the os.walk() logic and provides better filtering
+        walker = ProjectWalker(
+            self.root_path,
+            exclude_dirs=self.exclude_dirs,
+            max_depth=self.max_depth,
+            max_files=self.max_files,
+            respect_gitignore=self.respect_gitignore,
+        )
+
+        # Collect files to analyze
         files_to_analyze: list[tuple[Path, str]] = []
-        analyzed_files = 0
-        reached_limit = False
-
-        for root, dirs, files in os.walk(self.root_path):
-            rel_dir = Path(root).resolve().relative_to(self.root_path)
-            depth = len(rel_dir.parts)
-            if self.max_depth is not None and depth >= self.max_depth:
-                dirs[:] = []
-            else:
-                filtered_dirs: list[str] = []
-                for d in dirs:
-                    if d in self.exclude_dirs:
-                        continue
-                    rel_child = rel_dir / d
-                    if self._is_gitignored(rel_child, is_dir=True):
-                        continue
-                    filtered_dirs.append(d)
-                dirs[:] = filtered_dirs
-
-            for filename in files:
-                rel_file = rel_dir / filename
-                if self._is_gitignored(rel_file, is_dir=False):
-                    continue
-
-                if Path(filename).suffix.lower() in self.include_extensions:
-                    if self.max_files is not None and analyzed_files >= self.max_files:
-                        reached_limit = True
-                        dirs[:] = []
-                        break
-                    analyzed_files += 1
-                    file_path = Path(root) / filename
-                    rel_path = str(
-                        (Path(root) / filename).resolve().relative_to(self.root_path)
-                    )
-                    files_to_analyze.append((file_path, rel_path))
-
-            if reached_limit:
-                break
+        for file_info in walker.get_files():
+            # Filter by supported extensions
+            if file_info.extension.lower() not in self.include_extensions:
+                continue
+            files_to_analyze.append((Path(file_info.path), file_info.rel_path))
 
         # Analyze discovered files (with optional caching/parallelism)
         analyzed_results: list[FileAnalysisResult] = []
