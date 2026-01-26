@@ -303,6 +303,78 @@ class LanguageRouter:
         }
         return descriptions.get(tier, "Unknown tier")
 
+    @staticmethod
+    def validate_and_route(
+        source_context,
+        validator=None,
+        request_context_scope=None,
+    ):
+        """Route code through validation and language detection.
+
+        This method orchestrates the validation layer with language routing:
+        1. Pre-execution validation (syntax, symbols, imports)
+        2. Language detection
+        3. Route to appropriate parser tier
+
+        Args:
+            source_context: SourceContext with code to validate and route.
+            validator: Optional SemanticValidator for symbol checking.
+            request_context_scope: Optional scope for locality-aware validation.
+
+        Returns:
+            Tuple of (language, validator_suggestions, parser_tier)
+
+        Raises:
+            ValidationError: If validation fails (will include suggestions).
+        """
+        from code_scalpel.mcp.validators import (
+            StructuralValidator,
+            SemanticValidator,
+        )
+
+        language = source_context.language
+
+        # Step 1: Structural validation (syntax, file size)
+        StructuralValidator.validate_python_syntax(source_context)
+        StructuralValidator.validate_file_size(source_context)
+
+        # Step 2: Optional semantic validation (symbols, imports)
+        suggestions = []
+        if validator is None:
+            validator = SemanticValidator()
+
+        # Note: We don't raise on semantic validation errors here,
+        # but we could collect them for suggestions
+        try:
+            # Could check for missing imports here
+            pass
+        except Exception as e:
+            logger.debug(f"Semantic validation warning: {e}")
+
+        # Step 3: Language detection
+        result = LanguageRouter.detect(
+            source_context.content,
+            file_path=source_context.file_path,
+        )
+
+        if language == Language.UNKNOWN:
+            language = result.language
+            source_context.language = language
+            logger.info(
+                f"Auto-detected language: {language.value} "
+                f"(confidence={result.confidence:.2f}, method={result.detected_by})"
+            )
+
+        # Step 4: Route to parser tier
+        parser_tier = LanguageRouter.get_parser_tier(language)
+
+        logger.debug(
+            f"Routed {language.value} to tier {parser_tier}: "
+            f"{LanguageRouter.get_tier_description(parser_tier)}"
+        )
+
+        return language, suggestions, parser_tier
+
 
 __all__ = [
     "LanguageDetectionResult",

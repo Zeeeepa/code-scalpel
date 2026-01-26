@@ -20,6 +20,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel
 
+from code_scalpel.mcp.models.envelope import ResponseEnvelope
 from code_scalpel.mcp.response_config import get_response_config
 
 logger = logging.getLogger(__name__)
@@ -72,7 +73,12 @@ PROFILE_MINIMAL = ResponseProfile(
 PROFILE_STANDARD = ResponseProfile(
     name="standard",
     description="Standard output: data + error/upgrade hints",
-    include_envelope_fields=["error", "upgrade_hints"],
+    include_envelope_fields=[
+        "error",
+        "upgrade_hints",
+        "suggestions",
+        "capabilities_used",
+    ],
     exclude_data_fields=[
         "raw_ast",
         "intermediate_results",
@@ -88,6 +94,8 @@ PROFILE_VERBOSE = ResponseProfile(
         "tool_version",
         "error",
         "upgrade_hints",
+        "suggestions",
+        "capabilities_used",
         "duration_ms",
     ],
     exclude_data_fields=[
@@ -108,6 +116,8 @@ PROFILE_DEBUG = ResponseProfile(
         "duration_ms",
         "error",
         "upgrade_hints",
+        "suggestions",
+        "capabilities_used",
     ],
     exclude_data_fields=[],
 )
@@ -257,6 +267,114 @@ class ResponseFormatter:
         """
         profile = PROFILES.get(profile_name)
         return profile.description if profile else f"Unknown profile: {profile_name}"
+
+    @staticmethod
+    def filter_envelope(
+        envelope: ResponseEnvelope,
+        profile: ResponseProfile,
+    ) -> dict:
+        """Filter a ResponseEnvelope according to profile.
+
+        Args:
+            envelope: ResponseEnvelope to filter.
+            profile: ResponseProfile to apply.
+
+        Returns:
+            Filtered envelope as dictionary.
+        """
+        # Convert envelope to dict
+        envelope_dict = envelope.to_dict(exclude_none=True)
+
+        # Determine which envelope fields to include
+        envelope_fields_to_keep = {
+            # Always include
+            "schema_version",
+            "tool_id",
+            "tool_name",
+            "tool_version",
+            "request_id",
+            "timestamp",
+            "data",
+            "error",
+            "validation_passed",
+            "response_profile",
+        }
+
+        # Add profile-specified envelope fields
+        envelope_fields_to_keep.update(profile.include_envelope_fields)
+
+        # Filter envelope to keep only specified fields
+        filtered_envelope = {
+            k: v for k, v in envelope_dict.items() if k in envelope_fields_to_keep
+        }
+
+        # Filter the data field using standard data filtering
+        if "data" in filtered_envelope and filtered_envelope["data"]:
+            filtered_envelope["data"] = ResponseFormatter.filter_data(
+                filtered_envelope["data"],
+                profile,
+            )
+
+        return filtered_envelope
+
+    @staticmethod
+    def format_with_envelope(
+        tool_id: str,
+        tool_name: str,
+        tool_version: str,
+        data: Any,
+        profile_name: Optional[str] = None,
+        error: Optional[str] = None,
+        suggestions: Optional[list[str]] = None,
+        request_id: Optional[str] = None,
+        duration_ms: float = 0.0,
+        tier: Optional[str] = None,
+        capabilities_used: Optional[list[str]] = None,
+    ) -> dict:
+        """Format a response with ResponseEnvelope and profile filtering.
+
+        Args:
+            tool_id: Tool identifier.
+            tool_name: Human-readable tool name.
+            tool_version: Tool version.
+            data: Tool output data.
+            profile_name: Response profile to apply.
+            error: Optional error message.
+            suggestions: Optional validation suggestions.
+            request_id: Optional request ID for tracing.
+            duration_ms: Execution duration in milliseconds.
+            tier: User tier.
+            capabilities_used: List of capabilities invoked.
+
+        Returns:
+            Filtered envelope dictionary ready for JSON serialization.
+        """
+        # Resolve profile
+        profile = ResponseFormatter.resolve_profile_cascading(profile_name)
+
+        # Create envelope
+        envelope = ResponseEnvelope(
+            tool_id=tool_id,
+            tool_name=tool_name,
+            tool_version=tool_version,
+            data=data,
+            request_id=request_id,
+            duration_ms=duration_ms,
+            tier=tier,
+            capabilities_used=capabilities_used or [],
+            response_profile=profile.name,
+        )
+
+        # Add error if present
+        if error:
+            envelope.with_error(error, suggestions=suggestions)
+
+        # Add suggestions if present
+        if suggestions:
+            envelope.with_suggestions(suggestions)
+
+        # Filter and return
+        return ResponseFormatter.filter_envelope(envelope, profile)
 
 
 __all__ = [

@@ -26,6 +26,8 @@ from .core import (
     UnifiedSinkResult,
     VulnerabilityInfo,
 )
+from .context import Language, SourceContext, ProjectContext, FileMetadata
+from .envelope import SchemaVersion, ResponseEnvelope
 from .policy import (
     CodePolicyCheckResult,
     PathValidationResult,
@@ -76,4 +78,12 @@ __all__ = [
     "CodePolicyCheckResult",
     "PathValidationResult",
     "PolicyVerificationResult",
+    # Context models
+    "Language",
+    "SourceContext",
+    "ProjectContext",
+    "FileMetadata",
+    # Response envelope
+    "SchemaVersion",
+    "ResponseEnvelope",
 ]
