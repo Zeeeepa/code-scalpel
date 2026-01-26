@@ -54,9 +54,9 @@ def classify_number(n):
 
     # Test case order should be identical
     for tc1, tc2 in zip(result1.test_cases, result2.test_cases):
-        assert tc1.path_id == tc2.path_id
-        assert tc1.inputs == tc2.inputs
-        assert tc1.description == tc2.description
+        assert tc1["path_id"] == tc2["path_id"]
+        assert tc1["inputs"] == tc2["inputs"]
+        assert tc1["description"] == tc2["description"]
 
 
 @pytest.mark.asyncio
@@ -81,7 +81,7 @@ def is_even(n):
 
     # Check test names don't have random elements
     for tc in result.test_cases:
-        name = tc.description
+        name = tc["description"]
         # Should not contain UUID-like patterns (8-4-4-4-12 hex)
         assert "-" not in name or not all(
             c in "0123456789abcdef-" for c in name.split("-")[0]
@@ -118,7 +118,7 @@ def get_sign(x):
             framework="pytest",
         )
         assert result.success is True
-        order = [tc.path_id for tc in result.test_cases]
+        order = [tc["path_id"] for tc in result.test_cases]
         orders.append(order)
 
     # All should have identical ordering
