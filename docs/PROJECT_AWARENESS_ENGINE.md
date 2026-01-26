@@ -307,16 +307,43 @@ walker = ProjectWalker("/path", exclude_dirs=custom_exclude)
 
 ## Integration with ProjectCrawler
 
-ProjectWalker is designed to complement ProjectCrawler:
+ProjectCrawler has been refactored (v1.2.0) to use ProjectWalker internally for file discovery. This provides:
+
+- **Better performance**: Reuses ProjectWalker's optimized file discovery
+- **Less code duplication**: Gitignore handling centralized in ProjectWalker
+- **Better maintainability**: Single source of truth for file filtering logic
+- **Full backward compatibility**: ProjectCrawler API unchanged
+
+### Usage
+
+ProjectCrawler automatically uses ProjectWalker for discovery:
+
+```python
+from code_scalpel.analysis import ProjectCrawler
+
+# ProjectCrawler now uses ProjectWalker internally
+crawler = ProjectCrawler("/path/to/project", respect_gitignore=True, max_depth=3)
+result = crawler.crawl()
+
+# All files are discovered via ProjectWalker, then analyzed
+print(f"Analyzed {len(result.files_analyzed)} files")
+```
+
+### Two-Step Analysis (Optional)
+
+For advanced use cases, you can manually control discovery and analysis:
 
 ```python
 from code_scalpel.analysis import ProjectWalker, ProjectCrawler
 
-# Step 1: Discover files (fast, lightweight)
+# Step 1: Discover files (fast)
 walker = ProjectWalker("/path/to/project", max_depth=2)
 python_files = list(walker.get_python_files())
+print(f"Discovered {len(python_files)} Python files")
 
-# Step 2: Analyze discovered files (slow, comprehensive)
+# Step 2: Analyze all files (comprehensive)
+# Note: ProjectCrawler internally uses ProjectWalker, so you get
+# consistent file discovery behavior
 crawler = ProjectCrawler("/path/to/project")
 result = crawler.crawl()
 ```
@@ -439,7 +466,7 @@ pytest tests/core/analysis/test_project_walker.py -v
 
 ## Roadmap (Future Versions)
 
-- [ ] Refactor ProjectCrawler to use ProjectWalker backend
+- [x] Refactor ProjectCrawler to use ProjectWalker backend (v1.2.0)
 - [ ] Add .gitignore negation pattern support (!)
 - [ ] Persistent cache database schema v2
 - [ ] Parallel directory scanning
