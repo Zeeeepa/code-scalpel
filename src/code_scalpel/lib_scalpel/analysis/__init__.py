@@ -10,9 +10,7 @@ __all__ = ["ConstraintAnalyzer", "SpecGenerator"]
 
 
 # Helper function for pure spec generation
-def generate_markdown_spec(
-    graph, constraints, file_path, instruction, tier="community"
-):
+def generate_markdown_spec(graph, constraints, file_path, instruction):
     """Generate Markdown spec from graph and constraints."""
     gen = SpecGenerator()
     spec = gen.generate_constraint_spec(
@@ -20,6 +18,5 @@ def generate_markdown_spec(
         instruction=instruction,
         graph=graph,
         governance_config=None,
-        tier=tier,
     )
     return spec.markdown

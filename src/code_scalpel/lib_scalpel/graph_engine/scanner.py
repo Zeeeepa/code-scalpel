@@ -29,6 +29,7 @@ from typing import List, Set
 from .universal_graph import GraphEdge, GraphNode, UniversalGraph
 from .node_id import UniversalNodeID, NodeType
 from .confidence import EdgeType
+from code_scalpel.lib_scalpel.visitors.symbol_extractor import SymbolExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +76,7 @@ class ProjectScanner:
         root_dir: str | Path,
         max_files: int = 50,
         max_depth: int = 2,
+        extract_symbols: bool = True,
     ):
         """Initialize the project scanner.
 
@@ -82,12 +84,15 @@ class ProjectScanner:
             root_dir: Root directory of the project
             max_files: Maximum number of files to scan
             max_depth: Maximum directory depth to traverse
+            extract_symbols: Whether to extract symbol info (default: True)
         """
         self.root_dir = Path(root_dir).resolve()
         self.max_files = max_files
         self.max_depth = max_depth
+        self.extract_symbols = extract_symbols
         self.scanned_files: int = 0
         self.errors: List[tuple[str, str]] = []
+        self.symbol_extractor = SymbolExtractor() if extract_symbols else None
 
     def scan(self) -> UniversalGraph:
         """Scan project and build UniversalGraph.
@@ -209,6 +214,13 @@ class ProjectScanner:
             self._extract_symbols(tree, file_path_relative, graph, str(file_node_id))
             # Extract imports and dependencies
             self._extract_imports(tree, file_path_relative, graph, str(file_node_id))
+
+            # Extract rich symbol information if enabled
+            if self.extract_symbols and self.symbol_extractor:
+                symbol_table = self.symbol_extractor.extract_from_file(str(file_path))
+                self._enrich_with_symbols(
+                    symbol_table, file_path_relative, graph, str(file_node_id)
+                )
 
             logger.debug(
                 f"[ProjectScanner] Analyzed {file_path_relative}: "
@@ -371,3 +383,308 @@ class ProjectScanner:
                         evidence=f"Import from: {node.module}",
                     )
                     graph.add_edge(edge)
+
+    def _enrich_with_symbols(
+        self,
+        symbol_table,
+        file_path: Path,
+        graph: UniversalGraph,
+        file_node_id: str,
+    ) -> None:
+        """Enrich graph nodes with detailed symbol information.
+
+        Uses SymbolExtractor to add function signatures, parameters, and metadata.
+
+        Args:
+            symbol_table: SymbolTable from SymbolExtractor
+            file_path: Relative file path
+            graph: UniversalGraph to update
+            file_node_id: ID of file node
+        """
+        module_name = str(file_path).replace("/", ".").replace(".py", "")
+
+        # Enrich function nodes with signature info
+        for func_sig in symbol_table.functions:
+            func_node_id = UniversalNodeID(
+                language="python",
+                module=module_name,
+                node_type=NodeType.FUNCTION,
+                name=func_sig.name,
+                file=str(file_path),
+                line=func_sig.line,
+            )
+
+            # Find and update existing node or create new one
+            existing_node = graph.get_node(str(func_node_id))
+            if existing_node:
+                # Enrich metadata with signature details
+                existing_node.metadata.update(
+                    {
+                        "parameters": func_sig.params,
+                        "return_type": func_sig.returns,
+                        "docstring": func_sig.docstring,
+                        "decorators": func_sig.decorators,
+                    }
+                )
+            else:
+                # Create new enriched node
+                func_node = GraphNode(
+                    id=func_node_id,
+                    metadata={
+                        "parameters": func_sig.params,
+                        "return_type": func_sig.returns,
+                        "docstring": func_sig.docstring,
+                        "decorators": func_sig.decorators,
+                        "signature": func_sig.signature,
+                    },
+                )
+                graph.add_node(func_node)
+                # Add edge from file to function
+                edge = GraphEdge(
+                    from_id=file_node_id,
+                    to_id=str(func_node_id),
+                    edge_type=EdgeType.TYPE_ANNOTATION,
+                    confidence=1.0,
+                    evidence="Function defined in file",
+                )
+                graph.add_edge(edge)
+
+        # Enrich class nodes with method and inheritance info
+        for class_sig in symbol_table.classes:
+            class_node_id = UniversalNodeID(
+                language="python",
+                module=module_name,
+                node_type=NodeType.CLASS,
+                name=class_sig.name,
+                file=str(file_path),
+                line=class_sig.line,
+            )
+
+            # Find and update existing node
+            existing_node = graph.get_node(str(class_node_id))
+            if existing_node:
+                # Enrich with class metadata
+                existing_node.metadata.update(
+                    {
+                        "base_classes": class_sig.bases,
+                        "methods": [m.name for m in class_sig.methods],
+                        "properties": class_sig.properties,
+                        "docstring": class_sig.docstring,
+                    }
+                )
+            else:
+                # Create new enriched node
+                class_node = GraphNode(
+                    id=class_node_id,
+                    metadata={
+                        "base_classes": class_sig.bases,
+                        "methods": [m.name for m in class_sig.methods],
+                        "properties": class_sig.properties,
+                        "docstring": class_sig.docstring,
+                    },
+                )
+                graph.add_node(class_node)
+                # Add edge from file to class
+                edge = GraphEdge(
+                    from_id=file_node_id,
+                    to_id=str(class_node_id),
+                    edge_type=EdgeType.TYPE_ANNOTATION,
+                    confidence=1.0,
+                    evidence="Class defined in file",
+                )
+                graph.add_edge(edge)
+
+            # Add method nodes with signatures
+            for method_sig in class_sig.methods:
+                method_node_id = UniversalNodeID(
+                    language="python",
+                    module=module_name,
+                    node_type=NodeType.METHOD,
+                    name=method_sig.name,
+                    method=class_sig.name,
+                    file=str(file_path),
+                    line=method_sig.line,
+                )
+
+                existing_node = graph.get_node(str(method_node_id))
+                if existing_node:
+                    # Enrich with method signature
+                    existing_node.metadata.update(
+                        {
+                            "parameters": method_sig.params,
+                            "return_type": method_sig.returns,
+                            "docstring": method_sig.docstring,
+                        }
+                    )
+                else:
+                    # Create new method node
+                    method_node = GraphNode(
+                        id=method_node_id,
+                        metadata={
+                            "parameters": method_sig.params,
+                            "return_type": method_sig.returns,
+                            "docstring": method_sig.docstring,
+                            "signature": method_sig.signature,
+                        },
+                    )
+                    graph.add_node(method_node)
+                    # Add edge from class to method
+                    edge = GraphEdge(
+                        from_id=str(class_node_id),
+                        to_id=str(method_node_id),
+                        edge_type=EdgeType.TYPE_ANNOTATION,
+                        confidence=1.0,
+                        evidence="Method defined in class",
+                    )
+                    graph.add_edge(edge)
+
+        # Add import information to graph
+        for import_stmt in symbol_table.imports:
+            # Create edge for each import dependency
+            imported_node_id = UniversalNodeID(
+                language="python",
+                module=import_stmt.module,
+                node_type=NodeType.MODULE,
+                name=import_stmt.module,
+                file=str(file_path),
+                line=import_stmt.line,
+            )
+
+            # Find or create import node
+            import_node = graph.get_node(str(imported_node_id))
+            if not import_node:
+                import_node = GraphNode(id=imported_node_id)
+                graph.add_node(import_node)
+
+            # Create import edge with details
+            edge = GraphEdge(
+                from_id=file_node_id,
+                to_id=str(imported_node_id),
+                edge_type=EdgeType.IMPORT_STATEMENT,
+                confidence=1.0,
+                evidence=f"Import: {import_stmt.module} (line {import_stmt.line})",
+                metadata={
+                    "import_type": "from" if import_stmt.alias else "import",
+                    "symbols": import_stmt.symbols,
+                },
+            )
+            graph.add_edge(edge)
+
+        # Enrich class nodes with method and inheritance info
+        for class_sig in symbol_table.classes:
+            class_node_id = UniversalNodeID(
+                language="python",
+                module=module_name,
+                node_type=NodeType.CLASS,
+                name=class_sig.name,
+                file=str(file_path),
+                line=class_sig.line,
+            )
+
+            # Find and update existing node
+            existing_node = graph.get_node(str(class_node_id))
+            if existing_node:
+                # Enrich with class metadata
+                existing_node.metadata.update(
+                    {
+                        "base_classes": class_sig.base_classes,
+                        "methods": [m.name for m in class_sig.methods],
+                        "docstring": class_sig.docstring,
+                    }
+                )
+            else:
+                # Create new enriched node
+                class_node = GraphNode(
+                    id=class_node_id,
+                    metadata={
+                        "base_classes": class_sig.base_classes,
+                        "methods": [m.name for m in class_sig.methods],
+                        "docstring": class_sig.docstring,
+                    },
+                )
+                graph.add_node(class_node)
+                # Add edge from file to class
+                edge = GraphEdge(
+                    from_id=file_node_id,
+                    to_id=str(class_node_id),
+                    edge_type=EdgeType.TYPE_ANNOTATION,
+                    confidence=1.0,
+                    evidence="Class defined in file",
+                )
+                graph.add_edge(edge)
+
+            # Add method nodes with signatures
+            for method_sig in class_sig.methods:
+                method_node_id = UniversalNodeID(
+                    language="python",
+                    module=module_name,
+                    node_type=NodeType.METHOD,
+                    name=method_sig.name,
+                    method=class_sig.name,
+                    file=str(file_path),
+                    line=method_sig.line,
+                )
+
+                existing_node = graph.get_node(str(method_node_id))
+                if existing_node:
+                    # Enrich with method signature
+                    existing_node.metadata.update(
+                        {
+                            "parameters": method_sig.parameters,
+                            "return_type": method_sig.return_type,
+                            "docstring": method_sig.docstring,
+                        }
+                    )
+                else:
+                    # Create new method node
+                    method_node = GraphNode(
+                        id=method_node_id,
+                        metadata={
+                            "parameters": method_sig.parameters,
+                            "return_type": method_sig.return_type,
+                            "docstring": method_sig.docstring,
+                            "signature": str(method_sig),
+                        },
+                    )
+                    graph.add_node(method_node)
+                    # Add edge from class to method
+                    edge = GraphEdge(
+                        from_id=str(class_node_id),
+                        to_id=str(method_node_id),
+                        edge_type=EdgeType.TYPE_ANNOTATION,
+                        confidence=1.0,
+                        evidence="Method defined in class",
+                    )
+                    graph.add_edge(edge)
+
+        # Add import information to graph
+        for import_stmt in symbol_table.imports:
+            # Create edge for each import dependency
+            imported_node_id = UniversalNodeID(
+                language="python",
+                module=import_stmt.module,
+                node_type=NodeType.MODULE,
+                name=import_stmt.module,
+                file=str(file_path),
+                line=import_stmt.line,
+            )
+
+            # Find or create import node
+            import_node = graph.get_node(str(imported_node_id))
+            if not import_node:
+                import_node = GraphNode(id=imported_node_id)
+                graph.add_node(import_node)
+
+            # Create import edge with details
+            edge = GraphEdge(
+                from_id=file_node_id,
+                to_id=str(imported_node_id),
+                edge_type=EdgeType.IMPORT_STATEMENT,
+                confidence=1.0,
+                evidence=f"Import: {import_stmt.module} (line {import_stmt.line})",
+                metadata={
+                    "import_type": "from" if import_stmt.is_from else "import",
+                    "items": import_stmt.items,
+                },
+            )
+            graph.add_edge(edge)

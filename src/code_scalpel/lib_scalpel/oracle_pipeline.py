@@ -125,7 +125,6 @@ class OraclePipeline:
             instruction=instruction,
             graph=graph,
             governance_config=governance_config,
-            tier="library",
             max_graph_depth=self.max_depth,
             max_context_lines=self._get_context_lines(self.max_files),
         )

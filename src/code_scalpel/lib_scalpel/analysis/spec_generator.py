@@ -38,9 +38,9 @@ class SpecGenerator:
         instruction: str,
         graph: Any = None,
         governance_config: Optional[Dict[str, Any]] = None,
-        tier: str = "community",
-        max_graph_depth: Optional[int] = None,
-        max_context_lines: Optional[int] = None,
+        max_graph_depth: int = 5,
+        max_context_lines: int = 100,
+        include_topology_rules: bool = False,
     ) -> MarkdownSpec:
         """Generate a constraint specification for a file.
 
@@ -49,9 +49,9 @@ class SpecGenerator:
             instruction: What needs to be implemented
             graph: UniversalGraph instance (optional)
             governance_config: Governance config (optional)
-            tier: Current tier ("community", "pro", "enterprise")
-            max_graph_depth: Max depth for graph analysis
-            max_context_lines: Max lines of code context
+            max_graph_depth: Max depth for graph analysis (default 5)
+            max_context_lines: Max lines of code context (default 100)
+            include_topology_rules: Whether to load and include topology rules
 
         Returns:
             MarkdownSpec with Markdown constraint specification
@@ -60,12 +60,6 @@ class SpecGenerator:
             FileNotFoundError: If file doesn't exist
             SyntaxError: If file has syntax errors
         """
-        # Apply tier-based limits
-        if max_graph_depth is None:
-            max_graph_depth = self._get_tier_graph_depth(tier)
-        if max_context_lines is None:
-            max_context_lines = self._get_tier_context_lines(tier)
-
         # Extract symbol table
         try:
             symbol_table = self.symbol_extractor.extract_from_file(file_path)
@@ -82,7 +76,7 @@ class SpecGenerator:
 
         # Build topology rules
         topology_rules = []
-        if governance_config and tier in ("pro", "enterprise"):
+        if include_topology_rules and governance_config:
             self.constraint_analyzer.load_governance_rules(governance_config)
             topology_rules = list(self.constraint_analyzer.topology_rules.values())
 
@@ -93,7 +87,6 @@ class SpecGenerator:
             symbol_table=symbol_table,
             graph_constraints=graph_constraints,
             topology_rules=topology_rules,
-            tier=tier,
             max_context_lines=max_context_lines,
         )
 
@@ -101,7 +94,7 @@ class SpecGenerator:
             file_path=file_path,
             instruction=instruction,
             markdown=markdown,
-            tier=tier,
+            tier="",
             generated_at=datetime.utcnow().isoformat() + "Z",
         )
 
@@ -112,7 +105,6 @@ class SpecGenerator:
         symbol_table: SymbolTable,
         graph_constraints: GraphConstraints,
         topology_rules: List[TopologyRule],
-        tier: str,
         max_context_lines: int,
     ) -> str:
         """Generate Markdown constraint specification.
@@ -123,7 +115,6 @@ class SpecGenerator:
             symbol_table: Extracted symbols
             graph_constraints: Graph analysis
             topology_rules: Architectural rules
-            tier: Current tier
             max_context_lines: Max context lines
 
         Returns:
@@ -134,7 +125,6 @@ class SpecGenerator:
         # Header
         lines.append(f"# Code Generation Constraints for {file_path}\n")
         lines.append(f"*Generated: {datetime.utcnow().isoformat()}Z*\n")
-        lines.append(f"*Tier: {tier.upper()}*\n")
 
         # Instruction
         lines.append("## Instruction\n")
@@ -237,37 +227,3 @@ class SpecGenerator:
         lines.append("5. Maintain backward compatibility with callers\n")
 
         return "".join(lines)
-
-    @staticmethod
-    def _get_tier_graph_depth(tier: str) -> int:
-        """Get max graph depth for tier.
-
-        Args:
-            tier: Tier name
-
-        Returns:
-            Max graph depth
-        """
-        depths = {
-            "community": 2,
-            "pro": 5,
-            "enterprise": 999,
-        }
-        return depths.get(tier, 2)
-
-    @staticmethod
-    def _get_tier_context_lines(tier: str) -> int:
-        """Get max context lines for tier.
-
-        Args:
-            tier: Tier name
-
-        Returns:
-            Max context lines
-        """
-        lines = {
-            "community": 100,
-            "pro": 200,
-            "enterprise": 999,
-        }
-        return lines.get(tier, 100)
