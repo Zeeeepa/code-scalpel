@@ -17,12 +17,31 @@ from pathlib import Path
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
 from code_scalpel import __version__ as _pkg_version
 from code_scalpel.mcp.protocol import _get_current_tier
-from code_scalpel.oracle.oracle_pipeline import OraclePipeline
+from code_scalpel.lib_scalpel import OraclePipeline
 
 logger = logging.getLogger(__name__)
 
 # Avoid static import resolution issues in some type checkers
 mcp = import_module("code_scalpel.mcp.protocol").mcp
+
+# Tier to limits mapping - pure config-based
+TIER_LIMITS = {
+    "community": {"max_files": 50, "max_depth": 2},
+    "pro": {"max_files": 2000, "max_depth": 10},
+    "enterprise": {"max_files": 100000, "max_depth": 50},
+}
+
+
+def _get_limits_for_tier(tier: str) -> dict[str, int]:
+    """Get scan limits for a given tier.
+
+    Args:
+        tier: Tier level (community, pro, enterprise)
+
+    Returns:
+        Dict with max_files and max_depth
+    """
+    return TIER_LIMITS.get(tier, TIER_LIMITS["community"])
 
 
 async def _write_perfect_code_impl(
@@ -73,17 +92,23 @@ def _write_perfect_code_sync(
     if not path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
 
-    # Get current tier for limits
+    # Get current tier and map to limits
     tier = _get_current_tier()
+    limits = _get_limits_for_tier(tier)
 
     # Get project root
     from code_scalpel.mcp.server import get_project_root
 
     repo_root = get_project_root()
 
-    # Generate specification using OraclePipeline
+    # Generate specification using lib_scalpel OraclePipeline
+    # (pure library code with config-based limits, no tier knowledge)
     try:
-        pipeline = OraclePipeline(repo_root, tier)
+        pipeline = OraclePipeline(
+            repo_root,
+            max_files=limits["max_files"],
+            max_depth=limits["max_depth"],
+        )
         spec = pipeline.generate_constraint_spec(
             file_path=file_path,
             instruction=instruction,

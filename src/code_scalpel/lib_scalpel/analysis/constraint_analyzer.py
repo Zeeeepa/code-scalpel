@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from code_scalpel.oracle.models import (
+from code_scalpel.lib_scalpel.models import (
     GraphConstraints,
     TopologyRule,
     TopologyViolation,
