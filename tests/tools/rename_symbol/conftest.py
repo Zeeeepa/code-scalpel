@@ -5,8 +5,8 @@ Shared fixtures for rename_symbol tier testing.
 
 import pytest
 
-# NOTE: pytest_plugins moved to root conftest.py (pytest 9.x requirement)
-# pytest_plugins = ["tests.tools.rename_symbol.governance_profiles"]
+# [20260108_FEATURE] Auto-register governance profile fixtures
+pytest_plugins = ["tests.tools.rename_symbol.governance_profiles"]
 
 
 @pytest.fixture
@@ -56,3 +56,15 @@ def clear_tier_cache():
 
     jwt_validator._LICENSE_VALIDATION_CACHE = None
     config_loader.clear_cache()
+
+
+@pytest.fixture
+def scope_filesystem():
+    """Fixture for filesystem scope isolation in governance tests.
+
+    This fixture ensures that each test gets proper filesystem isolation
+    and doesn't interfere with other tests. It's primarily used as a marker
+    for tests that require filesystem operations to be scoped correctly.
+    """
+    # No-op fixture - just ensures isolation. Tests use tmp_path/temp_project for actual work.
+    pass

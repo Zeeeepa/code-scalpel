@@ -9,8 +9,6 @@ Tests can be run with: pytest tests/benchmarks/test_transport_performance.py -v
 
 import json
 import time
-from unittest.mock import Mock, patch
-import pytest
 
 
 class TestTransportPerformance:
@@ -61,11 +59,6 @@ class TestTransportPerformance:
             }
             # Encode as JSON (HTTP body)
             encoded = json.dumps(message)
-            # Add HTTP headers (simulation)
-            headers = {
-                "Content-Type": "application/json",
-                "Content-Length": str(len(encoded)),
-            }
             # Decode
             decoded = json.loads(encoded)
             return decoded
@@ -118,8 +111,6 @@ class TestTransportPerformance:
                 "params": {"code": "x = 1"},
             }
             encoded = json.dumps(message)
-            # HTTP headers (simulation)
-            headers = f"Content-Length: {len(encoded)}\r\n"
             json.loads(encoded)
 
             elapsed = time.perf_counter() - start
@@ -151,7 +142,8 @@ class TestTransportPerformance:
         for _ in range(cycles):
             message = {"jsonrpc": "2.0", "id": 1, "method": "test"}
             encoded = json.dumps(message)
-            headers = f"Content-Length: {len(encoded)}\r\n"
+            # Simulate HTTP overhead
+            _ = f"Content-Length: {len(encoded)}\r\n"
             json.loads(encoded)
         http_elapsed = time.perf_counter() - http_start
 
@@ -162,9 +154,9 @@ class TestTransportPerformance:
         print(f"\nStdio time: {stdio_elapsed * 1000:.2f}ms")
         print(f"HTTP time: {http_elapsed * 1000:.2f}ms")
         print(f"HTTP/Stdio ratio: {ratio:.2f}x")
-        assert ratio < 2.0, (
-            "HTTP transport should not be significantly slower than stdio"
-        )
+        assert (
+            ratio < 2.0
+        ), "HTTP transport should not be significantly slower than stdio"
 
 
 # Summary: Performance characteristics

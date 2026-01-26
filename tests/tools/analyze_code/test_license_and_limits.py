@@ -11,17 +11,18 @@ from unittest.mock import patch
 
 from code_scalpel.licensing import get_current_tier
 from code_scalpel.licensing.features import get_tool_capabilities
-from code_scalpel.mcp.server import _analyze_code_sync
 
 
 class TestLicenseFallback:
     """Test invalid/expired license fallback behavior."""
 
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    @patch("code_scalpel.licensing.jwt_validator.get_current_tier")
     def test_expired_license_fallback_to_community(self, mock_tier):
         """Expired license should fallback to Community tier."""
         # Simulate expired license detection returning Community
         mock_tier.return_value = "community"
+
+        from code_scalpel.mcp.server import _analyze_code_sync
 
         code = """
 def test_function():
@@ -41,11 +42,13 @@ def test_function():
         assert result.code_smells is None or result.code_smells == []
         assert result.halstead_metrics is None or result.halstead_metrics == {}
 
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    @patch("code_scalpel.licensing.jwt_validator.get_current_tier")
     def test_invalid_license_fallback_to_community(self, mock_tier):
         """Invalid license should fallback to Community tier."""
         # Simulate invalid license detection returning Community
         mock_tier.return_value = "community"
+
+        from code_scalpel.mcp.server import _analyze_code_sync
 
         code = """
 class TestClass:
@@ -63,11 +66,13 @@ class TestClass:
         assert result.cognitive_complexity is None or result.cognitive_complexity == 0
         assert result.code_smells is None or result.code_smells == []
 
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    @patch("code_scalpel.licensing.jwt_validator.get_current_tier")
     def test_missing_license_defaults_to_community(self, mock_tier):
         """Missing license (None) should default to Community tier."""
         # Simulate no license
         mock_tier.return_value = "community"
+
+        from code_scalpel.mcp.server import _analyze_code_sync
 
         code = """
 def simple():
@@ -87,7 +92,7 @@ def simple():
 class TestFileSizeLimits:
     """Test file size limit enforcement per tier."""
 
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    @patch("code_scalpel.mcp.helpers.analyze_helpers.get_current_tier_from_license")
     def test_community_max_file_size_1mb(self, mock_tier):
         """Community tier should enforce 1MB file size limit."""
         mock_tier.return_value = "community"
@@ -99,7 +104,7 @@ class TestFileSizeLimits:
 
         assert max_size == 1, "Community tier should have 1MB limit"
 
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    @patch("code_scalpel.mcp.helpers.analyze_helpers.get_current_tier_from_license")
     def test_pro_max_file_size_10mb(self, mock_tier):
         """Pro tier should enforce 10MB file size limit."""
         mock_tier.return_value = "pro"
@@ -111,9 +116,9 @@ class TestFileSizeLimits:
 
         assert max_size == 10, "Pro tier should have 10MB limit"
 
+    @patch("code_scalpel.mcp.helpers.analyze_helpers.get_current_tier_from_license")
     @patch("code_scalpel.licensing.get_current_tier")
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
-    def test_enterprise_max_file_size_100mb(self, mock_mcp_tier, mock_license_tier):
+    def test_enterprise_max_file_size_100mb(self, mock_license_tier, mock_mcp_tier):
         """Enterprise tier should enforce 100MB file size limit."""
         mock_mcp_tier.return_value = "enterprise"
         mock_license_tier.return_value = "enterprise"
@@ -125,7 +130,7 @@ class TestFileSizeLimits:
 
         assert max_size == 100, "Enterprise tier should have 100MB limit"
 
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    @patch("code_scalpel.mcp.helpers.analyze_helpers.get_current_tier_from_license")
     def test_file_size_limit_escalation(self, mock_tier):
         """File size limits should increase with tier upgrades."""
         # Test Community
@@ -149,10 +154,12 @@ class TestFileSizeLimits:
 class TestFileSizeEnforcement:
     """Test actual file size enforcement (stress tests)."""
 
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    @patch("code_scalpel.licensing.jwt_validator.get_current_tier")
     def test_large_file_generates_many_functions(self, mock_tier):
         """Generate large code and verify it's analyzed."""
         mock_tier.return_value = "community"
+
+        from code_scalpel.mcp.server import _analyze_code_sync
 
         # Generate code with many functions (but under 1MB)
         num_functions = 100
@@ -175,10 +182,12 @@ class TestFileSizeEnforcement:
             len(result.functions) == num_functions
         ), f"Expected {num_functions} functions, got {len(result.functions)}"
 
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    @patch("code_scalpel.licensing.jwt_validator.get_current_tier")
     def test_moderate_file_with_classes(self, mock_tier):
         """Test moderate-sized file with classes and methods."""
         mock_tier.return_value = "pro"
+
+        from code_scalpel.mcp.server import _analyze_code_sync
 
         # Generate code with classes and methods
         num_classes = 20
@@ -206,10 +215,12 @@ class TestFileSizeEnforcement:
         expected_functions = num_classes * methods_per_class
         assert len(result.functions) == expected_functions
 
-    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    @patch("code_scalpel.licensing.jwt_validator.get_current_tier")
     def test_complexity_scales_with_file_size(self, mock_tier):
         """Verify complexity analysis works on larger files."""
         mock_tier.return_value = "pro"
+
+        from code_scalpel.mcp.server import _analyze_code_sync
 
         # Generate complex code
         code = """
