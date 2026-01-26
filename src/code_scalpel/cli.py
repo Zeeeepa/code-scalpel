@@ -411,7 +411,7 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
         print("   1. Copy SCALPEL_MANIFEST_SECRET from .env to your CI/CD secrets")
         print("   2. Delete .env locally (or keep for development)")
         print("   3. Commit policy_manifest.json to git")
-        print("   4. Test with: code-scalpel verify-policies")
+        print("   4. Test with: codescalpel verify-policies")
 
     print("\nNext steps:")
     print("   1. Review policy.yaml to configure security rules")
@@ -437,7 +437,7 @@ def start_server(host: str = "127.0.0.1", port: int = 5000) -> int:
     print(f"   Refactor endpoint: POST http://{host}:{port}/refactor")
     print(f"   Security endpoint: POST http://{host}:{port}/security")
     print(
-        "\nNote: For MCP-compliant clients (Claude Desktop, Cursor), use 'code-scalpel mcp' instead."
+        "\nNote: For MCP-compliant clients (Claude Desktop, Cursor), use 'codescalpel mcp' instead."
     )
     print("Press Ctrl+C to stop the server.\n")
 
@@ -663,7 +663,7 @@ def verify_policies_command(
     if not secret:
         print("\n[ERROR] SCALPEL_MANIFEST_SECRET environment variable not set")
         print("\nThis secret is required to verify policy integrity.")
-        print("Find your secret in: .env (if using code-scalpel init)")
+        print("Find your secret in: .env (if using codescalpel init)")
         print("\nFor production:")
         print("   export SCALPEL_MANIFEST_SECRET=<your-secret-key>")
         return 1
@@ -757,7 +757,7 @@ def regenerate_manifest_command(
         print(f"   Signed by: {signed_by}")
         print("\nNext steps:")
         print("   1. Commit policy_manifest.json to git")
-        print("   2. Verify integrity: code-scalpel verify-policies")
+        print("   2. Verify integrity: codescalpel verify-policies")
         return 0
 
     except Exception as e:
@@ -770,27 +770,27 @@ def main() -> int:
     from . import __version__
 
     parser = argparse.ArgumentParser(
-        prog="code-scalpel",
+        prog="codescalpel",
         description="AI Agent toolkit for code analysis using ASTs, PDGs, and Symbolic Execution",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  code-scalpel analyze myfile.py              Analyze a Python file
-  code-scalpel analyze --code "def f(): pass" Analyze code string
-  code-scalpel analyze myfile.py --json       Output as JSON
-  code-scalpel scan myfile.py                 Security vulnerability scan
-  code-scalpel scan myfile.py --json          Security scan with JSON output
-  code-scalpel mcp                            TIER 1: Start MCP server (stdio, Claude Desktop)
-  code-scalpel mcp --http --port 8080         TIER 2: Start MCP server (HTTP fallback)
-  code-scalpel mcp --http --allow-lan         TIER 2: Start MCP server (HTTP with LAN)
-  code-scalpel mcp --http --ssl-cert cert.pem --ssl-key key.pem  HTTPS for production/Claude
-  code-scalpel server --port 5000             Start REST API server (legacy)
-  code-scalpel version                        Show version info
+  codescalpel analyze myfile.py              Analyze a Python file
+  codescalpel analyze --code "def f(): pass" Analyze code string
+  codescalpel analyze myfile.py --json       Output as JSON
+  codescalpel scan myfile.py                 Security vulnerability scan
+  codescalpel scan myfile.py --json          Security scan with JSON output
+  codescalpel mcp                            TIER 1: Start MCP server (stdio, Claude Desktop)
+  codescalpel mcp --http --port 8080         TIER 2: Start MCP server (HTTP fallback)
+  codescalpel mcp --http --allow-lan         TIER 2: Start MCP server (HTTP with LAN)
+  codescalpel mcp --http --ssl-cert cert.pem --ssl-key key.pem  HTTPS for production/Claude
+  codescalpel server --port 5000             Start REST API server (legacy)
+  codescalpel version                        Show version info
 
 For production deployments with Claude API, use HTTPS:
-  code-scalpel mcp --http --ssl-cert /path/to/cert.pem --ssl-key /path/to/key.pem
+  codescalpel mcp --http --ssl-cert /path/to/cert.pem --ssl-key /path/to/key.pem
 
-For more information, visit: https://github.com/tescolopio/code-scalpel
+For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         """,
     )
 
@@ -927,7 +927,7 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
     install_parser.add_argument(
         "--dest",
         default=None,
-        help="Optional destination path (default: ~/.config/code-scalpel/license.jwt)",
+        help="Optional destination path (default: ~/.config/codescalpel/license.jwt)",
     )
     install_parser.add_argument(
         "--force",
@@ -966,7 +966,7 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
     )
     regenerate_parser.add_argument(
         "--signed-by",
-        default="code-scalpel regenerate-manifest",
+        default="codescalpel regenerate-manifest",
         help="Signer identity for manifest",
     )
 

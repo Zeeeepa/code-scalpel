@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "code-scalpel": {
-      "command": "uvx",
-      "args": ["codescalpel", "mcp"],
-      "disabled": false
-    }
-  }
-}

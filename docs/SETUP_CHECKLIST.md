@@ -37,7 +37,7 @@
 ```json
 {
   "servers": {
-    "code-scalpel": {
+    "codescalpel": {
       "type": "stdio",
       "command": "python",
       "args": [
@@ -71,7 +71,7 @@
 ```json
 {
   "mcpServers": {
-    "code-scalpel": {
+    "codescalpel": {
       "command": "python",
       "args": [
         "-m",
@@ -134,7 +134,7 @@ If yes:
 - [ ] Restart Claude Desktop (close completely, then open again)
 - [ ] Create a new conversation
 - [ ] Type: "What MCP servers are available?"
-- [ ] Claude should mention code-scalpel
+- [ ] Claude should mention codescalpel
 
 ### For Cursor:
 

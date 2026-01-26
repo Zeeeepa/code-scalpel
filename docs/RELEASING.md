@@ -26,7 +26,7 @@ Each release is published to multiple distribution channels:
 
 2. **GitHub Releases**
    - Release notes and source artifacts
-   - URL: https://github.com/anthropics/code-scalpel/releases
+   - URL: https://github.com/3D-Tech-Solutions/code-scalpel/releases
 
 3. **VS Code Marketplace**
    - VSCode extension
@@ -272,7 +272,7 @@ gh release edit vX.Y.Z --draft=false
 ```
 
 Or manually via GitHub web interface:
-1. Go to Releases: https://github.com/anthropics/code-scalpel/releases
+1. Go to Releases: https://github.com/3D-Tech-Solutions/code-scalpel/releases
 2. Click "Draft a new release"
 3. Tag: `vX.Y.Z`
 4. Title: `v X.Y.Z`
@@ -507,8 +507,8 @@ After successful release:
 ## Support
 
 For questions about the release process:
-- GitHub Issues: https://github.com/anthropics/code-scalpel/issues
-- Discussions: https://github.com/anthropics/code-scalpel/discussions
+- GitHub Issues: https://github.com/3D-Tech-Solutions/code-scalpel/issues
+- Discussions: https://github.com/3D-Tech-Solutions/code-scalpel/discussions
 
 ---
 

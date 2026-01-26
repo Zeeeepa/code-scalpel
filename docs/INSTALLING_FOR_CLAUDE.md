@@ -48,7 +48,7 @@ For manual installation with pip:
 pip install codescalpel
 
 # Start the MCP server
-code-scalpel mcp
+codescalpel mcp
 ```
 
 **Requirements**:
@@ -58,7 +58,7 @@ code-scalpel mcp
 
 **Optional**: Install with all features
 ```bash
-pip install "code-scalpel[agents,web,polyglot]"
+pip install "codescalpel[agents,web,polyglot]"
 ```
 
 ---
@@ -69,7 +69,7 @@ For development or latest features:
 
 ```bash
 # Clone the repository
-git clone https://github.com/anthropics/code-scalpel.git
+git clone https://github.com/3D-Tech-Solutions/code-scalpel.git
 cd code-scalpel
 
 # Install in development mode
@@ -109,9 +109,9 @@ Add Code Scalpel to the `mcpServers` section:
 ```json
 {
   "mcpServers": {
-    "code-scalpel": {
+    "codescalpel": {
       "command": "uvx",
-      "args": ["code-scalpel", "mcp"]
+      "args": ["--from", "codescalpel", "codescalpel", "mcp"]
     }
   }
 }
@@ -121,7 +121,7 @@ Add Code Scalpel to the `mcpServers` section:
 ```json
 {
   "mcpServers": {
-    "code-scalpel": {
+    "codescalpel": {
       "command": "python",
       "args": ["-m", "code_scalpel.mcp.protocol"]
     }
@@ -210,20 +210,20 @@ RUN pip install codescalpel
 
 EXPOSE 8080
 
-CMD ["code-scalpel", "mcp"]
+CMD ["codescalpel", "mcp"]
 ```
 
 Build and run:
 ```bash
-docker build -t code-scalpel .
-docker run -p 8080:8080 code-scalpel
+docker build -t codescalpel .
+docker run -p 8080:8080 codescalpel
 ```
 
 Configure Claude to connect:
 ```json
 {
   "mcpServers": {
-    "code-scalpel": {
+    "codescalpel": {
       "command": "curl",
       "args": ["http://localhost:8080"]
     }
@@ -302,7 +302,7 @@ Contact support to upgrade tier if hitting limits.
 
 **Solution**: Make the script executable
 ```bash
-chmod +x ~/.local/bin/code-scalpel
+chmod +x ~/.local/bin/codescalpel
 ```
 
 Or use Python directly:
@@ -361,9 +361,9 @@ If you have multiple MCP servers configured:
 ```json
 {
   "mcpServers": {
-    "code-scalpel": {
+    "codescalpel": {
       "command": "uvx",
-      "args": ["code-scalpel", "mcp"]
+      "args": ["--from", "codescalpel", "codescalpel", "mcp"]
     },
     "other-server": {
       "command": "uvx",
@@ -412,9 +412,9 @@ Example prompts:
 
 ## Support & Documentation
 
-- **GitHub**: https://github.com/anthropics/code-scalpel
-- **Issues**: https://github.com/anthropics/code-scalpel/issues
-- **README**: https://github.com/anthropics/code-scalpel#readme
+- **GitHub**: https://github.com/3D-Tech-Solutions/code-scalpel
+- **Issues**: https://github.com/3D-Tech-Solutions/code-scalpel/issues
+- **README**: https://github.com/3D-Tech-Solutions/code-scalpel#readme
 - **Main Docs**: [docs/](../README.md)
 
 ---
@@ -439,8 +439,8 @@ A: Configure via environment variables or config file. Enterprise users should c
 **Q: Is there a CLI tool?**
 A: Yes! Use `codescalpel` command:
 ```bash
-code-scalpel analyze /path/to/code.py
-code-scalpel extract MyClass /path/to/file.py
+codescalpel analyze /path/to/code.py
+codescalpel extract MyClass /path/to/file.py
 ```
 
 ---

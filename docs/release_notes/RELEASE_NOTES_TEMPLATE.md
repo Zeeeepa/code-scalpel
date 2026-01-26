@@ -158,7 +158,7 @@ pip install codescalpel==[VERSION]
 
 ### From GitHub
 ```bash
-pip install git+https://github.com/anthropics/code-scalpel.git@v[VERSION]
+pip install git+https://github.com/3D-Tech-Solutions/code-scalpel.git@v[VERSION]
 ```
 
 ### Via UVX
@@ -189,8 +189,8 @@ This release has been tested on:
 ## Support
 
 For issues, questions, or feature requests, please visit:
-- GitHub Issues: https://github.com/anthropics/code-scalpel/issues
-- Documentation: https://github.com/anthropics/code-scalpel#documentation
+- GitHub Issues: https://github.com/3D-Tech-Solutions/code-scalpel/issues
+- Documentation: https://github.com/3D-Tech-Solutions/code-scalpel#documentation
 - Discord: [Link if available]
 
 ---
