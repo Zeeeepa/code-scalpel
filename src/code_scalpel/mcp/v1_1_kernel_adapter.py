@@ -78,6 +78,9 @@ class AnalyzeCodeKernelAdapter:
             with open(file_path, "r", encoding="utf-8") as f:
                 actual_content = f.read()
 
+        # Ensure content is non-None (type safety)
+        actual_content = actual_content or ""
+
         # Create SourceContext
         ctx = SourceContext(
             content=actual_content,

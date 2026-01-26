@@ -6,7 +6,8 @@ Shared fixtures for rename_symbol tier testing.
 import pytest
 
 # [20260108_FEATURE] Auto-register governance profile fixtures
-pytest_plugins = ["tests.tools.rename_symbol.governance_profiles"]
+# NOTE: Moved to root tests/conftest.py for Pytest 9.0+ compatibility
+# pytest_plugins = ["tests.tools.rename_symbol.governance_profiles"]
 
 
 @pytest.fixture

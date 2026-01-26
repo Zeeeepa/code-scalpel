@@ -17,6 +17,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# Register pytest plugins at root level (Pytest 9.0+ requires this to be in root conftest)
+pytest_plugins = ["tests.tools.rename_symbol.governance_profiles"]
+
 
 # [20260104_TEST] Lightweight fallback for pytest-mock's `mocker` fixture used in tier tests.
 @pytest.fixture

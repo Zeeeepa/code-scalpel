@@ -91,7 +91,8 @@ def main():
             port = args.port if hasattr(args, "port") else 8080
 
             print(
-                f"Starting codescalpel-agents MCP server ({transport} transport)", file=sys.stderr
+                f"Starting codescalpel-agents MCP server ({transport} transport)",
+                file=sys.stderr,
             )
             return run_server(transport=transport, host=host, port=port)
         except Exception as e:
