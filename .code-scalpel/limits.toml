@@ -369,6 +369,23 @@ test_frameworks = ["pytest", "unittest"]
 test_frameworks = "all"
 
 # ============================================================================
+# GROUP 5: ORACLE TOOLS (AI-ASSISTED CODE GENERATION)
+# ============================================================================
+# [20260126_FEATURE] Oracle constraint specification generation
+
+[pro.write_perfect_code]
+max_file_size_mb = 10
+max_graph_depth = 5
+max_context_lines = 200
+cache_ttl_seconds = 300
+
+[enterprise.write_perfect_code]
+max_file_size_mb = 100
+max_graph_depth = -1  # unlimited
+max_context_lines = 1000
+cache_ttl_seconds = 300
+
+# ============================================================================
 # DEPLOYMENT NOTES
 # ============================================================================
 #

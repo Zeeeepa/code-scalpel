@@ -164,6 +164,13 @@ DEFAULT_FEATURES: Dict[str, Feature] = {
         description="Compliance and audit reporting",
         category="governance",
     ),
+    # [20260126_FEATURE] Oracle tools for deterministic code generation
+    "write_perfect_code": Feature(
+        name="write_perfect_code",
+        tier="pro",
+        description="Generate constraint specs for AI code generation",
+        category="oracle",
+    ),
 }
 
 # Tier hierarchy for comparison
