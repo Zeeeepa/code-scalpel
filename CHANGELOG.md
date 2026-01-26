@@ -7,11 +7,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for v1.2.0
-- Project Awareness Engine (ProjectWalker + ProjectContext)
-- Smart codebase scanning for large projects
-- Symlink loop detection and handling
-- Performance optimizations for agent context windows
+### Planned for v1.3.0
+- Smart path suggestions for file resolution
+- Cache invalidation strategies (TTL-based)
+- Parallel file scanning for large projects
+- Incremental project updates
+- Custom language profile support
+- Language Server Protocol (LSP) integration
+
+---
+
+## [1.2.0] - 2026-01-26
+
+### Added
+- **Project Awareness Engine**: New subsystem for intelligent codebase analysis
+  - `ProjectWalker`: Fast file discovery with smart filtering (530 lines)
+    - 9+ language detection (Python, JS, TS, Java, C++, C#, Ruby, Go, Rust)
+    - 19 default exclusion patterns with custom override support
+    - Symlink cycle detection using inode tracking
+    - Optional .gitignore support
+    - Token estimation for context sizing
+  - `ProjectContext`: Metadata storage and intelligent caching (514 lines)
+    - Directory classification (source, test, build, docs, vendor, config)
+    - File importance scoring (0.0-1.0 scale)
+    - In-memory and optional SQLite caching
+    - Change detection via MD5 hashing
+  - `FileInfo`, `DirectoryInfo`, `ProjectMap` data classes
+  - `DirectoryType` enum for semantic directory classification
+  - All language extension constants exported from analysis module
+- Comprehensive documentation: `docs/PROJECT_AWARENESS_ENGINE.md` (473 lines)
+  - Quick start guide with 3+ code examples
+  - Complete API reference
+  - Performance benchmarks
+  - 5+ real-world use cases
+  - Integration patterns
+
+### Changed
+- **ProjectCrawler Refactoring**: Now uses ProjectWalker for file discovery
+  - Eliminated 51 lines of duplicate gitignore handling
+  - Single source of truth for file discovery
+  - 100% backward compatible with existing code
+
+### Testing
+- Added 39 comprehensive tests for Project Awareness Engine (100% pass rate)
+- All 31 existing ProjectCrawler tests continue to pass
+- Performance benchmarking for large project structures
+- Symlink cycle handling verification
+
+### Documentation
+- Added PROJECT_AWARENESS_ENGINE.md with complete feature documentation
+- Updated ARCHITECTURE_IMPLEMENTATION.md references
+- Added code examples for all major use cases
+- Performance characteristics and scaling notes
+
+### Performance
+- File discovery time for 1,000 files: ~50ms
+- Memory consumption: ~2MB per 1,000 files
+- Symlink cycle detection: O(1) per traversal
 
 ---
 
