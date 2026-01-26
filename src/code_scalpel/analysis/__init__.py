@@ -42,6 +42,28 @@ from .project_crawler import (
     ProjectCrawler,
     crawl_project,
 )
+from .project_walker import (
+    ALL_SUPPORTED_EXTENSIONS,
+    CPP_EXTENSIONS,
+    CSHARP_EXTENSIONS,
+    DEFAULT_EXCLUDE_DIRS,
+    GO_EXTENSIONS,
+    JAVA_EXTENSIONS,
+    JAVASCRIPT_EXTENSIONS,
+    PYTHON_EXTENSIONS,
+    RUBY_EXTENSIONS,
+    RUST_EXTENSIONS,
+    TYPESCRIPT_EXTENSIONS,
+    DirectoryInfo,
+    FileInfo,
+    ProjectMap,
+    ProjectWalker,
+)
+from .project_context import (
+    CacheMetadata,
+    DirectoryType,
+    ProjectContext,
+)
 
 __all__ = [
     # Code Analyzer
@@ -61,6 +83,26 @@ __all__ = [
     "crawl_project",
     # Core
     "CodeAnalysisToolkit",
+    # Project Awareness Engine (v1.2.0)
+    "ProjectWalker",
+    "ProjectContext",
+    "FileInfo",
+    "DirectoryInfo",
+    "ProjectMap",
+    "CacheMetadata",
+    "DirectoryType",
+    # Extensions and constants
+    "DEFAULT_EXCLUDE_DIRS",
+    "PYTHON_EXTENSIONS",
+    "JAVASCRIPT_EXTENSIONS",
+    "TYPESCRIPT_EXTENSIONS",
+    "JAVA_EXTENSIONS",
+    "CPP_EXTENSIONS",
+    "CSHARP_EXTENSIONS",
+    "RUBY_EXTENSIONS",
+    "GO_EXTENSIONS",
+    "RUST_EXTENSIONS",
+    "ALL_SUPPORTED_EXTENSIONS",
 ]
 
 __version__ = "1.0.0"
