@@ -2,6 +2,10 @@
 
 [20260121_REFACTOR] Ensure all MCP tool responses use ToolResponseEnvelope
 for contract compliance (tier metadata, duration, standardized errors).
+
+[20260126_v1_1] Integrate Phase 6 Kernel (SourceContext, Validators, ResponseEnvelope)
+to enable self-correction with validation suggestions for analyze_code.
+Hybrid architecture: new tool uses kernel, legacy tools unchanged.
 """
 
 from __future__ import annotations
@@ -15,6 +19,7 @@ from code_scalpel.mcp.helpers.analyze_helpers import _analyze_code_sync
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
 from code_scalpel import __version__ as _pkg_version
 from code_scalpel.mcp.protocol import _get_current_tier
+from code_scalpel.mcp.v1_1_kernel_adapter import get_adapter
 
 # Avoid static import resolution issues in some type checkers
 mcp = import_module("code_scalpel.mcp.protocol").mcp
@@ -37,10 +42,15 @@ async def analyze_code(
     - Community: Basic AST parsing, functions/classes, complexity, imports
     - Pro: + Cognitive complexity, code smells, Halstead metrics, duplicate detection
     - Enterprise: + Custom rules, compliance checks, organization patterns, technical debt
+
+    [20260126_v1_1] Now with self-correction suggestions via kernel validation.
     """
     started = time.perf_counter()
     try:
-        # Validate input: either code or file_path must be provided
+        # [20260126_v1_1] Integrate Phase 6 Kernel for validation and self-correction
+        adapter = get_adapter()
+
+        # 1. Validate input: either code or file_path must be provided
         if code is None and file_path is None:
             raise ValueError("Either 'code' or 'file_path' must be provided")
 
@@ -68,7 +78,36 @@ async def analyze_code(
             with open(file_path, "r", encoding="utf-8") as f:
                 code = f.read()
 
-        result = await asyncio.to_thread(_analyze_code_sync, code, language, file_path)
+        # [20260126_v1_1] Create SourceContext and validate input
+        try:
+            ctx = adapter.create_source_context(
+                code=code, file_path=file_path, language=language
+            )
+            is_valid, error_obj, suggestions = adapter.validate_input(ctx)
+
+            if not is_valid and error_obj:
+                # Return error response with self-correction suggestions
+                duration_ms = int((time.perf_counter() - started) * 1000)
+                tier = _get_current_tier()
+                # Enhance error with suggestions
+                error_obj.error_details = error_obj.error_details or {}
+                error_obj.error_details["suggestions"] = suggestions
+                return make_envelope(
+                    data=None,
+                    tool_id="analyze_code",
+                    tool_version=_pkg_version,
+                    tier=tier,
+                    duration_ms=duration_ms,
+                    error=error_obj,
+                )
+        except ValueError:
+            # Validation setup error
+            pass  # Continue with legacy code path
+
+        # [20260126_v1_1] Core analysis (unchanged)
+        result = await asyncio.to_thread(
+            _analyze_code_sync, code or "", language, file_path
+        )
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
         return make_envelope(
