@@ -7,11 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for v1.0.3+
-- Unified publication workflow (single trigger for all targets)
-- Version auto-detection from pyproject.toml
-- Automated release notes generation from commits
-- Multi-platform smoke tests post-release
+### Planned for v1.2.0
+- Project Awareness Engine (ProjectWalker + ProjectContext)
+- Smart codebase scanning for large projects
+- Symlink loop detection and handling
+- Performance optimizations for agent context windows
+
+---
+
+## [1.1.0] - 2026-01-26
+
+### Added
+- Phase 6 Kernel Integration for `analyze_code` tool
+- SourceContext model for unified input handling
+- SemanticValidator for pre-analysis input validation
+- ResponseEnvelope with metadata and tier information
+- UpgradeHints for tier-based feature suggestions
+- Self-correction support for AI agents
+
+### Changed
+- `analyze_code` now uses hybrid kernel architecture
+- Enhanced response metadata with version tracking and duration metrics
+- Improved error handling with structured error responses
+
+### Fixed
+- Package name corrected in pyproject.toml (code-scalpel → codescalpel) for PyPI compatibility
+- All documentation updated to reflect correct package name
+
+### Security
+- Backward compatible with all existing tools (no breaking changes)
+- Hybrid architecture allows gradual kernel adoption across tool suite
 
 ---
 

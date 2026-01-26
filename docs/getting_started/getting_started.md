@@ -91,7 +91,7 @@ Add to `~/.cursor/mcp.json`:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Run code-scalpel without installing (used in MCP configs above)
-uvx code-scalpel --help
+uvx codescalpel --help
 ```
 
 This is the **recommended** approach because:
@@ -102,10 +102,10 @@ This is the **recommended** approach because:
 ### Option 2: pip (Traditional)
 
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
 
-Then use `python -m code_scalpel.mcp` in your MCP configs instead of `uvx code-scalpel mcp`.
+Then use `python -m code_scalpel.mcp` in your MCP configs instead of `uvx codescalpel mcp`.
 
 ### Option 3: Docker (Production/CI)
 
@@ -314,9 +314,9 @@ code-scalpel scan app.py
 
 **Solution:** Ensure code-scalpel is installed and in PATH:
 ```bash
-pip install code-scalpel
+pip install codescalpel
 # Or with uv
-uvx code-scalpel --help
+uvx codescalpel --help
 ```
 
 ### VS Code Can't Find Server

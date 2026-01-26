@@ -29,12 +29,12 @@ In plain English: It's how Claude, Copilot, and Cursor can talk to Code Scalpel.
 
 **A:** Just run:
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
 
 If that doesn't work, type:
 ```bash
-python3 -m pip install code-scalpel
+python3 -m pip install codescalpel
 ```
 
 ---
@@ -117,12 +117,12 @@ Then restart your terminal.
 
 **A:** Code Scalpel isn't installed. Run:
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
 
 Or if that doesn't work:
 ```bash
-python3 -m pip install code-scalpel
+python3 -m pip install codescalpel
 ```
 
 ---

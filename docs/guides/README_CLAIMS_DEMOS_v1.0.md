@@ -41,9 +41,9 @@ evidence/readme_claims/
 - Commands (record terminal):
   - `python -m venv .venv && source .venv/bin/activate`
   - `pip install -U pip`
-  - `pip install code-scalpel`
+  - `pip install codescalpel`
   - `code-scalpel --help`
-  - `uvx code-scalpel --help` (if demonstrating uv)
+  - `uvx codescalpel --help` (if demonstrating uv)
 
 **Evidence:**
 - `evidence/readme_claims/01_install_and_health/install_help.txt`

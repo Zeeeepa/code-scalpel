@@ -160,6 +160,15 @@ async def type_evaporation_scan(
             & cap_set
         )
 
+        # At this point, both frontend_code and backend_code are guaranteed to be set
+        # (validated above at lines 111-133)
+        assert (
+            frontend_code is not None
+        ), "frontend_code must be provided or read from file"
+        assert (
+            backend_code is not None
+        ), "backend_code must be provided or read from file"
+
         result = await asyncio.to_thread(
             _type_evaporation_scan_sync,
             frontend_code,

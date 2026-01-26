@@ -16,7 +16,7 @@ import asyncio
 import functools
 import logging
 import os
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable, Optional, TypeVar, cast
 
 from code_scalpel.mcp.models.context import Language, SourceContext
 from code_scalpel.mcp.protocol import _get_current_tier
@@ -172,7 +172,8 @@ def normalize_input(
                 is_memory = False
             else:
                 # Use provided code (in-memory)
-                content = code
+                # Due to validation above, code is guaranteed to be str here
+                content = cast(str, code)
                 actual_file_path = None
                 is_memory = True
 
@@ -244,7 +245,8 @@ def normalize_input(
                 is_memory = False
             else:
                 # Use provided code (in-memory)
-                content = code
+                # Due to validation above, code is guaranteed to be str here
+                content = cast(str, code)
                 actual_file_path = None
                 is_memory = True
 

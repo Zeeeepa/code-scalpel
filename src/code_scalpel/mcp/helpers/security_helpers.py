@@ -936,7 +936,7 @@ def _fetch_package_license(package_name: str, ecosystem: str) -> str | None:
             parsed = urllib.parse.urlparse(url)
             if parsed.scheme not in {"http", "https"}:
                 raise ValueError(f"Unsupported registry scheme: {parsed.scheme}")
-            with urllib.request.urlopen(url, timeout=5) as response:
+            with urllib.request.urlopen(url, timeout=5) as response:  # nosec B310
                 data = json.loads(response.read().decode())
                 return data.get("info", {}).get("license") or "Unknown"
         elif ecosystem.lower() == "npm":
@@ -944,7 +944,7 @@ def _fetch_package_license(package_name: str, ecosystem: str) -> str | None:
             parsed = urllib.parse.urlparse(url)
             if parsed.scheme not in {"http", "https"}:
                 raise ValueError(f"Unsupported registry scheme: {parsed.scheme}")
-            with urllib.request.urlopen(url, timeout=5) as response:
+            with urllib.request.urlopen(url, timeout=5) as response:  # nosec B310
                 data = json.loads(response.read().decode())
                 license_info = data.get("license")
                 if isinstance(license_info, dict):

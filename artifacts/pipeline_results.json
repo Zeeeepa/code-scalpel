@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-25T17:18:37.780659",
+  "timestamp": "2026-01-26T15:14:17.334667",
   "checks": {
     "black": {
       "status": "passed",
@@ -10,8 +10,8 @@
       "output": "No linting issues found"
     },
     "pyright": {
-      "status": "passed",
-      "output": "No type errors found"
+      "status": "failed",
+      "output": "/mnt/k/backup/Develop/code-scalpel/src/code_scalpel/mcp/normalizers.py\n  /mnt/k/backup/Develop/code-scalpel/src/code_scalpel/mcp/normalizers.py:194:21 - error: Argument of type \"str | None\" cannot be assigned to parameter \"content\" of type \"str\" in function \"detect\"\n  \u00a0\u00a0Type \"str | None\" is not assignable to type \"str\"\n  \u00a0\u00a0\u00a0\u00a0\"None\" is not assignable to \"str\" (reportArgumentType)\n  /mnt/k/backup/Develop/code-scalpel/src/code_scalpel/mcp/normalizers.py:203:25 - error: Argument of type \"str | None\" cannot be assigned to parameter \"content\" of type \"str\" in function \"__init__\"\n  \u00a0\u00a0Type \"str | None\" is not assignable to type \"str\"\n  \u00a0\u00a0\u00a0\u00a0\"None\" is not assignable to \"str\" (reportArgumentType)\n  /mnt/k/backup/Develop/code-scalpel/src/code_scalpel/mcp/normalizers.py:266:21 - error: Argument of type \"str | None\" cannot be assigned to parameter \"content\" of type \"str\" in function \"detect\"\n  \u00a0\u00a0Type \"str | None\" is not assignable to type \"str\"\n  \u00a0\u00a0\u00a0\u00a0\"None\" is not assignable to \"str\" (reportArgumentType)\n  /mnt/k/backup/Develop/code-scalpel/src/code_scalpel/mcp/normalizers.py:275:25 - error: Argument of type \"str | None\" cannot be assigned to parameter \"content\" of type \"str\" in function \"__init__\"\n  \u00a0\u00a0Type \"str | None\" is not assignable to type \"str\"\n  \u00a0\u00a0\u00a0\u00a0\"None\" is not assignable to \"str\" (reportArgumentType)\n/mnt/k/backup/Develop/code-scalpel/src/code_scalpel/mcp/tools/security.py\n  /mnt/k/backup/Develop/code-scalpel/src/code_scalpel/mcp/tools/security.py:165:13 - error: Argument of type \"str | None\" cannot be assigned to parameter \"frontend_code\" of type \"str\"\n  \u00a0\u00a0Type \"str | None\" is not assignable to type \"str\"\n  \u00a0\u00a0\u00a0\u00a0\"None\" is not assignable to \"str\" (reportArgumentType)\n  /mnt/k/backup/Develop/code-scalpel/src/code_scalpel/mcp/tools/security.py:166:13 - error: Argument of type \"str | None\" cannot be assigned to parameter \"backend_code\" of type \"str\"\n  \u00a0\u00a0Type \"str | None\" is not assignable to type \"str\"\n  \u00a0\u00a0\u00a0\u00a0\"None\" is not assignable to \"str\" (reportArgumentType)\n/mnt/k/backup/Develop/code-scalpel/src/code_scalpel/oracle/__init__.py\n  /mnt/k/backup/Develop/code-scalpel/src/code_scalpel/oracle/__init__.py:22:5 - warning: \"generate_constraint_spec\" is specified in __all__ but is not present in module (reportUnsupportedDunderAll)\n6 errors, 1 warning, 0 informations\n"
     },
     "mcp_contracts": {
       "status": "passed",

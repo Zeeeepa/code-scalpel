@@ -20,7 +20,7 @@
 ## ✅ Step 1: Install Code Scalpel (Do This Once)
 
 - [ ] Open a terminal (Command Prompt on Windows, Terminal on Mac/Linux)
-- [ ] Run: `pip install code-scalpel`
+- [ ] Run: `pip install codescalpel`
 - [ ] Wait for it to finish (you'll see ✓ Successfully installed)
 
 ---
@@ -175,7 +175,7 @@ Generate unit tests for my payment processing function
 - [ ] On Linux: `sudo apt-get install python3`
 
 ### "Code Scalpel not found"
-- [ ] Run: `pip install code-scalpel`
+- [ ] Run: `pip install codescalpel`
 - [ ] Wait for it to complete
 
 ### "License path not found"

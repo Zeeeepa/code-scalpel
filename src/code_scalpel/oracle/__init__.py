@@ -13,11 +13,21 @@ Core Components:
 - models: Pydantic schemas for specs and rules
 
 Public API:
-- generate_constraint_spec(file_path, instruction) -> str
+- generate_constraint_spec(repo_root, file_path, instruction, tier, governance_config) -> str
 """
 
 from __future__ import annotations
 
+from code_scalpel.oracle.oracle_pipeline import (
+    generate_constraint_spec_async,
+    generate_constraint_spec_sync,
+)
+
+# Main entry point - use sync version as default
+generate_constraint_spec = generate_constraint_spec_sync
+
 __all__ = [
     "generate_constraint_spec",
+    "generate_constraint_spec_async",
+    "generate_constraint_spec_sync",
 ]

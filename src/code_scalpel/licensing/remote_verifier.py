@@ -333,7 +333,7 @@ def remote_verify(token: str, *, environment: str | None) -> VerifiedEntitlement
     last_exc: Exception | None = None
     for attempt in range(_verify_retries() + 1):
         try:
-            with urllib.request.urlopen(req, timeout=_verify_timeout_seconds()) as resp:  # type: ignore
+            with urllib.request.urlopen(req, timeout=_verify_timeout_seconds()) as resp:  # type: ignore  # nosec B310
                 raw = resp.read().decode("utf-8")
             parsed = json.loads(raw)
             if not isinstance(parsed, dict):

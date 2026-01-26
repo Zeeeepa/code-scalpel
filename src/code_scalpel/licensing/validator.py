@@ -368,7 +368,7 @@ class LicenseValidator:
                 method="POST",
             )
 
-            with request.urlopen(req, timeout=timeout) as response:
+            with request.urlopen(req, timeout=timeout) as response:  # nosec B310
                 result_data = json.loads(response.read().decode())
 
                 # Parse server response

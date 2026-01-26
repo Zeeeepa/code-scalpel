@@ -124,7 +124,7 @@ You only need to do this ONCE.
 Open a terminal and run:
 
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
 
 Done! No restart needed.
@@ -201,7 +201,7 @@ Use the Cursor Agent the same way as VS Code Copilot.
 **Solution:** Make sure Python and Code Scalpel are installed:
 ```bash
 python --version          # Should show Python 3.10+
-python -m pip install code-scalpel
+python -m pip install codescalpel
 ```
 
 ### "License not found"

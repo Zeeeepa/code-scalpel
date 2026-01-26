@@ -153,7 +153,7 @@ new_code()
 
 ### From PyPI
 ```bash
-pip install code-scalpel==[VERSION]
+pip install codescalpel==[VERSION]
 ```
 
 ### From GitHub
@@ -163,7 +163,7 @@ pip install git+https://github.com/anthropics/code-scalpel.git@v[VERSION]
 
 ### Via UVX
 ```bash
-uvx code-scalpel mcp
+uvx codescalpel mcp
 ```
 
 ---

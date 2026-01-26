@@ -9,7 +9,7 @@ Code Scalpel is an AI-powered code analysis tool available for Claude Desktop, V
 The fastest way to use Code Scalpel with Claude:
 
 ```bash
-uvx code-scalpel mcp
+uvx codescalpel mcp
 ```
 
 This installs and configures Code Scalpel for immediate use with Claude Desktop.
@@ -24,7 +24,7 @@ UVX automatically manages the Python environment and dependencies.
 
 ```bash
 # One-time setup
-uvx code-scalpel mcp
+uvx codescalpel mcp
 ```
 
 **Benefits**:
@@ -45,7 +45,7 @@ For manual installation with pip:
 
 ```bash
 # Install from PyPI
-pip install code-scalpel
+pip install codescalpel
 
 # Start the MCP server
 code-scalpel mcp
@@ -155,12 +155,12 @@ Claude should respond with Code Scalpel tool availability and analysis results.
 ### Step 1: Install Code Scalpel
 
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
 
 Or use UVX:
 ```bash
-uvx code-scalpel mcp
+uvx codescalpel mcp
 ```
 
 ### Step 2: Install Claude Extension
@@ -206,7 +206,7 @@ For containerized environments:
 ```dockerfile
 FROM python:3.11-slim
 
-RUN pip install code-scalpel
+RUN pip install codescalpel
 
 EXPOSE 8080
 
@@ -253,7 +253,7 @@ python -m code_scalpel.mcp.protocol
 
 **Solution**: Install the package
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
 
 Verify installation:
@@ -329,7 +329,7 @@ export CODE_SCALPEL_DEBUG=1
 export CODE_SCALPEL_MAX_FILES=500
 
 # Start the server
-uvx code-scalpel mcp
+uvx codescalpel mcp
 ```
 
 ### Configuration File
@@ -437,7 +437,7 @@ A: Yes, fully offline with local installation. UVX requires internet for first-t
 A: Configure via environment variables or config file. Enterprise users should contact support.
 
 **Q: Is there a CLI tool?**
-A: Yes! Use `code-scalpel` command:
+A: Yes! Use `codescalpel` command:
 ```bash
 code-scalpel analyze /path/to/code.py
 code-scalpel extract MyClass /path/to/file.py

@@ -68,7 +68,7 @@ This is the **first production release**, featuring 22 mature MCP tools for code
 
 ### PyPI
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
 
 ### Quick Start with MCP
@@ -292,7 +292,7 @@ Code Scalpel is licensed under the **MIT License** - see [LICENSE](../../LICENSE
 ## 🎯 Next Steps
 
 ### For Users
-1. Install: `pip install code-scalpel`
+1. Install: `pip install codescalpel`
 2. Integrate with your AI agent (Claude, Cursor, etc.)
 3. Run security audits on your code
 4. Use for refactoring and testing

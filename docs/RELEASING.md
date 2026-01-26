@@ -22,7 +22,7 @@ Each release is published to multiple distribution channels:
 
 1. **PyPI** (Python Package Index)
    - Official Python package repository
-   - Command: `pip install code-scalpel==X.Y.Z`
+   - Command: `pip install codescalpel==X.Y.Z`
 
 2. **GitHub Releases**
    - Release notes and source artifacts
@@ -35,7 +35,7 @@ Each release is published to multiple distribution channels:
 
 4. **UVX (Recommended Entry Point)**
    - Auto-installation for Claude Desktop
-   - Command: `uvx code-scalpel mcp`
+   - Command: `uvx codescalpel mcp`
 
 ---
 
@@ -56,7 +56,7 @@ Before releasing, ensure you have:
    ```bash
    export PYPI_TOKEN=pypi-xxxxxxxxxxxxxxxxxxxx
    ```
-   - Requires: Upload permissions to `code-scalpel` project
+   - Requires: Upload permissions to `codescalpel` project
    - Generate: https://pypi.org/manage/account/tokens/
    - Store in `~/.pypirc` or use environment variable
 
@@ -332,7 +332,7 @@ gh release view vX.Y.Z
 
 ```bash
 # Test UVX installation
-uvx code-scalpel --version
+uvx codescalpel --version
 # Should output: X.Y.Z
 ```
 
@@ -343,7 +343,7 @@ After release, verify:
 - [ ] PyPI: Package appears on https://pypi.org/project/code-scalpel/
 - [ ] GitHub: Release created at /releases with correct notes
 - [ ] Git: Tag `vX.Y.Z` exists and points to correct commit
-- [ ] UVX: `uvx code-scalpel --version` shows `X.Y.Z`
+- [ ] UVX: `uvx codescalpel --version` shows `X.Y.Z`
 - [ ] Changelog: CHANGELOG.md updated with release
 - [ ] VSCode: Extension updated (if applicable)
 
@@ -494,7 +494,7 @@ After successful release:
 - [ ] PyPI: Package visible on https://pypi.org/project/code-scalpel/
 - [ ] GitHub: Release created with correct notes
 - [ ] Git: Tag `v[VERSION]` exists
-- [ ] UVX: `uvx code-scalpel --version` shows `[VERSION]`
+- [ ] UVX: `uvx codescalpel --version` shows `[VERSION]`
 
 ## Communication
 - [ ] Announce on GitHub Discussions

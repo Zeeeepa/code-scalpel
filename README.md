@@ -1,6 +1,6 @@
 # Code Scalpel: Surgical Code Operations for AI Agents
 
-**Latest Release: v1.0.1 | January 25, 2026**
+**Latest Release: v1.1.0 | January 26, 2026**
 
 Code Scalpel is the bridge between **Generative AI** and **Reliable Software Engineering**.
 
@@ -11,7 +11,7 @@ It is an **MCP (Model Context Protocol) server** designed to be the primary tool
 ### For Claude Desktop / VSCode / Cursor Users
 
 ```bash
-uvx code-scalpel mcp
+uvx codescalpel mcp
 ```
 
 Then follow the [Installation Guide for Claude](docs/INSTALLING_FOR_CLAUDE.md) to integrate with your AI assistant.

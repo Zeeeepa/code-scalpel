@@ -89,11 +89,11 @@ try:
     _PROJECT_ROOT_HOLDER: list[Path] = [Path.cwd()]
 except FileNotFoundError:
     # Handle case where cwd() fails (e.g., directory was deleted)
-    _PROJECT_ROOT_HOLDER: list[Path] = [Path("/tmp")]
+    _PROJECT_ROOT_HOLDER: list[Path] = [Path("/tmp")]  # nosec B108
 try:
     PROJECT_ROOT: Path = Path.cwd()  # Backward compat - may be stale after main() runs
 except FileNotFoundError:
-    PROJECT_ROOT: Path = Path("/tmp")
+    PROJECT_ROOT: Path = Path("/tmp")  # nosec B108
 ALLOWED_ROOTS: list[Path] = []
 
 

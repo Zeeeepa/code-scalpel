@@ -58,7 +58,7 @@ Code Scalpel v1.0.0 is the public release of the AI-powered code analysis and re
 
 ### From PyPI (Recommended)
 ```bash
-pip install code-scalpel>=1.0.0
+pip install codescalpel>=1.0.0
 ```
 
 ### From Source

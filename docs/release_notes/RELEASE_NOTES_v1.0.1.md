@@ -168,7 +168,7 @@ Code Scalpel Team
 
 ### From PyPI
 ```bash
-pip install code-scalpel==1.0.1
+pip install codescalpel==1.0.1
 ```
 
 ### From GitHub
@@ -178,7 +178,7 @@ pip install git+https://github.com/anthropics/code-scalpel.git@v1.0.1
 
 ### Via UVX (Recommended for Claude Desktop)
 ```bash
-uvx code-scalpel mcp
+uvx codescalpel mcp
 ```
 
 ---

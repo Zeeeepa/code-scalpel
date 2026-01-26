@@ -369,7 +369,7 @@ jobs:
           python-version: '3.11'
       
       - name: Install Code Scalpel
-        run: pip install code-scalpel
+        run: pip install codescalpel
       
       - name: Run agent with policy verification
         env:
