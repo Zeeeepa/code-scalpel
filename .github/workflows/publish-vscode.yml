@@ -83,7 +83,7 @@ jobs:
 
       - name: Package extension
         working-directory: vscode-extension
-        run: vsce package --no-dependencies
+        run: npm run vscode:prepublish 2>/dev/null || true && vsce package --no-dependencies
 
       - name: Publish to VS Code Marketplace
         working-directory: vscode-extension
