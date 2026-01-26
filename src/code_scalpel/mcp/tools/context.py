@@ -31,7 +31,29 @@ async def crawl_project(
     include_related: list[str] | None = None,
     ctx: Context | None = None,
 ) -> ToolResponseEnvelope:
-    """Crawl a project directory and analyze Python files."""
+    """Crawl a project directory and analyze Python files.
+
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
+
+    **Tier Capabilities:**
+    - Community: Up to 100 files, no parsing, no complexity analysis
+    - Pro: Unlimited files, full parsing, complexity analysis
+    - Enterprise: Unlimited files, full parsing, complexity analysis
+
+    Args:
+        root_path: Root directory to crawl (default: server's project root)
+        exclude_dirs: List of directory names to exclude
+        complexity_threshold: Threshold for complexity analysis (default: 10)
+        include_report: Whether to include detailed report (default: True)
+        pattern: Optional pattern to filter files
+        pattern_type: Type of pattern matching ("regex" or "glob", default: "regex")
+        include_related: Optional list of related file types to include
+
+    Returns:
+        ToolResponseEnvelope with crawl results and tier metadata
+    """
     started = time.perf_counter()
     try:
         result = await _crawl_project(
@@ -69,7 +91,23 @@ async def crawl_project(
 
 @mcp.tool()
 async def get_file_context(file_path: str) -> ToolResponseEnvelope:
-    """Get a file overview without reading full content."""
+    """Get a file overview without reading full content.
+
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
+
+    **Tier Capabilities:**
+    - Community: Up to 500 lines of context
+    - Pro: Up to 2000 lines of context
+    - Enterprise: Unlimited context lines
+
+    Args:
+        file_path: Path to the file to analyze
+
+    Returns:
+        ToolResponseEnvelope with file context summary and tier metadata
+    """
     started = time.perf_counter()
     try:
         result = await _get_file_context(file_path)
@@ -104,7 +142,26 @@ async def get_symbol_references(
     include_tests: bool = True,
     ctx: Context | None = None,
 ) -> ToolResponseEnvelope:
-    """Find all references to a symbol across the project."""
+    """Find all references to a symbol across the project.
+
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
+
+    **Tier Capabilities:**
+    - Community: Up to 10 files searched, 50 references returned
+    - Pro: Unlimited files and references
+    - Enterprise: Unlimited files and references
+
+    Args:
+        symbol_name: Name of the symbol to find references for
+        project_root: Project root directory (default: server's project root)
+        scope_prefix: Optional prefix to limit search scope
+        include_tests: Whether to include test files in search (default: True)
+
+    Returns:
+        ToolResponseEnvelope with symbol references and tier metadata
+    """
     started = time.perf_counter()
     try:
         result = await _get_symbol_references(

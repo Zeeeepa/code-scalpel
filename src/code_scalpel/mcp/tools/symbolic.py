@@ -39,7 +39,22 @@ async def symbolic_execute(
 ) -> ToolResponseEnvelope:
     """Perform symbolic execution on Python code.
 
-    [20251226_FEATURE] Tier-aware limits are loaded from limits.toml via get_tool_capabilities.
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
+
+    **Tier Capabilities:**
+    - Community: Max 50 paths, max depth 10, basic types (int/bool/string/float)
+    - Pro: Unlimited paths, max depth 100, extended types (includes list/dict)
+    - Enterprise: Unlimited paths and depth, all constraint types
+
+    Args:
+        code: Python code to symbolically execute
+        max_paths: Maximum number of execution paths to explore (tier-limited)
+        max_depth: Maximum loop unrolling depth (tier-limited)
+
+    Returns:
+        ToolResponseEnvelope with symbolic execution results and tier metadata
     """
     started = time.perf_counter()
     try:
@@ -118,7 +133,33 @@ async def generate_unit_tests(
     data_driven: bool = False,
     crash_log: str | None = None,
 ) -> ToolResponseEnvelope:
-    """Generate unit tests from code using symbolic execution."""
+    """Generate unit tests from code using symbolic execution.
+
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
+
+    **Tier Capabilities:**
+    - Community: Max 5 test cases, pytest framework only
+    - Pro: Max 20 test cases, pytest/unittest frameworks, data-driven tests
+    - Enterprise: Unlimited test cases, all frameworks, data-driven tests, bug reproduction
+
+    **Input Methods (choose one):**
+    - `code`: Direct Python code string to analyze
+    - `file_path`: Path to Python file containing the code
+    - `function_name`: Name of function to generate tests for (requires file_path)
+
+    Args:
+        code: Python code string to generate tests for
+        file_path: Path to Python file to analyze
+        function_name: Specific function name to target (optional)
+        framework: Test framework ("pytest", "unittest", etc.)
+        data_driven: Generate parameterized data-driven tests (Pro+)
+        crash_log: Crash log for bug reproduction tests (Enterprise only)
+
+    Returns:
+        ToolResponseEnvelope with generated test cases and tier metadata
+    """
     started = time.perf_counter()
     try:
         # [20260120_BUGFIX] Consistent tier detection pattern
@@ -263,7 +304,30 @@ async def simulate_refactor(
     patch: str | None = None,
     strict_mode: bool = False,
 ) -> ToolResponseEnvelope:
-    """Simulate applying a code change and check for safety issues."""
+    """Simulate applying a code change and check for safety issues.
+
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
+
+    **Tier Capabilities:**
+    - Community: Max 1MB file size, basic analysis depth
+    - Pro: Max 10MB file size, advanced analysis depth
+    - Enterprise: Max 100MB file size, deep analysis depth
+
+    **Change Specification (choose one):**
+    - `new_code`: Complete replacement code for the original
+    - `patch`: Diff/patch format describing the changes
+
+    Args:
+        original_code: Original code before changes
+        new_code: Complete new code after changes (alternative to patch)
+        patch: Patch/diff describing the changes (alternative to new_code)
+        strict_mode: Enable strict validation checks
+
+    Returns:
+        ToolResponseEnvelope with safety analysis results and tier metadata
+    """
     started = time.perf_counter()
     try:
         # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).

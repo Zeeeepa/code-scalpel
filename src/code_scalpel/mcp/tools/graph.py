@@ -50,31 +50,17 @@ async def _get_call_graph_tool(
     - All tiers: Tool is available.
     - Limits and optional enhancements are applied based on tool capabilities.
 
-    [v1.5.0] Use this tool to understand code flow and function dependencies.
-    Analyzes Python source files to build a static call graph with:
-    - Line number tracking for each function
-    - Entry point detection (main, CLI commands, routes)
-    - Depth-limited traversal from any starting function
-    - Mermaid diagram generation for visualization
-    - Circular import detection
+    **Tier Capabilities:**
+    - Community: Max depth 3, max nodes 50
+    - Pro: Max depth 50, max nodes 500
+    - Enterprise: Unlimited depth and nodes
 
-    [v3.0.5] Now reports progress during graph construction.
-    [v3.2.8] Tier-based depth limiting for Community tier.
-    [v3.3.0] Added path queries, focus mode, call context, and confidence scoring.
-
-    **v3.3.0 Features:**
+    **Advanced Features:**
     - **Path Queries:** Use paths_from and paths_to to find all call paths between functions
     - **Focus Mode:** Use focus_functions to extract a subgraph centered on specific functions
     - **Call Context:** Each edge includes context (in_loop, in_try_block, in_conditional)
     - **Confidence Scoring:** Each edge includes confidence (1.0=static, 0.8=type_hint, 0.5=inferred)
     - **Source URIs:** Each node includes source_uri for IDE click-through (file:///path#L42)
-
-    Why AI agents need this:
-    - Navigation: Quickly understand how functions connect
-    - Impact analysis: See what breaks if you change a function
-    - Refactoring: Identify tightly coupled code
-    - Documentation: Generate visual diagrams of code flow
-    - Security: Find call paths from user input to dangerous sinks
 
     Args:
         project_root: Project root directory (default: server's project root)
@@ -175,52 +161,10 @@ async def _get_graph_neighborhood_tool(
     - All tiers: Tool is available.
     - Limits and optional enhancements are applied based on tool capabilities.
 
-    [v2.5.0] Use this tool to prevent graph explosion when analyzing large
-    codebases. Instead of loading the entire graph, extract only the nodes
-    within k hops of a specific node.
-
-    [v3.2.8] Tier-based hop limiting for Community tier.
-    [v3.5.0] Enterprise: Graph query language support.
-
-    **Graph Pruning Formula:** N(v, k) = {u ∈ V : d(v, u) ≤ k}
-
-    This extracts all nodes u where the shortest path from center v to u
-    is at most k hops.
-
-    **Truncation Protection:**
-    If the neighborhood exceeds max_nodes, the graph is truncated and
-    a warning is returned. This prevents memory exhaustion on dense graphs.
-
-    Key capabilities:
-    - Extract focused subgraph around any node
-    - Control traversal depth with k parameter
-    - Limit graph size with max_nodes
-    - Filter by edge direction (incoming, outgoing, both)
-    - Filter by minimum confidence score
-    - Generate Mermaid visualization
-    - Pro: Semantic neighbors and logical relationships
-    - Enterprise: Query language for custom graph traversals
-
-    Why AI agents need this:
-    - **Focused Analysis:** Analyze only relevant code, not entire codebase
-    - **Memory Safety:** Prevent OOM on large graphs
-    - **Honest Uncertainty:** Know when graph is incomplete
-
-    Example:
-        # Get 2-hop neighborhood around a function
-        result = get_graph_neighborhood(
-            center_node_id="python::services::function::process_order",
-            k=2,
-            max_nodes=50
-        )
-        if result.truncated:
-            print(f"Warning: {result.truncation_warning}")
-
-        # Enterprise: Use query language
-        result = get_graph_neighborhood(
-            center_node_id="python::controllers::function::handle_request",
-            query="MATCH (n)-[:calls]->(m:function) WHERE m.name CONTAINS 'DB' RETURN n, m"
-        )
+    **Tier Capabilities:**
+    - Community: Max k=1, max nodes=20
+    - Pro: Max k=5, max nodes=100
+    - Enterprise: Unlimited k and nodes
 
     Args:
         center_node_id: ID of the center node (format: language::module::type::name)
@@ -268,22 +212,14 @@ async def _get_project_map_tool(
     """
     Generate a comprehensive map of the project structure.
 
-    [v1.5.0] Use this tool to get a high-level overview of a codebase before diving in.
-    Analyzes all Python files to provide:
-    - Package and module structure
-    - Function and class inventory per file
-    - Entry point detection (main, CLI commands, routes)
-    - Complexity hotspots (files that need attention)
-    - Circular import detection
-    - Mermaid diagram of project structure
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
 
-    [v3.0.5] Now reports progress during analysis.
-
-    Why AI agents need this:
-    - Orientation: Understand project structure before making changes
-    - Navigation: Know where to find specific functionality
-    - Risk assessment: Identify complex areas that need careful handling
-    - Architecture: See how packages and modules are organized
+    **Tier Capabilities:**
+    - Community: Up to 100 files, 50 modules, basic detail level
+    - Pro: Up to 1000 files, 200 modules, detailed level
+    - Enterprise: Unlimited files, 1000 modules, comprehensive detail level
 
     Args:
         project_root: Project root directory (default: server's project root)
@@ -406,50 +342,14 @@ async def _get_cross_file_dependencies_tool(
     """
     Analyze and extract cross-file dependencies for a symbol.
 
-    [v2.5.0] Use this tool to understand all dependencies a function/class needs
-    from other files in the project. It recursively resolves imports and extracts
-    the complete dependency chain with source code.
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
 
-    **Confidence Decay (v2.5.0):**
-    Deep dependency chains get exponentially decaying confidence scores.
-    Formula: C_effective = 1.0 × confidence_decay_factor^depth
-
-    | Depth | Confidence (factor=0.9) |
-    |-------|------------------------|
-    | 0     | 1.000 (target)         |
-    | 1     | 0.900                  |
-    | 2     | 0.810                  |
-    | 5     | 0.590                  |
-    | 10    | 0.349                  |
-
-    Symbols with confidence < 0.5 are flagged as "low confidence".
-
-    Key capabilities:
-    - Resolve imports to their source files
-    - Extract code for all dependent symbols
-    - Detect circular import cycles
-    - Generate import relationship diagrams
-    - Provide combined code block ready for AI analysis
-    - **Confidence scoring** for each symbol based on depth
-
-    Why AI agents need this:
-    - Complete Context: Get all code needed to understand a function
-    - Safe Refactoring: Know what depends on what before making changes
-    - Debugging: Trace data flow across file boundaries
-    - Code Review: Understand the full impact of changes
-    - **Honest Uncertainty**: Know when deep dependencies may be unreliable
-
-    Example:
-        # Analyze 'process_order' function in 'services/order.py'
-        result = get_cross_file_dependencies(
-            target_file="services/order.py",
-            target_symbol="process_order",
-            max_depth=5,
-            confidence_decay_factor=0.9
-        )
-        # Check for low-confidence symbols
-        if result.low_confidence_count > 0:
-            print(f"Warning: {result.low_confidence_warning}")
+    **Tier Capabilities:**
+    - Community: Max depth=1, max files=50
+    - Pro: Max depth=5, max files=500
+    - Enterprise: Unlimited depth and files
 
     Args:
         target_file: Path to file containing the target symbol (relative to project root)
@@ -529,33 +429,14 @@ async def _cross_file_security_scan_tool(
     """
     Perform cross-file security analysis tracking taint flow across module boundaries.
 
-    [v1.5.1] Use this tool to detect vulnerabilities where tainted data crosses
-    file boundaries before reaching a dangerous sink. This catches security
-    issues that single-file analysis would miss.
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
 
-    [20251215_FEATURE] v2.0.0 - Progress reporting for long-running operations.
-    Reports progress during file discovery and taint analysis phases.
-
-    [20251220_PERF] v3.0.4 - Added timeout and module limits to prevent hanging
-    on large codebases with circular imports.
-
-    Key capabilities:
-    - Track taint flow through function calls across files
-    - Detect vulnerabilities where source and sink are in different files
-    - Identify all taint entry points (web inputs, file reads, etc.)
-    - Map dangerous sinks (SQL execution, command execution, etc.)
-    - Generate taint flow diagrams
-
-    Detects cross-file patterns like:
-    - User input in routes.py -> SQL execution in db.py (SQL Injection)
-    - Request data in views.py -> os.system() in utils.py (Command Injection)
-    - Form input in handlers.py -> open() in storage.py (Path Traversal)
-
-    Why AI agents need this:
-    - Defense in depth: Find vulnerabilities that span multiple files
-    - Architecture review: Understand how untrusted data flows through the app
-    - Code audit: Generate security reports for compliance
-    - Risk assessment: Identify highest-risk code paths
+    **Tier Capabilities:**
+    - Community: Max modules 10, max depth 3
+    - Pro: Max modules 100, max depth 10
+    - Enterprise: Unlimited modules and depth
 
     Args:
         project_root: Project root directory (default: server's project root)

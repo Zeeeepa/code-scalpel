@@ -50,7 +50,16 @@ async def extract_code(
     workspace_root: str | None = None,
     ctx: Context | None = None,
 ) -> ToolResponseEnvelope:
-    """Extract code elements with optional dependency context."""
+    """Extract code elements with optional dependency context.
+
+    Provide either 'file_path' (recommended) or 'code' for the source.
+    Language is auto-detected if not specified.
+
+    Tier Requirements:
+    - Community: Basic extraction, max_depth=0, include_cross_file_deps=false
+    - Pro: + cross-file deps, variable_promotion, closure_detection, dependency_injection_suggestions, max_depth=1
+    - Enterprise: + as_microservice, organization_wide, unlimited depth
+    """
     started = time.perf_counter()
     try:
         if _extract_code is None:
@@ -117,7 +126,13 @@ async def rename_symbol(
     new_name: str,
     create_backup: bool = True,
 ) -> ToolResponseEnvelope:
-    """Rename a function, class, or method in a file."""
+    """Rename a function, class, or method in a file.
+
+    Tier Features:
+    - Community: Definition-only rename, same-file reference updates, no cross-file changes
+    - Pro: + Cross-file reference updates (max 500 files searched, 200 updated)
+    - Enterprise: + Unlimited cross-file updates, organization-wide rename
+    """
     started = time.perf_counter()
     try:
         if _rename_symbol is None:
@@ -169,7 +184,34 @@ async def update_symbol(
     new_name: str | None = None,
     create_backup: bool = True,
 ) -> ToolResponseEnvelope:
-    """Safely replace a function, class, or method in a file."""
+    """Safely replace a function, class, or method in a file.
+
+    **Tier Behavior:**
+    - All tiers: Tool is available.
+    - Limits and optional enhancements are applied based on tool capabilities.
+
+    **Tier Capabilities:**
+    - Community: Syntax validation, automatic backups, up to 10 updates per call
+    - Pro: Semantic validation, automatic backups, unlimited updates per call
+    - Enterprise: Full validation, automatic backups, unlimited updates per call
+
+    **Validation Levels:**
+    - Community: Syntax validation only
+    - Pro: Syntax + semantic validation
+    - Enterprise: Syntax + semantic + full compliance validation
+
+    Args:
+        file_path: Path to the file containing the symbol to update
+        target_type: Type of symbol ("function", "class", "method")
+        target_name: Name of the symbol to update
+        new_code: New code for the symbol (required for "replace" operation)
+        operation: Operation type ("replace" is the only supported operation)
+        new_name: Optional new name for the symbol (for rename operations)
+        create_backup: Whether to create a backup before updating (default: True)
+
+    Returns:
+        ToolResponseEnvelope with update result and tier metadata
+    """
     started = time.perf_counter()
     try:
         debug_print(

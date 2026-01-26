@@ -1915,6 +1915,18 @@ def _security_scan_sync(
                 risk_level="unknown",
                 error=f"Failed to read file: {str(e)}.",
             )
+    else:
+        # Auto-detect language from code content
+        from code_scalpel.surgery.unified_extractor import Language, detect_language
+
+        detected = detect_language(None, code)
+        lang_map = {
+            Language.PYTHON: "python",
+            Language.JAVASCRIPT: "javascript",
+            Language.TYPESCRIPT: "typescript",
+            Language.JAVA: "java",
+        }
+        detected_language = lang_map.get(detected, "python")
 
     if code is None:
         return SecurityResult(

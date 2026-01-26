@@ -7,6 +7,7 @@ meet MCP contract requirements (tier, duration, standardized errors).
 from __future__ import annotations
 
 import asyncio
+import os
 import time
 from importlib import import_module
 from typing import Optional
@@ -26,11 +27,34 @@ from code_scalpel import __version__ as _pkg_version
 
 @mcp.tool()
 async def unified_sink_detect(
-    code: str, language: str, confidence_threshold: float = 0.7
+    code: str, language: str = "auto", confidence_threshold: float = 0.7
 ) -> ToolResponseEnvelope:
-    """Unified polyglot sink detection with confidence thresholds."""
+    """Unified polyglot sink detection with confidence thresholds.
+
+    If language is not specified or set to 'auto', it will be auto-detected from the code.
+    Supported languages: python, javascript, typescript, java.
+
+    Tier Features:
+    - Community: Basic sink detection, CWE mapping, confidence scoring
+    - Pro: + Context-aware detection, framework-specific sinks, custom patterns
+    - Enterprise: + Compliance reporting, risk scoring, remediation suggestions
+    """
     started = time.perf_counter()
     try:
+        # [20260126_FEATURE] Auto-detect language if not specified
+        if language == "auto" or language is None:
+            # [20251228_BUGFIX] Avoid deprecated shim imports.
+            from code_scalpel.surgery.unified_extractor import Language, detect_language
+
+            detected = detect_language(None, code)
+            lang_map = {
+                Language.PYTHON: "python",
+                Language.JAVASCRIPT: "javascript",
+                Language.TYPESCRIPT: "typescript",
+                Language.JAVA: "java",
+            }
+            language = lang_map.get(detected, "python")
+
         tier = _get_current_tier()
         capabilities = get_tool_capabilities("unified_sink_detect", tier)
         result = await asyncio.to_thread(
@@ -65,14 +89,49 @@ async def unified_sink_detect(
 
 @mcp.tool()
 async def type_evaporation_scan(
-    frontend_code: str,
-    backend_code: str,
+    frontend_code: str | None = None,
+    backend_code: str | None = None,
+    frontend_file_path: str | None = None,
+    backend_file_path: str | None = None,
     frontend_file: str = "frontend.ts",
     backend_file: str = "backend.py",
 ) -> ToolResponseEnvelope:
-    """Detect Type System Evaporation vulnerabilities across frontend/backend code."""
+    """Detect Type System Evaporation vulnerabilities across frontend/backend code.
+
+    Provide either frontend_code/backend_code strings, or frontend_file_path/backend_file_path to read from files.
+
+    Tier Features:
+    - Community: Frontend-only analysis, basic type checking
+    - Pro: + Network boundary analysis, implicit any tracing, library boundary checks
+    - Enterprise: + Runtime validation generation, Zod schema generation, API contract validation
+    """
     started = time.perf_counter()
     try:
+        # Validate input: at least one way to provide each code
+        if frontend_code is None and frontend_file_path is None:
+            raise ValueError(
+                "Either 'frontend_code' or 'frontend_file_path' must be provided"
+            )
+        if backend_code is None and backend_file_path is None:
+            raise ValueError(
+                "Either 'backend_code' or 'backend_file_path' must be provided"
+            )
+
+        # Read from files if codes not provided
+        if frontend_code is None and frontend_file_path is not None:
+            if not os.path.isfile(frontend_file_path):
+                raise ValueError(f"Frontend file not found: {frontend_file_path}")
+            with open(frontend_file_path, "r", encoding="utf-8") as f:
+                frontend_code = f.read()
+            frontend_file = os.path.basename(frontend_file_path)
+
+        if backend_code is None and backend_file_path is not None:
+            if not os.path.isfile(backend_file_path):
+                raise ValueError(f"Backend file not found: {backend_file_path}")
+            with open(backend_file_path, "r", encoding="utf-8") as f:
+                backend_code = f.read()
+            backend_file = os.path.basename(backend_file_path)
+
         tier = _get_current_tier()
         caps = get_tool_capabilities("type_evaporation_scan", tier) or {}
         cap_set = set(caps.get("capabilities", []))
@@ -202,7 +261,15 @@ async def security_scan(
     file_path: Optional[str] = None,
     confidence_threshold: float = 0.7,
 ) -> ToolResponseEnvelope:
-    """Scan code for security vulnerabilities using taint analysis."""
+    """Scan code for security vulnerabilities using taint analysis.
+
+    Provide either 'code' or 'file_path'. Language is auto-detected from code content.
+
+    Tier Features:
+    - Community: Basic pattern matching, CWE mapping, confidence scoring
+    - Pro: + Taint analysis, reachability, false positive tuning, custom rules
+    - Enterprise: + Compliance mappings, priority ordering, remediation suggestions
+    """
     started = time.perf_counter()
     try:
         tier = _get_current_tier()
