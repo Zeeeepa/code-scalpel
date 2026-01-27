@@ -327,7 +327,7 @@ class ProjectContext:
             },
             sort_keys=True,
         )
-        return md5(hash_input.encode()).hexdigest()
+        return md5(hash_input.encode(), usedforsecurity=False).hexdigest()
 
     def _save_to_disk(self, project_map: ProjectMap) -> None:
         """Save project map to SQLite cache."""

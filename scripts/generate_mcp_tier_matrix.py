@@ -46,11 +46,70 @@ def _pythonpath_env(repo_root: Path) -> dict[str, str]:
     return env
 
 
-async def _fetch_tools_for_tier(project_root: Path, tier: str) -> TierTools:
+def _setup_licenses_env(env: dict[str, str]) -> dict[str, str]:
+    """Configure license environment for tier matrix documentation generation.
+
+    Real licenses from CI secrets ensure docs reflect actual entitlement logic.
+    No fallback values - fail loudly if licenses are not configured.
+    """
+    pro_jwt = os.environ.get("TEST_PRO_LICENSE_JWT")
+    enterprise_jwt = os.environ.get("TEST_ENTERPRISE_LICENSE_JWT")
+
+    missing = []
+    if not pro_jwt:
+        missing.append("TEST_PRO_LICENSE_JWT")
+    if not enterprise_jwt:
+        missing.append("TEST_ENTERPRISE_LICENSE_JWT")
+
+    if missing:
+        raise RuntimeError(
+            f"Licenses required for docs generation: {', '.join(missing)}\n"
+            "Set TEST_PRO_LICENSE_JWT and TEST_ENTERPRISE_LICENSE_JWT environment variables.\n"
+            "This ensures docs reflect real entitlement logic, not fallback defaults."
+        )
+
+    # Write licenses to temp location
+    license_path = (
+        Path(os.environ.get("CODE_SCALPEL_DOC_PROJECT_ROOT", "/tmp")) / ".code-scalpel"
+    )
+    license_path.mkdir(parents=True, exist_ok=True)
+
+    # Type assertions: after above checks, these are guaranteed to be non-None
+    assert pro_jwt is not None
+    assert enterprise_jwt is not None
+
+    # Store the licenses for later use
+    env["_TMP_PRO_LICENSE_JWT"] = pro_jwt
+    env["_TMP_ENTERPRISE_LICENSE_JWT"] = enterprise_jwt
+
+    return env
+
+
+async def _fetch_tools_for_tier(
+    project_root: Path, tier: str, licenses: dict[str, str]
+) -> TierTools:
     repo_root = _repo_root()
 
     env = _pythonpath_env(repo_root)
     env["CODE_SCALPEL_TIER"] = tier
+
+    # Set up license for this tier
+    if tier == "pro":
+        license_jwt = licenses.get("pro")
+    elif tier == "enterprise":
+        license_jwt = licenses.get("enterprise")
+    else:
+        # Community tier doesn't require a license
+        license_jwt = None
+
+    if license_jwt:
+        license_path = (
+            Path(os.environ.get("CODE_SCALPEL_DOC_PROJECT_ROOT", "/tmp"))
+            / ".code-scalpel"
+        )
+        license_file = license_path / f"license_{tier}.jwt"
+        license_file.write_text(license_jwt, encoding="utf-8")
+        env["CODE_SCALPEL_LICENSE_PATH"] = str(license_file)
 
     params = StdioServerParameters(
         command=sys.executable,
@@ -121,10 +180,18 @@ async def main() -> int:
             encoding="utf-8",
         )
 
+    # Set up licenses (will fail if not available)
+    empty_env: dict[str, str] = {}
+    env_with_licenses = _setup_licenses_env(empty_env)
+    licenses = {
+        "pro": env_with_licenses["_TMP_PRO_LICENSE_JWT"],
+        "enterprise": env_with_licenses["_TMP_ENTERPRISE_LICENSE_JWT"],
+    }
+
     by_tier: dict[str, TierTools] = {}
     for tier in TIERS:
         by_tier[tier] = await asyncio.wait_for(
-            _fetch_tools_for_tier(project_root, tier),
+            _fetch_tools_for_tier(project_root, tier, licenses),
             timeout=timedelta(seconds=90).total_seconds(),
         )
 

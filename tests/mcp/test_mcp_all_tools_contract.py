@@ -60,6 +60,7 @@ ALL_TOOL_NAMES = {
     "cross_file_security_scan",
     "validate_paths",
     "verify_policy_integrity",
+    "get_capabilities",
 }
 
 

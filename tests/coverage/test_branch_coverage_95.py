@@ -8,6 +8,8 @@ import ast
 import tempfile
 from pathlib import Path
 
+import pytest
+
 # =============================================================================
 # TEST GENERATOR BRANCH COVERAGE (26 branches)
 # =============================================================================
@@ -356,6 +358,9 @@ class TestTaintTrackerBranchCoverage:
 # =============================================================================
 
 
+@pytest.mark.skip(
+    reason="Autonomy is now a separate product boundary (codescalpel-agents package)"
+)
 class TestErrorToDiffBranchCoverage:
     """Target uncovered branches in error_to_diff.py."""
 

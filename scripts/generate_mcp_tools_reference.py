@@ -47,6 +47,33 @@ def _pythonpath_env(repo_root: Path) -> dict[str, str]:
     return env
 
 
+def _setup_license_env(env: dict[str, str]) -> dict[str, str]:
+    """Configure license environment for documentation generation.
+
+    Real licenses from CI secrets ensure docs reflect actual entitlement logic.
+    No fallback values - fail loudly if licenses are not configured.
+    """
+    # Try to get enterprise license from CI secrets
+    license_jwt = os.environ.get("TEST_ENTERPRISE_LICENSE_JWT")
+    if not license_jwt:
+        raise RuntimeError(
+            "Enterprise license required for docs generation.\n"
+            "Set TEST_ENTERPRISE_LICENSE_JWT environment variable with a valid license JWT.\n"
+            "This ensures docs reflect real entitlement logic, not fallback defaults."
+        )
+
+    # Write license to temp location
+    license_path = (
+        Path(os.environ.get("CODE_SCALPEL_DOC_PROJECT_ROOT", "/tmp")) / ".code-scalpel"
+    )
+    license_path.mkdir(parents=True, exist_ok=True)
+    license_file = license_path / "license.jwt"
+    license_file.write_text(license_jwt, encoding="utf-8")
+
+    env["CODE_SCALPEL_LICENSE_PATH"] = str(license_file)
+    return env
+
+
 def _as_dict(obj: Any) -> Any:
     if obj is None:
         return None
@@ -70,6 +97,7 @@ async def _fetch_tools(project_root: Path) -> list[ToolDoc]:
 
     # Always document the full tool surface shipped by this repo.
     env = _pythonpath_env(repo_root)
+    env = _setup_license_env(env)  # Configure real license, fail if missing
     env["CODE_SCALPEL_TIER"] = "enterprise"
 
     params = StdioServerParameters(
