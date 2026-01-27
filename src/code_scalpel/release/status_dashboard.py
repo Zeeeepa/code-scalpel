@@ -25,7 +25,7 @@ class PublishEvent:
     status: PublishStatus
     timestamp: datetime
     message: str = ""
-    details: dict = None
+    details: dict | None = None
 
     def __post_init__(self):
         """Initialize details."""

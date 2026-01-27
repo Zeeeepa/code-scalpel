@@ -19,7 +19,6 @@ from pathlib import Path
 from code_scalpel.capabilities import (
     get_all_capabilities,
     get_json_schema,
-    get_tier_names,
 )
 
 

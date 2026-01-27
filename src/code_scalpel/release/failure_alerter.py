@@ -24,7 +24,7 @@ class Alert:
     title: str
     message: str
     severity: str = "error"
-    timestamp: datetime = None
+    timestamp: datetime | None = None
     channel: AlertChannel = AlertChannel.CONSOLE
 
     def __post_init__(self):

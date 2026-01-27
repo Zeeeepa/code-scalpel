@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 try:
     from github import Github, GithubException, Repository
@@ -61,7 +61,7 @@ class GitHubReleaseManager:
         self.repo_url = self._normalize_repo_url(self.repo_url)
 
         self.github = Github(self.token)
-        self.repo: Repository.Repository = self.github.get_repo(self.repo_url)
+        self.repo: Any = self.github.get_repo(self.repo_url)
 
     @staticmethod
     def _normalize_repo_url(url: str) -> str:
@@ -171,13 +171,10 @@ class GitHubReleaseManager:
                 "title": release.title or tag,
                 "assets_url": release.upload_url,
             }
-        except GithubException as e:
-            raise GithubException(
-                e.status,
-                f"Failed to create GitHub release: {str(e)}",
-            ) from e
+        except Exception as e:
+            raise RuntimeError(f"Failed to create GitHub release: {str(e)}") from e
 
-    def upload_asset(self, release_tag: str, file_path: str) -> dict[str, str]:
+    def upload_asset(self, release_tag: str, file_path: str | Path) -> dict[str, str]:
         """Upload an asset to a release.
 
         Args:
@@ -192,11 +189,11 @@ class GitHubReleaseManager:
 
         Raises:
             FileNotFoundError: If file doesn't exist
-            GithubException: If upload fails
+            RuntimeError: If upload fails
         """
-        file_path = Path(file_path)
-        if not file_path.exists():
-            raise FileNotFoundError(f"Asset file not found: {file_path}")
+        path_obj = Path(file_path)
+        if not path_obj.exists():
+            raise FileNotFoundError(f"Asset file not found: {path_obj}")
 
         try:
             # Get the release by tag
@@ -204,7 +201,7 @@ class GitHubReleaseManager:
 
             # Upload the asset
             asset = release.upload_asset(
-                name=file_path.name,
+                name=path_obj.name,
                 asset_type="application/octet-stream",
             )
 
@@ -213,11 +210,8 @@ class GitHubReleaseManager:
                 "url": asset.browser_download_url,
                 "size": str(asset.size),
             }
-        except GithubException as e:
-            raise GithubException(
-                e.status,
-                f"Failed to upload asset: {str(e)}",
-            ) from e
+        except Exception as e:
+            raise RuntimeError(f"Failed to upload asset: {str(e)}") from e
 
     def upload_assets(
         self, release_tag: str, asset_paths: list[str]
@@ -236,7 +230,7 @@ class GitHubReleaseManager:
             try:
                 result = self.upload_asset(release_tag, asset_path)
                 results.append(result)
-            except (FileNotFoundError, GithubException) as e:
+            except (FileNotFoundError, RuntimeError) as e:
                 results.append(
                     {
                         "name": Path(asset_path).name,
@@ -255,7 +249,7 @@ class GitHubReleaseManager:
             Dict with updated release information
 
         Raises:
-            GithubException: If publish fails
+            RuntimeError: If publish fails
         """
         try:
             release = self.repo.get_release(release_tag)
@@ -267,11 +261,8 @@ class GitHubReleaseManager:
                 "url": updated.html_url,
                 "draft": str(updated.draft),
             }
-        except GithubException as e:
-            raise GithubException(
-                e.status,
-                f"Failed to publish release: {str(e)}",
-            ) from e
+        except Exception as e:
+            raise RuntimeError(f"Failed to publish release: {str(e)}") from e
 
     def get_release(self, release_tag: str) -> dict[str, str]:
         """Get information about a release.
@@ -283,7 +274,7 @@ class GitHubReleaseManager:
             Dict with release information
 
         Raises:
-            GithubException: If release not found
+            RuntimeError: If release not found
         """
         try:
             release = self.repo.get_release(release_tag)
@@ -297,11 +288,8 @@ class GitHubReleaseManager:
                 "created_at": str(release.created_at),
                 "assets_count": str(len(release.get_assets())),
             }
-        except GithubException as e:
-            raise GithubException(
-                e.status,
-                f"Failed to get release: {str(e)}",
-            ) from e
+        except Exception as e:
+            raise RuntimeError(f"Failed to get release: {str(e)}") from e
 
     def delete_release(self, release_tag: str) -> bool:
         """Delete a release.
@@ -313,14 +301,11 @@ class GitHubReleaseManager:
             True if successfully deleted
 
         Raises:
-            GithubException: If deletion fails
+            RuntimeError: If deletion fails
         """
         try:
             release = self.repo.get_release(release_tag)
             release.delete()
             return True
-        except GithubException as e:
-            raise GithubException(
-                e.status,
-                f"Failed to delete release: {str(e)}",
-            ) from e
+        except Exception as e:
+            raise RuntimeError(f"Failed to delete release: {str(e)}") from e

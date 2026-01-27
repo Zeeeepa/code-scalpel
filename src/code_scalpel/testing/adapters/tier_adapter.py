@@ -40,7 +40,7 @@ class TierAdapter:
             raise ValueError(
                 f"Invalid tier '{tier}'. Must be 'community', 'pro', or 'enterprise'"
             )
-        self.tier = tier
+        self.tier: Tier = tier
         self._original_license_path: Optional[str] = None
 
     def get_tier(self) -> Tier:
