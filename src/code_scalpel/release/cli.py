@@ -246,3 +246,63 @@ def release_publish(
     except Exception as e:
         print(f"Unexpected error: {str(e)}", file=sys.stderr)
         return 1
+
+
+def build_docker_images(
+    repo_path: str = ".",
+    registry: str = "docker.io",
+    skip_push: bool = False,
+    dry_run: bool = False,
+) -> int:
+    """Build Docker images for a release.
+
+    Builds Docker images with proper version tags.
+
+    Args:
+        repo_path: Path to git repository
+        registry: Docker registry URL (default: docker.io)
+        skip_push: Skip pushing images to registry
+        dry_run: Perform dry-run (don't build or push)
+
+    Returns:
+        Exit code (0 = success)
+    """
+    try:
+        from code_scalpel.release.orchestrator import ReleaseOrchestrator
+        from code_scalpel.release.docker_builder import DockerImageBuilder
+
+        # Get current version
+        orchestrator = ReleaseOrchestrator(repo_path=repo_path)
+        current_version = orchestrator.get_current_version()
+
+        if not current_version:
+            current_version = "1.0.0"
+
+        # Build Docker images
+        print(f"🐳 Building Docker images for v{current_version}...\n")
+
+        builder = DockerImageBuilder(
+            project_dir=repo_path,
+            version=current_version,
+            registry=registry,
+        )
+
+        result = builder.publish_release(skip_push=skip_push, dry_run=dry_run)
+
+        if not dry_run:
+            if result["images_pushed"]:
+                print(f"\n✅ Docker images published to {registry}")
+            else:
+                print("\n✅ Docker images built successfully")
+                print(
+                    f"To push to registry, run: docker push {registry}/code-scalpel:{current_version}"
+                )
+
+        return 0
+
+    except ValueError as e:
+        print(f"Error: {str(e)}", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}", file=sys.stderr)
+        return 1
