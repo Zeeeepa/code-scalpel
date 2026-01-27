@@ -52,6 +52,31 @@ def _normalize_tier(value: str | None) -> str:
     return v
 
 
+def format_tier_for_display(tier: str | None) -> str:
+    """Format a tier string for user-facing display with proper capitalization.
+
+    Args:
+        tier: Tier string (lowercase or mixed case)
+
+    Returns:
+        Properly capitalized tier name: "Community", "Pro", or "Enterprise"
+        Default: "Community" if tier is None/empty
+
+    Example:
+        >>> format_tier_for_display("pro")
+        'Pro'
+        >>> format_tier_for_display("enterprise")
+        'Enterprise'
+    """
+    normalized = _normalize_tier(tier)
+    capitalization = {
+        "community": "Community",
+        "pro": "Pro",
+        "enterprise": "Enterprise",
+    }
+    return capitalization.get(normalized, "Community")
+
+
 def _requested_tier_from_env() -> str | None:
     """Get requested tier from environment variables (for testing/downgrade)."""
     import os

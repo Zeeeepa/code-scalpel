@@ -4,6 +4,8 @@ import os
 import sys
 from pathlib import Path
 
+from code_scalpel.mcp.protocol import format_tier_for_display
+
 
 def analyze_file(
     filepath: str, output_format: str = "text", language: str | None = None
@@ -639,7 +641,7 @@ def _license_install(
 
     # Do not print token content.
     print("✓ License valid")
-    print(f"✓ Tier: {data.tier}")
+    print(f"✓ Tier: {format_tier_for_display(data.tier)}")
     print(f"✓ Installed to: {dest}")
     return 0
 

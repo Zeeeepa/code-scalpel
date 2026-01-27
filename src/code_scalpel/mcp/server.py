@@ -57,7 +57,7 @@ from code_scalpel.mcp.paths import (
 )
 
 # [20260116_REFACTOR] Import shared mcp instance from protocol
-from code_scalpel.mcp.protocol import mcp, set_current_tier
+from code_scalpel.mcp.protocol import mcp, set_current_tier, format_tier_for_display
 
 # [20260117_SECURITY] Authoritative startup tier selection via authorization helper
 from code_scalpel.licensing.authorization import compute_effective_tier_for_startup
@@ -5216,7 +5216,7 @@ def run_server(
     output = sys.stderr if transport == "stdio" else sys.stdout
     print(f"Code Scalpel MCP Server v{__version__}", file=output)
     print(f"Project Root: {get_project_root()}", file=output)
-    print(f"Tier: {tier}", file=output)
+    print(f"Tier: {format_tier_for_display(tier)}", file=output)
 
     # [20251215_FEATURE] SSL/HTTPS support for production deployments
     use_https = ssl_certfile and ssl_keyfile
