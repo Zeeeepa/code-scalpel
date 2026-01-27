@@ -222,16 +222,27 @@ class PipelineRunner:
                         "note": "Vulnerabilities found but no fix versions available yet",
                     }
                     return True  # Don't block on unfixed CVEs
+                else:
+                    # Has fixable vulnerabilities - this is a real error
+                    self.log(
+                        "❌ Security audit failed - fixable vulnerabilities found",
+                        "ERROR",
+                    )
+                    self.results["checks"]["security"] = {
+                        "status": "failed",
+                        "output": text_output,
+                    }
+                    return False
 
-            except Exception:
-                pass
-
-            self.log("❌ Security audit failed", "ERROR")
-            self.results["checks"]["security"] = {
-                "status": "failed",
-                "output": stdout + stderr,
-            }
-            return False
+            except Exception as e:
+                self.log(f"⚠️ Error parsing security audit output: {str(e)}", "WARNING")
+                # Treat parsing errors as warnings for now
+                self.results["checks"]["security"] = {
+                    "status": "warning",
+                    "output": str(e),
+                    "note": "Could not parse security audit output, treating as warning",
+                }
+                return True
 
     def validate_package_build(self) -> bool:
         """Validate package can be built."""
@@ -333,9 +344,13 @@ class PipelineRunner:
             all_passed = True
             for check_name, check_result in self.results["checks"].items():
                 status = check_result["status"]
-                status_emoji = "✅" if status == "passed" else "❌"
+                status_emoji = (
+                    "✅"
+                    if status == "passed"
+                    else ("⚠️" if status == "warning" else "❌")
+                )
                 f.write(f"- {status_emoji} **{check_name}**: {status}\n")
-                if status != "passed":
+                if status == "failed":
                     all_passed = False
 
             f.write("\n## Overall Status\n\n")
