@@ -1118,6 +1118,64 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         help="Signer identity for manifest",
     )
 
+    # Release management commands
+    release_parser = subparsers.add_parser(
+        "release",
+        help="Manage code releases (version, changelog, GitHub, PyPI)",
+    )
+    release_subparsers = release_parser.add_subparsers(
+        dest="release_command",
+        help="Release subcommands",
+    )
+
+    # plan subcommand (no arguments needed)
+    release_subparsers.add_parser(
+        "plan",
+        help="Preview the next release without making changes",
+    )
+
+    # prepare subcommand (no arguments needed)
+    release_subparsers.add_parser(
+        "prepare",
+        help="Prepare release in dry-run mode",
+    )
+
+    # execute subcommand
+    execute_parser = release_subparsers.add_parser(
+        "execute",
+        help="Execute complete release (prepare + GitHub + PyPI)",
+    )
+    execute_parser.add_argument(
+        "--skip-github",
+        action="store_true",
+        help="Skip GitHub release creation",
+    )
+    execute_parser.add_argument(
+        "--skip-pypi",
+        action="store_true",
+        help="Skip PyPI publishing",
+    )
+
+    # publish subcommand
+    publish_parser = release_subparsers.add_parser(
+        "publish",
+        help="Publish existing release to PyPI and GitHub",
+    )
+    publish_parser.add_argument(
+        "--tag",
+        help="Git tag to publish (default: latest)",
+    )
+    publish_parser.add_argument(
+        "--skip-github",
+        action="store_true",
+        help="Skip GitHub release",
+    )
+    publish_parser.add_argument(
+        "--skip-pypi",
+        action="store_true",
+        help="Skip PyPI publishing",
+    )
+
     args = parser.parse_args()
 
     if args.command == "analyze":
@@ -1225,6 +1283,33 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         print(f"Code Scalpel v{__version__}")
         print(f"Python {sys.version}")
         return 0
+
+    elif args.command == "release":  # [20260127_FEATURE] Phase 4 Release Pipeline
+        from code_scalpel.release.cli import (
+            release_plan,
+            release_prepare,
+            release_execute,
+            release_publish,
+        )
+
+        if args.release_command == "plan":
+            return release_plan()
+        elif args.release_command == "prepare":
+            return release_prepare()
+        elif args.release_command == "execute":
+            return release_execute(
+                skip_github=args.skip_github,
+                skip_pypi=args.skip_pypi,
+            )
+        elif args.release_command == "publish":
+            return release_publish(
+                tag=args.tag,
+                skip_github=args.skip_github,
+                skip_pypi=args.skip_pypi,
+            )
+        else:
+            release_parser.print_help()
+            return 1
 
     else:
         parser.print_help()
