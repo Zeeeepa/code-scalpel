@@ -17,6 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2026-01-26
+
+### Fixed
+- **UVX Entry Point**: Fixed missing `codescalpel` entry point that prevented `uvx codescalpel` from working
+  - v1.1.0 regression: package was renamed to `codescalpel` on PyPI but only had `code-scalpel` entry point
+  - Both `codescalpel` and `code-scalpel` commands now available and work identically
+  - Verified backward compatibility: all CLI tests pass
+  - Fixes deployment for MCP via stdio, HTTP(S), and Docker
+
+---
+
 ## [1.2.0] - 2026-01-26
 
 ### Added

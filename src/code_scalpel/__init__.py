@@ -25,7 +25,7 @@ For AI agent integrations:
 # [20251225_RELEASE] v3.3.0 - Project Reorganization (Phases 1-4)
 # [20260126_RELEASE] v1.1.0 - Kernel integration pilot for analyze_code
 # [20260126_DEVELOPMENT] v1.2.0-dev - Project Awareness Engine
-__version__ = "1.2.0-dev"
+__version__ = "1.2.1"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 
