@@ -765,6 +765,128 @@ def regenerate_manifest_command(
         return 1
 
 
+def show_capabilities(
+    tier: str | None = None,
+    tool_filter: str | None = None,
+    json_output: bool = False,
+) -> int:
+    """Show available tools and limits for the current or specified tier.
+
+    [20260127_FEATURE] v3.4.0 - CLI command to query tool capabilities
+    """
+    from code_scalpel.capabilities import (
+        get_all_capabilities,
+        get_tool_capabilities,
+        get_tier_names,
+    )
+    from code_scalpel.mcp.protocol import _get_current_tier
+
+    try:
+        # Use provided tier or current tier from license
+        if tier is None:
+            tier = _get_current_tier()
+        elif tier not in get_tier_names():
+            print(f"❌ Invalid tier: {tier}")
+            print(f"   Available tiers: {', '.join(get_tier_names())}")
+            return 1
+
+        # Get capabilities for the tier
+        if tool_filter:
+            # Show single tool
+            caps = get_tool_capabilities(tool_filter, tier=tier)
+            if not caps["available"]:
+                print(
+                    f"❌ Tool '{tool_filter}' is not available at {tier.upper()} tier"
+                )
+                return 1
+
+            if json_output:
+                print(json.dumps(caps, indent=2))
+            else:
+                print(f"Tool: {caps['tool_id'].upper()}")
+                print(f"Tier: {caps['tier'].upper()}")
+                print(f"Available: {'✅ Yes' if caps['available'] else '❌ No'}")
+                if caps["limits"]:
+                    print("Limits:")
+                    for key, value in caps["limits"].items():
+                        print(f"  {key}: {value}")
+            return 0
+        else:
+            # Show all tools
+            capabilities = get_all_capabilities(tier=tier)
+            available_count = sum(1 for c in capabilities.values() if c["available"])
+
+            if json_output:
+                # JSON output
+                result = {
+                    "tier": tier,
+                    "tool_count": len(capabilities),
+                    "available_count": available_count,
+                    "capabilities": capabilities,
+                }
+                print(json.dumps(result, indent=2))
+            else:
+                # Human-readable output
+                print("=" * 70)
+                print(f"Code Scalpel Capabilities - {tier.upper()} Tier")
+                print("=" * 70)
+                print(f"Total Tools: {len(capabilities)}")
+                print(f"Available: {available_count}/{len(capabilities)}")
+                print()
+
+                # Group by availability
+                available_tools = [
+                    (tid, cap)
+                    for tid, cap in sorted(capabilities.items())
+                    if cap["available"]
+                ]
+                unavailable_tools = [
+                    (tid, cap)
+                    for tid, cap in sorted(capabilities.items())
+                    if not cap["available"]
+                ]
+
+                if available_tools:
+                    print("✅ AVAILABLE TOOLS:")
+                    print("-" * 70)
+                    for tool_id, cap in available_tools:
+                        limits = cap["limits"]
+                        if limits:
+                            limits_str = ", ".join(
+                                f"{k}={v}" for k, v in list(limits.items())[:3]
+                            )
+                            if len(limits) > 3:
+                                limits_str += ", ..."
+                            print(f"  • {tool_id:40} [{limits_str}]")
+                        else:
+                            print(f"  • {tool_id:40} [unlimited]")
+                    print()
+
+                if unavailable_tools:
+                    print("❌ UNAVAILABLE TOOLS (upgrade required):")
+                    print("-" * 70)
+                    for tool_id, _ in unavailable_tools:
+                        print(f"  • {tool_id:40} [upgrade required]")
+                    print()
+
+                print("=" * 70)
+                if available_count < len(capabilities):
+                    print(
+                        f"💡 Tip: Upgrade to unlock {len(unavailable_tools)} more tools"
+                    )
+                    print("   Visit: https://code-scalpel.ai for pricing")
+                    print()
+
+            return 0
+
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
+        return 1
+
+
 def main() -> int:
     """Main CLI entry point."""
     from . import __version__
@@ -780,6 +902,8 @@ Examples:
   codescalpel analyze myfile.py --json       Output as JSON
   codescalpel scan myfile.py                 Security vulnerability scan
   codescalpel scan myfile.py --json          Security scan with JSON output
+  codescalpel capabilities                   Show available tools for your tier
+  codescalpel capabilities --tier pro        Show tools available at PRO tier
   codescalpel mcp                            TIER 1: Start MCP server (stdio, Claude Desktop)
   codescalpel mcp --http --port 8080         TIER 2: Start MCP server (HTTP fallback)
   codescalpel mcp --http --allow-lan         TIER 2: Start MCP server (HTTP with LAN)
@@ -938,6 +1062,30 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     # Version command
     subparsers.add_parser("version", help="Show version information")
 
+    # Capabilities command - [20260127_FEATURE] Show tier-aware tool capabilities
+    capabilities_parser = subparsers.add_parser(
+        "capabilities",
+        help="Show available tools and limits for your license tier",
+    )
+    capabilities_parser.add_argument(
+        "--tier",
+        choices=["community", "pro", "enterprise"],
+        default=None,
+        help="Optional tier to inspect (default: current license tier)",
+    )
+    capabilities_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+    capabilities_parser.add_argument(
+        "--tool",
+        "-t",
+        default=None,
+        help="Show details for a specific tool (default: show all tools)",
+    )
+
     # [20241225_FEATURE] v3.3.0 - Policy verification commands
     verify_parser = subparsers.add_parser(
         "verify-policies",
@@ -1064,6 +1212,13 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
 
         return start_mcp_server(
             **_filter_kwargs_for_callable(start_mcp_server, start_kwargs)
+        )
+
+    elif args.command == "capabilities":
+        return show_capabilities(
+            tier=args.tier,
+            tool_filter=args.tool,
+            json_output=args.json,
         )
 
     elif args.command == "version":
