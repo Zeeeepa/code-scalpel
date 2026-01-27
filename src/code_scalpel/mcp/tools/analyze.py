@@ -104,7 +104,9 @@ async def analyze_code(
 
         # [20260126_v1_1] Create SourceContext and validate input
         try:
-            ctx = adapter.create_source_context(code=code, file_path=file_path, language=language)
+            ctx = adapter.create_source_context(
+                code=code, file_path=file_path, language=language
+            )
             is_valid, error_obj, suggestions = adapter.validate_input(ctx)
 
             if not is_valid and error_obj:
@@ -127,7 +129,9 @@ async def analyze_code(
             pass  # Continue with legacy code path
 
         # [20260126_v1_1] Core analysis (unchanged)
-        result = await asyncio.to_thread(_analyze_code_sync, code or "", language, file_path)
+        result = await asyncio.to_thread(
+            _analyze_code_sync, code or "", language, file_path
+        )
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
         return make_envelope(
