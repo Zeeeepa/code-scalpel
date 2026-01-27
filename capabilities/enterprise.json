@@ -1,0 +1,170 @@
+{
+  "tier": "enterprise",
+  "generated_at": "2026-01-27T14:09:07.497100Z",
+  "tool_count": 22,
+  "available_count": 10,
+  "capabilities": {
+    "analyze_code": {
+      "tool_id": "analyze_code",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "max_file_size_mb": 100
+      }
+    },
+    "code_policy_check": {
+      "tool_id": "code_policy_check",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "compliance_enabled": true,
+        "custom_rules_enabled": true,
+        "audit_trail_enabled": true,
+        "pdf_reports_enabled": true
+      }
+    },
+    "crawl_project": {
+      "tool_id": "crawl_project",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "parsing_enabled": true,
+        "complexity_analysis": true,
+        "respect_gitignore": true
+      }
+    },
+    "cross_file_security_scan": {
+      "tool_id": "cross_file_security_scan",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "extract_code": {
+      "tool_id": "extract_code",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "include_cross_file_deps": true,
+        "max_extraction_size_mb": 100
+      }
+    },
+    "generate_unit_tests": {
+      "tool_id": "generate_unit_tests",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "test_frameworks": "all"
+      }
+    },
+    "get_call_graph": {
+      "tool_id": "get_call_graph",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "get_cross_file_dependencies": {
+      "tool_id": "get_cross_file_dependencies",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "get_file_context": {
+      "tool_id": "get_file_context",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "get_graph_neighborhood": {
+      "tool_id": "get_graph_neighborhood",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "get_project_map": {
+      "tool_id": "get_project_map",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "max_modules": 1000,
+        "detail_level": "comprehensive"
+      }
+    },
+    "get_symbol_references": {
+      "tool_id": "get_symbol_references",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "rename_symbol": {
+      "tool_id": "rename_symbol",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "scan_dependencies": {
+      "tool_id": "scan_dependencies",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "osv_lookup": true
+      }
+    },
+    "security_scan": {
+      "tool_id": "security_scan",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "simulate_refactor": {
+      "tool_id": "simulate_refactor",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "max_file_size_mb": 100,
+        "analysis_depth": "deep"
+      }
+    },
+    "symbolic_execute": {
+      "tool_id": "symbolic_execute",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "constraint_types": "all"
+      }
+    },
+    "type_evaporation_scan": {
+      "tool_id": "type_evaporation_scan",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "unified_sink_detect": {
+      "tool_id": "unified_sink_detect",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "update_symbol": {
+      "tool_id": "update_symbol",
+      "tier": "enterprise",
+      "available": true,
+      "limits": {
+        "backup_enabled": true,
+        "validation_level": "full",
+        "max_updates_per_call": -1
+      }
+    },
+    "validate_paths": {
+      "tool_id": "validate_paths",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    },
+    "verify_policy_integrity": {
+      "tool_id": "verify_policy_integrity",
+      "tier": "enterprise",
+      "available": false,
+      "limits": {}
+    }
+  }
+}

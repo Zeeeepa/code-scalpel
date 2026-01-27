@@ -1,0 +1,218 @@
+{
+  "tier": "pro",
+  "generated_at": "2026-01-27T14:09:07.494951Z",
+  "tool_count": 22,
+  "available_count": 19,
+  "capabilities": {
+    "analyze_code": {
+      "tool_id": "analyze_code",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_file_size_mb": 10,
+        "languages": [
+          "python",
+          "javascript",
+          "typescript",
+          "java"
+        ]
+      }
+    },
+    "code_policy_check": {
+      "tool_id": "code_policy_check",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_files": 1000,
+        "max_rules": 200,
+        "compliance_enabled": false,
+        "custom_rules_enabled": true
+      }
+    },
+    "crawl_project": {
+      "tool_id": "crawl_project",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "parsing_enabled": true,
+        "complexity_analysis": true,
+        "respect_gitignore": true
+      }
+    },
+    "cross_file_security_scan": {
+      "tool_id": "cross_file_security_scan",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_modules": 100,
+        "max_depth": 10
+      }
+    },
+    "extract_code": {
+      "tool_id": "extract_code",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "include_cross_file_deps": true,
+        "max_depth": 1,
+        "max_extraction_size_mb": 10
+      }
+    },
+    "generate_unit_tests": {
+      "tool_id": "generate_unit_tests",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_test_cases": 20,
+        "test_frameworks": [
+          "pytest",
+          "unittest"
+        ]
+      }
+    },
+    "get_call_graph": {
+      "tool_id": "get_call_graph",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_depth": 50,
+        "max_nodes": 500
+      }
+    },
+    "get_cross_file_dependencies": {
+      "tool_id": "get_cross_file_dependencies",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_depth": 5,
+        "max_files": 500
+      }
+    },
+    "get_file_context": {
+      "tool_id": "get_file_context",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_context_lines": 2000
+      }
+    },
+    "get_graph_neighborhood": {
+      "tool_id": "get_graph_neighborhood",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_k": 5,
+        "max_nodes": 100
+      }
+    },
+    "get_project_map": {
+      "tool_id": "get_project_map",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_files": 1000,
+        "max_modules": 200,
+        "detail_level": "detailed"
+      }
+    },
+    "get_symbol_references": {
+      "tool_id": "get_symbol_references",
+      "tier": "pro",
+      "available": false,
+      "limits": {}
+    },
+    "rename_symbol": {
+      "tool_id": "rename_symbol",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_files_searched": 500,
+        "max_files_updated": 200
+      }
+    },
+    "scan_dependencies": {
+      "tool_id": "scan_dependencies",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "osv_lookup": true
+      }
+    },
+    "security_scan": {
+      "tool_id": "security_scan",
+      "tier": "pro",
+      "available": false,
+      "limits": {}
+    },
+    "simulate_refactor": {
+      "tool_id": "simulate_refactor",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_file_size_mb": 10,
+        "analysis_depth": "advanced"
+      }
+    },
+    "symbolic_execute": {
+      "tool_id": "symbolic_execute",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_depth": 100,
+        "constraint_types": [
+          "int",
+          "bool",
+          "string",
+          "float",
+          "list",
+          "dict"
+        ]
+      }
+    },
+    "type_evaporation_scan": {
+      "tool_id": "type_evaporation_scan",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_files": 500
+      }
+    },
+    "unified_sink_detect": {
+      "tool_id": "unified_sink_detect",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "languages": [
+          "python",
+          "javascript",
+          "typescript",
+          "java"
+        ]
+      }
+    },
+    "update_symbol": {
+      "tool_id": "update_symbol",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "backup_enabled": true,
+        "validation_level": "semantic",
+        "max_updates_per_call": -1
+      }
+    },
+    "validate_paths": {
+      "tool_id": "validate_paths",
+      "tier": "pro",
+      "available": false,
+      "limits": {}
+    },
+    "verify_policy_integrity": {
+      "tool_id": "verify_policy_integrity",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "max_policy_files": 200
+      }
+    }
+  }
+}
