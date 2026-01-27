@@ -189,43 +189,31 @@ class PipelineRunner:
             }
             return True
         else:
-            # Check if vulnerabilities have no fix available (treat as warning)
+            # pip-audit found vulnerabilities
+            # Check if they have fixes available
             try:
                 # Run non-json format to get human-readable output
                 _, text_output, _ = self.run_command(["pip-audit"])
 
-                # Parse the output to check for fix versions
-                # Format: "Name     Version ID            Fix Versions"
-                # If "Fix Versions" column is empty, there's no fix available
+                # If there are vulnerabilities without fixes, treat as warning
+                # Count how many lines have fix versions (4+ parts when split)
                 lines = text_output.strip().split("\n")
-                has_fixable_vuln = False
+                vuln_count = 0
+                fixable_count = 0
 
                 for line in lines:
-                    # Skip header and separator lines
+                    # Look for vulnerability lines (contain CVE/PYSEC/GHSA)
                     if "CVE-" in line or "PYSEC-" in line or "GHSA-" in line:
-                        # Check if there's content in the Fix Versions column
-                        # The format has 4 columns: Name, Version, ID, Fix Versions
+                        vuln_count += 1
                         parts = line.split()
-                        # If there are more than 3 parts, there's a fix version
+                        # If more than 3 parts, there's a fix available
                         if len(parts) > 3:
-                            has_fixable_vuln = True
-                            break
+                            fixable_count += 1
 
-                if not has_fixable_vuln:
+                if fixable_count > 0:
+                    # Has fixable vulnerabilities - fail
                     self.log(
-                        "⚠️ Security audit found vulnerabilities with no available fix",
-                        "WARNING",
-                    )
-                    self.results["checks"]["security"] = {
-                        "status": "warning",
-                        "output": text_output,
-                        "note": "Vulnerabilities found but no fix versions available yet",
-                    }
-                    return True  # Don't block on unfixed CVEs
-                else:
-                    # Has fixable vulnerabilities - this is a real error
-                    self.log(
-                        "❌ Security audit failed - fixable vulnerabilities found",
+                        f"❌ Security audit failed - found {fixable_count} fixable vulnerabilities",
                         "ERROR",
                     )
                     self.results["checks"]["security"] = {
@@ -233,14 +221,37 @@ class PipelineRunner:
                         "output": text_output,
                     }
                     return False
+                elif vuln_count > 0:
+                    # Has unfixable vulnerabilities - warn but allow
+                    self.log(
+                        f"⚠️ Security audit found {vuln_count} vulnerability(-ies) with no available fix",
+                        "WARNING",
+                    )
+                    self.results["checks"]["security"] = {
+                        "status": "warning",
+                        "output": text_output,
+                        "note": f"{vuln_count} vulnerability(-ies) found but no fix versions available yet",
+                    }
+                    return True
+                else:
+                    # No vulnerabilities found (exit code was non-zero for other reason)
+                    self.log(
+                        "⚠️ Security audit had non-zero exit but no vulnerabilities found",
+                        "WARNING",
+                    )
+                    self.results["checks"]["security"] = {
+                        "status": "warning",
+                        "output": text_output,
+                    }
+                    return True
 
             except Exception as e:
-                self.log(f"⚠️ Error parsing security audit output: {str(e)}", "WARNING")
-                # Treat parsing errors as warnings for now
+                self.log(f"⚠️ Error running security audit: {str(e)}", "WARNING")
+                # Treat errors as warnings to not block development
                 self.results["checks"]["security"] = {
                     "status": "warning",
                     "output": str(e),
-                    "note": "Could not parse security audit output, treating as warning",
+                    "note": "Could not run security audit, treating as warning",
                 }
                 return True
 
