@@ -1,6 +1,6 @@
 # Code Scalpel: Surgical Code Operations for AI Agents
 
-**Latest Release: v1.1.0 | January 26, 2026**
+**Latest Release: v1.2.1 | January 27, 2026**
 
 Code Scalpel is the bridge between **Generative AI** and **Reliable Software Engineering**.
 
@@ -50,7 +50,7 @@ Code Scalpel treats code as a **Graph** (AST + PDG). It gives agents determinist
 
 ## Key Capabilities at Launch (v1.0) | Jan 2026
 
-Code Scalpel launches with **22 specialized tools** divided into five surgical disciplines. All tools are available in the open-source Community Edition.
+Code Scalpel launches with **23 specialized tools** divided into five surgical disciplines. All tools are available in the open-source Community Edition.
 
 ### 1. Surgical Extraction & Analysis (6 Tools)
 Stop grepping. Start understanding.
