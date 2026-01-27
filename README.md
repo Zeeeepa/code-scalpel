@@ -50,7 +50,7 @@ Code Scalpel treats code as a **Graph** (AST + PDG). It gives agents determinist
 
 ## Key Capabilities at Launch (v1.0) | Jan 2026
 
-Code Scalpel launches with **23 specialized tools** divided into five surgical disciplines. All tools are available in the open-source Community Edition.
+Code Scalpel launches with **20 specialized development tools** plus **3 system tools** for a total of **23 tools**. All development tools are available in the open-source Community Edition.
 
 ### 1. Surgical Extraction & Analysis (6 Tools)
 Stop grepping. Start understanding.
@@ -83,9 +83,14 @@ Trust, but verify.
 *   **`crawl_project`**: Project-wide analysis of code structure and metrics.
 *   **`verify_policy_integrity`**: Cryptographically verify policy files haven't been tampered with.
 
-### 5. Advanced Analysis (2 Tools)
+### 5. Advanced Analysis (1 Tool)
 *   **`get_cross_file_dependencies`**: Analyze complex dependency chains across files.
-*   **`code_policy_check`**: Evaluate code against organizational compliance standards.
+
+### 6. System & Infrastructure (3 Tools)
+Infrastructure and governance tools for agent orchestration and policy enforcement.
+*   **`get_capabilities`**: Discover available tools and tier-specific limits (for agent self-discovery).
+*   **`code_policy_check`**: Evaluate code against organizational compliance standards and security policies.
+*   **`verify_policy_integrity`**: Verify policy file integrity using cryptographic signatures.
 
 ## How We're Different
 
@@ -97,7 +102,7 @@ Code Scalpel is NOT a fork or wrapper of the `scalpel` Python library. It's a co
 |---------|--------------|------------------|
 | **Interface** | MCP server (primary) | CLI tool only |
 | **AI Agent Ready** | Yes (designed for agents) | CLI-only |
-| **Tools** | 22 specialized tools | Limited utilities |
+| **Tools** | 20 development + 3 system tools | Limited utilities |
 | **Security Scanning** | Taint analysis (12 CWEs) | Basic pattern matching |
 | **Symbolic Execution** | Z3-powered (all paths) | Not supported |
 | **Test Generation** | Auto-generate from paths | Not supported |
@@ -110,7 +115,7 @@ Code Scalpel is NOT a fork or wrapper of the `scalpel` Python library. It's a co
 | Feature | Code Scalpel | AST Explorer | Semgrep | Pylint |
 |---------|--------------|--------------|---------|--------|
 | **Primary Use** | MCP server for AI agents | Code visualization | Security patterns | Style linting |
-| **Tool Count** | 22 specialized tools | Query only | ~1000 rules | Limited |
+| **Tool Count** | 20 dev + 3 system tools | Query only | ~1000 rules | Limited |
 | **Code Extraction** | ✅ By symbol name, safe | ⚠️ Manual AST inspection | ❌ Not primary | ❌ Not supported |
 | **Security Scan** | ✅ Full taint analysis (12 CWEs) | ❌ No | ⚠️ Pattern-based | ⚠️ Basic only |
 | **Symbolic Execution** | ✅ Z3-powered | ❌ No | ❌ No | ❌ No |
@@ -127,7 +132,7 @@ Code Scalpel is NOT a fork or wrapper of the `scalpel` Python library. It's a co
 |---------|--------------|-----------------|----------------|---------|
 | **Interface** | MCP server | IDE plugin | IDE plugin | Chat-only |
 | **Surgical Extraction** | ✅ By name, safe, cross-file | ⚠️ Partial (line-based) | ⚠️ Partial (line-based) | ❌ Not precise |
-| **Security Analysis** | ✅ 22 tools, taint-based | ⚠️ Limited | ⚠️ Limited | ⚠️ Generalist |
+| **Security Analysis** | ✅ 20 dev tools, taint-based | ⚠️ Limited | ⚠️ Limited | ⚠️ Generalist |
 | **Test Generation** | ✅ Symbolic execution | ❌ No | ❌ No | ⚠️ Quality varies |
 | **Behavior Verification** | ✅ Before refactoring | ❌ No | ⚠️ Limited | ⚠️ Manual only |
 | **Independent of IDE** | ✅ Works anywhere | ❌ IDE-bound | ❌ IDE-bound | ❌ Web-bound |
@@ -157,7 +162,7 @@ claude mcp add codescalpel --transport stdio uvx codescalpel mcp
 
 **What happens:**
 1. Claude runs `uvx codescalpel mcp` when you ask for code analysis
-2. All 22 tools become available in your AI assistant
+2. All 20 development tools + 3 system tools become available in your AI assistant
 3. Your code is analyzed locally; no data sent to external servers
 
 ---

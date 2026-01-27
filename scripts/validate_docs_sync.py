@@ -2,7 +2,7 @@
 
 This script ensures:
 1. README.md version matches pyproject.toml version
-2. README.md tool count matches actual MCP tool registry
+2. README.md mentions of tool counts match actual MCP tool registry (20 dev + 3 system = 23 total)
 3. All critical metadata is consistent across documentation
 
 This should be run in CI to catch stale documentation before release.
