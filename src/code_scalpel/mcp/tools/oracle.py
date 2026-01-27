@@ -132,21 +132,40 @@ async def write_perfect_code(
     """
     Generate constraint specification for AI-assisted code generation.
 
-    Provides a Markdown specification containing:
-    - Strict symbol table (function/class signatures)
-    - Graph constraints (dependencies, callers)
-    - Architectural rules (layer boundaries)
-    - Code context (relevant snippet)
-    - Implementation notes (best practices)
+    Provides a Markdown specification containing strict symbol table (function/class signatures),
+    graph constraints (dependencies, callers), architectural rules, code context, and
+    implementation notes. The LLM uses this spec to generate code that compiles and integrates.
 
-    The LLM uses this spec to generate code that compiles and integrates correctly.
+    **Tier Behavior:**
+    - Community: Basic symbol table and context (max 50 files, depth 2)
+    - Pro: + Graph constraints and dependencies (max 2000 files, depth 10)
+    - Enterprise: + Architectural rules and deep analysis (unlimited files, depth 50)
 
-    Args:
-        file_path: Path to target file (e.g., "src/auth.py")
-        instruction: What needs to be implemented (e.g., "Add JWT validation")
+    **Tier Capabilities:**
+    The following features/limits vary by tier:
+    - Community: Basic context only, max 50 files, depth 2
+    - Pro: + Graph constraints, max 2000 files, depth 10
+    - Enterprise: + Architectural rules, unlimited files, depth 50
 
-    Returns:
-        Markdown constraint specification in response envelope
+    **Args:**
+        file_path (str): Path to target file (e.g., "src/auth.py")
+        instruction (str): What needs to be implemented (e.g., "Add JWT validation")
+
+    **Returns:**
+        ToolResponseEnvelope:
+        - success: True if specification generated
+        - data: Markdown constraint specification with symbols, graph, rules, context
+        - error: Error message if generation failed (file not found, invalid instruction, etc.)
+
+    **Example:**
+        ```python
+        result = await write_perfect_code(
+            file_path="src/auth.py",
+            instruction="Add JWT token validation"
+        )
+        if result.success:
+            print(result.data)  # Markdown specification
+        ```
     """
     started = time.perf_counter()
     try:

@@ -29,15 +29,45 @@ from code_scalpel import __version__ as _pkg_version
 async def unified_sink_detect(
     code: str, language: str = "auto", confidence_threshold: float = 0.7
 ) -> ToolResponseEnvelope:
-    """Unified polyglot sink detection with confidence thresholds.
+    """Detect polyglot security sinks with confidence thresholds.
 
-    If language is not specified or set to 'auto', it will be auto-detected from the code.
-    Supported languages: python, javascript, typescript, java.
+    Identifies dangerous sinks (functions that handle untrusted data) across multiple languages.
+    Language is auto-detected from code if set to 'auto' (default).
 
-    Tier Features:
+    **Tier Behavior:**
     - Community: Basic sink detection, CWE mapping, confidence scoring
     - Pro: + Context-aware detection, framework-specific sinks, custom patterns
     - Enterprise: + Compliance reporting, risk scoring, remediation suggestions
+
+    **Tier Capabilities:**
+    The following features/limits vary by tier:
+    - Community: Pattern-based detection only
+    - Pro: + Context analysis and custom patterns
+    - Enterprise: + Compliance mappings and remediation suggestions
+
+    **Args:**
+        code (str): Source code to scan for sinks.
+        language (str): Programming language. Default: 'auto' (auto-detect).
+                       Supported: python, javascript, typescript, java
+        confidence_threshold (float): Minimum confidence score (0.0-1.0) to report sinks.
+                                     Default: 0.7 (70% confidence minimum)
+
+    **Returns:**
+        ToolResponseEnvelope:
+        - success: True if scan completed
+        - data: List of detected sinks with CWE mappings and confidence scores
+        - error: Error message if scan failed (unsupported language, invalid code, etc.)
+
+    **Example:**
+        ```python
+        result = await unified_sink_detect(
+            code="exec(user_input)",
+            language="python",
+            confidence_threshold=0.7
+        )
+        if result.success:
+            print(f"Found {len(result.data['sinks'])} sinks")
+        ```
     """
     started = time.perf_counter()
     try:
@@ -96,14 +126,45 @@ async def type_evaporation_scan(
     frontend_file: str = "frontend.ts",
     backend_file: str = "backend.py",
 ) -> ToolResponseEnvelope:
-    """Detect Type System Evaporation vulnerabilities across frontend/backend code.
+    """Detect Type System Evaporation vulnerabilities across frontend/backend.
 
-    Provide either frontend_code/backend_code strings, or frontend_file_path/backend_file_path to read from files.
+    Identifies security issues when type information is lost at frontend/backend boundaries.
+    Provide either code strings or file paths for both frontend and backend code.
 
-    Tier Features:
+    **Tier Behavior:**
     - Community: Frontend-only analysis, basic type checking
     - Pro: + Network boundary analysis, implicit any tracing, library boundary checks
     - Enterprise: + Runtime validation generation, Zod schema generation, API contract validation
+
+    **Tier Capabilities:**
+    The following features/limits vary by tier:
+    - Community: Frontend analysis only, single file
+    - Pro: + Network boundary analysis, max 10 files
+    - Enterprise: + API contracts and validation generation, unlimited files
+
+    **Args:**
+        frontend_code (str, optional): Frontend TypeScript/JavaScript code. Either frontend_code or frontend_file_path required.
+        backend_code (str, optional): Backend Python code. Either backend_code or backend_file_path required.
+        frontend_file_path (str, optional): Path to frontend file. Either frontend_code or frontend_file_path required.
+        backend_file_path (str, optional): Path to backend file. Either backend_code or backend_file_path required.
+        frontend_file (str): Display name for frontend file. Default: 'frontend.ts'
+        backend_file (str): Display name for backend file. Default: 'backend.py'
+
+    **Returns:**
+        ToolResponseEnvelope:
+        - success: True if analysis completed
+        - data: Type evaporation issues with affected boundaries and severity
+        - error: Error message if analysis failed (missing files, invalid code, etc.)
+
+    **Example:**
+        ```python
+        result = await type_evaporation_scan(
+            frontend_code="const data = await fetch('/api')",
+            backend_code="def api(): return {'any': 'value'}"
+        )
+        if result.success:
+            print(result.data['issues'])
+        ```
     """
     started = time.perf_counter()
     try:
@@ -162,12 +223,12 @@ async def type_evaporation_scan(
 
         # At this point, both frontend_code and backend_code are guaranteed to be set
         # (validated above at lines 111-133)
-        assert (
-            frontend_code is not None
-        ), "frontend_code must be provided or read from file"
-        assert (
-            backend_code is not None
-        ), "backend_code must be provided or read from file"
+        assert frontend_code is not None, (
+            "frontend_code must be provided or read from file"
+        )
+        assert backend_code is not None, (
+            "backend_code must be provided or read from file"
+        )
 
         result = await asyncio.to_thread(
             _type_evaporation_scan_sync,
@@ -211,7 +272,46 @@ async def scan_dependencies(
     timeout: float = 30.0,
     ctx: Context | None = None,
 ) -> ToolResponseEnvelope:
-    """Scan project dependencies for known vulnerabilities."""
+    """Scan project dependencies for known vulnerabilities.
+
+    Analyzes project dependency manifests (package.json, requirements.txt, pom.xml, etc.)
+    for known security vulnerabilities using CVE databases.
+
+    **Tier Behavior:**
+    - Community: Basic vulnerability scanning, CVE mapping only
+    - Pro: + License analysis, supply chain insights, automated updates
+    - Enterprise: + Priority scoring, compliance reports, SLA tracking
+
+    **Tier Capabilities:**
+    The following features/limits vary by tier:
+    - Community: Vulnerabilities only, max 1000 packages
+    - Pro: + Licenses and supply chain, max 10000 packages
+    - Enterprise: + Compliance and SLA tracking, unlimited packages
+
+    **Args:**
+        path (str, optional): Path to scan for dependencies. If None, uses project root.
+        project_root (str, optional): Project root directory. If None, uses server default.
+        scan_vulnerabilities (bool): Scan for vulnerabilities. Default: True
+        include_dev (bool): Include development dependencies. Default: True
+        timeout (float): Scan timeout in seconds. Default: 30.0
+        ctx (Context, optional): MCP context for progress reporting
+
+    **Returns:**
+        ToolResponseEnvelope:
+        - success: True if scan completed
+        - data: Dependencies with vulnerability info, licenses, version info
+        - error: Error message if scan failed (invalid path, scan timeout, etc.)
+
+    **Example:**
+        ```python
+        result = await scan_dependencies(
+            project_root="/home/user/myproject",
+            scan_vulnerabilities=True
+        )
+        if result.success:
+            print(f"Found {result.data['total_vulnerabilities']} vulnerabilities")
+        ```
+    """
     started = time.perf_counter()
     try:
         # Import PROJECT_ROOT from server to avoid circular import issues
@@ -272,12 +372,41 @@ async def security_scan(
 ) -> ToolResponseEnvelope:
     """Scan code for security vulnerabilities using taint analysis.
 
+    Identifies security vulnerabilities using taint analysis and pattern matching.
     Provide either 'code' or 'file_path'. Language is auto-detected from code content.
 
-    Tier Features:
+    **Tier Behavior:**
     - Community: Basic pattern matching, CWE mapping, confidence scoring
     - Pro: + Taint analysis, reachability, false positive tuning, custom rules
     - Enterprise: + Compliance mappings, priority ordering, remediation suggestions
+
+    **Tier Capabilities:**
+    The following features/limits vary by tier:
+    - Community: Pattern matching only
+    - Pro: + Taint analysis and custom patterns, max complexity 10000
+    - Enterprise: + Compliance and remediation, unlimited complexity
+
+    **Args:**
+        code (str, optional): Source code to scan. Either code or file_path required.
+        file_path (str, optional): Path to file to scan. Either code or file_path required.
+        confidence_threshold (float): Minimum confidence score (0.0-1.0) to report issues.
+                                     Default: 0.7 (70% confidence minimum)
+
+    **Returns:**
+        ToolResponseEnvelope:
+        - success: True if scan completed
+        - data: List of security vulnerabilities with CWE, severity, and location info
+        - error: Error message if scan failed (file not found, invalid code, etc.)
+
+    **Example:**
+        ```python
+        result = await security_scan(
+            code="password = input('Enter password: ')",
+            confidence_threshold=0.7
+        )
+        if result.success:
+            print(f"Found {len(result.data['vulnerabilities'])} issues")
+        ```
     """
     started = time.perf_counter()
     try:

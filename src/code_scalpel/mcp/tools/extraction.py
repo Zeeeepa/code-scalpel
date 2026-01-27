@@ -52,13 +52,58 @@ async def extract_code(
 ) -> ToolResponseEnvelope:
     """Extract code elements with optional dependency context.
 
-    Provide either 'file_path' (recommended) or 'code' for the source.
-    Language is auto-detected if not specified.
+    Extracts a specified code element (function, class, method) along with optional
+    context, cross-file dependencies, and refactoring suggestions. Provide either
+    'file_path' (recommended) or 'code' for the source. Language is auto-detected if not specified.
 
-    Tier Requirements:
-    - Community: Basic extraction, max_depth=0, include_cross_file_deps=false
-    - Pro: + cross-file deps, variable_promotion, closure_detection, dependency_injection_suggestions, max_depth=1
-    - Enterprise: + as_microservice, organization_wide, unlimited depth
+    **Tier Behavior:**
+    - Community: Basic extraction only, no cross-file deps, depth 0
+    - Pro: + Cross-file dependencies, variable promotion, closures, depth 1
+    - Enterprise: + Microservice extraction, organization-wide analysis, unlimited depth
+
+    **Tier Capabilities:**
+    The following features/limits vary by tier:
+    - Community: Basic extraction, max_depth 0, single file only
+    - Pro: + Cross-file deps, variable promotion, closure detection, max_depth 1
+    - Enterprise: + Microservice refactoring, org-wide scope, unlimited depth
+
+    **Args:**
+        target_type (str): Type of element to extract ('function', 'class', 'method')
+        target_name (str): Name of the element to extract
+        file_path (str, optional): Path to source file. Either file_path or code required.
+        code (str, optional): Source code string. Either file_path or code required.
+        language (str, optional): Programming language. Default: auto-detect
+        include_context (bool): Include surrounding code context. Default: False
+        context_depth (int): Depth of context to include. Default: 1
+        include_cross_file_deps (bool): Include cross-file dependencies. Pro+ tier only. Default: False
+        include_token_estimate (bool): Include token count estimate. Default: True
+        variable_promotion (bool): Suggest variables for external dependencies. Pro+ only. Default: False
+        closure_detection (bool): Detect closure requirements. Pro+ only. Default: False
+        dependency_injection_suggestions (bool): Suggest DI patterns. Pro+ only. Default: False
+        as_microservice (bool): Refactor as microservice. Enterprise only. Default: False
+        microservice_host (str): Host for microservice. Default: '127.0.0.1'
+        microservice_port (int): Port for microservice. Default: 8000
+        organization_wide (bool): Organization-wide scope. Enterprise only. Default: False
+        workspace_root (str, optional): Workspace root directory
+        ctx (Context, optional): MCP context for progress reporting
+
+    **Returns:**
+        ToolResponseEnvelope:
+        - success: True if extraction completed
+        - data: Extracted code with context, dependencies, and suggestions
+        - error: Error message if extraction failed (target not found, invalid code, etc.)
+
+    **Example:**
+        ```python
+        result = await extract_code(
+            target_type="function",
+            target_name="authenticate",
+            file_path="/src/auth.py",
+            include_context=True
+        )
+        if result.success:
+            print(result.data['target_code'])
+        ```
     """
     started = time.perf_counter()
     try:
@@ -128,10 +173,44 @@ async def rename_symbol(
 ) -> ToolResponseEnvelope:
     """Rename a function, class, or method in a file.
 
-    Tier Features:
-    - Community: Definition-only rename, same-file reference updates, no cross-file changes
+    Updates a symbol's name throughout the file and optionally across the project,
+    maintaining code integrity with automatic backup creation and reference updates.
+
+    **Tier Behavior:**
+    - Community: Definition-only rename, same-file reference updates only
     - Pro: + Cross-file reference updates (max 500 files searched, 200 updated)
-    - Enterprise: + Unlimited cross-file updates, organization-wide rename
+    - Enterprise: + Unlimited cross-file updates, organization-wide rename capability
+
+    **Tier Capabilities:**
+    The following features/limits vary by tier:
+    - Community: Same-file only, no cross-file changes
+    - Pro: Cross-file updates, max 500 files searched, 200 updates
+    - Enterprise: Unlimited cross-file updates, org-wide scope
+
+    **Args:**
+        file_path (str): Path to file containing the symbol to rename
+        target_type (str): Type of symbol ('function', 'class', 'method')
+        target_name (str): Current name of the symbol
+        new_name (str): New name for the symbol
+        create_backup (bool): Create backup before renaming. Default: True
+
+    **Returns:**
+        ToolResponseEnvelope:
+        - success: True if rename completed
+        - data: Patch result with updated file content and change locations
+        - error: Error message if rename failed (symbol not found, invalid name, etc.)
+
+    **Example:**
+        ```python
+        result = await rename_symbol(
+            file_path="/src/auth.py",
+            target_type="function",
+            target_name="login",
+            new_name="authenticate"
+        )
+        if result.success:
+            print(f"Renamed {result.data['occurrences']} occurrences")
+        ```
     """
     started = time.perf_counter()
     try:

@@ -30,18 +30,42 @@ async def analyze_code(
     code: str | None = None, language: str = "auto", file_path: str | None = None
 ) -> ToolResponseEnvelope:
     """
-    Analyze source code structure.
+    Analyze source code structure with AST parsing and metrics.
 
-    Provide either 'code' (string) or 'file_path' (to read from file).
-    Language is auto-detected if set to 'auto' (default).
-    Use this tool to understand the high-level architecture (classes, functions, imports)
-    of a file before attempting to edit it. This helps prevent hallucinating non-existent
-    methods or classes.
+    Provide either 'code' (string) or 'file_path' (to read from file). Language is auto-detected
+    if set to 'auto' (default). Use this tool to understand high-level architecture (classes,
+    functions, imports) before attempting to edit, preventing hallucinated methods or classes.
 
-    Tier Features:
-    - Community: Basic AST parsing, functions/classes, complexity, imports
+    **Tier Behavior:**
+    - Community: Basic AST parsing, functions/classes, complexity metrics, imports
     - Pro: + Cognitive complexity, code smells, Halstead metrics, duplicate detection
-    - Enterprise: + Custom rules, compliance checks, organization patterns, technical debt
+    - Enterprise: + Custom rules, compliance checks, org patterns, technical debt
+
+    **Tier Capabilities:**
+    The following features/limits vary by tier:
+    - Community: Basic metrics only, max file size 10MB
+    - Pro: Advanced metrics and smells, max file size 50MB
+    - Enterprise: All features, unlimited file size, compliance checks
+
+    **Args:**
+        code (str, optional): Source code to analyze. Either code or file_path required.
+        language (str): Programming language for analysis. Default: 'auto' (auto-detect).
+                       Supported: python, javascript, typescript, java
+        file_path (str, optional): Path to file to analyze. Either code or file_path required.
+                                   If provided, file_size limits apply per tier.
+
+    **Returns:**
+        ToolResponseEnvelope:
+        - success: True if analysis completed
+        - data: Analysis results including functions, classes, complexity, imports
+        - error: Error message if analysis failed (invalid code, file not found, etc.)
+
+    **Example:**
+        ```python
+        result = await analyze_code(code="def hello(): pass", language="python")
+        if result.success:
+            print(result.data['functions'])
+        ```
 
     [20260126_v1_1] Now with self-correction suggestions via kernel validation.
     """
@@ -80,9 +104,7 @@ async def analyze_code(
 
         # [20260126_v1_1] Create SourceContext and validate input
         try:
-            ctx = adapter.create_source_context(
-                code=code, file_path=file_path, language=language
-            )
+            ctx = adapter.create_source_context(code=code, file_path=file_path, language=language)
             is_valid, error_obj, suggestions = adapter.validate_input(ctx)
 
             if not is_valid and error_obj:
@@ -105,9 +127,7 @@ async def analyze_code(
             pass  # Continue with legacy code path
 
         # [20260126_v1_1] Core analysis (unchanged)
-        result = await asyncio.to_thread(
-            _analyze_code_sync, code or "", language, file_path
-        )
+        result = await asyncio.to_thread(_analyze_code_sync, code or "", language, file_path)
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
         return make_envelope(
