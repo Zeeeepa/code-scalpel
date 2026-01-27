@@ -25,14 +25,30 @@ _MID_SESSION_EXPIRY_GRACE_SECONDS = 24 * 60 * 60
 
 
 def _normalize_tier(value: str | None) -> str:
-    """Normalize tier string to canonical form."""
+    """Normalize tier string to canonical form.
+
+    Accepts: "community" (default), "pro", "enterprise"
+    Also accepts aliases: "free" → "community", "all" → "enterprise"
+
+    Args:
+        value: Tier string (case-insensitive, whitespace trimmed)
+
+    Returns:
+        Canonical tier name: "community", "pro", or "enterprise"
+        Default: "community" if value is None/empty
+    """
     if not value:
         return "community"
     v = value.strip().lower()
+    # Handle aliases
     if v == "free":
         return "community"
     if v == "all":
         return "enterprise"
+    # Return normalized (lowercase) tier if it's one of the canonical values
+    if v in ("community", "pro", "enterprise"):
+        return v
+    # Invalid tier - return as-is (caller will validate)
     return v
 
 
