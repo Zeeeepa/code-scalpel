@@ -179,81 +179,36 @@ class PipelineRunner:
     def check_security_audit(self) -> bool:
         """Run pip-audit security scanning."""
         self.log("Running pip-audit security scan...")
-        exit_code, stdout, stderr = self.run_command(["pip-audit", "--format", "json"])
+
+        # Run pip-audit, ignoring known unfixable CVEs
+        # CVE-2026-0994 in protobuf 6.33.4 - no fix yet, ignore it
+        exit_code, stdout, stderr = self.run_command(
+            ["pip-audit", "--format", "json", "--ignore-vuln", "CVE-2026-0994"]
+        )
 
         if exit_code == 0:
             self.log("✅ Security audit passed")
             self.results["checks"]["security"] = {
                 "status": "passed",
-                "output": "No security vulnerabilities found",
+                "output": "No security vulnerabilities found (excluding known unfixable CVEs)",
             }
             return True
         else:
-            # pip-audit found vulnerabilities
-            # Check if they have fixes available
-            try:
-                # Run non-json format to get human-readable output
-                _, text_output, _ = self.run_command(["pip-audit"])
+            # pip-audit found vulnerabilities that need fixing
+            self.log(
+                "❌ Security audit failed - fixable vulnerabilities found", "ERROR"
+            )
 
-                # If there are vulnerabilities without fixes, treat as warning
-                # Count how many lines have fix versions (4+ parts when split)
-                lines = text_output.strip().split("\n")
-                vuln_count = 0
-                fixable_count = 0
+            # Run without JSON format to show human-readable output
+            _, text_output, _ = self.run_command(
+                ["pip-audit", "--ignore-vuln", "CVE-2026-0994"]
+            )
 
-                for line in lines:
-                    # Look for vulnerability lines (contain CVE/PYSEC/GHSA)
-                    if "CVE-" in line or "PYSEC-" in line or "GHSA-" in line:
-                        vuln_count += 1
-                        parts = line.split()
-                        # If more than 3 parts, there's a fix available
-                        if len(parts) > 3:
-                            fixable_count += 1
-
-                if fixable_count > 0:
-                    # Has fixable vulnerabilities - fail
-                    self.log(
-                        f"❌ Security audit failed - found {fixable_count} fixable vulnerabilities",
-                        "ERROR",
-                    )
-                    self.results["checks"]["security"] = {
-                        "status": "failed",
-                        "output": text_output,
-                    }
-                    return False
-                elif vuln_count > 0:
-                    # Has unfixable vulnerabilities - warn but allow
-                    self.log(
-                        f"⚠️ Security audit found {vuln_count} vulnerability(-ies) with no available fix",
-                        "WARNING",
-                    )
-                    self.results["checks"]["security"] = {
-                        "status": "warning",
-                        "output": text_output,
-                        "note": f"{vuln_count} vulnerability(-ies) found but no fix versions available yet",
-                    }
-                    return True
-                else:
-                    # No vulnerabilities found (exit code was non-zero for other reason)
-                    self.log(
-                        "⚠️ Security audit had non-zero exit but no vulnerabilities found",
-                        "WARNING",
-                    )
-                    self.results["checks"]["security"] = {
-                        "status": "warning",
-                        "output": text_output,
-                    }
-                    return True
-
-            except Exception as e:
-                self.log(f"⚠️ Error running security audit: {str(e)}", "WARNING")
-                # Treat errors as warnings to not block development
-                self.results["checks"]["security"] = {
-                    "status": "warning",
-                    "output": str(e),
-                    "note": "Could not run security audit, treating as warning",
-                }
-                return True
+            self.results["checks"]["security"] = {
+                "status": "failed",
+                "output": text_output,
+            }
+            return False
 
     def validate_package_build(self) -> bool:
         """Validate package can be built."""
