@@ -1,8 +1,8 @@
 {
   "tier": "pro",
-  "generated_at": "2026-01-27T14:09:07.494951Z",
-  "tool_count": 22,
-  "available_count": 19,
+  "generated_at": "2026-01-27T21:34:21.649197Z",
+  "tool_count": 23,
+  "available_count": 23,
   "capabilities": {
     "analyze_code": {
       "tool_id": "analyze_code",
@@ -14,7 +14,13 @@
           "python",
           "javascript",
           "typescript",
-          "java"
+          "java",
+          "go",
+          "rust",
+          "cpp",
+          "c",
+          "ruby",
+          "php"
         ]
       }
     },
@@ -34,6 +40,7 @@
       "tier": "pro",
       "available": true,
       "limits": {
+        "max_files": 1000,
         "parsing_enabled": true,
         "complexity_analysis": true,
         "respect_gitignore": true
@@ -55,7 +62,8 @@
       "limits": {
         "include_cross_file_deps": true,
         "max_depth": 1,
-        "max_extraction_size_mb": 10
+        "max_extraction_size_mb": 10,
+        "max_context_lines": 500
       }
     },
     "generate_unit_tests": {
@@ -66,8 +74,10 @@
         "max_test_cases": 20,
         "test_frameworks": [
           "pytest",
-          "unittest"
-        ]
+          "unittest",
+          "jest"
+        ],
+        "enabled": true
       }
     },
     "get_call_graph": {
@@ -118,8 +128,11 @@
     "get_symbol_references": {
       "tool_id": "get_symbol_references",
       "tier": "pro",
-      "available": false,
-      "limits": {}
+      "available": true,
+      "limits": {
+        "max_files_searched": 100,
+        "max_references": 500
+      }
     },
     "rename_symbol": {
       "tool_id": "rename_symbol",
@@ -127,7 +140,8 @@
       "available": true,
       "limits": {
         "max_files_searched": 500,
-        "max_files_updated": 200
+        "max_files_updated": 200,
+        "enabled": true
       }
     },
     "scan_dependencies": {
@@ -135,14 +149,25 @@
       "tier": "pro",
       "available": true,
       "limits": {
-        "osv_lookup": true
+        "max_dependencies": 500,
+        "osv_lookup": true,
+        "curation_enabled": false
       }
     },
     "security_scan": {
       "tool_id": "security_scan",
       "tier": "pro",
-      "available": false,
-      "limits": {}
+      "available": true,
+      "limits": {
+        "max_findings": 500,
+        "max_file_size_kb": 5000,
+        "severity_levels": [
+          "critical",
+          "high",
+          "medium",
+          "low"
+        ]
+      }
     },
     "simulate_refactor": {
       "tool_id": "simulate_refactor",
@@ -158,6 +183,7 @@
       "tier": "pro",
       "available": true,
       "limits": {
+        "max_paths": 500,
         "max_depth": 100,
         "constraint_types": [
           "int",
@@ -174,7 +200,8 @@
       "tier": "pro",
       "available": true,
       "limits": {
-        "max_files": 500
+        "max_files": 500,
+        "frontend_only": false
       }
     },
     "unified_sink_detect": {
@@ -186,8 +213,11 @@
           "python",
           "javascript",
           "typescript",
-          "java"
-        ]
+          "java",
+          "php",
+          "go"
+        ],
+        "max_sinks": 500
       }
     },
     "update_symbol": {
@@ -203,15 +233,31 @@
     "validate_paths": {
       "tool_id": "validate_paths",
       "tier": "pro",
-      "available": false,
-      "limits": {}
+      "available": true,
+      "limits": {
+        "max_paths": 100,
+        "validate_existence": true,
+        "validate_readability": true
+      }
     },
     "verify_policy_integrity": {
       "tool_id": "verify_policy_integrity",
       "tier": "pro",
       "available": true,
       "limits": {
-        "max_policy_files": 200
+        "max_policy_files": 50,
+        "validate_schema": true,
+        "validate_conflicts": true
+      }
+    },
+    "write_perfect_code": {
+      "tool_id": "write_perfect_code",
+      "tier": "pro",
+      "available": true,
+      "limits": {
+        "cache_ttl_seconds": 300,
+        "constraint_validation": true,
+        "ai_feedback_enabled": true
       }
     }
   }

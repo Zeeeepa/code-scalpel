@@ -4,9 +4,9 @@ This directory contains the golden capability files for Code Scalpel's tier-base
 
 ## Files
 
-- **`free.json`** - Capabilities for the COMMUNITY tier (all 22 tools available)
-- **`pro.json`** - Capabilities for the PRO tier (19 tools available)
-- **`enterprise.json`** - Capabilities for the ENTERPRISE tier (10 tools available)
+- **`community.json`** - Capabilities for the COMMUNITY tier (all 23 tools available)
+- **`pro.json`** - Capabilities for the PRO tier (all 23 tools available)
+- **`enterprise.json`** - Capabilities for the ENTERPRISE tier (all 23 tools available)
 - **`schema.json`** - JSON Schema for validating capability files
 
 ## Usage
@@ -15,8 +15,8 @@ These files serve two purposes:
 
 ### 1. **Regression Testing** (Primary)
 The golden files are compared against dynamically-generated capabilities during CI/CD:
-- Tool count must match (always 22)
-- Available count must not decrease
+- Tool count must match (always 23)
+- Available count must match (23 tools available at all tiers)
 - Tool limits must match the limits.toml configuration
 
 ```bash
@@ -85,11 +85,34 @@ In the CI/CD pipeline, the following changes to capabilities WILL block a releas
 
 ## Tier Availability Summary
 
-| Tool | Community | PRO | Enterprise |
-|------|-----------|-----|------------|
-| analyze_code | ✓ | ✓ | ✗ |
-| code_policy_check | ✓ | ✓ | ✗ |
-| crawl_project | ✓ | ✓ | ✓ |
-| ... | ... | ... | ... |
+All 23 tools are available in all tiers (Community, Pro, Enterprise). The tiers differ in their **usage limits**, not tool availability:
 
-(See the actual golden files for complete list)
+### Tool Categories
+
+**20 Development Tools** (tier-gated limits):
+- analyze_code, code_policy_check, crawl_project, cross_file_security_scan, extract_code
+- generate_unit_tests, get_call_graph, get_cross_file_dependencies, get_file_context
+- get_graph_neighborhood, get_project_map, get_symbol_references, rename_symbol
+- scan_dependencies, security_scan, simulate_refactor, symbolic_execute
+- type_evaporation_scan, unified_sink_detect, update_symbol
+
+**3 System Tools** (no tier gating):
+- validate_paths, verify_policy_integrity, write_perfect_code
+
+### Limit Escalation Example
+
+```
+Tool: extract_code
+├── Community: max_depth=0, max_context_lines=100, include_cross_file_deps=False
+├── Pro: max_depth=1, max_context_lines=500, include_cross_file_deps=True
+└── Enterprise: max_depth=unlimited, max_context_lines=unlimited, include_cross_file_deps=True
+
+Tool: validate_paths (System Tool - NO TIER GATING)
+└── All tiers: max_paths=100 (identical limits across all tiers)
+```
+
+| Category | Community | Pro | Enterprise |
+|----------|-----------|-----|------------|
+| Development Tools (20) | ✓ Limited | ✓ Expanded | ✓ Unlimited |
+| System Tools (3) | ✓ Standard | ✓ Standard | ✓ Standard |
+| **Total Tools** | **23** | **23** | **23** |

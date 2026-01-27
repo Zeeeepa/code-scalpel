@@ -1,17 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Code Scalpel Capability Schema",
-  "description": "Schema for tool capabilities at a specific tier",
+  "title": "Code Scalpel Capability Tier Schema",
+  "description": "Schema for all tool capabilities at a specific license tier",
   "type": "object",
   "properties": {
-    "tool_id": {
-      "type": "string",
-      "description": "Unique tool identifier",
-      "examples": [
-        "analyze_code",
-        "get_file_context"
-      ]
-    },
     "tier": {
       "type": "string",
       "enum": [
@@ -21,78 +13,64 @@
       ],
       "description": "License tier"
     },
-    "available": {
-      "type": "boolean",
-      "description": "Whether tool is available at this tier"
+    "generated_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp when the capabilities were generated"
     },
-    "limits": {
+    "tool_count": {
+      "type": "integer",
+      "description": "Total number of tools in this tier"
+    },
+    "available_count": {
+      "type": "integer",
+      "description": "Number of tools available in this tier"
+    },
+    "capabilities": {
       "type": "object",
-      "description": "Limits and parameters for the tool at this tier",
-      "properties": {
-        "max_file_size_mb": {
-          "type": "integer"
-        },
-        "max_files": {
-          "type": "integer"
-        },
-        "max_depth": {
-          "type": "integer"
-        },
-        "max_nodes": {
-          "type": "integer"
-        },
-        "max_context_lines": {
-          "type": "integer"
-        },
-        "max_findings": {
-          "type": "integer"
-        },
-        "max_references": {
-          "type": "integer"
-        },
-        "max_files_searched": {
-          "type": "integer"
-        },
-        "max_modules": {
-          "type": "integer"
-        },
-        "max_symbol_count": {
-          "type": "integer"
-        },
-        "parsing_enabled": {
-          "type": "boolean"
-        },
-        "complexity_analysis": {
-          "type": "boolean"
-        },
-        "respect_gitignore": {
-          "type": "boolean"
-        },
-        "languages": {
-          "type": "array",
-          "items": {
-            "type": "string"
+      "description": "Map of tool IDs to their capability definitions",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "tool_id": {
+            "type": "string",
+            "description": "Unique tool identifier"
           },
-          "description": "List of supported languages"
+          "tier": {
+            "type": "string",
+            "enum": [
+              "community",
+              "pro",
+              "enterprise"
+            ],
+            "description": "License tier"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Whether tool is available at this tier"
+          },
+          "limits": {
+            "type": "object",
+            "description": "Limits and parameters for the tool at this tier",
+            "additionalProperties": true
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "Whether the tool is deprecated",
+            "default": false
+          }
         },
-        "detail_level": {
-          "type": "string",
-          "description": "Level of detail (e.g., 'basic', 'detailed', 'comprehensive')"
-        },
-        "cache_ttl_seconds": {
-          "type": "integer"
-        }
+        "required": [
+          "tool_id",
+          "tier",
+          "available"
+        ]
       }
-    },
-    "deprecated": {
-      "type": "boolean",
-      "description": "Whether the tool is deprecated",
-      "default": false
     }
   },
   "required": [
-    "tool_id",
     "tier",
-    "available"
+    "tool_count",
+    "available_count",
+    "capabilities"
   ]
 }
