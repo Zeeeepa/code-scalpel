@@ -1,7 +1,5 @@
 """Oracle MCP tool registrations.
 
-[20260126_FEATURE] write_perfect_code tool for deterministic code generation.
-
 Generates constraint specifications that bind LLMs to the reality of the codebase,
 preventing hallucinations and enabling first-try correct code.
 """
@@ -129,33 +127,39 @@ async def write_perfect_code(
     file_path: str,
     instruction: str,
 ) -> ToolResponseEnvelope:
-    """
-    Generate constraint specification for AI-assisted code generation.
+    """Generate constraint specification for AI-assisted code generation.
 
-    Provides a Markdown specification containing strict symbol table (function/class signatures),
-    graph constraints (dependencies, callers), architectural rules, code context, and
-    implementation notes. The LLM uses this spec to generate code that compiles and integrates.
+    **IMPORTANT: This is documented as a pipeline trigger, not a standard MCP tool.**
+    It should be reclassified as part of the Oracle pipeline that kicks off when
+    a tool fails, rather than being called directly by users.
+
+    Provides a Markdown specification containing strict symbol table (function/class
+    signatures), graph constraints (dependencies, callers), architectural rules, code
+    context, and implementation notes. The LLM uses this spec to generate code that
+    compiles and integrates.
 
     **Tier Behavior:**
     - Community: Basic symbol table and context (max 50 files, depth 2)
-    - Pro: + Graph constraints and dependencies (max 2000 files, depth 10)
-    - Enterprise: + Architectural rules and deep analysis (unlimited files, depth 50)
+    - Pro: All Community + graph constraints and dependencies (max 2000 files, depth 10)
+    - Enterprise: All Pro + architectural rules and deep analysis (unlimited files, depth 50)
 
     **Tier Capabilities:**
-    The following features/limits vary by tier:
-    - Community: Basic context only, max 50 files, depth 2
-    - Pro: + Graph constraints, max 2000 files, depth 10
-    - Enterprise: + Architectural rules, unlimited files, depth 50
+    - Community: Basic context only (max_files=50, max_depth=2)
+    - Pro: All Community + graph constraints (max_files=2000, max_depth=10)
+    - Enterprise: All Pro + architectural rules (max_files=unlimited, max_depth=50)
 
     **Args:**
-        file_path (str): Path to target file (e.g., "src/auth.py")
-        instruction (str): What needs to be implemented (e.g., "Add JWT validation")
+        file_path (str): Path to target file (e.g., "src/auth.py").
+        instruction (str): What needs to be implemented (e.g., "Add JWT validation").
 
     **Returns:**
-        ToolResponseEnvelope:
-        - success: True if specification generated
-        - data: Markdown constraint specification with symbols, graph, rules, context
-        - error: Error message if generation failed (file not found, invalid instruction, etc.)
+        ToolResponseEnvelope containing Markdown constraint specification with:
+        - data (str): Markdown specification containing symbols, graph, rules, context
+        - success (bool): True if specification generated
+        - error (str, optional): Error message if generation failed (file not found, invalid instruction, etc.)
+        - error (str): Error message if operation failed
+        - tier_applied (str): Tier used for analysis
+        - duration_ms (int): Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
