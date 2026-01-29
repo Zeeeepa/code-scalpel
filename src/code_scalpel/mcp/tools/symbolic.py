@@ -1,7 +1,4 @@
-"""Symbolic and testing MCP tool registrations.
-
-[20260121_REFACTOR] Wrap outputs in ToolResponseEnvelope for MCP contract.
-"""
+"""Symbolic and testing MCP tool registrations."""
 
 from __future__ import annotations
 
@@ -16,7 +13,7 @@ from code_scalpel.mcp.helpers import symbolic_helpers as sym_helpers
 from code_scalpel.mcp.models.core import TestGenerationResult
 from code_scalpel.licensing import tier_detector
 
-# [20260121_BUGFIX] Move contract imports before variable assignments to satisfy E402
+# pragma: no cover
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
 from code_scalpel import __version__ as _pkg_version
 from code_scalpel.mcp.protocol import _get_current_tier
@@ -24,7 +21,6 @@ from code_scalpel.mcp.protocol import _get_current_tier
 _ORIG_SYM_GENERATE_TESTS = sym_helpers._generate_tests_sync
 _ORIG_SYM_SYMBOLIC = sym_helpers._symbolic_execute_sync
 
-# [20260121_TEST] Expose helper aliases for test monkeypatching
 _generate_tests_sync = sym_helpers._generate_tests_sync
 _symbolic_execute_sync = sym_helpers._symbolic_execute_sync
 
@@ -37,44 +33,44 @@ async def symbolic_execute(
     max_paths: int | None = None,
     max_depth: int | None = None,
 ) -> ToolResponseEnvelope:
-    """
-    Perform symbolic execution on Python code.
-    Analyzes Python code symbolically to explore execution paths, discover constraints, and identify potential issues without concrete execution.
+    """Perform symbolic execution on Python code.
+
+    Analyzes Python code symbolically to explore execution paths, discover constraints,
+    and identify potential issues without concrete execution.
 
     **Tier Behavior:**
-    - Community: Basic symbolic execution (max_paths=50, max_depth=10, basic types)
-    - Pro: Advanced symbolic execution (max_paths=unlimited, max_depth=100, concolic execution)
-    - Enterprise: Unlimited symbolic execution (max_paths=unlimited, max_depth=unlimited, distributed execution, memory modeling)
+    - Community: Basic symbolic execution (max_paths=50, max_depth=10)
+    - Pro: All Community + advanced symbolic execution with concolic execution (max_paths=unlimited, max_depth=100)
+    - Enterprise: All Pro + unlimited symbolic execution with distributed execution and memory modeling
 
     **Tier Capabilities:**
-    - **Community:** Basic symbolic execution (max_paths=50, max_depth=10, constraint_types=["int", "bool", "string", "float"])
-    - **Pro:** Advanced symbolic execution (max_paths=unlimited, max_depth=100, constraint_types=["int", "bool", "string", "float", "list", "dict"], concolic execution)
-    - **Enterprise:** Unlimited symbolic execution (max_paths=unlimited, max_depth=unlimited, constraint_types="all", distributed execution, memory modeling)
+    - Community: Basic symbolic execution (max_paths=50, max_depth=10, basic constraint types)
+    - Pro: All Community + concolic execution (max_paths=unlimited, max_depth=100)
+    - Enterprise: All Pro + distributed execution, memory modeling (max_paths=unlimited, max_depth=unlimited)
 
     **Args:**
-    - code (str): Python code to symbolically execute
-    - max_paths (int, optional): Maximum number of execution paths to explore (subject to tier limits)
-    - max_depth (int, optional): Maximum loop unrolling depth (subject to tier limits)
+        code (str): Python code to symbolically execute.
+        max_paths (int, optional): Maximum execution paths to explore (subject to tier limits).
+        max_depth (int, optional): Maximum loop unrolling depth (subject to tier limits).
 
     **Returns:**
-    - ToolResponseEnvelope: Standardized MCP response envelope containing:
-      - data (SymbolicResult): Symbolic execution results with:
-        - success (bool): Whether analysis succeeded
+        ToolResponseEnvelope containing SymbolicResult with:
+        - success (bool): True if analysis succeeded
         - paths_explored (int): Number of execution paths explored
-        - paths (list[ExecutionPath]): Discovered execution paths with conditions and constraints
+        - paths (list[ExecutionPath]): Discovered paths with conditions and constraints
         - symbolic_variables (list[str]): Variables treated symbolically
         - constraints (list[str]): Discovered constraints
-        - total_paths (int, optional): Total paths discovered before limiting
-        - truncated (bool): Whether paths were limited by configuration
-        - truncation_warning (str, optional): Warning when results are limited
-        - path_prioritization (dict, optional): Path prioritization metadata (Pro/Enterprise)
-        - concolic_results (dict, optional): Concolic execution results (Pro/Enterprise)
-        - state_space_analysis (dict, optional): State space reduction analysis (Enterprise)
-        - memory_model (dict, optional): Memory modeling results (Enterprise)
+        - total_paths (int, optional): Total paths before limiting
+        - truncated (bool): Whether paths were limited
+        - truncation_warning (str, optional): Warning when limited
+        - path_prioritization (dict, optional): Path prioritization (Pro/Enterprise)
+        - concolic_results (dict, optional): Concolic execution (Pro/Enterprise)
+        - state_space_analysis (dict, optional): State space reduction (Enterprise)
+        - memory_model (dict, optional): Memory modeling (Enterprise)
         - error (str, optional): Error message if analysis failed
-      - tier (str, optional): Applied tier ("community", "pro", "enterprise")
-      - error (ToolError, optional): Standardized error if operation failed
-      - warnings (list[str]): Non-fatal warnings from MCP boundary
+        - error (str): Error message if operation failed
+        - tier_applied (str): Tier used for analysis
+        - duration_ms (int): Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
@@ -102,7 +98,6 @@ async def symbolic_execute(
             if configured_max_depth is not None:
                 effective_max_depth = min(effective_max_depth, int(configured_max_depth))
 
-        # [20260121_BUGFIX] Resolve helper at runtime; prefer sym_helpers to honor monkeypatches
         helper = sym_helpers._symbolic_execute_sync
 
         result = await asyncio.to_thread(
@@ -148,33 +143,48 @@ async def generate_unit_tests(
     """Generate unit tests from code using symbolic execution.
 
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Limits and optional enhancements are applied based on tool capabilities.
+    - Community: Max 5 test cases, pytest framework only
+    - Pro: All Community + max 20 test cases, pytest/unittest frameworks, data-driven tests
+    - Enterprise: All Pro + unlimited test cases, all frameworks, data-driven tests, bug reproduction
 
     **Tier Capabilities:**
-    - Community: Max 5 test cases, pytest framework only
-    - Pro: Max 20 test cases, pytest/unittest frameworks, data-driven tests
-    - Enterprise: Unlimited test cases, all frameworks, data-driven tests, bug reproduction
+    - Community: Limited test generation (max_test_cases=5, test_frameworks=["pytest"])
+    - Pro: All Community + data-driven tests (max_test_cases=20)
+    - Enterprise: All Pro + bug reproduction (max_test_cases=unlimited)
 
-    **Input Methods (choose one):**
+    Input Methods (choose one):
     - `code`: Direct Python code string to analyze
     - `file_path`: Path to Python file containing the code
     - `function_name`: Name of function to generate tests for (requires file_path)
 
     **Args:**
-        code: Python code string to generate tests for
-        file_path: Path to Python file to analyze
-        function_name: Specific function name to target (optional)
-        framework: Test framework ("pytest", "unittest", etc.)
-        data_driven: Generate parameterized data-driven tests (Pro+)
-        crash_log: Crash log for bug reproduction tests (Enterprise only)
+        code (str, optional): Python code string to generate tests for.
+        file_path (str, optional): Path to Python file to analyze.
+        function_name (str, optional): Specific function name to target.
+        framework (str): Test framework. Default: "pytest".
+        data_driven (bool): Generate parameterized data-driven tests (Pro+). Default: False.
+        crash_log (str, optional): Crash log for bug reproduction tests (Enterprise only).
 
     **Returns:**
-        ToolResponseEnvelope with generated test cases and tier metadata
+        ToolResponseEnvelope containing TestGenerationResult with:
+        - success (bool): True if generation succeeded
+        - function_name (str): Target function name
+        - test_count (int): Number of test cases generated
+        - test_cases (list[dict]): Generated test cases with code, expected results
+        - total_test_cases (int): Total tests before truncation
+        - framework_used (str): Test framework used
+        - data_driven_enabled (bool): Whether data-driven tests were enabled
+        - bug_reproduction_enabled (bool): Whether bug reproduction was enabled
+        - coverage_estimate (float, 0-100): Code coverage estimate
+        - warnings (list[str]): Non-fatal warnings
+        - tier_applied (str): Tier used
+        - error (str, optional): Error message if generation failed
+        - error (str): Error message if operation failed
+        - tier_applied (str): Tier used for analysis
+        - duration_ms (int): Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
-        # [20260120_BUGFIX] Consistent tier detection pattern
         tier = tier_detector.get_current_tier()
         caps = feature_caps.get_tool_capabilities("generate_unit_tests", tier)
         limits = caps.get("limits", {})
@@ -182,11 +192,9 @@ async def generate_unit_tests(
 
         max_test_cases = limits.get("max_test_cases")
         allowed_frameworks = limits.get("test_frameworks")
-        # [20251231_BUGFIX] Fixed capabilities check - it's a set, not dict
         data_driven_supported = "data_driven_tests" in cap_set
         bug_reproduction_supported = "bug_reproduction" in cap_set
 
-        # [20251229_FEATURE] v3.3.0 - Pro tier enforcement for data-driven tests
         if data_driven and not data_driven_supported:
             result = TestGenerationResult(
                 success=False,
@@ -209,7 +217,6 @@ async def generate_unit_tests(
                 duration_ms=duration_ms,
             )
 
-        # [20251229_FEATURE] v3.3.0 - Enterprise tier enforcement for bug reproduction
         if crash_log and not bug_reproduction_supported:
             result = TestGenerationResult(
                 success=False,
@@ -254,8 +261,6 @@ async def generate_unit_tests(
                 duration_ms=duration_ms,
             )
 
-        # [20260121_BUGFIX] Resolve helper at runtime so tests can monkeypatch either
-        # sym_helpers._generate_tests_sync or server._generate_tests_sync.
         helper = sym_helpers._generate_tests_sync
         if sym_helpers._generate_tests_sync is not _ORIG_SYM_GENERATE_TESTS:
             helper = sym_helpers._generate_tests_sync
@@ -318,42 +323,47 @@ async def simulate_refactor(
 ) -> ToolResponseEnvelope:
     """Simulate applying a code change and check for safety issues.
 
-    **Description:**
-    Verifies code changes are safe before applying them by detecting security issues and structural changes that could break functionality.
+    Verifies code changes are safe before applying them by detecting security issues
+    and structural changes that could break functionality.
 
     **Tier Behavior:**
     - Community: Basic refactor simulation (max 1MB file size, basic analysis depth)
-    - Pro: Advanced simulation with type checking (max 10MB file size, advanced analysis depth)
-    - Enterprise: Deep simulation with compliance validation (max 100MB file size, deep analysis depth)
+    - Pro: All Community + advanced simulation with type checking (max 10MB file size, advanced analysis depth)
+    - Enterprise: All Pro + deep simulation with compliance validation (max 100MB file size, deep analysis depth)
 
     **Tier Capabilities:**
     - Community: basic_simulation, structural_diff (max_file_size_mb=1, analysis_depth="basic")
-    - Pro: Community capabilities + advanced_simulation, behavior_preservation, type_checking, build_check (max_file_size_mb=10, analysis_depth="advanced")
-    - Enterprise: Pro capabilities + regression_prediction, impact_analysis, custom_rules, compliance_validation (max_file_size_mb=100, analysis_depth="deep")
+    - Pro: All Community + advanced_simulation, behavior_preservation, type_checking (max_file_size_mb=10, analysis_depth="advanced")
+    - Enterprise: All Pro + regression_prediction, impact_analysis, compliance_validation (max_file_size_mb=100, analysis_depth="deep")
 
     **Args:**
-        original_code: Original code before changes
-        new_code: Complete new code after changes (alternative to patch)
-        patch: Patch/diff describing the changes (alternative to new_code)
-        strict_mode: Enable strict validation checks
+        original_code (str): Original code before changes.
+        new_code (str, optional): Complete new code after changes (alternative to patch).
+        patch (str, optional): Patch/diff describing the changes (alternative to new_code).
+        strict_mode (bool): Enable strict validation checks. Default: False.
 
     **Returns:**
-        ToolResponseEnvelope:
-        - success: True if simulation succeeded
-        - data: RefactorSimulationResult with detailed safety analysis:
-            - success: Whether simulation succeeded
-            - is_safe: Whether the refactor is safe to apply
-            - status: Status (safe, unsafe, warning, or error)
-            - reason: Reason if not safe
-            - security_issues: List of security issues found with type, severity, line, description, CWE
-            - structural_changes: Dictionary of functions/classes added/removed/modified
-            - warnings: List of non-critical warnings
-            - error: Error message if simulation failed
-        - error: Error message if operation failed
+        ToolResponseEnvelope with RefactorSimulationResult containing:
+        - success (bool): Whether simulation succeeded
+        - is_safe (bool): Whether the refactor is safe to apply
+        - status (str): Status (safe, unsafe, warning, or error)
+        - reason (str, optional): Reason if not safe
+        - security_issues (list[dict]): Security issues with type, severity, line, CWE
+        - structural_changes (dict): Functions/classes added/removed/modified
+        - warnings (list[str]): Non-critical warnings
+        - impact_summary (str): Summary of potential impact
+        - behavior_changes (list[dict]): Detected behavior changes (Pro+)
+        - type_errors (list[dict]): Type checking errors (Pro+)
+        - regression_predictions (dict): Regression likelihood (Enterprise)
+        - impact_analysis (dict): Detailed impact analysis (Enterprise)
+        - tier_applied (str): Tier used
+        - error (str, optional): Error message if simulation failed
+        - error (str): Error message if operation failed
+        - tier_applied (str): Tier used for analysis
+        - duration_ms (int): Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
-        # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).
         tier = tier_detector.get_current_tier()
         caps = feature_caps.get_tool_capabilities("simulate_refactor", tier)
         limits = caps.get("limits", {})
