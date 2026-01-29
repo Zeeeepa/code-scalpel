@@ -1,8 +1,4 @@
-"""Context and discovery MCP tool registrations.
-
-[20260121_REFACTOR] Wrap tool responses in ToolResponseEnvelope for MCP
-contract compliance across HTTP and stdio transports.
-"""
+"""Context and discovery MCP tool registrations."""
 
 from __future__ import annotations
 
@@ -34,15 +30,16 @@ async def crawl_project(
     """Crawl a project directory and analyze Python files.
 
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Limits and optional enhancements are applied based on tool capabilities.
+    - Community: Limited to 100 files, basic file tree indexing with language breakdown and entrypoint detection
+    - Pro: Unlimited files/depth, parallel processing, incremental crawling, framework detection, dependency mapping, hotspot identification
+    - Enterprise: Unlimited files/depth/repos, distributed crawling, historical trends, custom rules, compliance scanning, monorepo support
 
     **Tier Capabilities:**
-    - Community: Up to 100 files, no parsing, no complexity analysis
-    - Pro: Unlimited files, full parsing, complexity analysis
-    - Enterprise: Unlimited files, full parsing, complexity analysis
+    - Community: Full file tree indexing, language breakdown, gitignore respect, basic statistics, entrypoint detection (max 100 files, 10 depth)
+    - Pro: All Community features + parallel processing, incremental crawling, smart crawl, framework entrypoint detection, dependency mapping, hotspot identification, generated code detection, Next.js/Django/Flask route detection (unlimited files/depth)
+    - Enterprise: All Pro features + distributed crawling, historical trend analysis, custom crawl rules, compliance scanning, incremental indexing, monorepo support, cross-repo dependency linking, 100k+ files support (unlimited files/depth/repos)
 
-    Args:
+    **Args:**
         root_path: Root directory to crawl (default: server's project root)
         exclude_dirs: List of directory names to exclude
         complexity_threshold: Threshold for complexity analysis (default: 10)
@@ -51,8 +48,29 @@ async def crawl_project(
         pattern_type: Type of pattern matching ("regex" or "glob", default: "regex")
         include_related: Optional list of related file types to include
 
-    Returns:
-        ToolResponseEnvelope with crawl results and tier metadata
+    **Returns:**
+        ToolResponseEnvelope with crawl results:
+        - success: True if crawl completed successfully
+        - data: ProjectCrawlResult containing:
+          - success: True if crawl succeeded
+          - root_path: Project root path
+          - timestamp: When the crawl was performed
+          - summary: CrawlSummary with statistics (total_files, total_lines_of_code, total_functions, total_classes, complexity_warnings)
+          - files: List of CrawlFileResult with detailed file analysis
+          - errors: List of CrawlFileResult for files that failed analysis
+          - markdown_report: Human-readable report
+          - language_breakdown: Files per detected language (Pro/Enterprise)
+          - cache_hits: Number of files reused from cache (Pro/Enterprise incremental)
+          - framework_hints: Detected frameworks in discovery mode (Pro/Enterprise)
+          - entrypoints: Detected entrypoint file paths (Pro/Enterprise)
+          - compliance_summary: Enterprise compliance scanning results (Enterprise)
+          - tier_applied: Which tier was used ("community"/"pro"/"enterprise")
+          - crawl_mode: "discovery" (Community) or "deep" (Pro/Enterprise)
+          - files_limit_applied: Max files limit applied (None=unlimited)
+          - error: Error message if crawl failed
+        - error: Error message if analysis failed (permission denied, invalid path, etc.)
+        - tier_applied: Tier used for analysis (community/pro/enterprise)
+        - duration_ms: Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
@@ -94,19 +112,59 @@ async def get_file_context(file_path: str) -> ToolResponseEnvelope:
     """Get a file overview without reading full content.
 
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Limits and optional enhancements are applied based on tool capabilities.
+    - Community: Limited to 500 lines of context, basic file structure analysis
+    - Pro: Up to 2000 lines of context, code quality metrics and semantic analysis
+    - Enterprise: Unlimited context lines, security redaction and organizational metadata
 
     **Tier Capabilities:**
-    - Community: Up to 500 lines of context
-    - Pro: Up to 2000 lines of context
-    - Enterprise: Unlimited context lines
+    - Community: Basic file structure, imports, functions, classes (up to 500 lines)
+    - Pro: Code smells detection, documentation coverage, maintainability index, semantic summarization, intent extraction, related imports inclusion, smart context expansion (up to 2000 lines)
+    - Enterprise: PII redaction, secret masking, API key detection, RBAC-aware retrieval, file access control, custom metadata extraction, compliance flags, technical debt scoring, owner team mapping, historical metrics (unlimited lines)
 
-    Args:
-        file_path: Path to the file to analyze
+    **Args:**
+        file_path (str): Path to the file to analyze for context information
 
-    Returns:
-        ToolResponseEnvelope with file context summary and tier metadata
+    **Returns:**
+        ToolResponseEnvelope with file context summary:
+        - success: True if analysis completed successfully
+        - data: FileContextResult containing:
+          - success: True if analysis succeeded
+          - file_path: Path to the analyzed file
+          - language: Detected language
+          - line_count: Total lines in file
+          - functions: Function names or detailed info
+          - classes: Class names or detailed info
+          - imports: Import statements (max 20)
+          - exports: Exported symbols (__all__)
+          - complexity_score: Overall cyclomatic complexity
+          - has_security_issues: Whether file has security issues
+          - summary: Brief description of file purpose
+          - imports_truncated: Whether imports list was truncated
+          - total_imports: Total imports before truncation
+          - semantic_summary: AI-lite semantic summary when enabled (Pro)
+          - intent_tags: Extracted intents/topics from docstrings/names (Pro)
+          - related_imports: Resolved related imports for context expansion (Pro)
+          - expanded_context: Smartly expanded context when allowed by tier limits (Pro)
+          - pii_redacted: Whether PII content was redacted (Enterprise)
+          - secrets_masked: Whether secrets/API keys were masked (Enterprise)
+          - redaction_summary: What redactions/masking actions were taken (Enterprise)
+          - access_controlled: Whether RBAC/file access controls were applied (Enterprise)
+          - code_smells: Detected code smells (Pro)
+          - doc_coverage: Documentation coverage percentage (Pro)
+          - maintainability_index: Maintainability index (Pro)
+          - custom_metadata: Custom metadata from .code-scalpel/metadata.yaml (Enterprise)
+          - compliance_flags: Compliance flags detected (Enterprise)
+          - technical_debt_score: Technical debt score (Enterprise)
+          - owners: Code owners from CODEOWNERS file (Enterprise)
+          - historical_metrics: Historical metrics from git (Enterprise)
+          - tier_applied: The tier used for analysis
+          - max_context_lines_applied: The max context lines limit applied
+          - pro_features_enabled: Whether Pro tier features were enabled
+          - enterprise_features_enabled: Whether Enterprise tier features were enabled
+          - error: Error message if failed
+        - error: Error message if analysis failed (file not found, invalid syntax, etc.)
+        - tier_applied: Tier used for analysis (community/pro/enterprise)
+        - duration_ms: Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
@@ -145,22 +203,58 @@ async def get_symbol_references(
     """Find all references to a symbol across the project.
 
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Limits and optional enhancements are applied based on tool capabilities.
+    - Community: Limited to 100 files searched, 100 references returned, basic symbol location
+    - Pro: Unlimited files and references, enhanced categorization (definition/import/call/read/write/reference), scope filtering, test file filtering
+    - Enterprise: Unlimited files and references, CODEOWNERS integration, ownership attribution, impact analysis with risk scoring
 
     **Tier Capabilities:**
-    - Community: Up to 10 files searched, 50 references returned
+    - Community: Up to 100 files searched, 100 references returned
     - Pro: Unlimited files and references
     - Enterprise: Unlimited files and references
 
-    Args:
+    **Args:**
         symbol_name: Name of the symbol to find references for
         project_root: Project root directory (default: server's project root)
         scope_prefix: Optional prefix to limit search scope
         include_tests: Whether to include test files in search (default: True)
 
-    Returns:
-        ToolResponseEnvelope with symbol references and tier metadata
+    **Returns:**
+        ToolResponseEnvelope with symbol references:
+        - success: True if search completed successfully
+        - data: SymbolReferencesResult containing:
+          - success: True if search succeeded
+          - symbol_name: Name of the searched symbol
+          - definition_file: File where symbol is defined (if found)
+          - definition_line: Line where symbol is defined (if found)
+          - references: List of SymbolReference objects (max limited by tier):
+            - file: File path containing the reference
+            - line: Line number of the reference
+            - column: Column number (default 0)
+            - context: Code snippet showing usage context
+            - is_definition: Whether this is the definition
+            - reference_type: Category (definition/import/call/read/write/reference) (Pro+)
+            - is_test_file: Whether reference is in a test file
+            - owners: CODEOWNERS owners for the file (Enterprise)
+          - total_references: Total reference count before truncation
+          - files_scanned: Number of files actually scanned
+          - total_files: Total candidate files before filtering
+          - files_truncated: Whether file scanning was truncated
+          - file_truncation_warning: Warning if file scan was truncated
+          - category_counts: Counts by reference category (Pro+)
+          - owner_counts: Counts by CODEOWNERS owner (Enterprise)
+          - change_risk: Heuristic change risk assessment (Enterprise)
+          - references_truncated: Whether references list was truncated
+          - truncation_warning: Warning if results truncated
+          - risk_score: Weighted risk score 0-100 (Enterprise)
+          - risk_factors: List of factors contributing to risk (Enterprise)
+          - tier_applied: Tier used for search (community/pro/enterprise)
+          - max_files_applied: Max files limit applied
+          - max_references_applied: Max references limit applied
+          - pro_features_enabled: List of Pro features enabled
+          - enterprise_features_enabled: List of Enterprise features enabled
+        - error: Error message if search failed (invalid symbol, permission denied, etc.)
+        - tier_applied: Tier used for analysis (community/pro/enterprise)
+        - duration_ms: Search duration in milliseconds
     """
     started = time.perf_counter()
     try:

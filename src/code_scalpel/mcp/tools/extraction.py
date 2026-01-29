@@ -1,8 +1,4 @@
-"""Extraction and refactor MCP tool registrations.
-
-[20260121_REFACTOR] Wrap outputs in ToolResponseEnvelope to meet MCP
-contract expectations (tier metadata and standardized envelope).
-"""
+"""Extraction and refactor MCP tool registrations."""
 
 from __future__ import annotations
 
@@ -19,9 +15,7 @@ from code_scalpel.mcp.protocol import mcp, _get_current_tier
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
 from code_scalpel import __version__ as _pkg_version
 
-_extract_code = getattr(_helpers, "extract_code", None) or getattr(
-    _helpers, "_extract_code_impl", None
-)
+_extract_code = getattr(_helpers, "extract_code", None) or getattr(_helpers, "_extract_code_impl", None)
 _rename_symbol = getattr(_helpers, "rename_symbol", None)
 _update_symbol = getattr(_helpers, "update_symbol", None)
 
@@ -54,61 +48,69 @@ async def extract_code(
 
     Extracts a specified code element (function, class, method) along with optional
     context, cross-file dependencies, and refactoring suggestions. Provide either
-    'file_path' (recommended) or 'code' for the source. Language is auto-detected if not specified.
+    'file_path' (recommended) or 'code' for the source.
 
     **Tier Behavior:**
-    - Community: Basic extraction only, no cross-file deps, depth 0
-    - Pro: + Cross-file dependencies, variable promotion, closures, depth 1
-    - Enterprise: + Microservice extraction, organization-wide analysis, unlimited depth
+    - Community: Single-file extraction only, basic symbols, max depth 0, 1MB limit
+    - Pro: Cross-file dependencies, variable promotion, closure detection, max depth 1, 10MB limit
+    - Enterprise: Organization-wide resolution, custom patterns, Dockerfile generation, unlimited depth, 100MB limit
 
     **Tier Capabilities:**
-    The following features/limits vary by tier:
-    - Community: Basic extraction, max_depth 0, single file only
-    - Pro: + Cross-file deps, variable promotion, closure detection, max_depth 1
-    - Enterprise: + Microservice refactoring, org-wide scope, unlimited depth
+    - Community: single_file_extraction, basic_symbols (max_depth=0, max_file_size_mb=1)
+    - Pro: All Community + cross_file_deps, context_extraction, variable_promotion, closure_detection, dependency_injection_suggestions (max_depth=1, max_file_size_mb=10)
+    - Enterprise: All Pro + org_wide_resolution, custom_extraction_patterns, dockerfile_generation, service_boundaries (max_depth=unlimited, max_file_size_mb=100)
 
     **Args:**
-        target_type (str): Type of element to extract ('function', 'class', 'method')
-        target_name (str): Name of the element to extract
+        target_type (str): Type of element to extract - "function", "class", or "method".
+        target_name (str): Name of the element to extract.
         file_path (str, optional): Path to source file. Either file_path or code required.
         code (str, optional): Source code string. Either file_path or code required.
-        language (str, optional): Programming language. Default: auto-detect
-        include_context (bool): Include surrounding code context. Default: False
-        context_depth (int): Depth of context to include. Default: 1
-        include_cross_file_deps (bool): Include cross-file dependencies. Pro+ tier only. Default: False
-        include_token_estimate (bool): Include token count estimate. Default: True
-        variable_promotion (bool): Suggest variables for external dependencies. Pro+ only. Default: False
-        closure_detection (bool): Detect closure requirements. Pro+ only. Default: False
-        dependency_injection_suggestions (bool): Suggest DI patterns. Pro+ only. Default: False
-        as_microservice (bool): Refactor as microservice. Enterprise only. Default: False
-        microservice_host (str): Host for microservice. Default: '127.0.0.1'
-        microservice_port (int): Port for microservice. Default: 8000
-        organization_wide (bool): Organization-wide scope. Enterprise only. Default: False
-        workspace_root (str, optional): Workspace root directory
-        ctx (Context, optional): MCP context for progress reporting
+        language (str, optional): Programming language. Default: auto-detect.
+        include_context (bool): Include surrounding code context. Default: False.
+        context_depth (int): Depth of context to include. Default: 1.
+        include_cross_file_deps (bool): Include cross-file dependencies (Pro+ only). Default: False.
+        include_token_estimate (bool): Include token count estimate. Default: True.
+        variable_promotion (bool): Suggest variables for external dependencies (Pro+ only). Default: False.
+        closure_detection (bool): Detect closure requirements (Pro+ only). Default: False.
+        dependency_injection_suggestions (bool): Suggest DI patterns (Pro+ only). Default: False.
+        as_microservice (bool): Refactor as microservice (Enterprise only). Default: False.
+        microservice_host (str): Host for microservice. Default: "127.0.0.1".
+        microservice_port (int): Port for microservice. Default: 8000.
+        organization_wide (bool): Organization-wide scope (Enterprise only). Default: False.
+        workspace_root (str, optional): Workspace root directory.
+        ctx (Context, optional): MCP context for progress reporting.
 
     **Returns:**
-        ToolResponseEnvelope:
-        - success: True if extraction completed
-        - data: Extracted code with context, dependencies, and suggestions
-        - error: Error message if extraction failed (target not found, invalid code, etc.)
-
-    **Example:**
-        ```python
-        result = await extract_code(
-            target_type="function",
-            target_name="authenticate",
-            file_path="/src/auth.py",
-            include_context=True
-        )
-        if result.success:
-            print(result.data['target_code'])
-        ```
+        ToolResponseEnvelope with ContextualExtractionResult containing:
+        - success (bool): True if extraction completed successfully
+        - server_version (str): Code Scalpel version
+        - target_name (str): Name of target element
+        - target_code (str): Target element source code
+        - context_code (str): Combined dependency source code
+        - full_code (str): Complete code block for LLM consumption
+        - context_items (list[str]): Names of included dependencies
+        - total_lines (int): Total lines in extraction
+        - line_start (int): Starting line number of target
+        - line_end (int): Ending line number of target
+        - token_estimate (int): Estimated token count
+        - tier_applied (str): Tier used ("community"/"pro"/"enterprise")
+        - language_detected (str): Language detected/used
+        - cross_file_deps_enabled (bool): Whether cross-file deps were enabled
+        - max_depth_applied (int, optional): Max depth limit applied (None=unlimited)
+        - jsx_normalized (bool): Whether JSX syntax was normalized
+        - is_server_component (bool): Next.js Server Component flag
+        - is_server_action (bool): Next.js Server Action flag
+        - component_type (str): React component type ("functional"/"class")
+        - warnings (list[str]): Non-fatal warnings
+        - advanced (dict): Tier-specific metadata
+        - error (str, optional): Error message if extraction failed
+        - error (str): Error message if tool execution failed
+        - tier_applied (str): Tier used for analysis
+        - duration_ms (int): Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
         if _extract_code is None:
-            # [20260118_BUGFIX] Return error response instead of raising TypeError
             from code_scalpel.mcp.models.core import ContextualExtractionResult
 
             result = ContextualExtractionResult(
@@ -171,46 +173,40 @@ async def rename_symbol(
     new_name: str,
     create_backup: bool = True,
 ) -> ToolResponseEnvelope:
-    """Rename a function, class, or method in a file.
-
-    Updates a symbol's name throughout the file and optionally across the project,
-    maintaining code integrity with automatic backup creation and reference updates.
+    """Safely rename a function, class, or method in a file.
 
     **Tier Behavior:**
-    - Community: Definition-only rename, same-file reference updates only
-    - Pro: + Cross-file reference updates (max 500 files searched, 200 updated)
-    - Enterprise: + Unlimited cross-file updates, organization-wide rename capability
+    - Community: Single-file renames only (definition + local references)
+    - Pro: Cross-file renames within project scope
+    - Enterprise: Unlimited cross-file renames with audit trail and approval workflows
 
     **Tier Capabilities:**
-    The following features/limits vary by tier:
-    - Community: Same-file only, no cross-file changes
-    - Pro: Cross-file updates, max 500 files searched, 200 updates
-    - Enterprise: Unlimited cross-file updates, org-wide scope
+    - Community: Single-file renames, definition + local references only (max_files_searched=0, max_files_updated=0)
+    - Pro: All Community + cross-file renames (max_files_searched=500, max_files_updated=200)
+    - Enterprise: All Pro + audit trail, approval workflows, unlimited scope (max_files_searched=None, max_files_updated=None)
 
     **Args:**
-        file_path (str): Path to file containing the symbol to rename
-        target_type (str): Type of symbol ('function', 'class', 'method')
-        target_name (str): Current name of the symbol
-        new_name (str): New name for the symbol
-        create_backup (bool): Create backup before renaming. Default: True
+        file_path (str): Path to the file containing the symbol to rename.
+        target_type (str): Type of symbol - "function", "class", or "method".
+        target_name (str): Current name of the symbol to rename.
+        new_name (str): New name for the symbol.
+        create_backup (bool): Whether to create a backup before renaming. Default: True.
 
     **Returns:**
-        ToolResponseEnvelope:
-        - success: True if rename completed
-        - data: Patch result with updated file content and change locations
-        - error: Error message if rename failed (symbol not found, invalid name, etc.)
-
-    **Example:**
-        ```python
-        result = await rename_symbol(
-            file_path="/src/auth.py",
-            target_type="function",
-            target_name="login",
-            new_name="authenticate"
-        )
-        if result.success:
-            print(f"Renamed {result.data['occurrences']} occurrences")
-        ```
+        ToolResponseEnvelope containing PatchResultModel with:
+        - success (bool): Whether the rename was successful
+        - file_path (str): Path to the modified file
+        - target_name (str): Name of the modified symbol
+        - target_type (str): Type - function, class, or method
+        - backup_path (str, optional): Path to backup file if created
+        - error (str, optional): Error message if rename failed
+        - tier_applied (str): Tier applied ("community"/"pro"/"enterprise")
+        - max_files_searched (int): Maximum files that could be searched
+        - max_files_updated (int): Maximum files that could be updated
+        - warnings (list[str]): Non-fatal warnings
+        - error (str): Error message if operation failed
+        - tier_applied (str): Tier used for analysis
+        - duration_ms (int): Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
@@ -266,30 +262,36 @@ async def update_symbol(
     """Safely replace a function, class, or method in a file.
 
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Limits and optional enhancements are applied based on tool capabilities.
+    - Community: Syntax validation only, up to 10 updates per call
+    - Pro: Syntax + semantic validation, unlimited updates per call
+    - Enterprise: Syntax + semantic + full compliance validation, unlimited updates per call
 
     **Tier Capabilities:**
-    - Community: Syntax validation, automatic backups, up to 10 updates per call
-    - Pro: Semantic validation, automatic backups, unlimited updates per call
-    - Enterprise: Full validation, automatic backups, unlimited updates per call
+    - Community: Syntax validation, automatic backups (max_updates=10)
+    - Pro: All Community + semantic validation, unlimited updates
+    - Enterprise: All Pro + full compliance validation, unlimited updates
 
-    **Validation Levels:**
-    - Community: Syntax validation only
-    - Pro: Syntax + semantic validation
-    - Enterprise: Syntax + semantic + full compliance validation
+    **Args:**
+        file_path (str): Path to the file containing the symbol to update.
+        target_type (str): Type of symbol - "function", "class", "method".
+        target_name (str): Name of the symbol to update.
+        new_code (str, optional): New code for the symbol (required for "replace" operation).
+        operation (str): Operation type. Default: "replace" (only supported operation).
+        new_name (str, optional): Optional new name for the symbol.
+        create_backup (bool): Whether to create a backup before updating. Default: True.
 
-    Args:
-        file_path: Path to the file containing the symbol to update
-        target_type: Type of symbol ("function", "class", "method")
-        target_name: Name of the symbol to update
-        new_code: New code for the symbol (required for "replace" operation)
-        operation: Operation type ("replace" is the only supported operation)
-        new_name: Optional new name for the symbol (for rename operations)
-        create_backup: Whether to create a backup before updating (default: True)
-
-    Returns:
-        ToolResponseEnvelope with update result and tier metadata
+    **Returns:**
+        ToolResponseEnvelope containing PatchResultModel with:
+        - success (bool): Whether the update was successful
+        - file_path (str): Path to the modified file
+        - target_name (str): Name of the modified symbol
+        - target_type (str): Type - function, class, or method
+        - error (str, optional): Error message if update failed
+        - tier_applied (str): Tier applied ("community"/"pro"/"enterprise")
+        - warnings (list[str]): Non-fatal warnings
+        - error (str): Error message if operation failed
+        - tier_applied (str): Tier used for analysis
+        - duration_ms (int): Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
@@ -322,9 +324,7 @@ async def update_symbol(
                 raise
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
-        debug_print(
-            f"DEBUG:update_symbol: helper returned, preparing envelope (duration_ms={duration_ms})"
-        )
+        debug_print(f"DEBUG:update_symbol: helper returned, preparing envelope (duration_ms={duration_ms})")
         try:
             env = make_envelope(
                 data=result,
