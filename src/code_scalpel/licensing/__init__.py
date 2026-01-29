@@ -12,7 +12,7 @@ Licensing Model: Open-core (COMMUNITY/PRO/ENTERPRISE tiers)
 JWT License Validation (v3.3.0+):
     - Industry-standard RS256/HS256 signing
     - Cryptographically tamper-proof tokens
-    - Community tier: free, no license required
+    - Community tier: no license required
     - Pro/Enterprise tiers: valid JWT required
 
 JWT Claims:

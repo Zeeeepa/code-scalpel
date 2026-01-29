@@ -235,12 +235,8 @@ class TestMetricsStatistics:
             suggestions=["option"],
         )
 
-        collector.report_outcome(
-            "req_1", SuggestionOutcome.ACCEPTED, accuracy_score=0.8
-        )
-        collector.report_outcome(
-            "req_2", SuggestionOutcome.ACCEPTED, accuracy_score=0.6
-        )
+        collector.report_outcome("req_1", SuggestionOutcome.ACCEPTED, accuracy_score=0.8)
+        collector.report_outcome("req_2", SuggestionOutcome.ACCEPTED, accuracy_score=0.6)
 
         stats = collector.get_statistics()
         assert stats["avg_accuracy"] == 0.7
@@ -272,13 +268,9 @@ class TestMetricsStatistics:
         )
 
         # Report outcomes
-        collector.report_outcome(
-            "req_1", SuggestionOutcome.ACCEPTED, accuracy_score=1.0
-        )
+        collector.report_outcome("req_1", SuggestionOutcome.ACCEPTED, accuracy_score=1.0)
         collector.report_outcome("req_2", SuggestionOutcome.IGNORED, accuracy_score=0.0)
-        collector.report_outcome(
-            "req_3", SuggestionOutcome.ACCEPTED, accuracy_score=0.9
-        )
+        collector.report_outcome("req_3", SuggestionOutcome.ACCEPTED, accuracy_score=0.9)
 
         stats = collector.get_statistics()
         by_type = stats["by_type"]
@@ -358,9 +350,7 @@ class TestMetricsPersistence:
                 suggestion_type=SuggestionType.IMPORT_MISSING,
                 suggestions=["from x import y"],
             )
-            collector1.report_outcome(
-                "req_1", SuggestionOutcome.ACCEPTED, accuracy_score=0.9
-            )
+            collector1.report_outcome("req_1", SuggestionOutcome.ACCEPTED, accuracy_score=0.9)
             collector1.persist_to_file()
 
             # Load in new collector
@@ -395,12 +385,8 @@ class TestMetricsExport:
                 suggestions=["from x import y", "from z import w"],
             )
 
-            collector.report_outcome(
-                "req_1", SuggestionOutcome.ACCEPTED, accuracy_score=1.0
-            )
-            collector.report_outcome(
-                "req_2", SuggestionOutcome.IGNORED, accuracy_score=0.5
-            )
+            collector.report_outcome("req_1", SuggestionOutcome.ACCEPTED, accuracy_score=1.0)
+            collector.report_outcome("req_2", SuggestionOutcome.IGNORED, accuracy_score=0.5)
 
             # Export
             result_path = collector.export_csv(csv_path)
@@ -454,9 +440,7 @@ class TestMetricsThreadSafety:
                     suggestions=["option"],
                 )
 
-        threads = [
-            threading.Thread(target=track_suggestions, args=(i,)) for i in range(5)
-        ]
+        threads = [threading.Thread(target=track_suggestions, args=(i,)) for i in range(5)]
         for t in threads:
             t.start()
         for t in threads:
@@ -485,9 +469,7 @@ class TestMetricsThreadSafety:
                 req_id = f"req_{thread_id * 10 + i}"
                 collector.report_outcome(req_id, SuggestionOutcome.ACCEPTED)
 
-        threads = [
-            threading.Thread(target=report_outcomes, args=(i,)) for i in range(5)
-        ]
+        threads = [threading.Thread(target=report_outcomes, args=(i,)) for i in range(5)]
         for t in threads:
             t.start()
         for t in threads:

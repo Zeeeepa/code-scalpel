@@ -31,9 +31,7 @@ class ASTTransformer(ast.NodeTransformer):
         """Add a new transformation rule."""
         self.transformation_rules.append(rule)
 
-    def rename_variable(
-        self, old_name: str, new_name: str, scope: Optional[str] = None
-    ) -> None:
+    def rename_variable(self, old_name: str, new_name: str, scope: Optional[str] = None) -> None:
         """Register a variable rename transformation."""
         self.var_mapping[(old_name, scope if scope else "")] = new_name
 
@@ -53,9 +51,7 @@ class ASTTransformer(ast.NodeTransformer):
         current_scope = self._get_current_scope()
 
         # Check scoped mapping first, then global mapping
-        new_name = self.var_mapping.get(
-            (node.id, current_scope)
-        ) or self.var_mapping.get((node.id, ""))
+        new_name = self.var_mapping.get((node.id, current_scope)) or self.var_mapping.get((node.id, ""))
 
         if new_name:
             self.modified = True
@@ -275,9 +271,7 @@ class ASTTransformer(ast.NodeTransformer):
 
         return True
 
-    def _apply_replacement(
-        self, node: ast.AST, replacement: Union[str, ast.AST]
-    ) -> ast.AST:
+    def _apply_replacement(self, node: ast.AST, replacement: Union[str, ast.AST]) -> ast.AST:
         """Apply a replacement pattern."""
         if isinstance(replacement, str):
             parsed: ast.Module = ast.parse(replacement)

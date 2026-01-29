@@ -298,9 +298,7 @@ class ElasticsearchBackend(SearchBackend):
         parsed = urllib.parse.urlparse(url)
         # [20260102_BUGFIX] Enforce network URL schemes to block file:// access.
         if parsed.scheme not in {"http", "https"}:
-            raise ValueError(
-                f"Unsupported URL scheme for Elasticsearch host: {parsed.scheme}"
-            )
+            raise ValueError(f"Unsupported URL scheme for Elasticsearch host: {parsed.scheme}")
         headers = {"Content-Type": "application/json"}
 
         data = json.dumps(body).encode() if body else None
@@ -310,9 +308,7 @@ class ElasticsearchBackend(SearchBackend):
         if self.auth:
             import base64
 
-            credentials = base64.b64encode(
-                f"{self.auth[0]}:{self.auth[1]}".encode()
-            ).decode()
+            credentials = base64.b64encode(f"{self.auth[0]}:{self.auth[1]}".encode()).decode()
             req.add_header("Authorization", f"Basic {credentials}")
 
         try:
@@ -373,9 +369,7 @@ class ElasticsearchBackend(SearchBackend):
         """Index a file in Elasticsearch."""
         self._ensure_indices()
 
-        doc_id = hashlib.sha256(
-            f"{file.repo_name}:{file.file_path}".encode()
-        ).hexdigest()
+        doc_id = hashlib.sha256(f"{file.repo_name}:{file.file_path}".encode()).hexdigest()
 
         doc = {
             "repo_name": file.repo_name,
@@ -426,9 +420,7 @@ class ElasticsearchBackend(SearchBackend):
         limit: int = 20,
     ) -> List[SearchResult]:
         """Search the index using Elasticsearch."""
-        must_clauses = [
-            {"multi_match": {"query": query, "fields": ["file_path", "symbols"]}}
-        ]
+        must_clauses = [{"multi_match": {"query": query, "fields": ["file_path", "symbols"]}}]
 
         if repos:
             must_clauses.append({"terms": {"repo_name": repos}})
@@ -479,9 +471,7 @@ class ElasticsearchBackend(SearchBackend):
         }
 
         try:
-            response = self._request(
-                "POST", f"{self.symbols_index}/_search", search_body
-            )
+            response = self._request("POST", f"{self.symbols_index}/_search", search_body)
 
             results: List[IndexedSymbol] = []
             for hit in response.get("hits", {}).get("hits", []):
@@ -556,9 +546,7 @@ class ElasticsearchBackend(SearchBackend):
             }
             response = self._request("POST", f"{self.files_index}/_search", agg_query)
 
-            for bucket in (
-                response.get("aggregations", {}).get("repos", {}).get("buckets", [])
-            ):
+            for bucket in response.get("aggregations", {}).get("repos", {}).get("buckets", []):
                 stats.repos[bucket["key"]] = bucket["doc_count"]
 
             stats.total_repos = len(stats.repos)
@@ -738,9 +726,7 @@ class OrganizationIndex:
             symbols.append(match.group(1))
 
         # Arrow functions assigned to const/let/var
-        for match in re.finditer(
-            r"(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(", content
-        ):
+        for match in re.finditer(r"(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(", content):
             symbols.append(match.group(1))
 
         # Classes

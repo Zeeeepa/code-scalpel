@@ -309,9 +309,7 @@ class ClassComplexity:
         """Calculate average complexity of methods."""
         if not self.methods:
             return 0.0
-        return sum(m.metrics.cyclomatic_complexity for m in self.methods) / len(
-            self.methods
-        )
+        return sum(m.metrics.cyclomatic_complexity for m in self.methods) / len(self.methods)
 
 
 @dataclass
@@ -357,9 +355,7 @@ class RadonReport:
 
         if not all_items:
             return 0.0
-        return sum(item.metrics.cyclomatic_complexity for item in all_items) / len(
-            all_items
-        )
+        return sum(item.metrics.cyclomatic_complexity for item in all_items) / len(all_items)
 
 
 class RadonParser:

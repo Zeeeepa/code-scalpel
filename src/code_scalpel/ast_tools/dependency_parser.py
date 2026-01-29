@@ -44,11 +44,7 @@ class DependencyParser:
                         deps.append(self._parse_pep508(d))
 
                 # Poetry
-                if (
-                    "tool" in data
-                    and "poetry" in data["tool"]
-                    and "dependencies" in data["tool"]["poetry"]
-                ):
+                if "tool" in data and "poetry" in data["tool"] and "dependencies" in data["tool"]["poetry"]:
                     for k, v in data["tool"]["poetry"]["dependencies"].items():
                         if k.lower() != "python":
                             deps.append({"name": k, "version": str(v)})
@@ -62,11 +58,7 @@ class DependencyParser:
                 with open(req_path, "r", encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
-                        if (
-                            line
-                            and not line.startswith("#")
-                            and not line.startswith("-")
-                        ):
+                        if line and not line.startswith("#") and not line.startswith("-"):
                             deps.append(self._parse_pep508(line))
             except Exception:
                 pass
@@ -126,17 +118,12 @@ class DependencyParser:
                             line = line.strip()
                             if not line or line.startswith("//"):
                                 continue
-                            match = re.search(
-                                r"['\"]([\w\-.]+:[\w\-.]+):([\w\-.]+)['\"]", line
-                            )
+                            match = re.search(r"['\"]([\w\-.]+:[\w\-.]+):([\w\-.]+)['\"]", line)
                             if match:
                                 coords = match.group(1)
                                 ver = match.group(2)
                                 entry = {"name": coords, "version": ver}
-                                if any(
-                                    k in line
-                                    for k in ("testImplementation", "testCompile")
-                                ):
+                                if any(k in line for k in ("testImplementation", "testCompile")):
                                     entry["type"] = "dev"
                                 deps.append(entry)
                 except Exception:

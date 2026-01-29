@@ -109,9 +109,7 @@ class RoutePatternMatcher:
     - Dynamic routes: "/api/" + version + "/users" (confidence 0.5)
     """
 
-    def match_routes(
-        self, client_route: str, endpoint_route: str
-    ) -> tuple[bool, float, str]:
+    def match_routes(self, client_route: str, endpoint_route: str) -> tuple[bool, float, str]:
         """
         Match client route against endpoint route.
 
@@ -152,9 +150,7 @@ class RoutePatternMatcher:
 
         return False, 0.0, "none"
 
-    def _has_structural_similarity(
-        self, client_route: str, endpoint_route: str
-    ) -> bool:
+    def _has_structural_similarity(self, client_route: str, endpoint_route: str) -> bool:
         """Check if routes have structural similarity (common path segments)."""
 
         # Extract clean path segments from dynamic route
@@ -162,9 +158,7 @@ class RoutePatternMatcher:
             # Remove quotes, variables, and split by common delimiters
             clean = re.sub(r'["\'\s+]', "", route)
             clean = re.sub(r"\$\{[^}]+\}", "", clean)  # Remove template vars
-            clean = re.sub(
-                r"version|baseUrl|api_url", "", clean, flags=re.IGNORECASE
-            )  # Common vars
+            clean = re.sub(r"version|baseUrl|api_url", "", clean, flags=re.IGNORECASE)  # Common vars
             segments = set(clean.split("/"))
             return {s for s in segments if s and len(s) > 2}  # Non-empty, meaningful
 
@@ -303,14 +297,10 @@ class HTTPLinkDetector:
                     continue
 
                 # Try to match routes
-                matches, confidence, match_type = self.matcher.match_routes(
-                    client["route"], endpoint["route"]
-                )
+                matches, confidence, match_type = self.matcher.match_routes(client["route"], endpoint["route"])
 
                 if matches:
-                    evidence = self._build_evidence(
-                        client, endpoint, match_type, confidence
-                    )
+                    evidence = self._build_evidence(client, endpoint, match_type, confidence)
 
                     link = HTTPLink(
                         client_id=client["node_id"],
@@ -326,9 +316,7 @@ class HTTPLinkDetector:
 
         return links
 
-    def _build_evidence(
-        self, client: Dict, endpoint: Dict, match_type: str, confidence: float
-    ) -> str:
+    def _build_evidence(self, client: Dict, endpoint: Dict, match_type: str, confidence: float) -> str:
         """Build human-readable evidence string."""
         method = client["method"].value
         route = client["route"]
@@ -351,9 +339,7 @@ class HTTPLinkDetector:
                 if client["method"] != endpoint["method"]:
                     continue
 
-                matches, _, _ = self.matcher.match_routes(
-                    client["route"], endpoint["route"]
-                )
+                matches, _, _ = self.matcher.match_routes(client["route"], endpoint["route"])
                 if matches:
                     matched_clients.add(client["node_id"])
                     break
@@ -369,9 +355,7 @@ class HTTPLinkDetector:
                 if client["method"] != endpoint["method"]:
                     continue
 
-                matches, _, _ = self.matcher.match_routes(
-                    client["route"], endpoint["route"]
-                )
+                matches, _, _ = self.matcher.match_routes(client["route"], endpoint["route"])
                 if matches:
                     matched_endpoints.add(endpoint["node_id"])
                     break

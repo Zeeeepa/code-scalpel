@@ -35,9 +35,7 @@ async def test_get_symbol_references_community_limits(monkeypatch, tmp_path: Pat
 x = target()
 """)
 
-    monkeypatch.setattr(
-        code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"
-    )
+    monkeypatch.setattr(code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community")
     # [20260121_TEST] Patch the helper module import site to affect runtime.
     from code_scalpel.mcp.helpers import context_helpers
 
@@ -90,12 +88,8 @@ async def test_symbolic_execute_community_truncates_paths(monkeypatch):
             constraints=[],
         )
 
-    monkeypatch.setattr(
-        code_scalpel.mcp.helpers.symbolic_helpers, "_symbolic_execute_sync", _fake_sync
-    )
-    monkeypatch.setattr(
-        code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"
-    )
+    monkeypatch.setattr(code_scalpel.mcp.helpers.symbolic_helpers, "_symbolic_execute_sync", _fake_sync)
+    monkeypatch.setattr(code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community")
     monkeypatch.setattr(
         code_scalpel.licensing.features,
         "get_tool_capabilities",
@@ -128,9 +122,7 @@ async def test_update_symbol_community_forces_backup(monkeypatch, tmp_path: Path
     return 1
 """)
 
-    monkeypatch.setattr(
-        code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"
-    )
+    monkeypatch.setattr(code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community")
     # Patch capabilities at the helper import site used by update_symbol.
     from code_scalpel.mcp.helpers import extraction_helpers
 
@@ -184,9 +176,7 @@ if role == 'admin':
     grant_admin_access()
 """
 
-    monkeypatch.setattr(
-        code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"
-    )
+    monkeypatch.setattr(code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community")
     # Patch capabilities at the helper import site used by type_evaporation_scan.
     from code_scalpel.mcp.helpers import security_helpers
 

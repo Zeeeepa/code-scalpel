@@ -53,9 +53,7 @@ def _tail_text(path: Path, max_lines: int = 40) -> str:
     return "\n".join(tail) if tail else "(empty server log)"
 
 
-@pytest.mark.parametrize(
-    "transport,expected_path", [("streamable-http", "/mcp"), ("sse", "/sse")]
-)
+@pytest.mark.parametrize("transport,expected_path", [("streamable-http", "/mcp"), ("sse", "/sse")])
 async def test_http_transport_endpoint_path_matches_fastmcp_defaults(
     tmp_path: Path, transport: str, expected_path: str
 ):
@@ -93,9 +91,7 @@ async def test_http_transport_endpoint_path_matches_fastmcp_defaults(
 
         env = os.environ.copy()
         existing_pythonpath = env.get("PYTHONPATH", "")
-        env["PYTHONPATH"] = str(src_root) + (
-            ":" + existing_pythonpath if existing_pythonpath else ""
-        )
+        env["PYTHONPATH"] = str(src_root) + (":" + existing_pythonpath if existing_pythonpath else "")
         # Avoid nondeterministic tier selection due to stray license files on disk.
         env.setdefault("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 

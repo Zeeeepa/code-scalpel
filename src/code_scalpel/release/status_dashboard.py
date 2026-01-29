@@ -42,9 +42,7 @@ class StatusDashboard:
         self.current_version: str = ""
         self.overall_status = PublishStatus.PENDING
 
-    def update_status(
-        self, stage: str, status: PublishStatus, message: str = ""
-    ) -> PublishEvent:
+    def update_status(self, stage: str, status: PublishStatus, message: str = "") -> PublishEvent:
         """Update status for a stage."""
         event = PublishEvent(
             stage=stage,
@@ -57,10 +55,7 @@ class StatusDashboard:
             self.overall_status = PublishStatus.FAILED
         elif status == PublishStatus.IN_PROGRESS:
             self.overall_status = PublishStatus.IN_PROGRESS
-        elif (
-            status == PublishStatus.COMPLETED
-            and self.overall_status != PublishStatus.FAILED
-        ):
+        elif status == PublishStatus.COMPLETED and self.overall_status != PublishStatus.FAILED:
             self.overall_status = PublishStatus.COMPLETED
         return event
 
@@ -69,9 +64,7 @@ class StatusDashboard:
         return {
             "overall_status": self.overall_status.value,
             "version": self.current_version,
-            "last_update": (
-                self.events[-1].timestamp.isoformat() if self.events else None
-            ),
+            "last_update": (self.events[-1].timestamp.isoformat() if self.events else None),
             "total_events": len(self.events),
         }
 
@@ -85,9 +78,7 @@ class StatusDashboard:
             "Event History:",
         ]
         for event in self.events:
-            lines.append(
-                f"  [{event.timestamp.strftime('%H:%M:%S')}] {event.stage}: {event.status.value}"
-            )
+            lines.append(f"  [{event.timestamp.strftime('%H:%M:%S')}] {event.stage}: {event.status.value}")
             if event.message:
                 lines.append(f"    → {event.message}")
         return "\n".join(lines)

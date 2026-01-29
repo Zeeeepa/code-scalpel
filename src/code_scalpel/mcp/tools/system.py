@@ -23,55 +23,37 @@ async def get_capabilities(
     tier: str | None = None,
     ctx: Context | None = None,
 ) -> ToolResponseEnvelope:
-    """Get the capabilities available for the current license tier.
+    """
+    Get the capabilities available for the current license tier.
 
-    This tool returns a complete list of all 22 Code Scalpel tools and their
-    availability/limits at the specified tier or current tier.
-
-    **Usage by Agents:**
-    Agents can call this tool to discover:
-    - Which tools are available at the current tier
-    - The limits applied to each tool (max_files, max_depth, etc.)
-    - Whether specific features are enabled
+    Returns a complete list of all Code Scalpel tools and their availability/limits at the specified tier or current tier.
 
     **Tier Behavior:**
-    - Community: All tools available with basic limits
-    - Pro: 19 tools available with expanded limits
-    - Enterprise: 10 tools available with no limits
+    - All tiers: Tool is available.
+    - Provides information about capabilities available at different tiers.
 
-    Args:
-        tier: Optional tier to query (defaults to current tier from license)
-              Must be one of: "community", "pro", "enterprise"
-              If not specified, uses the tier from the current license.
+    **Tier Capabilities:**
+    - **Community:** Returns capabilities for community tier (basic limits on all tools)
+    - **Pro:** Returns capabilities for pro tier (expanded limits on most tools)
+    - **Enterprise:** Returns capabilities for enterprise tier (no limits on core tools)
 
-    Returns:
-        ToolResponseEnvelope containing:
-        {
-            "tier": "pro",
-            "tool_count": 22,
-            "available_count": 19,
-            "capabilities": {
-                "analyze_code": {
-                    "tool_id": "analyze_code",
-                    "tier": "pro",
-                    "available": true,
-                    "limits": {
-                        "max_file_size_mb": 10,
-                        "languages": ["python", "javascript", "typescript", "java"]
-                    }
-                },
-                ...
-            }
-        }
+    **Args:**
+    - tier (str, optional): Tier to query (defaults to current tier from license). Must be one of: "community", "pro", "enterprise"
 
-    Example:
-        ```
-        # Get capabilities for current tier (from license)
-        result = await get_capabilities()
-
-        # Get capabilities for a specific tier (testing/downgrade only)
-        result = await get_capabilities(tier="community")
-        ```
+    **Returns:**
+    - ToolResponseEnvelope: Standardized MCP response envelope containing:
+      - data (dict): Capabilities information with:
+        - tier (str): The tier that was queried
+        - tool_count (int): Total number of tools
+        - available_count (int): Number of tools available at this tier
+        - capabilities (dict): Dictionary mapping tool_id -> capability info for each tool:
+          - tool_id (str): The tool identifier
+          - tier (str): The tier being described
+          - available (bool): Whether the tool is available at this tier
+          - limits (dict): The limits applied to this tool at this tier
+      - tier (str, optional): Applied tier ("community", "pro", "enterprise")
+      - error (ToolError, optional): Standardized error if operation failed
+      - warnings (list[str]): Non-fatal warnings from MCP boundary
     """
     started = time.perf_counter()
     current_tier = _get_current_tier()

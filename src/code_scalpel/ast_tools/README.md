@@ -293,7 +293,7 @@ User / Claude / Copilot
 
 ## Feature Roadmap by Tier
 
-### TIER 1: COMMUNITY FEATURES (Free, High Priority)
+### TIER 1: COMMUNITY FEATURES (No License Required, High Priority)
 
 **Foundation capabilities** for code analysis and transformation:
 

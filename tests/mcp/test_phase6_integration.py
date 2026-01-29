@@ -204,16 +204,12 @@ class TestProfileResolution:
 
     def test_profile_resolution_explicit(self):
         """Explicit profile argument should override all."""
-        profile = ResponseFormatter.resolve_profile_cascading(
-            tool_argument_profile="debug"
-        )
+        profile = ResponseFormatter.resolve_profile_cascading(tool_argument_profile="debug")
         assert profile.name == "debug"
 
     def test_profile_resolution_fallback(self):
         """Should fall back to standard if unknown profile."""
-        profile = ResponseFormatter.resolve_profile_cascading(
-            tool_argument_profile="nonexistent"
-        )
+        profile = ResponseFormatter.resolve_profile_cascading(tool_argument_profile="nonexistent")
         # Falls back to config or standard
         assert profile in [PROFILES.get(p, PROFILE_STANDARD) for p in PROFILES]
 

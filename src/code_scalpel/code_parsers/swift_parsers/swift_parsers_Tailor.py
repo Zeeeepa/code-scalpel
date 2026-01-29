@@ -57,22 +57,16 @@ class TailorParser:
     def parse_json_report(self, report_path: Path) -> List[TailorMetric]:
         raise NotImplementedError("Phase 2: JSON report parsing")
 
-    def execute_tailor(
-        self, paths: List[Path], config: Optional[TailorConfig] = None
-    ) -> List[TailorMetric]:
+    def execute_tailor(self, paths: List[Path], config: Optional[TailorConfig] = None) -> List[TailorMetric]:
         raise NotImplementedError("Phase 2: Tailor execution")
 
     def load_config(self, config_file: Path) -> TailorConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_metrics(
-        self, metrics: List[TailorMetric]
-    ) -> Dict[str, List[TailorMetric]]:
+    def categorize_metrics(self, metrics: List[TailorMetric]) -> Dict[str, List[TailorMetric]]:
         raise NotImplementedError("Phase 2: Metric categorization")
 
-    def detect_complexity_issues(
-        self, metrics: List[TailorMetric]
-    ) -> List[TailorMetric]:
+    def detect_complexity_issues(self, metrics: List[TailorMetric]) -> List[TailorMetric]:
         raise NotImplementedError("Phase 2: Complexity detection")
 
     def calculate_code_metrics(self, metrics: List[TailorMetric]) -> Dict[str, Any]:

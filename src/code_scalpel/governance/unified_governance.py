@@ -246,10 +246,7 @@ class UnifiedGovernance:
                 with open(budget_path, "r") as f:
                     budget_config = yaml.safe_load(f) or {}
                     # Extract the 'default' budget if using the budgets structure
-                    if (
-                        "budgets" in budget_config
-                        and "default" in budget_config["budgets"]
-                    ):
+                    if "budgets" in budget_config and "default" in budget_config["budgets"]:
                         budget_limits = budget_config["budgets"]["default"]
                     else:
                         budget_limits = budget_config
@@ -316,11 +313,7 @@ class UnifiedGovernance:
                     changes=[
                         FileChange(  # type: ignore[misc]
                             file_path=operation.get("file_path", ""),
-                            added_lines=(
-                                [operation.get("code", "")]
-                                if operation.get("code")
-                                else []
-                            ),
+                            added_lines=([operation.get("code", "")] if operation.get("code") else []),
                         )
                     ],
                     description=operation.get("type", "unknown"),
@@ -336,10 +329,7 @@ class UnifiedGovernance:
             v
             for v in violations
             if v.severity in ("CRITICAL", "HIGH")
-            or (
-                v.severity == "MEDIUM"
-                and v.source in (ViolationSource.BUDGET, ViolationSource.POLICY)
-            )
+            or (v.severity == "MEDIUM" and v.source in (ViolationSource.BUDGET, ViolationSource.POLICY))
         ]
 
         decision = GovernanceDecision(
@@ -355,9 +345,7 @@ class UnifiedGovernance:
 
         return decision
 
-    def _evaluate_semantic(
-        self, operation: Dict[str, Any]
-    ) -> List[GovernanceViolation]:
+    def _evaluate_semantic(self, operation: Dict[str, Any]) -> List[GovernanceViolation]:
         """Evaluate operation for semantic security issues."""
         violations = []
 
@@ -523,11 +511,7 @@ class UnifiedGovernance:
                     changes=[
                         FileChange(  # type: ignore[misc]
                             file_path=getattr(operation, "file_path", ""),
-                            added_lines=(
-                                [getattr(operation, "code", "")]
-                                if getattr(operation, "code", None)
-                                else []
-                            ),
+                            added_lines=([getattr(operation, "code", "")] if getattr(operation, "code", None) else []),
                         )
                     ],
                     description=f"{getattr(operation, 'type', 'unknown')}: {getattr(operation, 'file_path', '')}",
@@ -573,11 +557,7 @@ class UnifiedGovernance:
             changes = getattr(operation, "changes", [])
             return {
                 "type": "code_edit",
-                "code": "\n".join(
-                    line
-                    for change in changes
-                    for line in getattr(change, "added_lines", [])
-                ),
+                "code": "\n".join(line for change in changes for line in getattr(change, "added_lines", [])),
                 "language": "python",  # Default, could detect
                 "file_path": changes[0].file_path if changes else "",
             }
@@ -694,9 +674,7 @@ class UnifiedGovernance:
 
         # Convert from BudgetOperation
         changes = getattr(operation, "changes", [])
-        code = "\n".join(
-            line for change in changes for line in getattr(change, "added_lines", [])
-        )
+        code = "\n".join(line for change in changes for line in getattr(change, "added_lines", []))
 
         return EngineOperation(  # type: ignore[misc]
             type="code_edit",
@@ -705,9 +683,7 @@ class UnifiedGovernance:
             file_path=changes[0].file_path if changes else "",
         )
 
-    def _convert_to_policy_decision(
-        self, governance_decision: GovernanceDecision
-    ) -> Any:  # PolicyDecision
+    def _convert_to_policy_decision(self, governance_decision: GovernanceDecision) -> Any:  # PolicyDecision
         """Convert GovernanceDecision to PolicyDecision."""
         if not PolicyDecision:
             return None

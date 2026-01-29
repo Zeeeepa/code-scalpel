@@ -26,8 +26,7 @@ class PHPParserAdapter(IParser):
     def __init__(self):
         """Initialize the PHP parser adapter (stub)."""
         raise NotImplementedError(
-            "PHPParserAdapter not yet implemented. "
-            "See TODO items in this file for implementation roadmap."
+            "PHPParserAdapter not yet implemented. " "See TODO items in this file for implementation roadmap."
         )
 
     def parse(self, code: str) -> ParseResult:

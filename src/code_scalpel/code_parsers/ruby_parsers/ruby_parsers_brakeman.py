@@ -58,19 +58,13 @@ class BrakemanParser:
     def categorize_vulnerabilities(self, vulns: List[BrakemanVulnerability]) -> Dict:
         raise NotImplementedError("Phase 2: Vulnerability categorization")
 
-    def detect_sql_injection(
-        self, vulns: List[BrakemanVulnerability]
-    ) -> List[BrakemanVulnerability]:
+    def detect_sql_injection(self, vulns: List[BrakemanVulnerability]) -> List[BrakemanVulnerability]:
         raise NotImplementedError("Phase 2: SQL injection detection")
 
-    def detect_mass_assignment(
-        self, vulns: List[BrakemanVulnerability]
-    ) -> List[BrakemanVulnerability]:
+    def detect_mass_assignment(self, vulns: List[BrakemanVulnerability]) -> List[BrakemanVulnerability]:
         raise NotImplementedError("Phase 2: Mass assignment detection")
 
-    def detect_xss_vulnerabilities(
-        self, vulns: List[BrakemanVulnerability]
-    ) -> List[BrakemanVulnerability]:
+    def detect_xss_vulnerabilities(self, vulns: List[BrakemanVulnerability]) -> List[BrakemanVulnerability]:
         raise NotImplementedError("Phase 2: XSS detection")
 
     def generate_security_report(self, vulns: List[BrakemanVulnerability]) -> str:

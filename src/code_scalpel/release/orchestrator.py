@@ -43,9 +43,7 @@ class ReleaseOrchestrator:
         """
         pyproject = Path(self.pyproject_path)
         if not pyproject.exists():
-            raise FileNotFoundError(
-                f"pyproject.toml not found at {self.pyproject_path}"
-            )
+            raise FileNotFoundError(f"pyproject.toml not found at {self.pyproject_path}")
 
         content = pyproject.read_text()
         match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
@@ -90,9 +88,7 @@ class ReleaseOrchestrator:
 
         # Check for commits since last tag
         latest_tag = self.git.get_latest_tag()
-        commits = self.git.get_commits_since_tag(
-            latest_tag.name if latest_tag else None
-        )
+        commits = self.git.get_commits_since_tag(latest_tag.name if latest_tag else None)
 
         if not commits:
             print("❌ No commits since last release")
@@ -114,9 +110,7 @@ class ReleaseOrchestrator:
         latest_tag = self.git.get_latest_tag()
 
         # Get commits since last release
-        commits = self.git.get_commits_since_tag(
-            latest_tag.name if latest_tag else None
-        )
+        commits = self.git.get_commits_since_tag(latest_tag.name if latest_tag else None)
 
         if not commits:
             raise ValueError("No commits to release")

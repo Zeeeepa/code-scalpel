@@ -76,9 +76,7 @@ class PipelineRunner:
     def check_black_formatting(self) -> bool:
         """Check Black code formatting."""
         self.log("Checking Black formatting...")
-        exit_code, stdout, stderr = self.run_command(
-            ["black", "--check", "--diff", "."]
-        )
+        exit_code, stdout, stderr = self.run_command(["black", "--check", "--diff", "."])
 
         if exit_code == 0:
             self.log("✅ Black formatting check passed")
@@ -190,9 +188,7 @@ class PipelineRunner:
         # The ignore flag should make exit_code=0, but on the safe side we'll log warnings
         if exit_code == 0:
             self.log("✅ Security audit passed")
-            status_msg = (
-                "No security vulnerabilities found (excluding known unfixable CVEs)"
-            )
+            status_msg = "No security vulnerabilities found (excluding known unfixable CVEs)"
         else:
             # Non-zero exit might indicate parsing issues or other problems
             # but we've already filtered out the known unfixable CVE
@@ -308,11 +304,7 @@ class PipelineRunner:
             all_passed = True
             for check_name, check_result in self.results["checks"].items():
                 status = check_result["status"]
-                status_emoji = (
-                    "✅"
-                    if status == "passed"
-                    else ("⚠️" if status == "warning" else "❌")
-                )
+                status_emoji = "✅" if status == "passed" else ("⚠️" if status == "warning" else "❌")
                 f.write(f"- {status_emoji} **{check_name}**: {status}\n")
                 if status == "failed":
                     all_passed = False
@@ -370,27 +362,19 @@ def main():
         default=True,
         help="Generate artifacts for Jenkins",
     )
-    parser.add_argument(
-        "--skip-tests", action="store_true", default=False, help="Skip running pytest"
-    )
+    parser.add_argument("--skip-tests", action="store_true", default=False, help="Skip running pytest")
     parser.add_argument(
         "--skip-build",
         action="store_true",
         default=False,
         help="Skip package build validation",
     )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", default=False, help="Verbose output"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", default=False, help="Verbose output")
 
     args = parser.parse_args()
 
-    pipeline = PipelineRunner(
-        verbose=args.verbose, generate_artifacts=args.generate_artifacts
-    )
-    success = pipeline.run_pipeline(
-        skip_tests=args.skip_tests, skip_build=args.skip_build
-    )
+    pipeline = PipelineRunner(verbose=args.verbose, generate_artifacts=args.generate_artifacts)
+    success = pipeline.run_pipeline(skip_tests=args.skip_tests, skip_build=args.skip_build)
 
     sys.exit(0 if success else 1)
 

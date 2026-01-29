@@ -118,9 +118,7 @@ class AnalyzeCodeKernelAdapter:
             # since analyze_code parses arbitrary code that may not be executable
 
             # Placeholder for future: Add syntax validation if needed
-            logger.debug(
-                f"Validating input: language={ctx.language}, is_memory={ctx.is_memory}"
-            )
+            logger.debug(f"Validating input: language={ctx.language}, is_memory={ctx.is_memory}")
 
             return (True, None, [])
 

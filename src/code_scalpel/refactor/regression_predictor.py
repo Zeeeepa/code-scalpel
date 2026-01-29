@@ -159,9 +159,7 @@ class RegressionPredictor:
 
         return (covered_statements / total_statements) * 100.0
 
-    def identify_low_coverage_functions(
-        self, functions: list[str], threshold: float = 80.0
-    ) -> list[str]:
+    def identify_low_coverage_functions(self, functions: list[str], threshold: float = 80.0) -> list[str]:
         """
         Identify functions with low test coverage.
 

@@ -117,9 +117,7 @@ def compute(x, y):
         # Get slice for a specific criterion
         if len(pdg.nodes()) > 0:
             # Create slicing criteria
-            criteria = SlicingCriteria(
-                nodes=set(list(pdg.nodes())[:1]), variables=set()
-            )
+            criteria = SlicingCriteria(nodes=set(list(pdg.nodes())[:1]), variables=set())
 
             sliced_pdg = slicer.compute_slice(criteria, SliceType.BACKWARD)
             assert isinstance(sliced_pdg, nx.DiGraph)
@@ -256,9 +254,7 @@ class TestMockedExternalServices:
     def test_mocked_llm_response(self):
         """Test mocked LLM response in agent workflow."""
         mock_llm = Mock()
-        mock_llm.generate.return_value = (
-            "Suggested optimization: Move invariant code out of loop"
-        )
+        mock_llm.generate.return_value = "Suggested optimization: Move invariant code out of loop"
 
         # Simulate agent using LLM for code suggestions
         code = "for i in range(n):\n    x = 10\n    result += x * i"

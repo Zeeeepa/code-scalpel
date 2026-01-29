@@ -25,8 +25,7 @@ class GoParserAdapter(IParser):
     def __init__(self):
         """Initialize the Go parser adapter (stub)."""
         raise NotImplementedError(
-            "GoParserAdapter not yet implemented. "
-            "See TODO items in this file for implementation roadmap."
+            "GoParserAdapter not yet implemented. " "See TODO items in this file for implementation roadmap."
         )
 
     def parse(self, code: str) -> ParseResult:

@@ -56,9 +56,7 @@ class CppLintParser:
         self.config = CppLintConfig()
         self.violations: List[CppLintViolation] = []
 
-    def execute_cpplint(
-        self, paths: List[Path], config: Optional[CppLintConfig] = None
-    ) -> List[CppLintViolation]:
+    def execute_cpplint(self, paths: List[Path], config: Optional[CppLintConfig] = None) -> List[CppLintViolation]:
         raise NotImplementedError("Phase 2: CppLint execution")
 
     def parse_cpplint_output(self, output: str) -> List[CppLintViolation]:
@@ -72,12 +70,8 @@ class CppLintParser:
     ) -> Dict[StyleViolationType, List[CppLintViolation]]:
         raise NotImplementedError("Phase 2: Violation categorization")
 
-    def calculate_style_score(
-        self, violations: List[CppLintViolation], total_lines: int
-    ) -> float:
+    def calculate_style_score(self, violations: List[CppLintViolation], total_lines: int) -> float:
         raise NotImplementedError("Phase 2: Style score calculation")
 
-    def generate_report(
-        self, violations: List[CppLintViolation], format: str = "json"
-    ) -> str:
+    def generate_report(self, violations: List[CppLintViolation], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")

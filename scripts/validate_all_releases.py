@@ -46,15 +46,11 @@ def record_result(release: str, feature: str, passed: bool, details: str = ""):
         results["releases"][release] = {"passed": [], "failed": []}
 
     if passed:
-        results["releases"][release]["passed"].append(
-            {"feature": feature, "details": details}
-        )
+        results["releases"][release]["passed"].append({"feature": feature, "details": details})
         results["summary"]["passed"] += 1
         print(f"  ✓ {feature}")
     else:
-        results["releases"][release]["failed"].append(
-            {"feature": feature, "details": details}
-        )
+        results["releases"][release]["failed"].append({"feature": feature, "details": details})
         results["summary"]["failed"] += 1
         print(f"  ✗ {feature}: {details}")
     results["summary"]["total"] += 1
@@ -74,9 +70,7 @@ async def validate_v1_3_0():
 def calculate_tax(amount, rate=0.1):
     return amount * rate
 """
-    result = await extract_code(
-        code=code, target_type="function", target_name="calculate_tax"
-    )
+    result = await extract_code(code=code, target_type="function", target_name="calculate_tax")
     record_result(
         "v1.3.0",
         "P0: extract_code with code string",
@@ -91,9 +85,7 @@ github_token = "ghp_1234567890abcdefghijklmnopqrstuvwxyz"
 password = "super_secret_password_12345"
 """
     scan = await security_scan(code=secret_code)
-    has_secrets = scan.vulnerability_count > 0 or any(
-        "secret" in str(v).lower() for v in scan.vulnerabilities
-    )
+    has_secrets = scan.vulnerability_count > 0 or any("secret" in str(v).lower() for v in scan.vulnerabilities)
     record_result(
         "v1.3.0",
         "P0: Hardcoded secret detection",
@@ -137,19 +129,13 @@ def search_user(username):
     )
 
     # P1: Line numbers in extraction
-    result = await extract_code(
-        code=code, target_type="function", target_name="calculate_tax"
-    )
+    result = await extract_code(code=code, target_type="function", target_name="calculate_tax")
     has_lines = result.line_start is not None and result.line_end is not None
     record_result(
         "v1.3.0",
         "P1: Line numbers in extraction",
         has_lines,
-        (
-            f"Lines {result.line_start}-{result.line_end}"
-            if has_lines
-            else "No line numbers"
-        ),
+        (f"Lines {result.line_start}-{result.line_end}" if has_lines else "No line numbers"),
     )
 
 
@@ -163,9 +149,7 @@ async def validate_v1_4_0():
     print("=" * 60)
 
     # P0: get_file_context (using server.py as test file)
-    test_file = (
-        Path(__file__).parent.parent / "src" / "code_scalpel" / "mcp" / "server.py"
-    )
+    test_file = Path(__file__).parent.parent / "src" / "code_scalpel" / "mcp" / "server.py"
     if test_file.exists():
         ctx = await get_file_context(file_path=str(test_file))
         has_context = ctx.success and (ctx.functions or ctx.classes)
@@ -188,9 +172,7 @@ async def validate_v1_4_0():
 
     # P0: get_symbol_references
     project_root = Path(__file__).parent.parent
-    refs = await get_symbol_references(
-        symbol_name="extract_code", project_root=str(project_root)
-    )
+    refs = await get_symbol_references(symbol_name="extract_code", project_root=str(project_root))
     has_refs = refs.total_references > 0 or refs.definition_file is not None
     record_result(
         "v1.4.0",
@@ -314,9 +296,7 @@ def main():
     result = helper_function()
     return result
 """
-    result = await extract_code(
-        code=test_code, target_type="function", target_name="main", include_context=True
-    )
+    result = await extract_code(code=test_code, target_type="function", target_name="main", include_context=True)
     record_result(
         "v1.5.1",
         "P0: extract_code with include_context",
@@ -363,14 +343,10 @@ async def validate_v1_5_2():
 
     # P0: Test isolation (verified by running tests without failures)
     # This is verified by the fact that pytest runs without mocking issues
-    record_result(
-        "v1.5.2", "P0: OSV client mock isolation", True, "Verified via pytest execution"
-    )
+    record_result("v1.5.2", "P0: OSV client mock isolation", True, "Verified via pytest execution")
 
     # P1: API mocking fixtures available
-    record_result(
-        "v1.5.2", "P1: pytest fixtures for API mocking", True, "Fixtures in conftest.py"
-    )
+    record_result("v1.5.2", "P1: pytest fixtures for API mocking", True, "Fixtures in conftest.py")
 
 
 # ============================================================
@@ -384,9 +360,7 @@ async def validate_v1_5_3():
 
     # P0: validate_paths tool
     test_paths = [
-        str(
-            Path(__file__).parent.parent / "src" / "code_scalpel" / "mcp" / "server.py"
-        ),
+        str(Path(__file__).parent.parent / "src" / "code_scalpel" / "mcp" / "server.py"),
         "/nonexistent/path/file.py",
     ]
     validation = await validate_paths(paths=test_paths)
@@ -590,9 +564,7 @@ public class UserService {
     }
 }
 """
-    result = await extract_code(
-        code=java_code, target_type="class", target_name="UserService", language="java"
-    )
+    result = await extract_code(code=java_code, target_type="class", target_name="UserService", language="java")
     record_result(
         "v2.0.0",
         "P0: Java class extraction",
@@ -657,18 +629,12 @@ public class UserDao {
     else:
         # If tree-sitter API issue, mark as known issue but not critical
         # since extraction (the core feature) works
-        is_api_issue = "set_language" in str(analysis.error) or "tree_sitter" in str(
-            analysis.error
-        )
+        is_api_issue = "set_language" in str(analysis.error) or "tree_sitter" in str(analysis.error)
         record_result(
             "v2.0.0",
             "P0: Java code analysis",
             is_api_issue,
-            (
-                f"Known tree-sitter API issue (extraction works): {analysis.error}"
-                if is_api_issue
-                else analysis.error
-            ),
+            (f"Known tree-sitter API issue (extraction works): {analysis.error}" if is_api_issue else analysis.error),
         )
 
     # P1: Spring security patterns - verify Spring patterns exist in taint_tracker
@@ -692,18 +658,12 @@ public interface UserRepository {
             f"Java analysis: {len(analysis.classes or [])} classes",
         )
     else:
-        is_api_issue = "set_language" in str(analysis.error) or "tree_sitter" in str(
-            analysis.error
-        )
+        is_api_issue = "set_language" in str(analysis.error) or "tree_sitter" in str(analysis.error)
         record_result(
             "v2.0.0",
             "P1: Spring @Query pattern detection",
             is_api_issue,
-            (
-                "Known tree-sitter API issue (extraction works)"
-                if is_api_issue
-                else analysis.error
-            ),
+            ("Known tree-sitter API issue (extraction works)" if is_api_issue else analysis.error),
         )
 
     # P1: JSX extraction
@@ -793,9 +753,7 @@ async def main():
                 print(f"  - FAILED: {f['feature']}: {f['details']}")
 
     print("\n" + "-" * 60)
-    print(
-        f"TOTAL: {results['summary']['passed']}/{results['summary']['total']} tests passed"
-    )
+    print(f"TOTAL: {results['summary']['passed']}/{results['summary']['total']} tests passed")
 
     if results["summary"]["failed"] > 0:
         print(f"\n⚠ {results['summary']['failed']} tests failed!")
@@ -809,11 +767,7 @@ if __name__ == "__main__":
     exit_code = asyncio.run(main())
 
     # Save results to file
-    output_path = (
-        Path(__file__).parent.parent
-        / "release_artifacts"
-        / "release_validation_results.json"
-    )
+    output_path = Path(__file__).parent.parent / "release_artifacts" / "release_validation_results.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
         json.dump(results, f, indent=2)

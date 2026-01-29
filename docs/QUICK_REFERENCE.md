@@ -8,7 +8,7 @@
 
 ## TL;DR - What You Need to Know
 
-We're implementing a **pre-release validation system** that tests all 22 tools across 3 tiers (FREE, PRO, ENTERPRISE) on 3 transports (stdio, HTTP, Docker) before every release.
+We're implementing a **pre-release validation system** that tests all 23 tools across 3 tiers (COMMUNITY, PRO, ENTERPRISE) on 3 transports (stdio, HTTP, Docker) before every release.
 
 **Why?** To ensure pricing is enforced correctly and tools don't accidentally get exposed at the wrong tier.
 
@@ -29,7 +29,7 @@ src/code_scalpel/capabilities/
   └── schema.json                     ← NEW: Capability schema
 
 capabilities/
-  ├── free.json                       ← NEW: Golden file, COMMUNITY tier
+  ├── community.json                       ← NEW: Golden file, COMMUNITY tier
   ├── pro.json                        ← NEW: Golden file, PRO tier
   ├── enterprise.json                 ← NEW: Golden file, ENTERPRISE tier
   └── README.md                       ← How to update
@@ -83,7 +83,7 @@ Stage 2: Unit Tests (3 min)
   ↓
 Stage 3: Build (2 min)
   ↓
-Stage 4-6: Tier Tests (FREE/PRO/ENTERPRISE, each on stdio/HTTP/Docker)
+Stage 4-6: Tier Tests (COMMUNITY/PRO/ENTERPRISE, each on stdio/HTTP/Docker)
   ↓
 Stage 7: Capability Snapshots (compare against golden files)
   ↓
@@ -174,8 +174,8 @@ Both should be:
 ### Pricing Enforcement (Automated)
 
 Every release will verify:
-- ✅ FREE tier limited to 1000 files (not 5000)
-- ✅ PRO tier can cross-file scan (FREE can't)
+- ✅ COMMUNITY tier limited to 1000 files (not 5000)
+- ✅ PRO tier can cross-file scan (COMMUNITY can't)
 - ✅ ENTERPRISE can do symbolic execution (PRO can't)
 - ✅ 22 tools always available (none hidden per tier)
 
@@ -310,7 +310,7 @@ pytest tests/tier_enforcement/ -v
 | `docs/PRE_RELEASE_PIPELINE.md` | Full specification (read this for details) |
 | `src/code_scalpel/capabilities/resolver.py` | Get capabilities by tier |
 | `.code-scalpel/limits.toml` | Central config for all tier limits |
-| `capabilities/free.json` | Golden file for FREE tier (auto-generated) |
+| `capabilities/community.json` | Golden file for COMMUNITY tier (auto-generated) |
 | `capabilities/pro.json` | Golden file for PRO tier (auto-generated) |
 | `capabilities/enterprise.json` | Golden file for ENTERPRISE tier (auto-generated) |
 | `tests/transports/adapter.py` | Unified test interface for all transports |

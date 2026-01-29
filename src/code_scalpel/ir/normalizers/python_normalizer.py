@@ -104,8 +104,7 @@ class PythonNormalizer(BaseNormalizer):
 
         if method is None:
             raise NotImplementedError(
-                f"Python AST node type '{node.__class__.__name__}' "
-                f"is not yet supported in IR normalization"
+                f"Python AST node type '{node.__class__.__name__}' " f"is not yet supported in IR normalization"
             )
 
         return method(node)
@@ -215,9 +214,7 @@ class PythonNormalizer(BaseNormalizer):
             body=self._normalize_body(node.body),
             return_type=ast.unparse(node.returns) if node.returns else None,
             is_async=False,
-            is_generator=any(
-                isinstance(n, (ast.Yield, ast.YieldFrom)) for n in ast.walk(node)
-            ),
+            is_generator=any(isinstance(n, (ast.Yield, ast.YieldFrom)) for n in ast.walk(node)),
             decorators=decorators,
             docstring=docstring,
             loc=self._make_loc(node),
@@ -247,9 +244,7 @@ class PythonNormalizer(BaseNormalizer):
             params.append(
                 IRParameter(
                     name=arg.arg,
-                    type_annotation=(
-                        ast.unparse(arg.annotation) if arg.annotation else None
-                    ),
+                    type_annotation=(ast.unparse(arg.annotation) if arg.annotation else None),
                     default=default,
                     is_rest=False,
                     is_keyword_only=False,
@@ -263,11 +258,7 @@ class PythonNormalizer(BaseNormalizer):
             params.append(
                 IRParameter(
                     name=args.vararg.arg,
-                    type_annotation=(
-                        ast.unparse(args.vararg.annotation)
-                        if args.vararg.annotation
-                        else None
-                    ),
+                    type_annotation=(ast.unparse(args.vararg.annotation) if args.vararg.annotation else None),
                     is_rest=True,
                     loc=self._make_loc(args.vararg),
                     source_language=self.language,
@@ -275,9 +266,7 @@ class PythonNormalizer(BaseNormalizer):
             )
 
         # Keyword-only args
-        kw_defaults_map = {
-            i: d for i, d in enumerate(args.kw_defaults) if d is not None
-        }
+        kw_defaults_map = {i: d for i, d in enumerate(args.kw_defaults) if d is not None}
         for i, arg in enumerate(args.kwonlyargs):
             default = None
             if i in kw_defaults_map:
@@ -287,9 +276,7 @@ class PythonNormalizer(BaseNormalizer):
             params.append(
                 IRParameter(
                     name=arg.arg,
-                    type_annotation=(
-                        ast.unparse(arg.annotation) if arg.annotation else None
-                    ),
+                    type_annotation=(ast.unparse(arg.annotation) if arg.annotation else None),
                     default=default,
                     is_keyword_only=True,
                     loc=self._make_loc(arg),
@@ -514,10 +501,7 @@ class PythonNormalizer(BaseNormalizer):
         return IRExprStmt(
             value=IRCall(
                 func=IRName(id="__import__", source_language=self.language),
-                args=[
-                    IRConstant(value=alias.name, source_language=self.language)
-                    for alias in node.names
-                ],
+                args=[IRConstant(value=alias.name, source_language=self.language) for alias in node.names],
                 source_language=self.language,
             ),
             loc=self._make_loc(node),
@@ -529,9 +513,7 @@ class PythonNormalizer(BaseNormalizer):
         return IRExprStmt(
             value=IRCall(
                 func=IRName(id="__import__", source_language=self.language),
-                args=[
-                    IRConstant(value=node.module or "", source_language=self.language)
-                ],
+                args=[IRConstant(value=node.module or "", source_language=self.language)],
                 source_language=self.language,
             ),
             loc=self._make_loc(node),
@@ -689,15 +671,9 @@ class PythonNormalizer(BaseNormalizer):
         Represented as a special call for now.
         """
         # [20251220_BUGFIX] Cast test, body, orelse to IRExpr; ensure args are non-None
-        test = self._norm_expr(node.test) or IRConstant(
-            value=False, source_language=self.language
-        )
-        body = self._norm_expr(node.body) or IRConstant(
-            value=None, source_language=self.language
-        )
-        orelse = self._norm_expr(node.orelse) or IRConstant(
-            value=None, source_language=self.language
-        )
+        test = self._norm_expr(node.test) or IRConstant(value=False, source_language=self.language)
+        body = self._norm_expr(node.body) or IRConstant(value=None, source_language=self.language)
+        orelse = self._norm_expr(node.orelse) or IRConstant(value=None, source_language=self.language)
         return IRCall(
             func=IRName(id="__ternary__", source_language=self.language),
             args=[test, body, orelse],
@@ -759,9 +735,7 @@ class PythonNormalizer(BaseNormalizer):
         if not node.generators:
             # Shouldn't happen in valid Python, but handle gracefully
             # [20251220_BUGFIX] Cast elt to IRExpr
-            elt = self._norm_expr(node.elt) or IRConstant(
-                value=None, source_language=self.language
-            )
+            elt = self._norm_expr(node.elt) or IRConstant(value=None, source_language=self.language)
             return IRCall(
                 func=IRName(id="__listcomp__", source_language=self.language),
                 args=[elt],
@@ -773,15 +747,9 @@ class PythonNormalizer(BaseNormalizer):
 
         # Normalize the comprehension components
         # [20251220_BUGFIX] Cast all expressions to IRExpr
-        element_expr = self._norm_expr(node.elt) or IRConstant(
-            value=None, source_language=self.language
-        )
-        target_expr = self._norm_expr(gen.target) or IRName(
-            id="_", source_language=self.language
-        )
-        iter_expr = self._norm_expr(gen.iter) or IRConstant(
-            value=None, source_language=self.language
-        )
+        element_expr = self._norm_expr(node.elt) or IRConstant(value=None, source_language=self.language)
+        target_expr = self._norm_expr(gen.target) or IRName(id="_", source_language=self.language)
+        iter_expr = self._norm_expr(gen.iter) or IRConstant(value=None, source_language=self.language)
 
         # Normalize filter conditions (if any)
         # [20251220_BUGFIX] Cast conditions to IRExpr list
@@ -795,15 +763,7 @@ class PythonNormalizer(BaseNormalizer):
         call = IRCall(
             func=IRName(id="__listcomp__", source_language=self.language),
             args=[element_expr, target_expr, iter_expr],
-            kwargs=(
-                {
-                    "conditions": IRList(
-                        elements=conditions, source_language=self.language
-                    )
-                }
-                if conditions
-                else {}
-            ),
+            kwargs=({"conditions": IRList(elements=conditions, source_language=self.language)} if conditions else {}),
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -822,9 +782,7 @@ class PythonNormalizer(BaseNormalizer):
         """
         if not node.generators:
             # [20251220_BUGFIX] Cast elt to IRExpr
-            elt = self._norm_expr(node.elt) or IRConstant(
-                value=None, source_language=self.language
-            )
+            elt = self._norm_expr(node.elt) or IRConstant(value=None, source_language=self.language)
             return IRCall(
                 func=IRName(id="__setcomp__", source_language=self.language),
                 args=[elt],
@@ -834,15 +792,9 @@ class PythonNormalizer(BaseNormalizer):
 
         gen = node.generators[0]
         # [20251220_BUGFIX] Cast expressions to IRExpr
-        element_expr = self._norm_expr(node.elt) or IRConstant(
-            value=None, source_language=self.language
-        )
-        target_expr = self._norm_expr(gen.target) or IRName(
-            id="_", source_language=self.language
-        )
-        iter_expr = self._norm_expr(gen.iter) or IRConstant(
-            value=None, source_language=self.language
-        )
+        element_expr = self._norm_expr(node.elt) or IRConstant(value=None, source_language=self.language)
+        target_expr = self._norm_expr(gen.target) or IRName(id="_", source_language=self.language)
+        iter_expr = self._norm_expr(gen.iter) or IRConstant(value=None, source_language=self.language)
         conditions = [
             c or IRConstant(value=True, source_language=self.language)
             for c in [self._norm_expr(cond) for cond in gen.ifs]
@@ -851,15 +803,7 @@ class PythonNormalizer(BaseNormalizer):
         return IRCall(
             func=IRName(id="__setcomp__", source_language=self.language),
             args=[element_expr, target_expr, iter_expr],
-            kwargs=(
-                {
-                    "conditions": IRList(
-                        elements=conditions, source_language=self.language
-                    )
-                }
-                if conditions
-                else {}
-            ),
+            kwargs=({"conditions": IRList(elements=conditions, source_language=self.language)} if conditions else {}),
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -872,12 +816,8 @@ class PythonNormalizer(BaseNormalizer):
         """
         if not node.generators:
             # [20251220_BUGFIX] Cast key and value to IRExpr
-            key = self._norm_expr(node.key) or IRConstant(
-                value=None, source_language=self.language
-            )
-            value = self._norm_expr(node.value) or IRConstant(
-                value=None, source_language=self.language
-            )
+            key = self._norm_expr(node.key) or IRConstant(value=None, source_language=self.language)
+            value = self._norm_expr(node.value) or IRConstant(value=None, source_language=self.language)
             return IRCall(
                 func=IRName(id="__dictcomp__", source_language=self.language),
                 args=[key, value],
@@ -887,18 +827,10 @@ class PythonNormalizer(BaseNormalizer):
 
         gen = node.generators[0]
         # [20251220_BUGFIX] Cast all expressions to IRExpr
-        key_expr = self._norm_expr(node.key) or IRConstant(
-            value=None, source_language=self.language
-        )
-        value_expr = self._norm_expr(node.value) or IRConstant(
-            value=None, source_language=self.language
-        )
-        target_expr = self._norm_expr(gen.target) or IRName(
-            id="_", source_language=self.language
-        )
-        iter_expr = self._norm_expr(gen.iter) or IRConstant(
-            value=None, source_language=self.language
-        )
+        key_expr = self._norm_expr(node.key) or IRConstant(value=None, source_language=self.language)
+        value_expr = self._norm_expr(node.value) or IRConstant(value=None, source_language=self.language)
+        target_expr = self._norm_expr(gen.target) or IRName(id="_", source_language=self.language)
+        iter_expr = self._norm_expr(gen.iter) or IRConstant(value=None, source_language=self.language)
         conditions = [
             c or IRConstant(value=True, source_language=self.language)
             for c in [self._norm_expr(cond) for cond in gen.ifs]
@@ -907,15 +839,7 @@ class PythonNormalizer(BaseNormalizer):
         return IRCall(
             func=IRName(id="__dictcomp__", source_language=self.language),
             args=[key_expr, value_expr, target_expr, iter_expr],
-            kwargs=(
-                {
-                    "conditions": IRList(
-                        elements=conditions, source_language=self.language
-                    )
-                }
-                if conditions
-                else {}
-            ),
+            kwargs=({"conditions": IRList(elements=conditions, source_language=self.language)} if conditions else {}),
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -928,9 +852,7 @@ class PythonNormalizer(BaseNormalizer):
         """
         if not node.generators:
             # [20251220_BUGFIX] Cast elt to IRExpr
-            elt = self._norm_expr(node.elt) or IRConstant(
-                value=None, source_language=self.language
-            )
+            elt = self._norm_expr(node.elt) or IRConstant(value=None, source_language=self.language)
             return IRCall(
                 func=IRName(id="__genexp__", source_language=self.language),
                 args=[elt],
@@ -940,15 +862,9 @@ class PythonNormalizer(BaseNormalizer):
 
         gen = node.generators[0]
         # [20251220_BUGFIX] Cast expressions to IRExpr
-        element_expr = self._norm_expr(node.elt) or IRConstant(
-            value=None, source_language=self.language
-        )
-        target_expr = self._norm_expr(gen.target) or IRName(
-            id="_", source_language=self.language
-        )
-        iter_expr = self._norm_expr(gen.iter) or IRConstant(
-            value=None, source_language=self.language
-        )
+        element_expr = self._norm_expr(node.elt) or IRConstant(value=None, source_language=self.language)
+        target_expr = self._norm_expr(gen.target) or IRName(id="_", source_language=self.language)
+        iter_expr = self._norm_expr(gen.iter) or IRConstant(value=None, source_language=self.language)
         conditions = [
             c or IRConstant(value=True, source_language=self.language)
             for c in [self._norm_expr(cond) for cond in gen.ifs]
@@ -957,15 +873,7 @@ class PythonNormalizer(BaseNormalizer):
         return IRCall(
             func=IRName(id="__genexp__", source_language=self.language),
             args=[element_expr, target_expr, iter_expr],
-            kwargs=(
-                {
-                    "conditions": IRList(
-                        elements=conditions, source_language=self.language
-                    )
-                }
-                if conditions
-                else {}
-            ),
+            kwargs=({"conditions": IRList(elements=conditions, source_language=self.language)} if conditions else {}),
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -974,15 +882,9 @@ class PythonNormalizer(BaseNormalizer):
     def _normalize_Slice(self, node: ast.Slice) -> IRCall:
         """Normalize slice (a:b:c)."""
         # [20251220_BUGFIX] Cast slice bounds to IRExpr with defaults
-        lower = self._norm_expr(node.lower) or IRConstant(
-            value=None, source_language=self.language
-        )
-        upper = self._norm_expr(node.upper) or IRConstant(
-            value=None, source_language=self.language
-        )
-        step = self._norm_expr(node.step) or IRConstant(
-            value=None, source_language=self.language
-        )
+        lower = self._norm_expr(node.lower) or IRConstant(value=None, source_language=self.language)
+        upper = self._norm_expr(node.upper) or IRConstant(value=None, source_language=self.language)
+        step = self._norm_expr(node.step) or IRConstant(value=None, source_language=self.language)
         return IRCall(
             func=IRName(id="slice", source_language=self.language),
             args=[lower, upper, step],

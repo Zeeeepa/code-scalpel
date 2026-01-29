@@ -35,9 +35,7 @@ class Greeter:
         """Greet a person."""
         return hello(name)
 '''
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
             f.write(content)
             return f.name
 
@@ -81,9 +79,7 @@ class Greeter:
     def test_sync_implementation_invalid_python(self):
         """Test sync implementation with invalid Python syntax."""
         content = "def broken("
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
             f.write(content)
             f.flush()
             file_path = f.name
@@ -121,9 +117,7 @@ def add(a: int, b: int) -> int:
     """Add two numbers."""
     return a + b
 '''
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
             f.write(content)
             return f.name
 
@@ -173,21 +167,15 @@ def multiply(a: int, b: int) -> int:
     """Multiply two numbers."""
     return a * b
 '''
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
             f.write(content)
             return f.name
 
     @pytest.mark.asyncio
     async def test_tool_success_response(self, sample_file):
         """Test tool returns valid response on success."""
-        with patch(
-            "code_scalpel.mcp.tools.oracle._get_current_tier", return_value="pro"
-        ):
-            with patch(
-                "code_scalpel.mcp.tools.oracle._write_perfect_code_impl"
-            ) as mock_impl:
+        with patch("code_scalpel.mcp.tools.oracle._get_current_tier", return_value="pro"):
+            with patch("code_scalpel.mcp.tools.oracle._write_perfect_code_impl") as mock_impl:
                 mock_impl.return_value = "# Constraint Spec\nTest content"
 
                 response = await write_perfect_code(
@@ -207,9 +195,7 @@ def multiply(a: int, b: int) -> int:
     async def test_tool_includes_version(self, sample_file):
         """Test tool includes package version in response."""
         with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
-            with patch(
-                "code_scalpel.mcp.tools.oracle._write_perfect_code_impl"
-            ) as mock_impl:
+            with patch("code_scalpel.mcp.tools.oracle._write_perfect_code_impl") as mock_impl:
                 mock_impl.return_value = "# Spec"
 
                 response = await write_perfect_code(
@@ -224,12 +210,8 @@ def multiply(a: int, b: int) -> int:
     async def test_tool_includes_tier(self, sample_file):
         """Test tool includes current tier in response."""
         for tier in ["community", "pro", "enterprise"]:
-            with patch(
-                "code_scalpel.mcp.tools.oracle._get_current_tier", return_value=tier
-            ):
-                with patch(
-                    "code_scalpel.mcp.tools.oracle._write_perfect_code_impl"
-                ) as mock_impl:
+            with patch("code_scalpel.mcp.tools.oracle._get_current_tier", return_value=tier):
+                with patch("code_scalpel.mcp.tools.oracle._write_perfect_code_impl") as mock_impl:
                     mock_impl.return_value = "# Spec"
 
                     response = await write_perfect_code(
@@ -274,9 +256,7 @@ class TokenManager:
         """Retrieve user token."""
         return self.tokens.get(user_id)
 '''
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
             f.write(content)
             return f.name
 

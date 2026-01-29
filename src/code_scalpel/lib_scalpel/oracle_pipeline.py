@@ -82,8 +82,7 @@ class OraclePipeline:
             raise FileNotFoundError(f"File not found: {file_path}")
 
         logger.info(
-            f"[Oracle Pipeline] limits=max_files:{self.max_files}, max_depth:{self.max_depth}, "
-            f"file={file_path}"
+            f"[Oracle Pipeline] limits=max_files:{self.max_files}, max_depth:{self.max_depth}, " f"file={file_path}"
         )
 
         # Step 1: Scan with tier-limited visibility

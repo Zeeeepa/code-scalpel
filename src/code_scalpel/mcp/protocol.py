@@ -13,7 +13,7 @@ from code_scalpel import __version__
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
 # Current tier for response envelope metadata.
-# Initialized to "community" (free tier) by default.
+# Initialized to "community" (community tier) by default.
 # Can be overridden via CODE_SCALPEL_TIER environment variable.
 CURRENT_TIER = "community"
 
@@ -28,7 +28,7 @@ def _normalize_tier(value: str | None) -> str:
     """Normalize tier string to canonical form.
 
     Accepts: "community" (default), "pro", "enterprise"
-    Also accepts aliases: "free" → "community", "all" → "enterprise"
+    Also accepts aliases: "community" → "community", "all" → "enterprise"
 
     Args:
         value: Tier string (case-insensitive, whitespace trimmed)
@@ -41,7 +41,7 @@ def _normalize_tier(value: str | None) -> str:
         return "community"
     v = value.strip().lower()
     # Handle aliases
-    if v == "free":
+    if v == "community":
         return "community"
     if v == "all":
         return "enterprise"
@@ -109,9 +109,7 @@ def _get_current_tier() -> str:
     global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
 
     requested = _requested_tier_from_env()
-    disable_license_discovery = (
-        os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
-    )
+    disable_license_discovery = os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
     force_tier_override = os.environ.get("CODE_SCALPEL_TEST_FORCE_TIER") == "1"
 
     # [TESTING/OFFLINE] If license discovery is disabled and explicit test override

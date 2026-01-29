@@ -15,9 +15,7 @@ class TestDirectionOutgoing:
 
     def test_outgoing_only_includes_called_functions(self, sample_call_graph):
         """Outgoing direction should only include functions called BY center."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="outgoing"
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="outgoing")
 
         assert result.success
 
@@ -31,9 +29,7 @@ class TestDirectionOutgoing:
 
     def test_outgoing_k2_extends_call_chain(self, sample_call_graph):
         """Outgoing k=2 should follow two levels of function calls."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, direction="outgoing"
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, direction="outgoing")
 
         assert result.success
         # Should have center + functions it calls + functions they call
@@ -42,9 +38,7 @@ class TestDirectionOutgoing:
 
     def test_outgoing_excludes_callers(self, sample_call_graph):
         """Outgoing should exclude functions that call the center."""
-        sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="outgoing"
-        )
+        sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="outgoing")
 
         # Should not include callers of center
         # (functions that have edges TO center)
@@ -53,9 +47,7 @@ class TestDirectionOutgoing:
 
     def test_outgoing_edges_point_away_from_center(self, sample_call_graph):
         """In outgoing neighborhood, edges should flow from center outward."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="outgoing"
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="outgoing")
 
         # All edges should have center as source, or flow away from center
         # (for k > 1)
@@ -72,9 +64,7 @@ class TestDirectionIncoming:
 
     def test_incoming_only_includes_calling_functions(self, sample_call_graph):
         """Incoming direction should only include functions that call center."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="incoming"
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="incoming")
 
         assert result.success
 
@@ -86,9 +76,7 @@ class TestDirectionIncoming:
 
     def test_incoming_k2_traces_back_callers(self, sample_call_graph):
         """Incoming k=2 should trace back two levels of callers."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, direction="incoming"
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, direction="incoming")
 
         assert result.success
         # Should have center + functions that call it + functions that call them
@@ -96,9 +84,7 @@ class TestDirectionIncoming:
 
     def test_incoming_excludes_callees(self, sample_call_graph):
         """Incoming should exclude functions called by center."""
-        sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="incoming"
-        )
+        sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="incoming")
 
         # Should not include functions called by center
         # Verification depends on graph topology
@@ -106,9 +92,7 @@ class TestDirectionIncoming:
 
     def test_incoming_edges_point_toward_center(self, sample_call_graph):
         """In incoming neighborhood, edges should flow toward center."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="incoming"
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="incoming")
 
         # All edges should reference valid nodes in the subgraph
         nodes_set = set(result.subgraph.nodes)
@@ -122,9 +106,7 @@ class TestDirectionBoth:
 
     def test_both_includes_callers_and_callees(self, sample_call_graph):
         """Both direction should include both callers and callees."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="both"
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="both")
 
         assert result.success
 
@@ -134,9 +116,7 @@ class TestDirectionBoth:
 
     def test_both_k1_larger_than_outgoing_k1(self, sample_call_graph):
         """Both k=1 should include more nodes than outgoing k=1."""
-        result_both = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="both"
-        )
+        result_both = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="both")
         result_outgoing = sample_call_graph.get_neighborhood(
             "python::main::function::center", k=1, direction="outgoing"
         )
@@ -146,9 +126,7 @@ class TestDirectionBoth:
 
     def test_both_k1_larger_than_incoming_k1(self, sample_call_graph):
         """Both k=1 should include more nodes than incoming k=1."""
-        result_both = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="both"
-        )
+        result_both = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="both")
         result_incoming = sample_call_graph.get_neighborhood(
             "python::main::function::center", k=1, direction="incoming"
         )
@@ -158,21 +136,15 @@ class TestDirectionBoth:
 
     def test_both_is_default(self, sample_call_graph):
         """Default direction (no parameter) should equal direction='both'."""
-        result_default = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
-        result_both = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="both"
-        )
+        result_default = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
+        result_both = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="both")
 
         # Should have same nodes
         assert set(result_default.subgraph.nodes) == set(result_both.subgraph.nodes)
 
     def test_both_includes_all_edge_types(self, sample_call_graph):
         """Both direction should include all edges."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="both"
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="both")
 
         # All edges from graph should be represented
         assert len(result.subgraph.edges) > 0
@@ -183,12 +155,8 @@ class TestDirectionWithDepth:
 
     def test_outgoing_k2_vs_outgoing_k1(self, sample_call_graph):
         """Outgoing k=2 should include more nodes than outgoing k=1."""
-        result_k1 = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="outgoing"
-        )
-        result_k2 = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, direction="outgoing"
-        )
+        result_k1 = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="outgoing")
+        result_k2 = sample_call_graph.get_neighborhood("python::main::function::center", k=2, direction="outgoing")
 
         # k=2 should be superset of k=1
         k1_nodes = set(result_k1.subgraph.nodes)
@@ -197,12 +165,8 @@ class TestDirectionWithDepth:
 
     def test_incoming_k2_vs_incoming_k1(self, sample_call_graph):
         """Incoming k=2 should include more nodes than incoming k=1."""
-        result_k1 = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, direction="incoming"
-        )
-        result_k2 = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, direction="incoming"
-        )
+        result_k1 = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction="incoming")
+        result_k2 = sample_call_graph.get_neighborhood("python::main::function::center", k=2, direction="incoming")
 
         # k=2 should be superset of k=1
         k1_nodes = set(result_k1.subgraph.nodes)
@@ -230,9 +194,7 @@ class TestDirectionValidation:
     def test_valid_directions(self, sample_call_graph):
         """Valid directions are: 'outgoing', 'incoming', 'both'."""
         for direction in ["outgoing", "incoming", "both"]:
-            result = sample_call_graph.get_neighborhood(
-                "python::main::function::center", k=1, direction=direction
-            )
+            result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, direction=direction)
             # Should not raise error
             assert result is not None
 

@@ -118,9 +118,7 @@ async def _extract_polyglot(
     from code_scalpel.surgery.unified_extractor import Language, UnifiedExtractor
 
     if file_path is None and code is None:
-        return _extraction_error(
-            target_name, "Must provide either 'file_path' or 'code' argument"
-        )
+        return _extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
 
     try:
         # Create extractor from file or code
@@ -197,9 +195,7 @@ def _create_extractor(
     from code_scalpel import SurgicalExtractor
 
     if file_path is None and code is None:
-        return None, _extraction_error(
-            target_name, "Must provide either 'file_path' or 'code' argument"
-        )
+        return None, _extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
 
     if file_path is not None:
         try:
@@ -217,17 +213,13 @@ def _create_extractor(
             assert code is not None
             return SurgicalExtractor(code), None
         except (SyntaxError, ValueError) as e:
-            return None, _extraction_error(
-                target_name, f"Syntax error in code: {str(e)}"
-            )
+            return None, _extraction_error(target_name, f"Syntax error in code: {str(e)}")
 
 
 def _extract_method(extractor: "SurgicalExtractor", target_name: str):
     """Extract a method, handling the ClassName.method_name parsing."""
     if "." not in target_name:
-        return None, _extraction_error(
-            target_name, "Method name must be 'ClassName.method_name' format"
-        )
+        return None, _extraction_error(target_name, "Method name must be 'ClassName.method_name' format")
     class_name, method_name = target_name.rsplit(".", 1)
     return extractor.get_method(class_name, method_name), None
 
@@ -269,9 +261,7 @@ def _perform_extraction(
     if target_type == "function":
         if include_context:
             return (
-                extractor.get_function_with_context(
-                    target_name, max_depth=context_depth
-                ),
+                extractor.get_function_with_context(target_name, max_depth=context_depth),
                 None,
                 None,
             )
@@ -316,17 +306,13 @@ def _process_cross_file_context(cross_file_result) -> tuple[str, list[str]]:
 
     # Add unresolved imports as a comment
     if cross_file_result.unresolved_imports:
-        unresolved_comment = "# Unresolved imports: " + ", ".join(
-            cross_file_result.unresolved_imports
-        )
+        unresolved_comment = "# Unresolved imports: " + ", ".join(cross_file_result.unresolved_imports)
         context_code = unresolved_comment + "\n\n" + context_code
 
     return context_code, external_names
 
 
-def _build_full_code(
-    imports_needed: list[str], context_code: str, target_code: str
-) -> str:
+def _build_full_code(imports_needed: list[str], context_code: str, target_code: str) -> str:
     """Build the combined full_code for LLM consumption."""
     parts = []
     if imports_needed:
@@ -436,9 +422,7 @@ async def _extract_code_impl(
 
     # [20251228_FEATURE] Tier-limited option: cross-file dependency resolution.
     tier = get_current_tier()
-    if include_cross_file_deps and not has_capability(
-        "extract_code", "cross_file_deps", tier
-    ):
+    if include_cross_file_deps and not has_capability("extract_code", "cross_file_deps", tier):
         return ContextualExtractionResult(
             success=False,
             target_name=target_name,
@@ -523,13 +507,10 @@ async def _extract_code_impl(
             if not result.success:
                 return _extraction_error(
                     target_name,
-                    result.error
-                    or f"{target_type.capitalize()} '{target_name}' not found",
+                    result.error or f"{target_type.capitalize()} '{target_name}' not found",
                 )
             target_code = result.code
-            total_lines = (
-                result.line_end - result.line_start + 1 if result.line_end > 0 else 0
-            )
+            total_lines = result.line_end - result.line_start + 1 if result.line_end > 0 else 0
             line_start = result.line_start
             line_end = result.line_end
             imports_needed = result.imports_needed
@@ -541,8 +522,7 @@ async def _extract_code_impl(
             if not result.target.success:
                 return _extraction_error(
                     target_name,
-                    result.target.error
-                    or f"{target_type.capitalize()} '{target_name}' not found",
+                    result.target.error or f"{target_type.capitalize()} '{target_name}' not found",
                 )
             target_code = result.target.code
             context_items = result.context_items
@@ -552,9 +532,7 @@ async def _extract_code_impl(
             line_end = result.target.line_end
             imports_needed = result.target.imports_needed
         else:
-            return _extraction_error(
-                target_name, f"Unexpected result type: {type(result).__name__}"
-            )
+            return _extraction_error(target_name, f"Unexpected result type: {type(result).__name__}")
 
         # Step 5: Build final response
         full_code = _build_full_code(imports_needed, context_code, target_code)
@@ -573,13 +551,9 @@ async def _extract_code_impl(
 
         if variable_promotion:
             if target_type != "function":
-                return _extraction_error(
-                    target_name, "variable_promotion requires target_type='function'."
-                )
+                return _extraction_error(target_name, "variable_promotion requires target_type='function'.")
             if not has_capability("extract_code", "variable_promotion", tier):
-                return _extraction_error(
-                    target_name, "variable_promotion requires PRO tier"
-                )
+                return _extraction_error(target_name, "variable_promotion requires PRO tier")
             try:
                 from code_scalpel.surgery.surgical_extractor import promote_variables
 
@@ -593,23 +567,16 @@ async def _extract_code_impl(
                     }
                 else:
                     advanced["variable_promotion"] = {
-                        "error": getattr(promoted, "error", None)
-                        or "Variable promotion failed",
+                        "error": getattr(promoted, "error", None) or "Variable promotion failed",
                     }
             except Exception as e:
-                advanced["variable_promotion"] = {
-                    "error": f"Variable promotion failed: {e}"
-                }
+                advanced["variable_promotion"] = {"error": f"Variable promotion failed: {e}"}
 
         if closure_detection:
             if target_type != "function":
-                return _extraction_error(
-                    target_name, "closure_detection requires target_type='function'."
-                )
+                return _extraction_error(target_name, "closure_detection requires target_type='function'.")
             if tier == "community":
-                return _extraction_error(
-                    target_name, "closure_detection requires PRO tier"
-                )
+                return _extraction_error(target_name, "closure_detection requires PRO tier")
             try:
                 from code_scalpel.surgery.surgical_extractor import (
                     detect_closure_variables as _detect_closures,
@@ -635,13 +602,10 @@ async def _extract_code_impl(
                     }
                 else:
                     advanced["closure_detection"] = {
-                        "error": getattr(clos, "error", None)
-                        or "Closure analysis failed",
+                        "error": getattr(clos, "error", None) or "Closure analysis failed",
                     }
             except Exception as e:
-                advanced["closure_detection"] = {
-                    "error": f"Closure analysis failed: {e}"
-                }
+                advanced["closure_detection"] = {"error": f"Closure analysis failed: {e}"}
 
         if dependency_injection_suggestions:
             if target_type != "function":
@@ -650,9 +614,7 @@ async def _extract_code_impl(
                     "dependency_injection_suggestions requires target_type='function'.",
                 )
             if tier == "community":
-                return _extraction_error(
-                    target_name, "dependency injection suggestions require PRO tier"
-                )
+                return _extraction_error(target_name, "dependency injection suggestions require PRO tier")
             try:
                 from code_scalpel.surgery.surgical_extractor import (
                     suggest_dependency_injection as _suggest_di,
@@ -680,23 +642,16 @@ async def _extract_code_impl(
                     }
                 else:
                     advanced["dependency_injection_suggestions"] = {
-                        "error": getattr(di, "error", None)
-                        or "Dependency injection analysis failed",
+                        "error": getattr(di, "error", None) or "Dependency injection analysis failed",
                     }
             except Exception as e:
-                advanced["dependency_injection_suggestions"] = {
-                    "error": f"DI analysis failed: {e}"
-                }
+                advanced["dependency_injection_suggestions"] = {"error": f"DI analysis failed: {e}"}
 
         if as_microservice:
             if target_type != "function":
-                return _extraction_error(
-                    target_name, "as_microservice requires target_type='function'."
-                )
+                return _extraction_error(target_name, "as_microservice requires target_type='function'.")
             if not has_capability("extract_code", "dockerfile_generation", tier):
-                return _extraction_error(
-                    target_name, "as_microservice requires ENTERPRISE tier"
-                )
+                return _extraction_error(target_name, "as_microservice requires ENTERPRISE tier")
             try:
                 from code_scalpel.surgery.surgical_extractor import (
                     extract_as_microservice as _extract_microservice,
@@ -718,31 +673,22 @@ async def _extract_code_impl(
                     }
                 else:
                     advanced["microservice"] = {
-                        "error": getattr(ms, "error", None)
-                        or "Microservice extraction failed",
+                        "error": getattr(ms, "error", None) or "Microservice extraction failed",
                     }
             except Exception as e:
-                advanced["microservice"] = {
-                    "error": f"Microservice extraction failed: {e}"
-                }
+                advanced["microservice"] = {"error": f"Microservice extraction failed: {e}"}
 
         if organization_wide:
             if not has_capability("extract_code", "org_wide_resolution", tier):
-                return _extraction_error(
-                    target_name, "organization_wide requires ENTERPRISE tier"
-                )
+                return _extraction_error(target_name, "organization_wide requires ENTERPRISE tier")
             if not code:
-                return _extraction_error(
-                    target_name, "organization_wide requires 'code' input"
-                )
+                return _extraction_error(target_name, "organization_wide requires 'code' input")
             try:
                 from code_scalpel.surgery.surgical_extractor import (
                     resolve_organization_wide as _resolve_org,
                 )
 
-                org = _resolve_org(
-                    code=code, function_name=target_name, workspace_root=workspace_root
-                )
+                org = _resolve_org(code=code, function_name=target_name, workspace_root=workspace_root)
                 if getattr(org, "success", False):
                     advanced["organization_wide_resolution"] = {
                         "target_name": org.target_name,
@@ -762,13 +708,10 @@ async def _extract_code_impl(
                     }
                 else:
                     advanced["organization_wide_resolution"] = {
-                        "error": getattr(org, "error", None)
-                        or "Organization-wide resolution failed",
+                        "error": getattr(org, "error", None) or "Organization-wide resolution failed",
                     }
             except Exception as e:
-                advanced["organization_wide_resolution"] = {
-                    "error": f"Organization-wide resolution failed: {e}"
-                }
+                advanced["organization_wide_resolution"] = {"error": f"Organization-wide resolution failed: {e}"}
 
         # [20260111_FEATURE] Get tier limits for metadata
         from code_scalpel.licensing.config_loader import get_tool_limits
@@ -889,9 +832,7 @@ async def rename_symbol(
         max_files_updated = limits.get("max_files_updated")
 
         # If configured as definition-only, skip cross-file updates.
-        if tier in {"pro", "enterprise"} and not (
-            (max_files_searched == 0) and (max_files_updated == 0)
-        ):
+        if tier in {"pro", "enterprise"} and not ((max_files_searched == 0) and (max_files_updated == 0)):
             try:
                 from code_scalpel.surgery.rename_symbol_refactor import (
                     rename_references_across_project,
@@ -909,21 +850,15 @@ async def rename_symbol(
                 )
 
                 if not xres.success:
-                    warnings.append(
-                        f"Cross-file rename skipped: {xres.error or 'unknown error'}"
-                    )
+                    warnings.append(f"Cross-file rename skipped: {xres.error or 'unknown error'}")
                 elif xres.changed_files:
-                    warnings.append(
-                        f"Updated references/imports in {len(xres.changed_files)} additional file(s)."
-                    )
+                    warnings.append(f"Updated references/imports in {len(xres.changed_files)} additional file(s).")
 
                 warnings.extend(xres.warnings)
             except Exception as e:
                 warnings.append(f"Cross-file rename skipped due to error: {e}")
         else:
-            warnings.append(
-                "Definition-only rename (no cross-file updates) at this tier."
-            )
+            warnings.append("Definition-only rename (no cross-file updates) at this tier.")
 
         return PatchResultModel(
             success=True,
@@ -1057,9 +992,7 @@ async def update_symbol(
             if report.was_sanitized:
                 # Warn but don't fail - sanitization is informational
                 nonlocal warnings
-                warnings.append(
-                    f"Replacement code was auto-sanitized: {'; '.join(report.changes)}"
-                )
+                warnings.append(f"Replacement code was auto-sanitized: {'; '.join(report.changes)}")
         except ParsingError as e:
             msg = f"Replacement code has syntax error: {e}"
             if e.location:
@@ -1209,9 +1142,7 @@ async def update_symbol(
 
     # [20250101_FEATURE] v1.0 roadmap: Enterprise code review approval
     if "code_review_approval" in capabilities:
-        approval_result = await _check_code_review_approval(
-            file_path, target_name, target_type, new_code
-        )
+        approval_result = await _check_code_review_approval(file_path, target_name, target_type, new_code)
         if not approval_result.get("approved", True):
             return PatchResultModel(
                 success=False,
@@ -1243,9 +1174,7 @@ async def update_symbol(
 
     # [20250101_FEATURE] v1.0 roadmap: Pro pre-update hook
     if "pre_update_hook" in capabilities:
-        hook_result = await _run_pre_update_hook(
-            file_path, target_name, target_type, new_code
-        )
+        hook_result = await _run_pre_update_hook(file_path, target_name, target_type, new_code)
         if not hook_result.get("continue", True):
             return PatchResultModel(
                 success=False,
@@ -1305,9 +1234,7 @@ async def update_symbol(
                     lines_delta=getattr(rename_result, "lines_delta", 0),
                     backup_path=getattr(rename_result, "backup_path", None),
                     # [20260121_REFACTOR] Per-call metadata instead of session counts
-                    max_updates_per_call=(
-                        int(max_updates_per_call) if max_updates_per_call > 0 else None
-                    ),
+                    max_updates_per_call=(int(max_updates_per_call) if max_updates_per_call > 0 else None),
                     updates_in_batch=updates_in_this_call,
                     batch_truncated=False,
                     warnings=merged_warnings,
@@ -1327,9 +1254,7 @@ async def update_symbol(
                 error_code=getattr(rename_result, "error_code", None),
                 hint=getattr(rename_result, "hint", None),
                 # [20260121_REFACTOR] Per-call metadata
-                max_updates_per_call=(
-                    int(max_updates_per_call) if max_updates_per_call > 0 else None
-                ),
+                max_updates_per_call=(int(max_updates_per_call) if max_updates_per_call > 0 else None),
                 updates_in_batch=updates_in_this_call,
                 batch_truncated=False,
                 warnings=(
@@ -1347,28 +1272,20 @@ async def update_symbol(
             # [20251229_FEATURE] Auto-insert if not found
             if not result.success and "not found" in (result.error or ""):
                 # [20260101_BUGFIX] Verify method exists before calling
-                if hasattr(patcher, "insert_function") and callable(
-                    getattr(patcher, "insert_function")
-                ):
+                if hasattr(patcher, "insert_function") and callable(getattr(patcher, "insert_function")):
                     result = patcher.insert_function(new_code)  # type: ignore[attr-defined]
                 if result.success:
-                    warnings.append(
-                        f"Function '{target_name}' was not found, so it was inserted."
-                    )
+                    warnings.append(f"Function '{target_name}' was not found, so it was inserted.")
 
         elif target_type == "class":
             result = patcher.update_class(target_name, new_code)
             # [20251229_FEATURE] Auto-insert if not found
             if not result.success and "not found" in (result.error or ""):
                 # [20260101_BUGFIX] Verify method exists before calling
-                if hasattr(patcher, "insert_class") and callable(
-                    getattr(patcher, "insert_class")
-                ):
+                if hasattr(patcher, "insert_class") and callable(getattr(patcher, "insert_class")):
                     result = patcher.insert_class(new_code)  # type: ignore[attr-defined]
                 if result.success:
-                    warnings.append(
-                        f"Class '{target_name}' was not found, so it was inserted."
-                    )
+                    warnings.append(f"Class '{target_name}' was not found, so it was inserted.")
 
         elif target_type == "method":
             if "." not in target_name:
@@ -1384,20 +1301,12 @@ async def update_symbol(
             class_name, method_name = target_name.rsplit(".", 1)
             result = patcher.update_method(class_name, method_name, new_code)
             # [20251229_FEATURE] Auto-insert if not found (but class must exist)
-            if (
-                not result.success
-                and "not found" in (result.error or "")
-                and "Class" not in (result.error or "")
-            ):
+            if not result.success and "not found" in (result.error or "") and "Class" not in (result.error or ""):
                 # [20260101_BUGFIX] Verify method exists before calling
-                if hasattr(patcher, "insert_method") and callable(
-                    getattr(patcher, "insert_method")
-                ):
+                if hasattr(patcher, "insert_method") and callable(getattr(patcher, "insert_method")):
                     result = patcher.insert_method(class_name, new_code)  # type: ignore[attr-defined]
                 if result.success:
-                    warnings.append(
-                        f"Method '{method_name}' was not found in '{class_name}', so it was inserted."
-                    )
+                    warnings.append(f"Method '{method_name}' was not found in '{class_name}', so it was inserted.")
         else:
             # Should not reach here due to validation above
             return PatchResultModel(
@@ -1423,9 +1332,7 @@ async def update_symbol(
         # Save the changes
         debug_print("DEBUG:update_symbol: before patcher.save()")
         backup_path = patcher.save(backup=create_backup)
-        debug_print(
-            f"DEBUG:update_symbol: patcher.save() returned backup_path={backup_path}"
-        )
+        debug_print(f"DEBUG:update_symbol: patcher.save() returned backup_path={backup_path}")
 
         # [20260124_BUGFIX] Removed os.sync() - it can block indefinitely on WSL2
         # with mounted Windows filesystems and provides no correctness benefit.
@@ -1435,19 +1342,11 @@ async def update_symbol(
         # [20251230_FEATURE] v3.5.0 - Pro tier: Update cross-file references
         if "cross_file_updates" in capabilities:
             try:
-                debug_print(
-                    "DEBUG:update_symbol: starting _update_cross_file_references"
-                )
-                cross_file_updates = await _update_cross_file_references(
-                    file_path, target_type, target_name, new_code
-                )
-                debug_print(
-                    f"DEBUG:update_symbol: cross_file_updates={cross_file_updates}"
-                )
+                debug_print("DEBUG:update_symbol: starting _update_cross_file_references")
+                cross_file_updates = await _update_cross_file_references(file_path, target_type, target_name, new_code)
+                debug_print(f"DEBUG:update_symbol: cross_file_updates={cross_file_updates}")
                 if cross_file_updates["files_updated"] > 0:
-                    warnings.append(
-                        f"Updated {cross_file_updates['files_updated']} files with reference changes"
-                    )
+                    warnings.append(f"Updated {cross_file_updates['files_updated']} files with reference changes")
             except Exception as e:
                 debug_print(f"DEBUG:update_symbol: cross-file update exception: {e}")
                 warnings.append(f"Cross-file update warning: {str(e)}")
@@ -1455,9 +1354,7 @@ async def update_symbol(
         # [20250101_FEATURE] v1.0 roadmap: Pro post-update hook
         if "post_update_hook" in capabilities:
             try:
-                post_hook_result = await _run_post_update_hook(
-                    file_path, target_name, target_type, result
-                )
+                post_hook_result = await _run_post_update_hook(file_path, target_name, target_type, result)
                 if post_hook_result.get("warnings"):
                     warnings.extend(post_hook_result["warnings"])
             except Exception as e:
@@ -1468,9 +1365,7 @@ async def update_symbol(
         tests_passed = None
         if "git_integration" in capabilities:
             try:
-                git_result = await _perform_atomic_git_refactor(
-                    file_path, target_name, new_code
-                )
+                git_result = await _perform_atomic_git_refactor(file_path, target_name, new_code)
                 git_branch = git_result.get("branch_name")
                 tests_passed = git_result.get("tests_passed")
 
@@ -1501,17 +1396,11 @@ async def update_symbol(
 
                 # [20260119_FEATURE] Use unified parser for syntax check
                 try:
-                    _, post_save_report = parse_python_code(
-                        updated_source, filename=file_path
-                    )
+                    _, post_save_report = parse_python_code(updated_source, filename=file_path)
                     if post_save_report.was_sanitized:
-                        warnings.append(
-                            "Post-save verification: file required sanitization to parse"
-                        )
+                        warnings.append("Post-save verification: file required sanitization to parse")
                 except ParsingError as parse_err:
-                    raise ValueError(
-                        f"Post-save syntax verification failed: {parse_err}"
-                    ) from parse_err
+                    raise ValueError(f"Post-save syntax verification failed: {parse_err}") from parse_err
 
                 # Verify the symbol is still extractable (guards against boundary mistakes)
                 from code_scalpel import SurgicalExtractor
@@ -1571,9 +1460,7 @@ async def update_symbol(
             lines_delta=result.lines_delta,
             backup_path=backup_path,
             # [20260121_REFACTOR] Per-call metadata instead of session counts
-            max_updates_per_call=(
-                int(max_updates_per_call) if max_updates_per_call > 0 else None
-            ),
+            max_updates_per_call=(int(max_updates_per_call) if max_updates_per_call > 0 else None),
             updates_in_batch=updates_in_this_call,
             batch_truncated=False,
             warnings=warnings,
@@ -1602,9 +1489,7 @@ async def update_symbol(
         )
 
 
-async def _perform_atomic_git_refactor(
-    file_path: str, target_name: str, new_code: str
-) -> dict[str, Any]:
+async def _perform_atomic_git_refactor(file_path: str, target_name: str, new_code: str) -> dict[str, Any]:
     """
     Enterprise tier: Atomic refactoring with git branch creation and test execution.
 
@@ -1698,9 +1583,7 @@ async def _perform_atomic_git_refactor(
         # If tests failed, revert
         if tests_run and not tests_passed_flag:
             # Go back to previous branch
-            subprocess.run(
-                ["git", "checkout", "-"], cwd=project_root, capture_output=True
-            )
+            subprocess.run(["git", "checkout", "-"], cwd=project_root, capture_output=True)
             # Delete the failed branch
             subprocess.run(
                 ["git", "branch", "-D", branch_name],
@@ -1753,18 +1636,14 @@ async def _update_cross_file_references(
 
         # Find project root by looking for .git or pyproject.toml
         while project_root.parent != project_root:
-            if (project_root / ".git").exists() or (
-                project_root / "pyproject.toml"
-            ).exists():
+            if (project_root / ".git").exists() or (project_root / "pyproject.toml").exists():
                 break
             project_root = project_root.parent
 
         # Use get_symbol_references to find all references
         from code_scalpel.mcp.archive.server import _get_symbol_references_sync
 
-        refs_result = await asyncio.to_thread(
-            _get_symbol_references_sync, target_name, str(project_root)
-        )
+        refs_result = await asyncio.to_thread(_get_symbol_references_sync, target_name, str(project_root))
 
         if not refs_result.success or not refs_result.references:
             return result
@@ -1809,10 +1688,7 @@ async def _update_cross_file_references(
                     if f"{target_name}(" in line:
                         # Add warning comment
                         indent = len(line) - len(line.lstrip())
-                        warning = (
-                            " " * indent
-                            + f"# WARNING: {target_name} signature may have changed\n"
-                        )
+                        warning = " " * indent + f"# WARNING: {target_name} signature may have changed\n"
                         lines.insert(ref.line - 1, warning)
 
                         # Write back
@@ -2065,9 +1941,7 @@ async def _run_post_update_hook(
                             file_path=file_path,
                             target_name=target_name,
                             target_type=target_type,
-                            success=(
-                                result.success if hasattr(result, "success") else True
-                            ),
+                            success=(result.success if hasattr(result, "success") else True),
                         )
                         if isinstance(post_result, dict):
                             hook_result.update(post_result)

@@ -44,7 +44,7 @@ MCP server toolkit for AI agents - surgical code analysis, security scanning, an
 
 ## License Tiers
 
-- **Community** (Free): Basic analysis, 50 file limit, standard security scanning
+- **Community**: Basic analysis, 50 file limit, standard security scanning
 - **Pro**: Unlimited files, advanced refactoring, taint analysis
 - **Enterprise**: All Pro features plus compliance, audit trails, approval workflows
 

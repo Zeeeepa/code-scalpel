@@ -7,9 +7,7 @@ from pathlib import Path
 from code_scalpel.mcp.protocol import format_tier_for_display
 
 
-def analyze_file(
-    filepath: str, output_format: str = "text", language: str | None = None
-) -> int:
+def analyze_file(filepath: str, output_format: str = "text", language: str | None = None) -> int:
     """Analyze a file and print results."""
 
     path = Path(filepath)
@@ -208,17 +206,13 @@ def analyze_code(
         if result.dead_code:
             print(f"\nDead Code Detected ({len(result.dead_code)} items):")
             for dc in result.dead_code:
-                print(
-                    f"   - {dc.code_type} '{dc.name}' (lines {dc.line_start}-{dc.line_end})"
-                )
+                print(f"   - {dc.code_type} '{dc.name}' (lines {dc.line_start}-{dc.line_end})")
                 print(f"     Reason: {dc.reason}")
 
         if result.security_issues:
             print(f"\n[WARNING] Security Issues ({len(result.security_issues)}):")
             for issue in result.security_issues:
-                print(
-                    f"   - {issue.get('type', 'Unknown')}: {issue.get('description', 'No description')}"
-                )
+                print(f"   - {issue.get('type', 'Unknown')}: {issue.get('description', 'No description')}")
 
         if result.refactor_suggestions:
             print(f"\nSuggestions ({len(result.refactor_suggestions)}):")
@@ -281,9 +275,7 @@ def scan_security(filepath: str, output_format: str = "text") -> int:
         if not result.has_vulnerabilities:
             print("\n[OK] No vulnerabilities detected.")
         else:
-            print(
-                f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n"
-            )
+            print(f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n")
             for i, v in enumerate(result.vulnerabilities, 1):
                 print(f"  {i}. {v.vulnerability_type} ({v.cwe_id})")
                 print(f"     Source: {v.taint_source.name}")
@@ -333,9 +325,7 @@ def scan_code_security(code: str, output_format: str = "text") -> int:
         if not result.has_vulnerabilities:
             print("\n[OK] No vulnerabilities detected.")
         else:
-            print(
-                f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n"
-            )
+            print(f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n")
             for i, v in enumerate(result.vulnerabilities, 1):
                 print(f"  {i}. {v.vulnerability_type} ({v.cwe_id})")
                 print(f"     Source: {v.taint_source.name}")
@@ -388,9 +378,7 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
     # [20241225_FEATURE] v3.3.0 - Show validation results
     if "validation" in result:
         validation = result["validation"]
-        print(
-            f"\n[VALIDATION] Checked {len(validation['files_validated'])} configuration files:"
-        )
+        print(f"\n[VALIDATION] Checked {len(validation['files_validated'])} configuration files:")
         if validation["success"]:
             print("   ✅ All files have valid syntax")
         else:
@@ -438,9 +426,7 @@ def start_server(host: str = "127.0.0.1", port: int = 5000) -> int:
     print(f"   Analyze endpoint: POST http://{host}:{port}/analyze")
     print(f"   Refactor endpoint: POST http://{host}:{port}/refactor")
     print(f"   Security endpoint: POST http://{host}:{port}/security")
-    print(
-        "\nNote: For MCP-compliant clients (Claude Desktop, Cursor), use 'codescalpel mcp' instead."
-    )
+    print("\nNote: For MCP-compliant clients (Claude Desktop, Cursor), use 'codescalpel mcp' instead.")
     print("Press Ctrl+C to stop the server.\n")
 
     try:
@@ -523,9 +509,7 @@ def start_mcp_server(
         )
         print("\nPress Ctrl+C to stop.\n", file=sys.stderr)
     else:
-        print(
-            f"Starting Code Scalpel MCP Server ({protocol.upper()} transport) on {host}:{port}"
-        )
+        print(f"Starting Code Scalpel MCP Server ({protocol.upper()} transport) on {host}:{port}")
         endpoint_path = "/mcp" if transport == "streamable-http" else "/sse"
         print(f"   MCP endpoint: {protocol}://{host}:{port}{endpoint_path}")
         if use_https:
@@ -577,9 +561,7 @@ def start_mcp_server(
     return 0
 
 
-def _license_install(
-    source_path: str, dest_path: str | None = None, force: bool = False
-) -> int:
+def _license_install(source_path: str, dest_path: str | None = None, force: bool = False) -> int:
     """[20251228_FEATURE] Implements `code-scalpel license install`.
 
     Args:
@@ -646,9 +628,7 @@ def _license_install(
     return 0
 
 
-def verify_policies_command(
-    policy_dir: str = ".code-scalpel", manifest_source: str = "file"
-) -> int:
+def verify_policies_command(policy_dir: str = ".code-scalpel", manifest_source: str = "file") -> int:
     """Verify policy integrity using cryptographic signatures.
 
     [20241225_FEATURE] v3.3.0 - CLI command for policy verification
@@ -697,9 +677,7 @@ def verify_policies_command(
         return 1
 
 
-def regenerate_manifest_command(
-    policy_dir: str = ".code-scalpel", signed_by: str = "code-scalpel"
-) -> int:
+def regenerate_manifest_command(policy_dir: str = ".code-scalpel", signed_by: str = "code-scalpel") -> int:
     """Regenerate policy manifest after policy changes.
 
     [20241225_FEATURE] v3.3.0 - CLI command for manifest regeneration
@@ -730,9 +708,7 @@ def regenerate_manifest_command(
     # Find all policy files
     policy_files = []
     for pattern in ["*.yaml", "*.yml", "policies/**/*.rego"]:
-        policy_files.extend(
-            [str(f.relative_to(policy_path)) for f in policy_path.glob(pattern)]
-        )
+        policy_files.extend([str(f.relative_to(policy_path)) for f in policy_path.glob(pattern)])
 
     if not policy_files:
         print(f"\n[ERROR] No policy files found in {policy_dir}")
@@ -797,9 +773,7 @@ def show_capabilities(
             # Show single tool
             caps = get_tool_capabilities(tool_filter, tier=tier)
             if not caps["available"]:
-                print(
-                    f"❌ Tool '{tool_filter}' is not available at {tier.upper()} tier"
-                )
+                print(f"❌ Tool '{tool_filter}' is not available at {tier.upper()} tier")
                 return 1
 
             if json_output:
@@ -837,16 +811,8 @@ def show_capabilities(
                 print()
 
                 # Group by availability
-                available_tools = [
-                    (tid, cap)
-                    for tid, cap in sorted(capabilities.items())
-                    if cap["available"]
-                ]
-                unavailable_tools = [
-                    (tid, cap)
-                    for tid, cap in sorted(capabilities.items())
-                    if not cap["available"]
-                ]
+                available_tools = [(tid, cap) for tid, cap in sorted(capabilities.items()) if cap["available"]]
+                unavailable_tools = [(tid, cap) for tid, cap in sorted(capabilities.items()) if not cap["available"]]
 
                 if available_tools:
                     print("✅ AVAILABLE TOOLS:")
@@ -854,9 +820,7 @@ def show_capabilities(
                     for tool_id, cap in available_tools:
                         limits = cap["limits"]
                         if limits:
-                            limits_str = ", ".join(
-                                f"{k}={v}" for k, v in list(limits.items())[:3]
-                            )
+                            limits_str = ", ".join(f"{k}={v}" for k, v in list(limits.items())[:3])
                             if len(limits) > 3:
                                 limits_str += ", ..."
                             print(f"  • {tool_id:40} [{limits_str}]")
@@ -873,9 +837,7 @@ def show_capabilities(
 
                 print("=" * 70)
                 if available_count < len(capabilities):
-                    print(
-                        f"💡 Tip: Upgrade to unlock {len(unavailable_tools)} more tools"
-                    )
+                    print(f"💡 Tip: Upgrade to unlock {len(unavailable_tools)} more tools")
                     print("   Visit: https://code-scalpel.ai for pricing")
                     print()
 
@@ -926,9 +888,7 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     analyze_parser = subparsers.add_parser("analyze", help="Analyze code")
     analyze_parser.add_argument("file", nargs="?", help="File to analyze")
     analyze_parser.add_argument("--code", "-c", help="Code string to analyze")
-    analyze_parser.add_argument(
-        "--json", "-j", action="store_true", help="Output as JSON"
-    )
+    analyze_parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
     analyze_parser.add_argument(
         "--language",
         "-l",
@@ -937,17 +897,13 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     )
 
     # Scan command (Security Analysis)
-    scan_parser = subparsers.add_parser(
-        "scan", help="Scan for security vulnerabilities (SQLi, XSS, etc.)"
-    )
+    scan_parser = subparsers.add_parser("scan", help="Scan for security vulnerabilities (SQLi, XSS, etc.)")
     scan_parser.add_argument("file", nargs="?", help="Python file to scan")
     scan_parser.add_argument("--code", "-c", help="Code string to scan")
     scan_parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
 
     # Init command (Configuration Setup) - [20251219_FEATURE] v3.0.2
-    init_parser = subparsers.add_parser(
-        "init", help="Initialize .code-scalpel configuration directory"
-    )
+    init_parser = subparsers.add_parser("init", help="Initialize .code-scalpel configuration directory")
     init_parser.add_argument(
         "--dir",
         "-d",
@@ -962,17 +918,13 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     )
 
     # Server command (REST API - legacy)
-    server_parser = subparsers.add_parser(
-        "server", help="Start REST API server (legacy)"
-    )
+    server_parser = subparsers.add_parser("server", help="Start REST API server (legacy)")
     server_parser.add_argument(
         "--host",
         default="127.0.0.1",
         help="Host to bind to (default: 127.0.0.1)",
     )
-    server_parser.add_argument(
-        "--port", "-p", type=int, default=5000, help="Port to bind to (default: 5000)"
-    )
+    server_parser.add_argument("--port", "-p", type=int, default=5000, help="Port to bind to (default: 5000)")
 
     # MCP command (Model Context Protocol - recommended)
     # [20260125_FEATURE] Phase 3: stdio is Tier 1 (primary, most optimized)
@@ -1038,14 +990,10 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     )
 
     # License management commands
-    license_parser = subparsers.add_parser(
-        "license", help="Manage Code Scalpel licenses"
-    )
+    license_parser = subparsers.add_parser("license", help="Manage Code Scalpel licenses")
     license_subparsers = license_parser.add_subparsers(dest="license_command")
 
-    install_parser = license_subparsers.add_parser(
-        "install", help="Validate and install a license JWT"
-    )
+    install_parser = license_subparsers.add_parser("install", help="Validate and install a license JWT")
     install_parser.add_argument(
         "license_file",
         help="Path to the license JWT file to install",
@@ -1183,9 +1131,7 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     if args.command == "analyze":
         output_format = "json" if args.json else "text"
         if args.code:
-            return analyze_code(
-                args.code, output_format, language=args.language or "python"
-            )
+            return analyze_code(args.code, output_format, language=args.language or "python")
         elif args.file:
             return analyze_file(args.file, output_format, language=args.language)
         else:
@@ -1216,9 +1162,7 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
 
     elif args.command == "license":
         if args.license_command == "install":
-            return _license_install(
-                args.license_file, dest_path=args.dest, force=args.force
-            )
+            return _license_install(args.license_file, dest_path=args.dest, force=args.force)
 
         license_parser.print_help()
         return 1
@@ -1270,9 +1214,7 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
             allowed = set(sig.parameters.keys())
             return {k: v for k, v in kwargs.items() if k in allowed}
 
-        return start_mcp_server(
-            **_filter_kwargs_for_callable(start_mcp_server, start_kwargs)
-        )
+        return start_mcp_server(**_filter_kwargs_for_callable(start_mcp_server, start_kwargs))
 
     elif args.command == "capabilities":
         return show_capabilities(

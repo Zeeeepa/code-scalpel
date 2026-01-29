@@ -17,14 +17,10 @@ class TestUnifiedSinkDetectCommunityTier:
         """Verify max 50 sinks limit enforced for Community tier."""
         # Create code with 60+ detectable sinks
         code = "\n".join([f"os.system(user_input_{i})" for i in range(60)])
-        result = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="community"
-        )
+        result = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="community")
 
         assert result.success
-        assert (
-            result.sink_count <= 50
-        ), f"Community should limit to 50, got {result.sink_count}"
+        assert result.sink_count <= 50, f"Community should limit to 50, got {result.sink_count}"
         assert result.max_sinks_applied == 50
         if result.sinks_detected and result.sinks_detected > 50:
             assert result.truncated is True
@@ -32,9 +28,7 @@ class TestUnifiedSinkDetectCommunityTier:
     def test_python_sink_detection_enabled(self, community_tier):
         """Verify Python sink detection works for Community tier."""
         code = "import sqlite3\ndb.execute(user_sql)"
-        result = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="community"
-        )
+        result = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="community")
 
         assert result.success
         assert result.language == "python"
@@ -43,12 +37,8 @@ class TestUnifiedSinkDetectCommunityTier:
 
     def test_javascript_sink_detection_enabled(self, community_tier):
         """Verify JavaScript sink detection works for Community tier."""
-        code = (
-            "const sql = `SELECT * FROM users WHERE id = ${userId}`;\ndb.execute(sql);"
-        )
-        result = _unified_sink_detect_sync(
-            code=code, language="javascript", confidence_threshold=0.0, tier="community"
-        )
+        code = "const sql = `SELECT * FROM users WHERE id = ${userId}`;\ndb.execute(sql);"
+        result = _unified_sink_detect_sync(code=code, language="javascript", confidence_threshold=0.0, tier="community")
 
         assert result.success
         assert result.language == "javascript"
@@ -57,9 +47,7 @@ class TestUnifiedSinkDetectCommunityTier:
     def test_typescript_sink_detection_enabled(self, community_tier):
         """Verify TypeScript sink detection works for Community tier."""
         code = "const code = userInput;\\neval(code);"
-        result = _unified_sink_detect_sync(
-            code=code, language="typescript", confidence_threshold=0.0, tier="community"
-        )
+        result = _unified_sink_detect_sync(code=code, language="typescript", confidence_threshold=0.0, tier="community")
 
         assert result.success
         assert result.language == "typescript"
@@ -68,9 +56,7 @@ class TestUnifiedSinkDetectCommunityTier:
     def test_java_sink_detection_enabled(self, community_tier):
         """Verify Java sink detection works for Community tier."""
         code = 'String cmd = "ls " + userInput;\nRuntime.getRuntime().exec(cmd);'
-        result = _unified_sink_detect_sync(
-            code=code, language="java", confidence_threshold=0.0, tier="community"
-        )
+        result = _unified_sink_detect_sync(code=code, language="java", confidence_threshold=0.0, tier="community")
 
         assert result.success
         assert result.language == "java"
@@ -79,44 +65,28 @@ class TestUnifiedSinkDetectCommunityTier:
     def test_basic_confidence_scoring_present(self, community_tier):
         """Verify confidence scores are present in Community results."""
         code = "import sqlite3\ndb.execute(user_input)"
-        result = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="community"
-        )
+        result = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="community")
 
         assert result.success
         if result.sinks:
-            assert all(
-                hasattr(s, "confidence") for s in result.sinks
-            ), "All sinks should have confidence"
-            assert all(
-                0.0 <= s.confidence <= 1.0 for s in result.sinks
-            ), "Confidence should be 0-1"
+            assert all(hasattr(s, "confidence") for s in result.sinks), "All sinks should have confidence"
+            assert all(0.0 <= s.confidence <= 1.0 for s in result.sinks), "Confidence should be 0-1"
 
     def test_cwe_mapping_populated(self, community_tier):
         """Verify CWE mapping is populated for Community tier."""
         code = "import sqlite3\ndb.execute(user_sql)"
-        result = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="community"
-        )
+        result = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="community")
 
         assert result.success
         if result.sinks:
-            assert any(
-                s.cwe_id for s in result.sinks
-            ), "At least one sink should have CWE mapping"
-            assert any(
-                "CWE-" in str(s.cwe_id) for s in result.sinks if s.cwe_id
-            ), "CWE should be formatted as CWE-XXX"
+            assert any(s.cwe_id for s in result.sinks), "At least one sink should have CWE mapping"
+            assert any("CWE-" in str(s.cwe_id) for s in result.sinks if s.cwe_id), "CWE should be formatted as CWE-XXX"
 
     def test_sink_id_stability(self, community_tier):
         """Verify sink_id is stable and consistent across runs."""
         code = "import sqlite3\ndb.execute(user_input)"
-        result1 = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="community"
-        )
-        result2 = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="community"
-        )
+        result1 = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="community")
+        result2 = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="community")
 
         assert result1.success and result2.success
         if result1.sinks and result2.sinks:
@@ -129,9 +99,7 @@ class TestUnifiedSinkDetectCommunityTier:
         # Create a sink with a very long line
         long_line = "x = user_input; " * 50  # 800+ chars
         code = f"import sqlite3\ndb.execute({long_line})"
-        result = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="community"
-        )
+        result = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="community")
 
         assert result.success
         if result.sinks:
@@ -141,16 +109,12 @@ class TestUnifiedSinkDetectCommunityTier:
                 if sink.code_snippet_truncated:
                     assert sink.code_snippet_original_len is not None
                     assert sink.code_snippet_original_len > len(sink.code_snippet or "")
-                    assert "…" in (
-                        sink.code_snippet or ""
-                    ), "Truncated snippets should have ellipsis"
+                    assert "…" in (sink.code_snippet or ""), "Truncated snippets should have ellipsis"
 
     def test_unsupported_language_error_code(self, community_tier):
         """Verify unsupported language returns correct error_code."""
         code = "some code"
-        result = _unified_sink_detect_sync(
-            code=code, language="rust", confidence_threshold=0.0, tier="community"
-        )
+        result = _unified_sink_detect_sync(code=code, language="rust", confidence_threshold=0.0, tier="community")
 
         # Community should not support Rust
         assert not result.success
@@ -164,14 +128,10 @@ class TestUnifiedSinkDetectProTier:
         """Verify Pro tier analyzes unlimited sinks (no 50-limit)."""
         # Create code with 60+ sinks
         code = "\n".join([f"os.system(input_{i})" for i in range(60)])
-        result = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="pro"
-        )
+        result = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="pro")
 
         assert result.success
-        assert (
-            result.sink_count > 50
-        ), f"Pro should exceed 50-limit, got {result.sink_count}"
+        assert result.sink_count > 50, f"Pro should exceed 50-limit, got {result.sink_count}"
         if result.max_sinks_applied:
             assert result.max_sinks_applied is None or result.max_sinks_applied > 50
 
@@ -191,9 +151,7 @@ class TestUnifiedSinkDetectProTier:
         # Pro should have confidence_scores field populated
         assert hasattr(result, "confidence_scores")
         if result.confidence_scores:
-            assert (
-                len(result.confidence_scores) > 0
-            ), "Pro should have confidence scores"
+            assert len(result.confidence_scores) > 0, "Pro should have confidence scores"
 
     def test_context_aware_detection_enabled(self, pro_tier):
         """Verify context-aware detection is enabled for Pro tier."""
@@ -210,9 +168,7 @@ class TestUnifiedSinkDetectProTier:
         assert result.success
         assert hasattr(result, "context_analysis")
         if result.context_analysis:
-            assert (
-                "analyzed_sinks" in result.context_analysis
-            ), "Context analysis should be populated"
+            assert "analyzed_sinks" in result.context_analysis, "Context analysis should be populated"
 
     def test_framework_specific_sinks_detected(self, pro_tier):
         """Verify framework-specific sinks are detected for Pro tier."""
@@ -252,9 +208,7 @@ class TestUnifiedSinkDetectProTier:
 
         assert result.success
         assert result.coverage_summary is not None, "Pro should have coverage_summary"
-        assert (
-            "total_patterns" in result.coverage_summary
-        ), "Coverage should include pattern count"
+        assert "total_patterns" in result.coverage_summary, "Coverage should include pattern count"
 
 
 class TestUnifiedSinkDetectEnterpriseTier:
@@ -301,9 +255,7 @@ class TestUnifiedSinkDetectEnterpriseTier:
         assert result.success
         assert hasattr(result, "risk_assessments")
         if result.risk_assessments:
-            assert any(
-                "risk_score" in r for r in result.risk_assessments
-            ), "Risk assessments should include scores"
+            assert any("risk_score" in r for r in result.risk_assessments), "Risk assessments should include scores"
 
     def test_compliance_mapping_present(self, enterprise_tier):
         """Verify compliance mapping for Enterprise tier."""
@@ -355,9 +307,7 @@ class TestUnifiedSinkDetectEnterpriseTier:
         assert result.success
         assert hasattr(result, "remediation_suggestions")
         if result.remediation_suggestions:
-            assert (
-                len(result.remediation_suggestions) > 0
-            ), "Enterprise should provide remediation suggestions"
+            assert len(result.remediation_suggestions) > 0, "Enterprise should provide remediation suggestions"
             assert any("suggested_fix" in r for r in result.remediation_suggestions)
 
 
@@ -371,15 +321,11 @@ class TestUnifiedSinkDetectCrossTierComparison:
         comm_result = _unified_sink_detect_sync(
             code=code, language="python", confidence_threshold=0.0, tier="community"
         )
-        pro_result = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="pro"
-        )
+        pro_result = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="pro")
 
         assert comm_result.success and pro_result.success
         assert comm_result.sink_count <= 50, "Community should limit to 50"
-        assert (
-            pro_result.sink_count > comm_result.sink_count
-        ), "Pro should have more sinks"
+        assert pro_result.sink_count > comm_result.sink_count, "Pro should have more sinks"
 
     def test_community_no_advanced_features_pro_has(self, community_tier, pro_tier):
         """Verify Pro has advanced features that Community lacks."""
@@ -399,18 +345,14 @@ class TestUnifiedSinkDetectEdgeCases:
 
     def test_empty_code_error_handling(self, community_tier):
         """Verify empty code is handled gracefully."""
-        result = _unified_sink_detect_sync(
-            code="", language="python", confidence_threshold=0.0, tier="community"
-        )
+        result = _unified_sink_detect_sync(code="", language="python", confidence_threshold=0.0, tier="community")
         assert not result.success
         assert result.error_code == "UNIFIED_SINK_DETECT_MISSING_CODE"
 
     def test_invalid_confidence_threshold_error(self, community_tier):
         """Verify invalid confidence threshold is rejected."""
         code = "os.system(x)"
-        result = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=1.5, tier="community"
-        )
+        result = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=1.5, tier="community")
         assert not result.success
         assert result.error_code == "UNIFIED_SINK_DETECT_INVALID_MIN_CONFIDENCE"
 
@@ -424,9 +366,7 @@ class TestUnifiedSinkDetectEdgeCases:
         }
 
         for lang, code in test_cases.items():
-            result = _unified_sink_detect_sync(
-                code=code, language=lang, confidence_threshold=0.0, tier="community"
-            )
+            result = _unified_sink_detect_sync(code=code, language=lang, confidence_threshold=0.0, tier="community")
             assert result.success, f"Should support {lang} in Community"
             assert result.language == lang
 
@@ -434,9 +374,7 @@ class TestUnifiedSinkDetectEdgeCases:
         """Verify confidence threshold filters sinks correctly."""
         code = "os.system(x); db.execute(y); eval(z)"
 
-        result_low = _unified_sink_detect_sync(
-            code=code, language="python", confidence_threshold=0.0, tier="community"
-        )
+        result_low = _unified_sink_detect_sync(code=code, language="python", confidence_threshold=0.0, tier="community")
         result_high = _unified_sink_detect_sync(
             code=code, language="python", confidence_threshold=0.9, tier="community"
         )

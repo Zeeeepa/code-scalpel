@@ -68,9 +68,7 @@ class TestExtractionPipeline:
         # - Refactor simulation catches breaking changes
         pass
 
-    async def test_extract_respects_tier_depth(
-        self, community_tier, pro_tier, tmp_path
-    ):
+    async def test_extract_respects_tier_depth(self, community_tier, pro_tier, tmp_path):
         """extract_code respects tier limits through pipeline."""
         # Community: depth=0 (no cross-file deps)
         # Pro: depth=1 (one level of dependencies)

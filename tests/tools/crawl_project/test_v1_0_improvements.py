@@ -131,9 +131,7 @@ class TestConfigAlignment:
         pro_section = config.get("pro", {}).get("crawl_project", {})
         # If max_files exists, it should be None (not a hardcoded limit)
         if "max_files" in pro_section:
-            assert (
-                pro_section["max_files"] is None
-            ), "Pro tier should have unlimited files (max_files=None or omitted)"
+            assert pro_section["max_files"] is None, "Pro tier should have unlimited files (max_files=None or omitted)"
 
 
 class TestCrawlModeCapabilities:
@@ -160,9 +158,7 @@ if __name__ == "__main__":
         return root
 
     @pytest.mark.asyncio
-    async def test_discovery_mode_detects_entrypoints(
-        self, temp_flask_project, community_env
-    ):
+    async def test_discovery_mode_detects_entrypoints(self, temp_flask_project, community_env):
         """Discovery mode should detect entrypoints."""
         from code_scalpel.mcp.tools.context import crawl_project
 
@@ -175,9 +171,7 @@ if __name__ == "__main__":
         assert len(result.entrypoints) > 0
 
     @pytest.mark.asyncio
-    async def test_discovery_mode_provides_framework_hints(
-        self, temp_flask_project, community_env
-    ):
+    async def test_discovery_mode_provides_framework_hints(self, temp_flask_project, community_env):
         """Discovery mode should provide framework hints."""
         from code_scalpel.mcp.tools.context import crawl_project
 

@@ -58,33 +58,23 @@ class SwiftLintParser:
     def parse_json_report(self, report_path: Path) -> List[SwiftLintViolation]:
         raise NotImplementedError("Phase 2: JSON report parsing")
 
-    def execute_swiftlint(
-        self, paths: List[Path], config: SwiftLintConfig = None
-    ) -> List[SwiftLintViolation]:
+    def execute_swiftlint(self, paths: List[Path], config: SwiftLintConfig = None) -> List[SwiftLintViolation]:
         raise NotImplementedError("Phase 2: SwiftLint execution")
 
     def load_config(self, config_file: Path) -> SwiftLintConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_violations(
-        self, violations: List[SwiftLintViolation]
-    ) -> Dict[str, List[SwiftLintViolation]]:
+    def categorize_violations(self, violations: List[SwiftLintViolation]) -> Dict[str, List[SwiftLintViolation]]:
         raise NotImplementedError("Phase 2: Violation categorization")
 
-    def apply_autocorrect(
-        self, paths: List[Path], config: SwiftLintConfig = None
-    ) -> Dict[str, int]:
+    def apply_autocorrect(self, paths: List[Path], config: SwiftLintConfig = None) -> Dict[str, int]:
         raise NotImplementedError("Phase 2: Auto-correction")
 
-    def generate_report(
-        self, violations: List[SwiftLintViolation], format: str = "json"
-    ) -> str:
+    def generate_report(self, violations: List[SwiftLintViolation], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
     def calculate_metrics(self, violations: List[SwiftLintViolation]) -> Dict[str, Any]:
         raise NotImplementedError("Phase 2: Metrics calculation")
 
-    def detect_ios_specific_issues(
-        self, violations: List[SwiftLintViolation]
-    ) -> List[SwiftLintViolation]:
+    def detect_ios_specific_issues(self, violations: List[SwiftLintViolation]) -> List[SwiftLintViolation]:
         raise NotImplementedError("Phase 2: Platform-specific analysis")

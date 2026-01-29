@@ -23,9 +23,7 @@ if streamable_http_client is None:
     pytestmark = [pytest.mark.skip("streamable-http client not available")]
 
 # [20260118_TEST] Skip entire module - requires running HTTP server
-pytestmark = pytest.mark.skip(
-    reason="[20260118_TEST] HTTP/SSE tests require running server - skip for local pipeline"
-)
+pytestmark = pytest.mark.skip(reason="[20260118_TEST] HTTP/SSE tests require running server - skip for local pipeline")
 
 
 @dataclass(frozen=True)
@@ -84,9 +82,7 @@ def _pythonpath_env(repo_root: Path) -> dict[str, str]:
         if (src_root / "code_scalpel").exists():
             break
         if candidate == candidate.parent:
-            raise AssertionError(
-                f"Could not locate src/code_scalpel starting from: {repo_root}"
-            )
+            raise AssertionError(f"Could not locate src/code_scalpel starting from: {repo_root}")
         candidate = candidate.parent
 
     env = os.environ.copy()
@@ -96,9 +92,7 @@ def _pythonpath_env(repo_root: Path) -> dict[str, str]:
     return env
 
 
-def _with_hs256_test_license_env(
-    env: dict[str, str], tmp_path: Path, tier: str
-) -> None:
+def _with_hs256_test_license_env(env: dict[str, str], tmp_path: Path, tier: str) -> None:
     """[20251228_TEST] Configure a valid HS256 license for server subprocesses."""
 
     from code_scalpel.licensing.jwt_generator import generate_license
@@ -155,9 +149,7 @@ def add(a: int, b: int) -> int:
         encoding="utf-8",
     )
 
-    (project_root / "requirements.txt").write_text(
-        "requests==2.31.0\n", encoding="utf-8"
-    )
+    (project_root / "requirements.txt").write_text("requests==2.31.0\n", encoding="utf-8")
 
     (project_root / "package.json").write_text(
         """\
@@ -208,9 +200,7 @@ def _write_signed_policy_manifest(policy_dir: Path, secret: str) -> None:
     )
 
 
-async def _assert_all_tools_invocable(
-    session: ClientSession, project_root: Path, paths: dict[str, Path]
-) -> None:
+async def _assert_all_tools_invocable(session: ClientSession, project_root: Path, paths: dict[str, Path]) -> None:
     tools = await session.list_tools()
     tool_names = {t.name for t in tools.tools}
     assert len(tool_names) == 22
@@ -448,9 +438,7 @@ def add(a, b):
         ("sse", "/sse"),
     ],
 )
-async def test_mcp_http_sse_transports_invoke_all_tools(
-    tmp_path: Path, transport: str, endpoint_path: str
-):
+async def test_mcp_http_sse_transports_invoke_all_tools(tmp_path: Path, transport: str, endpoint_path: str):
     with anyio.fail_after(240):
         repo_root = Path(__file__).resolve().parents[1]
 

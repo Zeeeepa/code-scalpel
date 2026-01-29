@@ -23,9 +23,7 @@ def create_policy_file() -> Callable[[Path, str, str], Path]:
         Function that creates a policy file and returns its path
     """
 
-    def _create(
-        policy_dir: Path, filename: str = "policy.yaml", content: str = "rules: []"
-    ) -> Path:
+    def _create(policy_dir: Path, filename: str = "policy.yaml", content: str = "rules: []") -> Path:
         policy_dir.mkdir(parents=True, exist_ok=True)
         policy_file = policy_dir / filename
         policy_file.write_text(content, encoding="utf-8")
@@ -66,9 +64,7 @@ def create_manifest() -> Callable[[Path, str, list[str]], Path]:
 
         # Sign with HMAC-SHA256
         message = json.dumps(manifest_data, sort_keys=True, separators=(",", ":"))
-        signature = hmac.new(
-            secret.encode(), message.encode(), hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
 
         manifest_data["signature"] = signature
 

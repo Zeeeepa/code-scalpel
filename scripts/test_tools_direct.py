@@ -123,9 +123,7 @@ async def main():
                 "code": TEST_PYTHON_CODE,
                 "refactoring": "extract_function",
             },
-            "symbolic_execute": {
-                "code": "def foo(x):\n    if x > 0:\n        return 1\n    return 0"
-            },
+            "symbolic_execute": {"code": "def foo(x):\n    if x > 0:\n        return 1\n    return 0"},
             "type_evaporation_scan": {
                 "file_path": str(test_py),
             },
@@ -178,9 +176,7 @@ async def main():
         print(f"Total Tools: {results['total']}")
         print(f"Passed: {results['passed']}")
         print(f"Failed: {results['failed']}")
-        print(
-            f"Success Rate: {results['passed'] / max(results['total'], 1) * 100:.1f}%"
-        )
+        print(f"Success Rate: {results['passed'] / max(results['total'], 1) * 100:.1f}%")
         print()
 
         print("DETAILED RESULTS:")

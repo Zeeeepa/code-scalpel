@@ -183,18 +183,14 @@ class SpecGenerator:
                 for caller in graph_constraints.callers[:10]:  # Limit to 10
                     lines.append(f"- `{caller}`\n")
                 if len(graph_constraints.callers) > 10:
-                    lines.append(
-                        f"- ... and {len(graph_constraints.callers) - 10} more\n"
-                    )
+                    lines.append(f"- ... and {len(graph_constraints.callers) - 10} more\n")
 
             if graph_constraints.callees:
                 lines.append("### Dependencies (What this file imports/calls)\n")
                 for callee in graph_constraints.callees[:10]:  # Limit to 10
                     lines.append(f"- `{callee}`\n")
                 if len(graph_constraints.callees) > 10:
-                    lines.append(
-                        f"- ... and {len(graph_constraints.callees) - 10} more\n"
-                    )
+                    lines.append(f"- ... and {len(graph_constraints.callees) - 10} more\n")
 
             if graph_constraints.circular_dependencies:
                 lines.append("### ⚠️ Circular Dependencies Detected\n")
@@ -220,9 +216,7 @@ class SpecGenerator:
                 context_lines = source_lines[:max_context_lines]
                 lines.extend(context_lines)
                 if len(source_lines) > max_context_lines:
-                    lines.append(
-                        f"\n# ... ({len(source_lines) - max_context_lines} more lines)\n"
-                    )
+                    lines.append(f"\n# ... ({len(source_lines) - max_context_lines} more lines)\n")
                 lines.append("```\n")
 
         except Exception as e:

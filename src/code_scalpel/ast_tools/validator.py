@@ -106,8 +106,7 @@ class ASTValidator:
                 if complexity > self.max_complexity:
                     self.issues.append(
                         ValidationIssue(
-                            f"Function '{node.name}' has too high cognitive "
-                            f"complexity ({complexity})",
+                            f"Function '{node.name}' has too high cognitive " f"complexity ({complexity})",
                             Severity.WARNING,
                             node.lineno,
                         )
@@ -149,8 +148,7 @@ class ASTValidator:
                 if not node.name.islower() and "_" not in node.name:
                     self.issues.append(
                         ValidationIssue(
-                            f"Function name '{node.name}' should use "
-                            "lowercase_with_underscores convention",
+                            f"Function name '{node.name}' should use " "lowercase_with_underscores convention",
                             Severity.WARNING,
                             node.lineno,
                         )
@@ -162,8 +160,7 @@ class ASTValidator:
                     if not re.match(r"^[a-z_][a-z0-9_]*$", node.id):
                         self.issues.append(
                             ValidationIssue(
-                                f"Variable name '{node.id}' should use "
-                                "lowercase_with_underscores convention",
+                                f"Variable name '{node.id}' should use " "lowercase_with_underscores convention",
                                 Severity.INFO,
                                 getattr(node, "lineno", None),
                             )
@@ -206,9 +203,7 @@ class ASTValidator:
                     )
                 self.generic_visit(node)
 
-        validator = SizeValidator(
-            self.config["max_function_length"], self.config["max_class_length"]
-        )
+        validator = SizeValidator(self.config["max_function_length"], self.config["max_class_length"])
         validator.visit(tree)
         self.issues.extend(validator.issues)
 
@@ -268,10 +263,7 @@ class ASTValidator:
                 if isinstance(node.func, ast.Attribute):
                     if node.func.attr in {"execute", "executemany"}:
                         # Check if string formatting or concatenation is used
-                        if any(
-                            isinstance(arg, (ast.BinOp, ast.JoinedStr))
-                            for arg in node.args
-                        ):
+                        if any(isinstance(arg, (ast.BinOp, ast.JoinedStr)) for arg in node.args):
                             self.issues.append(
                                 ValidationIssue(
                                     "Possible SQL injection vulnerability",

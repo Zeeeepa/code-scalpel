@@ -99,11 +99,7 @@ class OraclePipeline:
         if not target_file.exists():
             raise FileNotFoundError(f"File not found: {file_path}")
 
-        logger.info(
-            f"[Oracle Pipeline] tier={self.tier}, "
-            f"limits={self.scanner_limits}, "
-            f"file={file_path}"
-        )
+        logger.info(f"[Oracle Pipeline] tier={self.tier}, " f"limits={self.scanner_limits}, " f"file={file_path}")
 
         # Step 1: Scan with tier-limited visibility
         logger.debug("[Oracle] Step 1: Crawling project with tier limits...")

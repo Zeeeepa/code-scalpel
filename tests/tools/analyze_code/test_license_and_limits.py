@@ -250,9 +250,7 @@ def complex_function(x, y, z):
         assert result.success
         assert result.complexity > 1, "Complex code should have complexity > 1"
         # With nested ifs, complexity should be reasonably high
-        assert (
-            result.complexity >= 7
-        ), f"Expected complexity >= 7, got {result.complexity}"
+        assert result.complexity >= 7, f"Expected complexity >= 7, got {result.complexity}"
 
 
 class TestTierLimitDifferences:
@@ -290,14 +288,8 @@ class TestTierLimitDifferences:
         """Verify limit progression: Community < Pro < Enterprise."""
         from code_scalpel.licensing.features import TOOL_CAPABILITIES
 
-        comm_size = TOOL_CAPABILITIES["analyze_code"]["community"].get(
-            "max_file_size_mb", 1
-        )
+        comm_size = TOOL_CAPABILITIES["analyze_code"]["community"].get("max_file_size_mb", 1)
         pro_size = TOOL_CAPABILITIES["analyze_code"]["pro"].get("max_file_size_mb", 10)
-        ent_size = TOOL_CAPABILITIES["analyze_code"]["enterprise"].get(
-            "max_file_size_mb", 100
-        )
+        ent_size = TOOL_CAPABILITIES["analyze_code"]["enterprise"].get("max_file_size_mb", 100)
 
-        assert (
-            comm_size < pro_size < ent_size
-        ), f"Limits should progress: {comm_size} < {pro_size} < {ent_size}"
+        assert comm_size < pro_size < ent_size, f"Limits should progress: {comm_size} < {pro_size} < {ent_size}"

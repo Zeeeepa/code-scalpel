@@ -25,9 +25,7 @@ def _pythonpath_env(repo_root: Path) -> dict[str, str]:
         if (src_root / "code_scalpel").exists():
             break
         if candidate == candidate.parent:
-            raise AssertionError(
-                f"Could not locate src/code_scalpel starting from: {repo_root}"
-            )
+            raise AssertionError(f"Could not locate src/code_scalpel starting from: {repo_root}")
         candidate = candidate.parent
 
     env = os.environ.copy()
@@ -37,9 +35,7 @@ def _pythonpath_env(repo_root: Path) -> dict[str, str]:
     return env
 
 
-def _with_hs256_test_license_env(
-    env: dict[str, str], tmp_path: Path, tier: str
-) -> None:
+def _with_hs256_test_license_env(env: dict[str, str], tmp_path: Path, tier: str) -> None:
     """[20251228_TEST] Configure a valid HS256 license for server subprocesses."""
 
     from code_scalpel.licensing.jwt_generator import generate_license
@@ -110,9 +106,7 @@ def run(cmd: str) -> None:
         encoding="utf-8",
     )
 
-    (project_root / "requirements.txt").write_text(
-        "requests==2.31.0\n", encoding="utf-8"
-    )
+    (project_root / "requirements.txt").write_text("requests==2.31.0\n", encoding="utf-8")
 
     (project_root / "package.json").write_text(
         """\
@@ -197,8 +191,7 @@ async def _strict_stdio_client(server: StdioServerParameters):
                         message = mcp_types.JSONRPCMessage.model_validate_json(line)
                     except Exception as exc:
                         raise AssertionError(
-                            "Server wrote non-JSON-RPC data to stdout; "
-                            f"first invalid line: {line[:200]!r}"
+                            "Server wrote non-JSON-RPC data to stdout; " f"first invalid line: {line[:200]!r}"
                         ) from exc
 
                     await read_stream_writer.send(SessionMessage(message))
@@ -208,9 +201,7 @@ async def _strict_stdio_client(server: StdioServerParameters):
 
         async with write_stream_reader:
             async for session_message in write_stream_reader:
-                payload = session_message.message.model_dump_json(
-                    by_alias=True, exclude_none=True
-                )
+                payload = session_message.message.model_dump_json(by_alias=True, exclude_none=True)
                 await process.stdin.send(
                     (payload + "\n").encode(
                         encoding=server.encoding,

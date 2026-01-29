@@ -13,15 +13,11 @@ import sys
 import os
 
 # Add agents package tests to path
-agents_tests = os.path.join(
-    os.path.dirname(__file__), "../../packages/codescalpel-agents/tests"
-)
+agents_tests = os.path.join(os.path.dirname(__file__), "../../packages/codescalpel-agents/tests")
 if agents_tests not in sys.path:
     sys.path.insert(0, agents_tests)
 
 try:
     from autonomy.test_tamper_resistance import *  # noqa: F401, F403
 except ImportError as e:
-    raise ImportError(
-        "This test requires the agents package. Install with: pip install code-scalpel[agents]"
-    ) from e
+    raise ImportError("This test requires the agents package. Install with: pip install code-scalpel[agents]") from e

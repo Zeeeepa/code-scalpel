@@ -225,17 +225,10 @@ async def test_whitespace_only_code(tmp_path: Path):
 async def test_very_large_valid_input(tmp_path: Path):
     """Very large valid code is handled (within limits)."""
     # Create a large TypeScript file with many valid interfaces
-    frontend_code = "\n".join(
-        [
-            f"interface Interface{i} {{\n" f"  field{i}: string;\n" f"}}\n"
-            for i in range(100)
-        ]
-    )
+    frontend_code = "\n".join([f"interface Interface{i} {{\n" f"  field{i}: string;\n" f"}}\n" for i in range(100)])
 
     # Create a large Python file with many functions
-    backend_code = "\n".join(
-        [f"def function_{i}():\n" f"  return {{'value': {i}}}\n" for i in range(100)]
-    )
+    backend_code = "\n".join([f"def function_{i}():\n" f"  return {{'value': {i}}}\n" for i in range(100)])
 
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(

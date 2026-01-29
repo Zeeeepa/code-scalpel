@@ -220,11 +220,7 @@ class KafkaAnalysisResult:
     @property
     def consumer_handlers(self) -> List[KafkaConsumer]:
         """Get consumer handlers (decorated functions)."""
-        return [
-            c
-            for c in self.consumers
-            if c.pattern_type == KafkaPatternType.CONSUMER_HANDLER
-        ]
+        return [c for c in self.consumers if c.pattern_type == KafkaPatternType.CONSUMER_HANDLER]
 
     @property
     def has_taint_risks(self) -> bool:
@@ -252,9 +248,7 @@ class KafkaAnalysisResult:
         if self.tainted_producers:
             lines.append("\n⚠️  TAINTED PRODUCERS:")
             for p in self.tainted_producers:
-                lines.append(
-                    f"  - Line {p.line}: {p.topic} <- {p.data_variable} (from {p.taint_source})"
-                )
+                lines.append(f"  - Line {p.line}: {p.topic} <- {p.data_variable} (from {p.taint_source})")
 
         if self.consumer_handlers:
             lines.append("\n🔍 CONSUMER HANDLERS (taint sources):")
@@ -509,9 +503,7 @@ class KafkaTaintTracker:
                             if decorator.func.attr == "agent":
                                 # Extract topic from decorator
                                 if decorator.args:
-                                    topic = outer_tracker._extract_string_value(
-                                        decorator.args[0]
-                                    )
+                                    topic = outer_tracker._extract_string_value(decorator.args[0])
                                     if topic:
                                         consumer = KafkaConsumer(
                                             topics=[topic],
@@ -543,10 +535,7 @@ class KafkaTaintTracker:
                         topic = outer_tracker._extract_string_value(node.args[0])
                         topic_is_dynamic = topic is None
                         if topic is None:
-                            topic = (
-                                outer_tracker._get_variable_name(node.args[0])
-                                or "dynamic"
-                            )
+                            topic = outer_tracker._get_variable_name(node.args[0]) or "dynamic"
 
                         data_var = None
                         is_tainted = False
@@ -562,10 +551,7 @@ class KafkaTaintTracker:
                         for kw in node.keywords:
                             if kw.arg == "value":
                                 data_var = outer_tracker._get_variable_name(kw.value)
-                                if (
-                                    data_var
-                                    and data_var in outer_tracker.tainted_variables
-                                ):
+                                if data_var and data_var in outer_tracker.tainted_variables:
                                     is_tainted = True
                                     taint_source = data_var
 
@@ -587,10 +573,7 @@ class KafkaTaintTracker:
                         topic = outer_tracker._extract_string_value(node.args[0])
                         topic_is_dynamic = topic is None
                         if topic is None:
-                            topic = (
-                                outer_tracker._get_variable_name(node.args[0])
-                                or "dynamic"
-                            )
+                            topic = outer_tracker._get_variable_name(node.args[0]) or "dynamic"
 
                         data_var = None
                         is_tainted = False
@@ -605,10 +588,7 @@ class KafkaTaintTracker:
                         for kw in node.keywords:
                             if kw.arg == "value":
                                 data_var = outer_tracker._get_variable_name(kw.value)
-                                if (
-                                    data_var
-                                    and data_var in outer_tracker.tainted_variables
-                                ):
+                                if data_var and data_var in outer_tracker.tainted_variables:
                                     is_tainted = True
                                     taint_source = data_var
 
@@ -699,9 +679,7 @@ class KafkaTaintTracker:
             return f"{self._get_variable_name(node.value)}.{node.attr}"
         return None
 
-    def _analyze_python_regex(
-        self, source_code: str, result: KafkaAnalysisResult
-    ) -> None:
+    def _analyze_python_regex(self, source_code: str, result: KafkaAnalysisResult) -> None:
         """Fallback regex-based analysis for Python."""
         lines = source_code.split("\n")
 
@@ -711,9 +689,7 @@ class KafkaTaintTracker:
                 match = re.search(pattern, line)
                 if match:
                     topic = match.group(1)
-                    topic_is_dynamic = not (
-                        topic.startswith('"') or topic.startswith("'")
-                    )
+                    topic_is_dynamic = not (topic.startswith('"') or topic.startswith("'"))
 
                     # Simple taint check - look for tainted vars in the line
                     is_tainted = any(var in line for var in self.tainted_variables)
@@ -800,9 +776,7 @@ class KafkaTaintTracker:
                         )
                         result.consumers.append(consumer)
 
-    def _analyze_javascript(
-        self, source_code: str, result: KafkaAnalysisResult
-    ) -> None:
+    def _analyze_javascript(self, source_code: str, result: KafkaAnalysisResult) -> None:
         """Analyze JavaScript/TypeScript code for Kafka patterns."""
         lines = source_code.split("\n")
 
@@ -816,10 +790,7 @@ class KafkaTaintTracker:
             topic = match.group(1)
             # Find line number
             line_num = source_code[: match.start()].count("\n") + 1
-            is_tainted = any(
-                var in source_code[match.start() : match.start() + 200]
-                for var in self.tainted_variables
-            )
+            is_tainted = any(var in source_code[match.start() : match.start() + 200] for var in self.tainted_variables)
 
             producer = KafkaProducer(
                 topic=topic,
@@ -900,9 +871,7 @@ class KafkaTaintTracker:
                 continue
 
             # Find consumers of this topic
-            matching_consumers = [
-                c for c in consumer_result.consumers if producer.topic in c.topics
-            ]
+            matching_consumers = [c for c in consumer_result.consumers if producer.topic in c.topics]
 
             if matching_consumers:
                 bridge = KafkaTaintBridge(
@@ -935,9 +904,7 @@ class KafkaTaintTracker:
         """
         taint_origin = original_taint or f"kafka:{','.join(consumer.topics)}"
 
-        return {
-            var: f"KAFKA_CONSUMER({taint_origin})" for var in consumer.taint_variables
-        }
+        return {var: f"KAFKA_CONSUMER({taint_origin})" for var in consumer.taint_variables}
 
     def get_security_findings(
         self,
@@ -1065,10 +1032,7 @@ def analyze_kafka_codebase(
     for ext in extensions:
         for file_path in root.rglob(f"*{ext}"):
             # Skip common non-source directories
-            if any(
-                part in file_path.parts
-                for part in ["node_modules", ".venv", "venv", "__pycache__", ".git"]
-            ):
+            if any(part in file_path.parts for part in ["node_modules", ".venv", "venv", "__pycache__", ".git"]):
                 continue
 
             try:
@@ -1078,11 +1042,7 @@ def analyze_kafka_codebase(
                 if "kafka" not in source_code.lower():
                     continue
 
-                language = (
-                    "python"
-                    if ext == ".py"
-                    else "java" if ext == ".java" else "javascript"
-                )
+                language = "python" if ext == ".py" else "java" if ext == ".java" else "javascript"
                 result = tracker.analyze_file(source_code, str(file_path), language)
 
                 # Only include files with Kafka patterns
@@ -1126,9 +1086,7 @@ def get_kafka_taint_bridges(
             continue
 
         matching_consumers = [
-            c
-            for c in all_consumers
-            if producer.topic in c.topics and c.file_path != producer.file_path
+            c for c in all_consumers if producer.topic in c.topics and c.file_path != producer.file_path
         ]
 
         if matching_consumers:

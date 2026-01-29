@@ -135,15 +135,12 @@ def verifier_base_url() -> str | None:
     # [20251228_SECURITY] Validate against allowlist to prevent malicious verifier exploitation
     if url not in TRUSTED_VERIFIER_URLS and not _is_loopback_verifier_url(url):
         logger.error(
-            "SECURITY: Untrusted verifier URL rejected: %s. "
-            "Only trusted verifiers are allowed. "
-            "Trusted URLs: %s",
+            "SECURITY: Untrusted verifier URL rejected: %s. " "Only trusted verifiers are allowed. " "Trusted URLs: %s",
             url,
             sorted(TRUSTED_VERIFIER_URLS),
         )
         raise ValueError(
-            f"Untrusted verifier URL: {url}. "
-            f"Only trusted verifiers are allowed: {sorted(TRUSTED_VERIFIER_URLS)}"
+            f"Untrusted verifier URL: {url}. " f"Only trusted verifiers are allowed: {sorted(TRUSTED_VERIFIER_URLS)}"
         )
 
     return url
@@ -298,9 +295,7 @@ def _verify_retries() -> int:
 def remote_verify(token: str, *, environment: str | None) -> VerifiedEntitlements:
     base = verifier_base_url()
     if not base:
-        raise RuntimeError(
-            f"Remote verifier URL not configured. Set {VERIFIER_BASE_URL_ENV_VAR}."
-        )
+        raise RuntimeError(f"Remote verifier URL not configured. Set {VERIFIER_BASE_URL_ENV_VAR}.")
 
     import urllib.parse
 
@@ -404,9 +399,7 @@ def remote_verify(token: str, *, environment: str | None) -> VerifiedEntitlement
         token_hash_hint,
         exc_name,
     )
-    raise RuntimeError(
-        f"Remote verify failed (hash={token_hash_hint}, error={exc_name})"
-    )
+    raise RuntimeError(f"Remote verify failed (hash={token_hash_hint}, error={exc_name})")
 
 
 @dataclass(frozen=True)

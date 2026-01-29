@@ -39,15 +39,12 @@ class PyPIPublisher:
         self.pyproject_path = self.project_dir / "pyproject.toml"
 
         if not self.pyproject_path.exists():
-            raise FileNotFoundError(
-                f"pyproject.toml not found at {self.pyproject_path}"
-            )
+            raise FileNotFoundError(f"pyproject.toml not found at {self.pyproject_path}")
 
         self.pypi_token = pypi_token or os.environ.get("PYPI_TOKEN")
         if not self.pypi_token:
             raise ValueError(
-                "PyPI token required. Pass 'pypi_token' argument or set PYPI_TOKEN "
-                "environment variable."
+                "PyPI token required. Pass 'pypi_token' argument or set PYPI_TOKEN " "environment variable."
             )
 
         self.pypi_url = pypi_url
@@ -154,9 +151,7 @@ class PyPIPublisher:
 
         except FileNotFoundError as e:
             if "No such file" not in str(e):
-                raise RuntimeError(
-                    "Python build module not found. Install with: pip install build"
-                )
+                raise RuntimeError("Python build module not found. Install with: pip install build")
             raise RuntimeError("Build did not produce expected distribution files")
 
     def verify_package(self) -> dict[str, str]:
@@ -327,9 +322,7 @@ class PyPIPublisher:
         print("1️⃣  Verifying version...")
         current_version = self.get_version()
         if current_version != version:
-            raise ValueError(
-                f"Version mismatch: expected {version}, got {current_version}"
-            )
+            raise ValueError(f"Version mismatch: expected {version}, got {current_version}")
         print(f"   ✅ Version verified: {version}\n")
 
         # Step 2: Build distributions

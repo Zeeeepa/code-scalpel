@@ -34,15 +34,15 @@
 
 A comprehensive pre-release validation system that ensures Code Scalpel's license-aware capabilities are:
 
-- ✅ **Correctly enforced** across all 22 tools
-- ✅ **Consistent** across all 3 tiers (FREE, PRO, ENTERPRISE)
+- ✅ **Correctly enforced** across all 23 tools
+- ✅ **Consistent** across all 3 tiers (COMMUNITY, PRO, ENTERPRISE)
 - ✅ **Validated** across all 3 transports (stdio, HTTP, Docker)
 - ✅ **Tested** with 300+ test cases
 - ✅ **Automated** in CI/CD before every release
 
 ### Why This Matters
 
-1. **Pricing Integrity**: Prevent accidental free access to paid features
+1. **Pricing Integrity**: Prevent accidental community access to paid features
 2. **Client Stability**: Guarantee tools never disappear on upgrade
 3. **Tier Correctness**: Validate pricing logic is executable code
 4. **License Validation**: Ensure licenses properly control access
@@ -73,23 +73,23 @@ After implementation, every release will have:
 
 ### Why Do We Need This?
 
-Code Scalpel has evolved from a simple analysis tool to a **commercial product with three tiers** and **22 MCP tools**. Current state:
+Code Scalpel has evolved from a simple analysis tool to a **commercial product with three tiers** and **23 MCP tools**. Current state:
 
 - ✅ License validation exists (JWT-based, offline)
-- ✅ Tier system exists (FREE/PRO/ENTERPRISE)
-- ✅ Tool registry exists (22 tools mapped to tiers)
+- ✅ Tier system exists (COMMUNITY/PRO/ENTERPRISE)
+- ✅ Tool registry exists (23 tools all available at all tiers)
 - ❌ **No automated capability validation**
 - ❌ **No cross-transport tier verification**
 - ❌ **No capability regression detection**
 - ❌ **No CI/CD enforcement of tier limits**
 
-**Risk**: Accidental releases could expose paid features at free tier, break client contracts, or silently degrade capabilities.
+**Risk**: Accidental releases could expose paid features at community tier, break client contracts, or silently degrade capabilities.
 
 ### Goals (What Success Looks Like)
 
 | Goal | How We Measure | Target |
 |------|----------------|--------|
-| **Tier Enforcement** | All 22 tools × 3 tiers tested | 100% pass rate |
+| **Tier Enforcement** | All 23 tools × 3 tiers tested | 100% pass rate |
 | **Transport Consistency** | Tests on stdio/HTTP/Docker | All pass |
 | **Capability Accuracy** | Golden file snapshots | 0 diffs (or approved) |
 | **License Validation** | Secret injection tests | All licenses work |
@@ -132,17 +132,17 @@ Code Scalpel has evolved from a simple analysis tool to a **commercial product w
 - ✅ Strict failure mode (expired = COMMUNITY)
 
 **Tool Registry** (`src/code_scalpel/tiers/`)
-- ✅ 22 tools mapped to tiers
-- ✅ Tool availability checks
+- ✅ 23 tools all available at all tiers
+- ✅ Tool availability checks (always true)
 - ✅ Feature registry (24 features)
-- ✅ `@requires_tier` decorator
-- ✅ `UpgradeRequiredError` exception
+- ✅ `@requires_tier` decorator (for limits, not availability)
+- ✅ `UpgradeRequiredError` exception (not used for availability)
 
 **MCP Server** (`src/code_scalpel/mcp/`)
 - ✅ FastMCP with decorator-based tools
 - ✅ `ToolResponseEnvelope` standard response
-- ✅ Tier-aware error codes
-- ✅ Tool registration system (21 tools + 1 oracle)
+- ✅ Tier-aware error codes (for limits, not availability)
+- ✅ Tool registration system (23 tools, all always available)
 
 **CLI** (`src/code_scalpel/cli.py`)
 - ✅ License install command
@@ -162,7 +162,7 @@ Code Scalpel has evolved from a simple analysis tool to a **commercial product w
 |-----|---------------|-------------------|
 | **Capability Introspection** | Tools have limits, no query interface | `get_capabilities()` MCP method + CLI command |
 | **Capability Schema** | Limits in TOML, not in JSON | Standardized JSON capability schema |
-| **Golden Files** | No regression testing | `/capabilities/free.json` etc. with CI comparison |
+| **Golden Files** | No regression testing | `/capabilities/community.json` etc. with CI comparison |
 | **Cross-Transport Tests** | Limited to stdio | Full matrix: stdio + HTTP + Docker per tier |
 | **Transport Adapter** | Tests per transport | Unified `CodeScalpelAdapter` interface |
 | **CI Tier Validation** | Generic CI checks | 8-stage pipeline with tier-specific gates |
@@ -196,11 +196,10 @@ Code Scalpel has evolved from a simple analysis tool to a **commercial product w
 └────────────────────────────────────────────────────────────────┘
                              ↓
         ┌────────────────────────────────────────┐
-        │   All 22 Tools (Always Registered)     │
-        │   ├─ 9 COMMUNITY (always available)    │
-        │   ├─ 5 PRO (available if licensed)     │
-        │   ├─ 5 ENTERPRISE (enterprise only)    │
-        │   └─ 1 ORACLE (emerging)               │
+        │   All 23 Tools (Always Available)    │
+        │   ├─ All tools registered at all tiers │
+        │   ├─ Capabilities vary by tier       │
+        │   └─ No tools hidden or unavailable   │
         └────────────────────────────────────────┘
                              ↓
         ┌────────────────────────────────────────┐
@@ -221,7 +220,7 @@ Code Scalpel has evolved from a simple analysis tool to a **commercial product w
 
 ### Key Design Principles
 
-1. **Stable Tool Surface**: All 22 tools always registered, schema never changes
+1. **Stable Tool Surface**: All 23 tools always available, schema never changes
 2. **Dynamic Capabilities**: Limits and features vary by tier, not tool availability
 3. **Introspectable**: Capabilities queryable via `get_capabilities()`
 4. **Testable**: Capability limits are executable code, not just documentation
@@ -235,10 +234,10 @@ Code Scalpel has evolved from a simple analysis tool to a **commercial product w
 ### Principle 1: Stable Tool Surface (Non-Negotiable)
 
 **What This Means:**
-- All 22 tools **always registered** in tool list (no hiding)
+- All 23 tools **always available** at all tiers
 - Tool schemas **never change** by tier
-- Tool names/parameters **immutable** per tier
-- Tools show "requires upgrade" message, not "not found"
+- Tool names/parameters **immutable**
+- No "requires upgrade" messages for availability
 
 **Why It Matters:**
 - LLM agents don't hallucinate unavailable tools
@@ -248,18 +247,18 @@ Code Scalpel has evolved from a simple analysis tool to a **commercial product w
 **How We Enforce It:**
 ```python
 def test_tool_count_constant_across_tiers():
-    """Assert all 22 tools present in every tier."""
-    for tier in ["free", "pro", "enterprise"]:
+    """Assert all 23 tools present in every tier."""
+    for tier in ["community", "pro", "enterprise"]:
         tools = get_mcp_tools(tier)
-        assert len(tools) == 22, f"Expected 22 tools, got {len(tools)} at {tier}"
+        assert len(tools) == 23, f"Expected 23 tools, got {len(tools)} at {tier}"
 
 def test_tool_schema_constant_across_tiers():
     """Assert tool schema doesn't change by tier."""
     for tool_id in ALL_TOOLS:
-        schema_free = get_tool_schema(tool_id, "free")
+        schema_community = get_tool_schema(tool_id, "community")
         schema_pro = get_tool_schema(tool_id, "pro")
         schema_ent = get_tool_schema(tool_id, "enterprise")
-        assert schema_free == schema_pro == schema_ent
+        assert schema_community == schema_pro == schema_ent
 ```
 
 ### Principle 2: Dynamic Capability Envelope
@@ -365,7 +364,7 @@ Located in `/capabilities/` directory:
 
 ```
 /capabilities/
-  ├── free.json           # Full envelope for COMMUNITY tier
+  ├── community.json           # Full envelope for COMMUNITY tier
   ├── pro.json            # Full envelope for PRO tier
   ├── enterprise.json     # Full envelope for ENTERPRISE tier
   ├── schema.json         # JSON schema for validation
@@ -395,9 +394,12 @@ Located in `/capabilities/` directory:
       }
     },
     "unified_sink_detect": {
-      "available": false,
-      "requires_tier": "enterprise",
-      "upgrade_url": "https://code-scalpel.ai/pricing"
+      "available": true,
+      "capabilities": {
+        "confidence_threshold": 0.7,
+        "supported_languages": ["python"],
+        "max_files": 50
+      }
     }
   }
 }
@@ -425,13 +427,8 @@ def get_tool_capabilities(tool_id: str, tier: str = None) -> dict:
     if tier is None:
         tier = get_current_tier()
     
-    # 1. Check availability
-    if not is_tool_available(tool_id, tier):
-        return {
-            "available": False,
-            "requires_tier": get_minimum_tier_for_tool(tool_id),
-            "upgrade_url": "https://code-scalpel.ai/pricing"
-        }
+    # 1. All tools are always available at all tiers
+    # No availability checks needed - all tools present everywhere
     
     # 2. Load from limits.toml
     config = load_limits_config()
@@ -506,7 +503,7 @@ env:
 def setup_licenses():
     """Inject license tokens from GitHub secrets."""
     
-    # FREE: Uses COMMUNITY default (no license needed)
+    # COMMUNITY: Uses COMMUNITY default (no license needed)
     os.environ.pop("CODE_SCALPEL_LICENSE", None)
     
     # PRO: From GitHub secret
@@ -520,7 +517,7 @@ def setup_licenses():
         pytest.skip("ENTERPRISE license not available in secrets")
     
     yield {
-        "free": None,
+        "community": None,
         "pro": pro_license,
         "enterprise": ent_license
     }
@@ -552,7 +549,7 @@ Dimension 2: Surface (2)
 └── MCP (model context protocol)
 
 Dimension 3: Tier (3)
-├── free (COMMUNITY, no license)
+├── community (COMMUNITY, no license)
 ├── pro (PRO, valid JWT)
 └── enterprise (ENTERPRISE, full features)
 
@@ -562,8 +559,8 @@ Total Base Combinations: 3 × 2 × 3 = 18
 ### 5.2 Full Coverage Test Plan (~300 Tests)
 
 **Phase 1: Tier Enforcement (132 tests)**
-- Tool Availability: 22 tools × 3 tiers = 66 tests
-- Capability Limits: 22 tools × 3 tiers = 66 tests
+- Tool Availability: 23 tools × 3 tiers = 69 tests (all tools always available)
+- Capability Limits: 23 tools × 3 tiers = 69 tests
 
 **Phase 2: Transport Validation (30 tests)**
 - Stdio: 10 tests (list tools, get capabilities, sample calls)
@@ -617,12 +614,12 @@ Total Base Combinations: 3 × 2 × 3 = 18
   │   ├── test_capability_schema.py        # Validate schema structure
   │   ├── test_capability_snapshot.py      # Compare against golden files
   │   ├── test_capability_generation.py    # Test auto-generation
-  │   └── fixtures/ (free.json, pro.json, enterprise.json)
+  │   └── fixtures/ (community.json, pro.json, enterprise.json)
   │
   ├── tier_enforcement/
-  │   ├── test_tool_availability.py        # 22 tools × 3 tiers
+  │   ├── test_tool_availability.py        # 23 tools × 3 tiers (all always available)
   │   ├── test_tool_limits.py              # Limit enforcement per tool
-  │   ├── test_upgrade_paths.py            # UpgradeRequired errors
+  │   ├── test_upgrade_paths.py            # No upgrade required errors (all available)
   │   └── test_feature_gating.py           # 24 features × 3 tiers
   │
   ├── licenses/
@@ -666,7 +663,7 @@ class CodeScalpelAdapter(ABC):
     
     @abstractmethod
     async def list_tools(self) -> list[dict]:
-        """Get all 22 tools (always)."""
+        """Get all 23 tools (always)."""
         pass
     
     @abstractmethod
@@ -696,16 +693,15 @@ class DockerAdapter(CodeScalpelAdapter): ...  # ~200 lines
 # tests/tier_enforcement/test_tool_availability.py
 
 @pytest.mark.parametrize("transport", ["stdio", "http", "docker"])
-@pytest.mark.parametrize("tier", ["free", "pro", "enterprise"])
-@pytest.mark.parametrize("tool_id", ALL_22_TOOLS)
+@pytest.mark.parametrize("tier", ["community", "pro", "enterprise"])
+@pytest.mark.parametrize("tool_id", ALL_23_TOOLS)
 async def test_tool_availability(adapter_factory, transport, tier, tool_id):
     """
-    Assert tool availability matches tier requirements.
+    Assert all tools are always available at all tiers.
     
     PASS CONDITIONS:
-    - COMMUNITY tools: visible in all tiers
-    - PRO tools: hidden in free, visible in pro+
-    - ENTERPRISE tools: visible only in enterprise
+    - All 23 tools visible in all tiers
+    - No tools hidden or unavailable
     """
     adapter = adapter_factory(transport, tier)
     await adapter.connect()
@@ -713,15 +709,9 @@ async def test_tool_availability(adapter_factory, transport, tier, tool_id):
     tools = await adapter.list_tools()
     tool_names = [t["name"] for t in tools]
     
-    # Get requirement
-    requirement = TOOL_REQUIREMENTS[tool_id]
-    should_be_visible = tier_supports(tier, requirement)
-    
-    # Assert
-    is_visible = tool_id in tool_names
-    assert is_visible == should_be_visible, (
-        f"Tool {tool_id} should be "
-        f"{'visible' if should_be_visible else 'hidden'} "
+    # All tools always available
+    assert tool_id in tool_names, (
+        f"Tool {tool_id} should be visible "
         f"at {tier} tier on {transport}"
     )
     
@@ -741,7 +731,7 @@ Stage 2: Unit Tests (3 min)
          ↓
 Stage 3: Build Package (2 min)
          ↓
-Stage 4: FREE Tier Tests (4 min)
+Stage 4: COMMUNITY Tier Tests (4 min)
          ↓
 Stage 5: PRO Tier Tests (5 min)
          ↓
@@ -788,20 +778,20 @@ Blockers: ❌ Test failure
 
 Blockers: ❌ Build failure, ❌ Entry point missing
 
-**Stage 4: FREE Tier Tests (4 min)**
+**Stage 4: COMMUNITY Tier Tests (4 min)**
 
 Prerequisites: Installed from Stage 3 build
 
 ```yaml
 Matrix: stdio × HTTP × Docker
 For each transport:
-  - List tools (expect 9 COMMUNITY only)
-  - Get capabilities (no PRO/ENTERPRISE features)
+  - List tools (expect all 23 tools available)
+  - Get capabilities (COMMUNITY limits applied)
   - Call analyze_code with 5000 files (expect clamped to 1000)
-  - Attempt cross_file_scan (expect UpgradeRequired error)
+  - Call cross_file_scan (expect success at COMMUNITY limits)
 ```
 
-Blockers: ❌ Tool count wrong, ❌ Limits not enforced
+Blockers: ❌ Tool count wrong (not 23), ❌ Limits not enforced
 
 **Stage 5: PRO Tier Tests (5 min)**
 
@@ -810,13 +800,13 @@ Prerequisites: Inject PRO license from GitHub secret
 ```yaml
 Matrix: stdio × HTTP × Docker
 For each transport:
-  - List tools (expect 14: 9 COMMUNITY + 5 PRO)
-  - Get capabilities (PRO features available, ENTERPRISE hidden)
-  - Call cross_file_scan (expect success at PRO limit)
-  - Attempt unified_sink_detect (expect UpgradeRequired error)
+  - List tools (expect all 23 tools available)
+  - Get capabilities (PRO limits applied)
+  - Call cross_file_scan (expect success at PRO limits)
+  - Call unified_sink_detect (expect success at PRO limits)
 ```
 
-Blockers: ❌ License not injected, ❌ Tool count wrong, ❌ Limits not enforced
+Blockers: ❌ License not injected, ❌ Tool count wrong (not 23), ❌ Limits not enforced
 
 **Stage 6: ENTERPRISE Tier Tests (5 min)**
 
@@ -825,20 +815,20 @@ Prerequisites: Inject ENTERPRISE license from GitHub secret
 ```yaml
 Matrix: stdio × HTTP × Docker
 For each transport:
-  - List tools (expect all 22)
-  - Get capabilities (all features available)
+  - List tools (expect all 23 tools available)
+  - Get capabilities (ENTERPRISE limits applied)
   - Call all tools at ENTERPRISE limits (expect success)
-  - Verify no UpgradeRequired errors
+  - Verify no limit clamping
 ```
 
-Blockers: ❌ License not injected, ❌ Tool count wrong, ❌ Feature unavailable
+Blockers: ❌ License not injected, ❌ Tool count wrong (not 23), ❌ Feature unavailable
 
 **Stage 7: Capability Snapshots (2 min)**
 
 Prerequisites: Test environment ready
 
 ```yaml
-For each tier (free, pro, enterprise):
+For each tier (community, pro, enterprise):
   - Generate current capabilities
   - Compare against golden file (capabilities/{tier}.json)
   - If different:
@@ -927,8 +917,8 @@ jobs:
           path: dist/
 
   # Stage 4
-  free-tier:
-    name: Stage 4 - FREE Tier Tests
+  community-tier:
+    name: Stage 4 - COMMUNITY Tier Tests
     runs-on: ubuntu-latest
     needs: build
     strategy:
@@ -942,7 +932,7 @@ jobs:
       - run: pip install -e ".[dev]" dist/*.whl
       - run: |
           pytest tests/tier_enforcement/test_tool_availability.py \
-            -k "free and transport_${{ matrix.transport }}" -v
+            -k "community and transport_${{ matrix.transport }}" -v
 
   # Stage 5 (PRO)
   pro-tier:
@@ -1003,7 +993,7 @@ jobs:
   release:
     name: Stage 8 - Release/Publish
     runs-on: ubuntu-latest
-    needs: [free-tier, pro-tier, enterprise-tier, snapshots]
+    needs: [community-tier, pro-tier, enterprise-tier, snapshots]
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v4
@@ -1025,10 +1015,10 @@ These violations **automatically block PR merge**:
 
 | Violation | Detection | Why Blocker | Example |
 |-----------|-----------|------------|---------|
-| **Tool count changes** | `len(tools) != 22` | Breaks client code | Expected 22, got 21 |
+| **Tool count changes** | `len(tools) != 23` | Breaks client code | Expected 23, got 22 |
 | **Tool schema changes** | Schema comparison | Tool interface instability | Input param type changed |
 | **Capability mismatch** | Golden file diff | Unintended pricing change | max_files changed without approval |
-| **Tier limit ignored** | Tool accepts wrong input | Paid feature exposed free | FREE tier can call PRO limit |
+| **Tier limit ignored** | Tool accepts wrong input | Paid feature exposed community | COMMUNITY tier can call PRO limit |
 | **License not injected** | Secret validation fails | Tier detection broken | License secret empty |
 | **MCP tool lies** | Capability vs actual | Contract violation | Says available but errors |
 | **Response format broken** | Contract validation | Breaks agents/clients | Missing required field |
@@ -1053,12 +1043,12 @@ These violations **warn but don't block merge**:
 class TestBlockerEnforcement:
     """Enforce non-negotiable rules before release."""
     
-    def test_tool_count_must_be_22(self):
-        """BLOCKER: Must have exactly 22 tools."""
+    def test_tool_count_must_be_23(self):
+        """BLOCKER: Must have exactly 23 tools."""
         tools = get_mcp_tools()
-        assert len(tools) == 22, (
-            f"Expected 22 tools, got {len(tools)}. "
-            "This is a BLOCKER - all 22 tools must always be registered."
+        assert len(tools) == 23, (
+            f"Expected 23 tools, got {len(tools)}. "
+            "This is a BLOCKER - all 23 tools must always be available."
         )
     
     def test_tool_schema_immutable(self):
@@ -1073,7 +1063,7 @@ class TestBlockerEnforcement:
     
     def test_capability_snapshot_match(self):
         """BLOCKER: Capabilities must match golden unless approved."""
-        for tier in ["free", "pro", "enterprise"]:
+        for tier in ["community", "pro", "enterprise"]:
             generated = generate_capabilities(tier)
             golden = load_golden_capabilities(tier)
             
@@ -1090,7 +1080,7 @@ class TestBlockerEnforcement:
     
     def test_tier_limits_enforced(self):
         """BLOCKER: Tier limits must actually be enforced."""
-        for tier in ["free", "pro", "enterprise"]:
+        for tier in ["community", "pro", "enterprise"]:
             with tier_context(tier):
                 caps = get_capabilities()
                 max_files = caps["tools"]["analyze_code"]["capabilities"]["max_files"]
@@ -1141,7 +1131,7 @@ def analyze_code(files):
 # ❌ Pattern 2: Hiding tools per tier
 @mcp.tool()
 def cross_file_scan():
-    if get_current_tier() == "free":
+    if get_current_tier() == "community":
         raise ToolNotAvailable("Upgrade to PRO")
     return scan_cross_file()
 
@@ -1181,7 +1171,7 @@ async def get_capabilities() -> CapabilityEnvelope:
 # ✅ Pattern 3: Limits in configuration, not code
 # File: src/code_scalpel/capabilities/limits.toml
 
-[analyze_code.free]
+[analyze_code.community]
 max_files = 1000
 max_depth = 5
 
@@ -1194,9 +1184,9 @@ max_files = 50000
 max_depth = 30
 
 # ✅ Pattern 4: Tests assert business rules
-def test_analyze_code_free_limit():
-    """FREE tier should limit to 1000 files."""
-    with tier_context("free"):
+def test_analyze_code_community_limit():
+    """COMMUNITY tier should limit to 1000 files."""
+    with tier_context("community"):
         result = analyze_code(["file"] * 5000)
         assert len(result.analyzed) == 1000
 
@@ -1214,7 +1204,7 @@ When adding a new tier-gated feature:
 - [ ] Add capability entry to `/src/code_scalpel/capabilities/limits.toml`
 - [ ] Add tool to tier registry if new
 - [ ] Update tool to use `get_tool_capabilities()` instead of hardcoding limits
-- [ ] Add test for each tier (free/pro/enterprise)
+- [ ] Add test for each tier (community/pro/enterprise)
 - [ ] Verify tool appears in all tier's tool lists
 - [ ] Verify capability envelope includes new limits
 - [ ] Verify `get_capabilities()` MCP method returns correct limits
@@ -1249,7 +1239,7 @@ When adding a new tier-gated feature:
 - [ ] Implement `StdioAdapter` (subprocess)
 - [ ] Implement `HTTPAdapter` (HTTP client)
 - [ ] Implement `DockerAdapter` (container runner)
-- [ ] Write tool availability tests (22 tools × 3 tiers)
+- [ ] Write tool availability tests (23 tools × 3 tiers)
 - [ ] Write capability limit tests
 - [ ] Write feature gating tests (24 features × 3 tiers)
 
@@ -1309,7 +1299,7 @@ When adding a new tier-gated feature:
 
 2. **Test Coverage**
    - [ ] 300+ tests passing
-   - [ ] All 22 tools × 3 tiers tested
+   - [ ] All 23 tools × 3 tiers tested
    - [ ] All 3 transports tested
    - [ ] All blockers functional
 
@@ -1413,7 +1403,7 @@ Tools check capabilities for both limits and feature availability.
 **A:**
 
 No, because:
-- All 22 tools always registered (tool list immutable)
+- All 23 tools always available (tool list immutable)
 - Tier enforcement in server code (not client code)
 - Limits applied before response sent
 - Invalid tiers fall back to COMMUNITY
@@ -1469,15 +1459,15 @@ ENTERPRISE (5 tools - enterprise only)
 ORACLE (1 tool - emerging)
 └── 1. oracle_tool
 
-TOTAL: 22 tools
+TOTAL: 23 tools
 ```
 
 ### Appendix B: Example Capability Files
 
-**capabilities/free.json (excerpt)**
+**capabilities/community.json (excerpt)**
 ```json
 {
-  "tier": "free",
+  "tier": "community",
   "generated_at": "2026-01-27T12:00:00Z",
   "tools": {
     "analyze_code": {

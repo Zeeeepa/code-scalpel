@@ -74,9 +74,7 @@ def _find_config_file() -> Optional[Path]:
             logger.info(f"Using limits from CODE_SCALPEL_LIMITS_FILE: {path}")
             return path
         else:
-            logger.warning(
-                f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}"
-            )
+            logger.warning(f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}")
 
     # Priority 2-6: Standard search locations
     candidates = [
@@ -280,9 +278,7 @@ def _find_response_config_file() -> Optional[Path]:
     if env_path:
         path = Path(env_path).expanduser()
         if path.exists():
-            logger.info(
-                f"Using response config from CODE_SCALPEL_RESPONSE_CONFIG: {path}"
-            )
+            logger.info(f"Using response config from CODE_SCALPEL_RESPONSE_CONFIG: {path}")
             return path
 
     # Priority 2-5: Standard search locations
@@ -337,9 +333,7 @@ def load_response_config(
     try:
         with open(config_path, "r", encoding="utf-8") as f:
             config = json.load(f)
-            logger.debug(
-                f"Loaded response config with {len(config.get('tool_overrides', {}))} tool overrides"
-            )
+            logger.debug(f"Loaded response config with {len(config.get('tool_overrides', {}))} tool overrides")
             return config
     except Exception as e:
         logger.warning(f"Failed to load response config from {config_path}: {e}")
@@ -393,11 +387,7 @@ def get_cached_response_config() -> Dict[str, Any]:
         except Exception:
             mtime_ns = -2
 
-    if (
-        _response_config_cache is None
-        or _response_config_path != cache_path
-        or _response_config_mtime_ns != mtime_ns
-    ):
+    if _response_config_cache is None or _response_config_path != cache_path or _response_config_mtime_ns != mtime_ns:
         _response_config_cache = load_response_config(config_path=config_path)
         _response_config_path = cache_path
         _response_config_mtime_ns = mtime_ns
@@ -452,19 +442,11 @@ def filter_response(
             continue
 
         # Skip empty arrays if configured
-        if (
-            global_settings.get("exclude_empty_arrays", False)
-            and isinstance(value, list)
-            and len(value) == 0
-        ):
+        if global_settings.get("exclude_empty_arrays", False) and isinstance(value, list) and len(value) == 0:
             continue
 
         # Skip empty objects if configured
-        if (
-            global_settings.get("exclude_empty_objects", False)
-            and isinstance(value, dict)
-            and len(value) == 0
-        ):
+        if global_settings.get("exclude_empty_objects", False) and isinstance(value, dict) and len(value) == 0:
             continue
 
         # Skip null values if configured

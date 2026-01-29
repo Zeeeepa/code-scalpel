@@ -115,9 +115,7 @@ class ESLintViolation:
                 "node": f"https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule}.md",
                 "promise": f"https://github.com/eslint-community/eslint-plugin-promise/blob/main/docs/rules/{rule}.md",
             }
-            return plugin_urls.get(
-                plugin, f"https://www.npmjs.com/package/eslint-plugin-{plugin}"
-            )
+            return plugin_urls.get(plugin, f"https://www.npmjs.com/package/eslint-plugin-{plugin}")
         else:
             # Core ESLint rule
             return f"https://eslint.org/docs/latest/rules/{self.rule_id}"
@@ -285,9 +283,7 @@ class ESLintParser:
                 config_data = json.load(f)
         elif path.suffix in (".js", ".cjs", ".mjs"):
             # For JS configs, we'd need to execute them - simplified here
-            raise NotImplementedError(
-                "JavaScript ESLint configs require Node.js execution"
-            )
+            raise NotImplementedError("JavaScript ESLint configs require Node.js execution")
         elif path.suffix in (".yaml", ".yml"):
             try:
                 import yaml
@@ -318,9 +314,7 @@ class ESLintParser:
             ignore_patterns=config_data.get("ignorePatterns", []),
         )
 
-    def analyze_file(
-        self, file_path: str, config_path: Optional[str] = None
-    ) -> ESLintFileResult:
+    def analyze_file(self, file_path: str, config_path: Optional[str] = None) -> ESLintFileResult:
         """
         Run ESLint on a file and return results.
 
@@ -406,9 +400,7 @@ class ESLintParser:
             )
             output = result.stdout or result.stderr
             results = self.parse_output(output)
-            file_result = (
-                results[0] if results else ESLintFileResult(file_path=filename)
-            )
+            file_result = results[0] if results else ESLintFileResult(file_path=filename)
 
             # Parse inline directives if requested
             if parse_directives:
@@ -440,18 +432,10 @@ class ESLintParser:
 
         # Patterns for different directive types
         patterns = {
-            ESLintDirectiveType.DISABLE: re.compile(
-                r"/\*\s*eslint-disable\s*(?:(?!eslint-enable)\s+([^*]+))?\s*\*/"
-            ),
-            ESLintDirectiveType.DISABLE_LINE: re.compile(
-                r"//\s*eslint-disable-line\s*(.*)$"
-            ),
-            ESLintDirectiveType.DISABLE_NEXT_LINE: re.compile(
-                r"//\s*eslint-disable-next-line\s*(.*)$"
-            ),
-            ESLintDirectiveType.ENABLE: re.compile(
-                r"/\*\s*eslint-enable\s*([^*]*)\s*\*/"
-            ),
+            ESLintDirectiveType.DISABLE: re.compile(r"/\*\s*eslint-disable\s*(?:(?!eslint-enable)\s+([^*]+))?\s*\*/"),
+            ESLintDirectiveType.DISABLE_LINE: re.compile(r"//\s*eslint-disable-line\s*(.*)$"),
+            ESLintDirectiveType.DISABLE_NEXT_LINE: re.compile(r"//\s*eslint-disable-next-line\s*(.*)$"),
+            ESLintDirectiveType.ENABLE: re.compile(r"/\*\s*eslint-enable\s*([^*]*)\s*\*/"),
             ESLintDirectiveType.ENV: re.compile(r"/\*\s*eslint-env\s+([^*]+)\s*\*/"),
             ESLintDirectiveType.GLOBAL: re.compile(r"/\*\s*globals?\s+([^*]+)\s*\*/"),
         }
@@ -484,11 +468,7 @@ class ESLintParser:
 
             # Single-line disable comment
             match = single_line_disable.search(line)
-            if (
-                match
-                and "eslint-disable-line" not in line
-                and "eslint-disable-next-line" not in line
-            ):
+            if match and "eslint-disable-line" not in line and "eslint-disable-next-line" not in line:
                 rules_str = match.group(1) if match.lastindex else ""
                 rules = self._parse_rule_list(rules_str)
                 directives.append(
@@ -583,9 +563,7 @@ class ESLintParser:
         """
         return [v for v in result.violations if v.severity == ESLintSeverity.WARN]
 
-    def group_by_rule(
-        self, result: ESLintFileResult
-    ) -> dict[str, list[ESLintViolation]]:
+    def group_by_rule(self, result: ESLintFileResult) -> dict[str, list[ESLintViolation]]:
         """
         Group violations by rule ID.
 
@@ -627,14 +605,10 @@ class ESLintParser:
         # Count by type
         for directive in result.directives:
             dtype = directive.directive_type.value
-            report["directives_by_type"][dtype] = (
-                report["directives_by_type"].get(dtype, 0) + 1
-            )
+            report["directives_by_type"][dtype] = report["directives_by_type"].get(dtype, 0) + 1
 
             # Count per-rule suppressions
             for rule in directive.rules:
-                report["rules_suppression_count"][rule] = (
-                    report["rules_suppression_count"].get(rule, 0) + 1
-                )
+                report["rules_suppression_count"][rule] = report["rules_suppression_count"].get(rule, 0) + 1
 
         return report

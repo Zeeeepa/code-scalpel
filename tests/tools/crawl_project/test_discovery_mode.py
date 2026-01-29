@@ -22,9 +22,7 @@ class TestDiscoveryMode:
 
         file_paths = {f.path for f in result.files_analyzed}
         # Should detect test files (e.g., test_*.py or *_test.py)
-        assert any(
-            "test" in str(p).lower() for p in file_paths
-        ), "Should find test files"
+        assert any("test" in str(p).lower() for p in file_paths), "Should find test files"
 
     def test_crawl_detects_framework_hints(self, flask_project):
         """Verify crawl identifies framework usage hints."""
@@ -37,13 +35,9 @@ class TestDiscoveryMode:
         if hasattr(result, "summary") and "frameworks" in result.summary:
             frameworks = result.summary.get("frameworks", [])
             # Flask project should have Flask detected
-            assert (
-                any("Flask" in str(f) or "flask" in str(f) for f in frameworks) or True
-            )
+            assert any("Flask" in str(f) or "flask" in str(f) for f in frameworks) or True
 
-    def test_crawl_complexity_available_without_deep_analysis(
-        self, small_python_extended
-    ):
+    def test_crawl_complexity_available_without_deep_analysis(self, small_python_extended):
         """Verify complexity metrics are available in basic crawl."""
         crawler = ProjectCrawler(str(small_python_extended))
         result = crawler.crawl()

@@ -94,9 +94,7 @@ class SourceContext(BaseContext):
         description="SHA256 hash of normalized content. Computed deterministically for change detection.",
     )
 
-    file_size_bytes: int = Field(
-        default=0, description="Size of source content in bytes (after UTF-8 encoding)."
-    )
+    file_size_bytes: int = Field(default=0, description="Size of source content in bytes (after UTF-8 encoding).")
 
     @field_validator("content")
     @classmethod
@@ -184,9 +182,7 @@ class ProjectContext(BaseContext):
     - Tracks which files have been scanned
     """
 
-    root_path: str = Field(
-        ..., description="Root directory path (absolute or relative to cwd)"
-    )
+    root_path: str = Field(..., description="Root directory path (absolute or relative to cwd)")
 
     max_files: int = Field(
         default=100,
@@ -254,15 +250,11 @@ class FileMetadata(BaseModel):
     """Metadata about a file (lightweight, no content)."""
 
     path: str = Field(..., description="Absolute or relative file path")
-    language: Language = Field(
-        default=Language.UNKNOWN, description="Detected language"
-    )
+    language: Language = Field(default=Language.UNKNOWN, description="Detected language")
     size_bytes: int = Field(default=0, description="File size in bytes")
     line_count: int = Field(default=0, description="Number of lines")
     hash: Optional[str] = Field(default=None, description="SHA256 hash of content")
-    last_modified: Optional[datetime] = Field(
-        default=None, description="Last modified time"
-    )
+    last_modified: Optional[datetime] = Field(default=None, description="Last modified time")
 
 
 __all__ = [

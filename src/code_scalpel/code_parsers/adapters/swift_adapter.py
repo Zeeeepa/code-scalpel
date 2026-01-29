@@ -26,8 +26,7 @@ class SwiftParserAdapter(IParser):
     def __init__(self):
         """Initialize the Swift parser adapter (stub)."""
         raise NotImplementedError(
-            "SwiftParserAdapter not yet implemented. "
-            "See TODO items in this file for implementation roadmap."
+            "SwiftParserAdapter not yet implemented. " "See TODO items in this file for implementation roadmap."
         )
 
     def parse(self, code: str) -> ParseResult:

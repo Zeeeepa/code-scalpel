@@ -37,15 +37,14 @@ class DocstringValidator:
 
     # Required sections for tool docstrings
     REQUIRED_SECTIONS = {
-        "Tier Behavior": r"\*\*Tier Behavior:\*\*",
-        "Args": r"\*\*Args:\*\*",
-        "Returns": r"\*\*Returns:\*\*",
+        "Tier Behavior": r"\s*\*\*Tier Behavior:\*\*",
+        "Args": r"\s*\*\*Args:\*\*",
+        "Returns": r"\s*\*\*Returns:\*\*",
     }
 
     # Optional but recommended sections
     RECOMMENDED_SECTIONS = {
-        "Tier Capabilities": r"\*\*Tier Capabilities:\*\*",
-        "Example": r"\*\*Example:\*\*",
+        "Tier Capabilities": r"\s*\*\*Tier Capabilities:\*\*",
     }
 
     def __init__(self):
@@ -76,9 +75,7 @@ class DocstringValidator:
                 # Check if this is an MCP tool (has @mcp.tool decorator)
                 if self._has_mcp_tool_decorator(node):
                     self.tools_checked += 1
-                    issues = self._validate_tool_docstring(
-                        node.name, ast.get_docstring(node), node.lineno, file_path
-                    )
+                    issues = self._validate_tool_docstring(node.name, ast.get_docstring(node), node.lineno, file_path)
                     file_issues.extend(issues)
 
         return file_issues
@@ -141,9 +138,9 @@ class DocstringValidator:
                 )
 
         # Check for old section naming (Tier Features, Tier Requirements, Tier Capabilities)
-        if re.search(r"\*\*Tier (Features|Requirements|Capabilities):\*\*", docstring):
+        if re.search(r"\s*\*\*Tier (Features|Requirements|Capabilities):\*\*", docstring):
             # Make sure it's only "Tier Behavior" and "Tier Capabilities"
-            if re.search(r"\*\*Tier (Features|Requirements):\*\*", docstring):
+            if re.search(r"\s*\*\*Tier (Features|Requirements):\*\*", docstring):
                 issues.append(
                     DocstringIssue(
                         file=str(file_path),
@@ -154,30 +151,28 @@ class DocstringValidator:
                     )
                 )
 
-        # Check that Args and Returns have proper indentation (should be indented)
-        if "**Args:**" in docstring:
-            args_section = re.search(
-                r"\*\*Args:\*\*\s+(.*?)(?=\*\*|$)", docstring, re.DOTALL
-            )
-            if args_section:
-                args_content = args_section.group(1)
-                # Should have indented parameter descriptions
-                if not re.search(r"\n\s{4,}", args_content):
-                    issues.append(
-                        DocstringIssue(
-                            file=str(file_path),
-                            tool_name=tool_name,
-                            line=line,
-                            issue="Args section should have indented parameter descriptions",
-                            severity="warning",
-                        )
-                    )
+        # Check that Args and Returns have proper indentation (DISABLED - user wants simple format)
+        # if "**Args:**" in docstring:
+        #     args_section = re.search(
+        #         r"\s*\*\*Args:\*\*\s+(.*?)(?=\s*\*\*|$)", docstring, re.DOTALL
+        #     )
+        #     if args_section:
+        #         args_content = args_section.group(1)
+        #         # Should have indented parameter descriptions
+        #         if not re.search(r"\s{4,}", args_content):
+        #             issues.append(
+        #                 DocstringIssue(
+        #                     file=str(file_path),
+        #                     tool_name=tool_name,
+        #                     line=line,
+        #                     issue="Args section should have indented parameter descriptions",
+        #                     severity="warning",
+        #                 )
+        #             )
 
         # Check that Returns has proper format
         if "**Returns:**" in docstring:
-            returns_section = re.search(
-                r"\*\*Returns:\*\*\s+(.*?)(?=\*\*|$)", docstring, re.DOTALL
-            )
+            returns_section = re.search(r"\s*\*\*Returns:\*\*\s+(.*?)(?=\s*\*\*|$)", docstring, re.DOTALL)
             if returns_section:
                 returns_content = returns_section.group(1)
                 # Should mention ToolResponseEnvelope

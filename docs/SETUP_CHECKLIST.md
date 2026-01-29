@@ -103,7 +103,7 @@
 
 - [ ] Do you have a license file (`.jwt` file)?
   - [ ] YES: Continue to next step
-  - [ ] NO: Skip to Step 4 (Community Edition is free)
+  - [ ] NO: Skip to Step 4 (Community Edition requires no license)
 
 If yes:
 

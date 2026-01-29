@@ -17,9 +17,7 @@ class TestAPISignature:
     """Test correct API parameter names and types."""
 
     @pytest.mark.asyncio
-    async def test_target_file_and_symbol_required(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_target_file_and_symbol_required(self, community_server, simple_two_file_project):
         """API should require target_file and target_symbol parameters."""
         # This should work
         result = await community_server.get_cross_file_dependencies(
@@ -49,9 +47,7 @@ class TestResultModelFields:
         assert result.success is True
 
     @pytest.mark.asyncio
-    async def test_extracted_symbols_field(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_extracted_symbols_field(self, community_server, simple_two_file_project):
         """Result should have extracted_symbols list."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -73,9 +69,7 @@ class TestResultModelFields:
         assert isinstance(result.import_graph, dict)
 
     @pytest.mark.asyncio
-    async def test_circular_imports_field(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_circular_imports_field(self, community_server, simple_two_file_project):
         """Result should have circular_imports list."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -114,9 +108,7 @@ class TestErrorHandling:
     """Test error handling and edge cases."""
 
     @pytest.mark.asyncio
-    async def test_nonexistent_file_error(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_nonexistent_file_error(self, community_server, simple_two_file_project):
         """Should return error for nonexistent file."""
         result = await community_server.get_cross_file_dependencies(
             target_file="/nonexistent/path/file.py",
@@ -128,9 +120,7 @@ class TestErrorHandling:
         assert result.error is not None
 
     @pytest.mark.asyncio
-    async def test_nonexistent_symbol_handling(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_nonexistent_symbol_handling(self, community_server, simple_two_file_project):
         """Should handle nonexistent symbol gracefully."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -146,9 +136,7 @@ class TestTokenEstimation:
     """Test token estimation accuracy."""
 
     @pytest.mark.asyncio
-    async def test_token_estimate_field(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_token_estimate_field(self, community_server, simple_two_file_project):
         """Result should estimate token count."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -165,9 +153,7 @@ class TestConfidenceDecay:
     """Test confidence decay scoring."""
 
     @pytest.mark.asyncio
-    async def test_confidence_decay_factor(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_confidence_decay_factor(self, community_server, simple_two_file_project):
         """Result should include confidence decay factor."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],

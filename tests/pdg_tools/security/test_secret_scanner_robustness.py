@@ -11,11 +11,7 @@ def connect_aws():
 """
     result = analyzer.analyze(code)
     # Currently expected to fail if bytes are not handled
-    vulns = [
-        v
-        for v in result.vulnerabilities
-        if v.sink_type == SecuritySink.HARDCODED_SECRET
-    ]
+    vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.HARDCODED_SECRET]
     # We want this to pass eventually
     assert len(vulns) >= 1
     # taint_path is a list - check if any element contains the key type
@@ -33,11 +29,7 @@ def test_fstring_secret_detection():
 msg = f"Your key is AKIAIOSFODNN7EXAMPLE for now"
 """
     result = analyzer.analyze(code)
-    vulns = [
-        v
-        for v in result.vulnerabilities
-        if v.sink_type == SecuritySink.HARDCODED_SECRET
-    ]
+    vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.HARDCODED_SECRET]
     assert len(vulns) >= 1
     # taint_path is a list - check if any element contains the key type
     assert any("AWS Access Key" in path for path in vulns[0].taint_path)

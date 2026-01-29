@@ -352,20 +352,20 @@ class TestPhase6TierBasedCapabilities:
         assert response_pro["tier"] == "pro"
         assert len(response_pro.get("capabilities_used", [])) == 3
 
-    def test_free_tier_limited_capabilities(self):
-        """Free tier has limited capabilities."""
-        response_free = ResponseFormatter.format_with_envelope(
+    def test_community_tier_limited_capabilities(self):
+        """Community tier has limited capabilities."""
+        response_community = ResponseFormatter.format_with_envelope(
             tool_id="analyzer",
             tool_name="Analyzer",
             tool_version="1.0.0",
             data={"result": "test"},
             profile_name="minimal",
-            tier="free",
+            tier="community",
             capabilities_used=["basic_syntax_check"],
         )
 
-        # Free tier still gets capabilities but may be limited in detail
-        assert response_free["response_profile"] == "minimal"
+        # Community tier still gets capabilities but may be limited in detail
+        assert response_community["response_profile"] == "minimal"
 
 
 class TestPhase6ProfileCascading:
@@ -478,11 +478,7 @@ class TestPhase6SchemaVersioning:
         assert "schema_version" in response
         # Should be SchemaVersion enum or string representation
         schema_version = response["schema_version"]
-        schema_str = (
-            schema_version.value
-            if hasattr(schema_version, "value")
-            else str(schema_version)
-        )
+        schema_str = schema_version.value if hasattr(schema_version, "value") else str(schema_version)
         assert schema_str in ["1.0", "1.1", "2.0", "V1_0", "V1_1", "V2_0"]
 
     def test_validation_metadata_preserved(self):

@@ -166,10 +166,7 @@ class MetricsCollector:
         """
         with self._lock:
             for metric in reversed(self._metrics):
-                if (
-                    metric.request_id == request_id
-                    and metric.outcome == SuggestionOutcome.PENDING
-                ):
+                if metric.request_id == request_id and metric.outcome == SuggestionOutcome.PENDING:
                     metric.outcome = outcome
                     metric.agent_choice = agent_choice
                     metric.accuracy_score = max(0.0, min(1.0, accuracy_score))
@@ -199,28 +196,16 @@ class MetricsCollector:
                 }
 
             # Count outcomes
-            accepted = sum(
-                1 for m in self._metrics if m.outcome == SuggestionOutcome.ACCEPTED
-            )
-            ignored = sum(
-                1 for m in self._metrics if m.outcome == SuggestionOutcome.IGNORED
-            )
-            partial = sum(
-                1
-                for m in self._metrics
-                if m.outcome == SuggestionOutcome.PARTIALLY_USED
-            )
-            errors = sum(
-                1 for m in self._metrics if m.outcome == SuggestionOutcome.ERROR
-            )
+            accepted = sum(1 for m in self._metrics if m.outcome == SuggestionOutcome.ACCEPTED)
+            ignored = sum(1 for m in self._metrics if m.outcome == SuggestionOutcome.IGNORED)
+            partial = sum(1 for m in self._metrics if m.outcome == SuggestionOutcome.PARTIALLY_USED)
+            errors = sum(1 for m in self._metrics if m.outcome == SuggestionOutcome.ERROR)
             completed = accepted + ignored + partial + errors
 
             # Calculate rates
             completion_rate = completed / len(self._metrics) if self._metrics else 0.0
             acceptance_rate = accepted / completed if completed > 0 else 0.0
-            avg_accuracy = sum(m.accuracy_score for m in self._metrics) / len(
-                self._metrics
-            )
+            avg_accuracy = sum(m.accuracy_score for m in self._metrics) / len(self._metrics)
 
             # Breakdown by type
             by_type = {}
@@ -240,9 +225,7 @@ class MetricsCollector:
             # Compute average accuracy per type
             for type_name in by_type:
                 accuracies = by_type[type_name].pop("accuracy")
-                by_type[type_name]["avg_accuracy"] = (
-                    sum(accuracies) / len(accuracies) if accuracies else 0.0
-                )
+                by_type[type_name]["avg_accuracy"] = sum(accuracies) / len(accuracies) if accuracies else 0.0
                 by_type[type_name]["acceptance_rate"] = (
                     by_type[type_name]["accepted"] / by_type[type_name]["count"]
                     if by_type[type_name]["count"] > 0
@@ -309,12 +292,8 @@ class MetricsCollector:
             with open(self._persist_path) as f:
                 data = json.load(f)
 
-            self._metrics = [
-                SuggestionMetric.from_dict(m) for m in data.get("metrics", [])
-            ]
-            logger.info(
-                f"Loaded {len(self._metrics)} metrics from {self._persist_path}"
-            )
+            self._metrics = [SuggestionMetric.from_dict(m) for m in data.get("metrics", [])]
+            logger.info(f"Loaded {len(self._metrics)} metrics from {self._persist_path}")
         except Exception as e:
             logger.warning(f"Failed to load metrics from {self._persist_path}: {e}")
 

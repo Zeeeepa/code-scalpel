@@ -86,9 +86,7 @@ def has_jsx_syntax(code: str) -> bool:
     return False
 
 
-def is_react_component(
-    node: IRFunctionDef | IRClassDef, code: str
-) -> ReactComponentInfo:
+def is_react_component(node: IRFunctionDef | IRClassDef, code: str) -> ReactComponentInfo:
     """
     Detect if a function or class is a React component.
 

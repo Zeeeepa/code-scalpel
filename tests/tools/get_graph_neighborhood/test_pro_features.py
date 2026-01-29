@@ -110,9 +110,7 @@ def unrelated_function(x):
         """Functions with similar names are detected as semantic neighbors."""
         from code_scalpel.graph.semantic_neighbors import find_semantic_neighbors
 
-        result = find_semantic_neighbors(
-            project_with_similar_names, "process_order", k=10, min_similarity=0.3
-        )
+        result = find_semantic_neighbors(project_with_similar_names, "process_order", k=10, min_similarity=0.3)
 
         assert result.success is True
         assert len(result.neighbors) > 0
@@ -125,9 +123,7 @@ def unrelated_function(x):
         """Semantic neighbors are ordered by similarity score (descending)."""
         from code_scalpel.graph.semantic_neighbors import find_semantic_neighbors
 
-        result = find_semantic_neighbors(
-            project_with_similar_names, "process_order", k=10, min_similarity=0.2
-        )
+        result = find_semantic_neighbors(project_with_similar_names, "process_order", k=10, min_similarity=0.2)
 
         if len(result.neighbors) > 1:
             scores = [n.similarity_score for n in result.neighbors]
@@ -165,9 +161,7 @@ def delete_user(user_id: int):
         """Functions with shared parameters have higher similarity."""
         from code_scalpel.graph.semantic_neighbors import find_semantic_neighbors
 
-        result = find_semantic_neighbors(
-            project_with_shared_params, "create_user", k=10, min_similarity=0.2
-        )
+        result = find_semantic_neighbors(project_with_shared_params, "create_user", k=10, min_similarity=0.2)
 
         assert result.success is True
 
@@ -175,9 +169,7 @@ def delete_user(user_id: int):
         neighbor_names = [n.name for n in result.neighbors]
         if len(neighbor_names) > 0:
             # Functions with shared params should be found
-            assert any(
-                name in ["update_user", "validate_user"] for name in neighbor_names
-            )
+            assert any(name in ["update_user", "validate_user"] for name in neighbor_names)
 
 
 # =============================================================================
@@ -294,9 +286,7 @@ def test_validate_items():
         from code_scalpel.graph.logical_relationships import LogicalRelationshipDetector
 
         detector = LogicalRelationshipDetector(project_with_tests)
-        result = detector.find_relationships(
-            "calculate_total", relationship_types={"test_for"}
-        )
+        result = detector.find_relationships("calculate_total", relationship_types={"test_for"})
 
         if result.success and len(result.relationships) > 0:
             relationship_types = [r.relationship_type for r in result.relationships]
@@ -304,8 +294,7 @@ def test_validate_items():
 
             # May find test_calculate_total
             assert (
-                any("test_calculate_total" in name.lower() for name in target_names)
-                or "test_for" in relationship_types
+                any("test_calculate_total" in name.lower() for name in target_names) or "test_for" in relationship_types
             )
 
     def test_tested_by_relationship_detected(self, project_with_tests):
@@ -313,19 +302,14 @@ def test_validate_items():
         from code_scalpel.graph.logical_relationships import LogicalRelationshipDetector
 
         detector = LogicalRelationshipDetector(project_with_tests)
-        result = detector.find_relationships(
-            "test_calculate_total", relationship_types={"tested_by"}
-        )
+        result = detector.find_relationships("test_calculate_total", relationship_types={"tested_by"})
 
         if result.success and len(result.relationships) > 0:
             relationship_types = [r.relationship_type for r in result.relationships]
             target_names = [r.target_node for r in result.relationships]
 
             # May find calculate_total
-            assert (
-                any("calculate_total" in name.lower() for name in target_names)
-                or "tested_by" in relationship_types
-            )
+            assert any("calculate_total" in name.lower() for name in target_names) or "tested_by" in relationship_types
 
 
 class TestLogicalHelperRelationships:
@@ -356,9 +340,7 @@ def _another_helper():
         from code_scalpel.graph.logical_relationships import LogicalRelationshipDetector
 
         detector = LogicalRelationshipDetector(project_with_helpers)
-        result = detector.find_relationships(
-            "public_function", relationship_types={"helper_of"}
-        )
+        result = detector.find_relationships("public_function", relationship_types={"helper_of"})
 
         if result.success and len(result.relationships) > 0:
             relationship_types = [r.relationship_type for r in result.relationships]
@@ -408,9 +390,7 @@ class Calculator:
 class TestProTierIntegrationWithKHop:
     """Test Pro tier features integrate with core k-hop extraction."""
 
-    def test_pro_tier_adds_semantic_neighbors_to_graph(
-        self, mock_tier_pro, sample_call_graph, temp_project_dir
-    ):
+    def test_pro_tier_adds_semantic_neighbors_to_graph(self, mock_tier_pro, sample_call_graph, temp_project_dir):
         """When Pro tier is active, semantic neighbors can be added to results."""
         # This test would require actual integration with get_graph_neighborhood
         # For now, verify capability gating

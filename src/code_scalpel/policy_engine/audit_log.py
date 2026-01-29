@@ -125,9 +125,7 @@ class AuditLog:
         secret = os.environ.get("SCALPEL_AUDIT_SECRET", "default-secret")
 
         message = json.dumps(event, sort_keys=True)
-        signature = hmac.new(
-            secret.encode(), message.encode(), hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
 
         return signature
 
@@ -153,9 +151,7 @@ class AuditLog:
                     signature = event.pop("signature", None)
 
                     if signature is None:
-                        raise TamperDetectedError(
-                            f"Audit log entry missing signature at line {line_num}"
-                        )
+                        raise TamperDetectedError(f"Audit log entry missing signature at line {line_num}")
 
                     # Verify signature
                     expected_signature = self._sign_event(event)
@@ -164,9 +160,7 @@ class AuditLog:
                             f"Audit log tampering detected at timestamp: {event.get('timestamp', 'unknown')}, line {line_num}"
                         )
                 except json.JSONDecodeError:
-                    raise TamperDetectedError(
-                        f"Audit log corrupted at line {line_num}: invalid JSON"
-                    )
+                    raise TamperDetectedError(f"Audit log corrupted at line {line_num}: invalid JSON")
 
         return True
 

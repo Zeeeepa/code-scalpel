@@ -79,8 +79,7 @@ class TestLimitsTOMLLoading:
         }
 
         assert set(tools) == expected_tools, (
-            f"Tool list mismatch. Found: {set(tools) - expected_tools}, "
-            f"Missing: {expected_tools - set(tools)}"
+            f"Tool list mismatch. Found: {set(tools) - expected_tools}, " f"Missing: {expected_tools - set(tools)}"
         )
 
 
@@ -101,23 +100,17 @@ class TestTierLimitProgression:
 
         assert community == 1, "Community analyze_code: max_file_size_mb should be 1"
         assert pro == 10, "Pro analyze_code: max_file_size_mb should be 10"
-        assert (
-            enterprise == 100
-        ), "Enterprise analyze_code: max_file_size_mb should be 100"
+        assert enterprise == 100, "Enterprise analyze_code: max_file_size_mb should be 100"
 
     def test_get_file_context_lines_progression(self):
         """get_file_context max_context_lines should progress."""
         community = get_tier_limit("get_file_context", "community", "max_context_lines")
         pro = get_tier_limit("get_file_context", "pro", "max_context_lines")
-        enterprise = get_tier_limit(
-            "get_file_context", "enterprise", "max_context_lines"
-        )
+        enterprise = get_tier_limit("get_file_context", "enterprise", "max_context_lines")
 
         assert community == 500, "Community: max_context_lines should be 500"
         assert pro == 2000, "Pro: max_context_lines should be 2000"
-        assert (
-            enterprise is None
-        ), "Enterprise: max_context_lines should be unlimited (None)"
+        assert enterprise is None, "Enterprise: max_context_lines should be unlimited (None)"
 
     def test_get_project_map_file_limit_progression(self):
         """get_project_map max_files should progress correctly."""
@@ -161,8 +154,7 @@ class TestLimitsTOMLConsistency:
                 # Both must be numeric, or enterprise must be None (unlimited)
                 if pro_val is not None and ent_val is not None:
                     assert ent_val >= pro_val, (
-                        f"Tool '{tool}' limit '{key}': "
-                        f"enterprise ({ent_val}) is stricter than pro ({pro_val})"
+                        f"Tool '{tool}' limit '{key}': " f"enterprise ({ent_val}) is stricter than pro ({pro_val})"
                     )
 
     def test_community_never_unlimited_if_pro_limited(self):

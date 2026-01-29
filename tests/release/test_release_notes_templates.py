@@ -303,6 +303,4 @@ class TestBuiltInTemplates:
         template_manager = ReleaseNotesTemplate()
         template = template_manager.load_template("minimal")
         # Minimal template should have fewer lines than default
-        assert len(template.content.split("\n")) < len(
-            template_manager.load_template("default").content.split("\n")
-        )
+        assert len(template.content.split("\n")) < len(template_manager.load_template("default").content.split("\n"))

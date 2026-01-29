@@ -108,9 +108,7 @@ class VSCodeExtensionPublisher:
             package_data = json.loads(package_file.read_text(encoding="utf-8"))
 
             if dry_run:
-                print(
-                    f"Would update version from {package_data['version']} to {version}"
-                )
+                print(f"Would update version from {package_data['version']} to {version}")
                 return True
 
             package_data["version"] = version
@@ -159,10 +157,7 @@ class VSCodeExtensionPublisher:
                     raise RuntimeError(f"npm ci failed: {error_msg}")
 
             except FileNotFoundError:
-                raise RuntimeError(
-                    "npm is not installed or not in PATH. "
-                    "Install Node.js to use this feature."
-                )
+                raise RuntimeError("npm is not installed or not in PATH. " "Install Node.js to use this feature.")
 
         # Run build scripts if they exist
         build_cmd = ["npm", "run", "vscode:prepublish"]
@@ -183,10 +178,7 @@ class VSCodeExtensionPublisher:
                     print("Note: vscode:prepublish script not found or failed (OK)")
 
             except FileNotFoundError:
-                raise RuntimeError(
-                    "npm is not installed or not in PATH. "
-                    "Install Node.js to use this feature."
-                )
+                raise RuntimeError("npm is not installed or not in PATH. " "Install Node.js to use this feature.")
 
         # Package the extension
         package_cmd = ["vsce", "package", "--no-dependencies"]
@@ -223,9 +215,7 @@ class VSCodeExtensionPublisher:
             }
 
         except FileNotFoundError:
-            raise RuntimeError(
-                "vsce is not installed. Install it with: npm install -g @vscode/vsce"
-            )
+            raise RuntimeError("vsce is not installed. Install it with: npm install -g @vscode/vsce")
 
     def publish_extension(
         self,
@@ -285,9 +275,7 @@ class VSCodeExtensionPublisher:
             }
 
         except FileNotFoundError:
-            raise RuntimeError(
-                "vsce is not installed. Install it with: npm install -g @vscode/vsce"
-            )
+            raise RuntimeError("vsce is not installed. Install it with: npm install -g @vscode/vsce")
 
     def get_publish_status(self) -> dict[str, str]:
         """Check current publication status.

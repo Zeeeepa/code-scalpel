@@ -86,9 +86,7 @@ class TestAutonomyIntegrationsCoverage:
             pytest.skip("CrewAI not available")
         with patch("code_scalpel.autonomy.integrations.crewai.Agent"):
             with patch("code_scalpel.autonomy.integrations.crewai.Task"):
-                with patch(
-                    "code_scalpel.autonomy.integrations.crewai.Crew"
-                ) as mock_crew:
+                with patch("code_scalpel.autonomy.integrations.crewai.Crew") as mock_crew:
                     mock_crew.return_value = MagicMock()
                     crew = create_scalpel_fix_crew()
                     assert crew is not None

@@ -106,6 +106,28 @@ async def async_func():
         assert result.success is True
         assert any("async_func" in f for f in result.functions)
 
+    async def test_analyze_file_not_found_with_oracle_suggestions(self):
+        """Test file not found error provides Oracle fuzzy matching suggestions."""
+        from code_scalpel.mcp.server import analyze_code
+
+        # Test with a non-existent file that has similar names in the project
+        result = await analyze_code(file_path="/nonexistent/src/utilz.py")
+
+        # For error cases, check the envelope's error field
+        assert result.error is not None
+        assert "not found" in result.error.error.lower()
+
+        # Check that Oracle suggestions are provided in error_details
+        assert result.error.error_details is not None
+        assert "oracle_suggestion" in result.error.error_details
+
+        oracle = result.error.error_details["oracle_suggestion"]
+        assert isinstance(oracle, dict)
+        assert "suggestion" in oracle
+        assert "confidence" in oracle
+        assert isinstance(oracle["confidence"], (int, float))
+        assert 0 <= oracle["confidence"] <= 1
+
 
 class TestSecurityScanTool:
     """Tests for the security_scan tool."""
@@ -137,10 +159,7 @@ def vulnerable(request):
         assert result.success is True
         assert result.has_vulnerabilities is True
         # Handle both dict and object forms (due to envelope wrapping converting to dict)
-        vuln_types = [
-            v.get("type") if isinstance(v, dict) else v.type
-            for v in result.vulnerabilities
-        ]
+        vuln_types = [v.get("type") if isinstance(v, dict) else v.type for v in result.vulnerabilities]
         assert any("SQL" in vt for vt in vuln_types)
 
     async def test_scan_command_injection(self):
@@ -156,10 +175,7 @@ def run_command(request):
         result = await security_scan(code)
         assert result.success is True
         assert result.has_vulnerabilities is True
-        vuln_types = [
-            v.get("type") if isinstance(v, dict) else v.type
-            for v in result.vulnerabilities
-        ]
+        vuln_types = [v.get("type") if isinstance(v, dict) else v.type for v in result.vulnerabilities]
         assert any("Command" in vt for vt in vuln_types)
 
     async def test_scan_eval_injection(self):
@@ -188,10 +204,7 @@ def connect():
         result = await security_scan(code)
         assert result.success is True
         assert result.has_vulnerabilities is True
-        vuln_types = [
-            v.get("type") if isinstance(v, dict) else v.type
-            for v in result.vulnerabilities
-        ]
+        vuln_types = [v.get("type") if isinstance(v, dict) else v.type for v in result.vulnerabilities]
         assert any("Secret" in vt or "Hardcoded" in vt for vt in vuln_types)
 
     async def test_scan_empty_code(self):
@@ -603,9 +616,7 @@ def hello():
 def goodbye():
     return "Goodbye!"
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="hello"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="hello")
         assert result.success is True
         assert result.target_name == "hello"
         assert "return" in result.target_code
@@ -647,9 +658,7 @@ class MyClass:
     def get_value(self):
         return self.value
 """
-        result = await extract_code(
-            code=code, target_type="class", target_name="MyClass"
-        )
+        result = await extract_code(code=code, target_type="class", target_name="MyClass")
         assert result.success is True
         assert result.target_name == "MyClass"
         assert "__init__" in result.target_code
@@ -667,9 +676,7 @@ class Calculator:
     def subtract(self, a, b):
         return a - b
 """
-        result = await extract_code(
-            code=code, target_type="method", target_name="Calculator.add"
-        )
+        result = await extract_code(code=code, target_type="method", target_name="Calculator.add")
         assert result.success is True
         assert result.target_name == "Calculator.add"
         assert "return a + b" in result.target_code
@@ -688,9 +695,7 @@ class Calculator:
         from code_scalpel.mcp.server import extract_code
 
         code = "def foo(): pass"
-        result = await extract_code(
-            code=code, target_type="function", target_name="nonexistent"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="nonexistent")
         assert result.success is False
         assert "not found" in result.error.lower()
 
@@ -750,9 +755,7 @@ class MyClass:
         from code_scalpel.mcp.server import extract_code
 
         code = "def broken("
-        result = await extract_code(
-            code=code, target_type="function", target_name="broken"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="broken")
         assert result.success is False
         assert result.error is not None
 
@@ -802,7 +805,7 @@ class UnrelatedClass:
 
         # Agent asks: "Get me calculate_tax from utils.py"
         # Agent sends: ~50 tokens (the request)
-        # Server reads file: FREE to Agent
+        # Server reads file: COMMUNITY to Agent
         # Agent receives: ~50 tokens (just the function)
         result = await extract_code(
             file_path=str(test_file),
@@ -928,10 +931,7 @@ def unrelated():
 
         assert result.success is False
         # [20251214_BUGFIX] Updated to match PathResolver's detailed error messages
-        assert (
-            "cannot access file" in result.error.lower()
-            or "not found" in result.error.lower()
-        )
+        assert "cannot access file" in result.error.lower() or "not found" in result.error.lower()
 
     async def test_extract_function_not_found_in_file(self, tmp_path):
         """Test extraction of non-existent function from valid file."""
@@ -1511,12 +1511,8 @@ class MyClass:
         assert result.language == "python"
         assert result.line_count > 0
         # [20260104_BUGFIX] Functions/classes may be dicts (from envelope) or objects
-        function_names = [
-            f["name"] if isinstance(f, dict) else f.name for f in result.functions
-        ]
-        class_names = [
-            c["name"] if isinstance(c, dict) else c.name for c in result.classes
-        ]
+        function_names = [f["name"] if isinstance(f, dict) else f.name for f in result.functions]
+        class_names = [c["name"] if isinstance(c, dict) else c.name for c in result.classes]
         assert "helper_function" in function_names
         assert "MyClass" in class_names
         assert "os" in result.imports
@@ -1650,17 +1646,10 @@ def create_user(name):
         # References may be dicts (from envelope) or objects
         for ref in result.references:
             ref_dict = ref if isinstance(ref, dict) else ref
-            is_def = (
-                ref_dict.get("is_definition")
-                if isinstance(ref, dict)
-                else ref.is_definition
-            )
+            is_def = ref_dict.get("is_definition") if isinstance(ref, dict) else ref.is_definition
             if is_def:
                 break
-        assert any(
-            (r.get("is_definition") if isinstance(r, dict) else r.is_definition)
-            for r in result.references
-        )
+        assert any((r.get("is_definition") if isinstance(r, dict) else r.is_definition) for r in result.references)
 
     async def test_symbol_not_found(self, tmp_path):
         """Test behavior when symbol is not found."""
@@ -1832,11 +1821,7 @@ def func_b():
 
         assert result.success is True
         # Mermaid diagram should be generated
-        assert (
-            "graph" in result.mermaid.lower()
-            or "flowchart" in result.mermaid.lower()
-            or result.mermaid == ""
-        )
+        assert "graph" in result.mermaid.lower() or "flowchart" in result.mermaid.lower() or result.mermaid == ""
 
     async def test_file_not_found(self, tmp_path):
         """Test handling of nonexistent target file."""
@@ -1851,9 +1836,7 @@ def func_b():
         assert result.success is False
         assert result.error is not None
         # error may be a string or ToolError object; extract string either way
-        error_msg = (
-            result.error.error if hasattr(result.error, "error") else result.error
-        )
+        error_msg = result.error.error if hasattr(result.error, "error") else result.error
         assert "not found" in error_msg.lower()
 
     async def test_invalid_project_root(self):
@@ -2029,9 +2012,7 @@ def test_func():
     return 42
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(tmp_path), include_diagram=True
-        )
+        result = await cross_file_security_scan(project_root=str(tmp_path), include_diagram=True)
 
         assert result.success is True
         # Diagram should be string (may be empty if no taint flows)

@@ -200,9 +200,7 @@ class GraphQLSchema:
     @property
     def input_types(self) -> List[GraphQLType]:
         """Get all input types."""
-        return [
-            t for t in self.types.values() if t.kind == GraphQLTypeKind.INPUT_OBJECT
-        ]
+        return [t for t in self.types.values() if t.kind == GraphQLTypeKind.INPUT_OBJECT]
 
     @property
     def enum_types(self) -> List[GraphQLType]:
@@ -297,9 +295,7 @@ class GraphQLSchemaDrift:
     @property
     def dangerous_changes(self) -> List[GraphQLSchemaChange]:
         """Get dangerous changes."""
-        return [
-            c for c in self.changes if c.severity == GraphQLChangeSeverity.DANGEROUS
-        ]
+        return [c for c in self.changes if c.severity == GraphQLChangeSeverity.DANGEROUS]
 
     @property
     def info_changes(self) -> List[GraphQLSchemaChange]:
@@ -352,26 +348,17 @@ class GraphQLSchemaParser:
     )
 
     INTERFACE_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?'
-        r"interface\s+(\w+)\s*"
-        r'(?:@[\w\s()=",]+)?\s*'
-        r"\{([\s\S]*?)\}",
+        r'(?:"""[\s\S]*?"""\s*)?' r"interface\s+(\w+)\s*" r'(?:@[\w\s()=",]+)?\s*' r"\{([\s\S]*?)\}",
         re.MULTILINE,
     )
 
     INPUT_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?'
-        r"input\s+(\w+)\s*"
-        r'(?:@[\w\s()=",]+)?\s*'
-        r"\{([\s\S]*?)\}",
+        r'(?:"""[\s\S]*?"""\s*)?' r"input\s+(\w+)\s*" r'(?:@[\w\s()=",]+)?\s*' r"\{([\s\S]*?)\}",
         re.MULTILINE,
     )
 
     ENUM_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?'
-        r"enum\s+(\w+)\s*"
-        r'(?:@[\w\s()=",]+)?\s*'
-        r"\{([\s\S]*?)\}",
+        r'(?:"""[\s\S]*?"""\s*)?' r"enum\s+(\w+)\s*" r'(?:@[\w\s()=",]+)?\s*' r"\{([\s\S]*?)\}",
         re.MULTILINE,
     )
 
@@ -381,9 +368,7 @@ class GraphQLSchemaParser:
         re.MULTILINE,
     )
 
-    SCALAR_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?' r"scalar\s+(\w+)", re.MULTILINE
-    )
+    SCALAR_PATTERN = re.compile(r'(?:"""[\s\S]*?"""\s*)?' r"scalar\s+(\w+)", re.MULTILINE)
 
     DIRECTIVE_PATTERN = re.compile(
         r'(?:"""[\s\S]*?"""\s*)?'
@@ -603,9 +588,7 @@ class GraphQLSchemaParser:
 
             directive = GraphQLDirective(
                 name=name,
-                locations=[
-                    loc.strip() for loc in locations_str.split("|") if loc.strip()
-                ],
+                locations=[loc.strip() for loc in locations_str.split("|") if loc.strip()],
                 repeatable="repeatable" in content[match.start() : match.end()].lower(),
             )
 
@@ -920,11 +903,7 @@ class GraphQLSchemaTracker:
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.FIELD_TYPE_CHANGED,
-                    severity=(
-                        GraphQLChangeSeverity.BREAKING
-                        if is_breaking
-                        else GraphQLChangeSeverity.DANGEROUS
-                    ),
+                    severity=(GraphQLChangeSeverity.BREAKING if is_breaking else GraphQLChangeSeverity.DANGEROUS),
                     path=path,
                     message=f"Field '{old_field.name}' type changed from '{old_field.type}' to '{new_field.type}'",
                     old_value=old_field.type,
@@ -975,15 +954,9 @@ class GraphQLSchemaTracker:
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=(
-                        GraphQLChangeType.REQUIRED_ARG_ADDED
-                        if is_required
-                        else GraphQLChangeType.OPTIONAL_ARG_ADDED
+                        GraphQLChangeType.REQUIRED_ARG_ADDED if is_required else GraphQLChangeType.OPTIONAL_ARG_ADDED
                     ),
-                    severity=(
-                        GraphQLChangeSeverity.BREAKING
-                        if is_required
-                        else GraphQLChangeSeverity.INFO
-                    ),
+                    severity=(GraphQLChangeSeverity.BREAKING if is_required else GraphQLChangeSeverity.INFO),
                     path=f"{path}({name})",
                     message=f"{'Required' if is_required else 'Optional'} argument '{name}' was added to '{path}'",
                 )
@@ -1034,15 +1007,9 @@ class GraphQLSchemaTracker:
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=(
-                        GraphQLChangeType.REQUIRED_ARG_ADDED
-                        if is_required
-                        else GraphQLChangeType.FIELD_ADDED
+                        GraphQLChangeType.REQUIRED_ARG_ADDED if is_required else GraphQLChangeType.FIELD_ADDED
                     ),
-                    severity=(
-                        GraphQLChangeSeverity.BREAKING
-                        if is_required
-                        else GraphQLChangeSeverity.INFO
-                    ),
+                    severity=(GraphQLChangeSeverity.BREAKING if is_required else GraphQLChangeSeverity.INFO),
                     path=f"{new_type.name}.{name}",
                     message=f"{'Required' if is_required else 'Optional'} input field '{name}' was added to '{new_type.name}'",
                 )

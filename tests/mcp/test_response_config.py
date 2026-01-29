@@ -14,9 +14,7 @@ def _reset_response_config_singleton() -> None:
     rc._response_config = None  # type: ignore[attr-defined]
 
 
-def test_response_config_loaded_from_cwd_filters_fields(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_response_config_loaded_from_cwd_filters_fields(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Loads .code-scalpel/response_config.json from CWD and applies exclusions."""
     config_dir = tmp_path / ".code-scalpel"
     config_dir.mkdir(parents=True)
@@ -38,9 +36,7 @@ def test_response_config_loaded_from_cwd_filters_fields(
         "tool_overrides": {},
     }
 
-    (config_dir / "response_config.json").write_text(
-        json.dumps(config), encoding="utf-8"
-    )
+    (config_dir / "response_config.json").write_text(json.dumps(config), encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     _reset_response_config_singleton()

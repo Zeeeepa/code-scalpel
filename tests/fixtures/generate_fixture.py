@@ -102,9 +102,7 @@ def link_stdlib() -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate benchmark fixtures")
-    parser.add_argument(
-        "--synthetic", type=int, metavar="N", help="Generate N-file synthetic project"
-    )
+    parser.add_argument("--synthetic", type=int, metavar="N", help="Generate N-file synthetic project")
     parser.add_argument(
         "--clone",
         type=str,

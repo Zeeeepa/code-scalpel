@@ -48,9 +48,7 @@ class User:
 import json
 from typing import Optional
 '''
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
             f.write(content)
             return f.name
 
@@ -354,9 +352,7 @@ from typing import Optional
             for i in range(10)
         ]
 
-        symbol_table = SymbolTable(
-            file_path="src/auth.py", language="python", classes=classes
-        )
+        symbol_table = SymbolTable(file_path="src/auth.py", language="python", classes=classes)
         graph_constraints = GraphConstraints(file_path="src/auth.py", depth=5)
 
         markdown = self.generator._generate_markdown(

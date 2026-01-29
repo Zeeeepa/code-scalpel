@@ -219,12 +219,8 @@ async def test_pro_tier_confidence_scoring_populated(tmp_path: Path, monkeypatch
 
     # Pro tier should populate confidence_scores when vulnerabilities found
     if r.vulnerability_count > 0:
-        assert (
-            r.confidence_scores is not None
-        ), "Pro tier should populate confidence_scores for vulnerabilities"
-        assert isinstance(
-            r.confidence_scores, dict
-        ), "confidence_scores should be a dictionary"
+        assert r.confidence_scores is not None, "Pro tier should populate confidence_scores for vulnerabilities"
+        assert isinstance(r.confidence_scores, dict), "confidence_scores should be a dictionary"
 
         # All scores should be valid floats in [0, 1]
         for score in r.confidence_scores.values():
@@ -263,18 +259,12 @@ async def test_pro_tier_framework_context_detection(tmp_path: Path, monkeypatch)
 
     # Pro tier should detect Flask framework
     if r.vulnerability_count > 0:
-        assert (
-            r.framework_contexts is not None
-        ), "Pro tier should populate framework_contexts when framework detected"
-        assert isinstance(
-            r.framework_contexts, list
-        ), "framework_contexts should be a list of dicts"
+        assert r.framework_contexts is not None, "Pro tier should populate framework_contexts when framework detected"
+        assert isinstance(r.framework_contexts, list), "framework_contexts should be a list of dicts"
 
         # Should have Flask context
         flask_contexts = [
-            ctx
-            for ctx in r.framework_contexts
-            if isinstance(ctx, dict) and ctx.get("framework") == "flask"
+            ctx for ctx in r.framework_contexts if isinstance(ctx, dict) and ctx.get("framework") == "flask"
         ]
         assert len(flask_contexts) > 0, "Should detect Flask framework in app structure"
 
@@ -310,12 +300,8 @@ async def test_pro_tier_dependency_chain_analysis(tmp_path: Path, monkeypatch):
 
     # Pro tier should track dependency chains
     if r.vulnerability_count > 0:
-        assert (
-            r.dependency_chains is not None
-        ), "Pro tier should populate dependency_chains for DI patterns"
-        assert isinstance(
-            r.dependency_chains, list
-        ), "dependency_chains should be a list"
+        assert r.dependency_chains is not None, "Pro tier should populate dependency_chains for DI patterns"
+        assert isinstance(r.dependency_chains, list), "dependency_chains should be a list"
 
 
 async def test_pro_tier_sanitizer_detection(tmp_path: Path, monkeypatch):
@@ -425,9 +411,7 @@ def query(sql):
 # =============================================================================
 
 
-async def test_enterprise_tier_microservice_boundary_detection(
-    tmp_path: Path, monkeypatch
-):
+async def test_enterprise_tier_microservice_boundary_detection(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Enterprise tier detects microservice/service boundaries.
 
@@ -458,17 +442,11 @@ async def test_enterprise_tier_microservice_boundary_detection(
 
     # Enterprise should detect service boundaries
     if r.vulnerability_count > 0:
-        assert (
-            r.microservice_boundaries is not None
-        ), "Enterprise tier should detect microservice boundaries"
-        assert isinstance(
-            r.microservice_boundaries, list
-        ), "microservice_boundaries should be a list"
+        assert r.microservice_boundaries is not None, "Enterprise tier should detect microservice boundaries"
+        assert isinstance(r.microservice_boundaries, list), "microservice_boundaries should be a list"
 
 
-async def test_enterprise_tier_cross_service_vulnerability_tracking(
-    tmp_path: Path, monkeypatch
-):
+async def test_enterprise_tier_cross_service_vulnerability_tracking(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Enterprise tier tracks vulnerabilities across services.
 
@@ -504,9 +482,7 @@ async def test_enterprise_tier_cross_service_vulnerability_tracking(
     assert len(r.taint_flows) >= 1, "Should detect taint flows across services"
 
 
-async def test_enterprise_tier_distributed_trace_representation(
-    tmp_path: Path, monkeypatch
-):
+async def test_enterprise_tier_distributed_trace_representation(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Enterprise tier provides distributed trace view.
 
@@ -543,9 +519,7 @@ async def test_enterprise_tier_distributed_trace_representation(
         ), "distributed_trace should be None or dict (best-effort)"
 
 
-async def test_enterprise_tier_global_flows_across_services(
-    tmp_path: Path, monkeypatch
-):
+async def test_enterprise_tier_global_flows_across_services(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Enterprise tier identifies global taint flows.
 
@@ -657,9 +631,7 @@ def service_{i}_handler(data):
 
     assert r.success is True
     # Should analyze all (or most) of the 20 services
-    assert (
-        r.files_analyzed >= 15
-    ), "Enterprise should analyze most/all modules without capping"
+    assert r.files_analyzed >= 15, "Enterprise should analyze most/all modules without capping"
 
 
 async def test_enterprise_tier_result_completeness(tmp_path: Path, monkeypatch):
@@ -703,9 +675,7 @@ async def test_enterprise_tier_result_completeness(tmp_path: Path, monkeypatch):
     assert hasattr(r, "confidence_scores"), "Missing confidence_scores"
 
     # All should have correct types
-    assert r.microservice_boundaries is None or isinstance(
-        r.microservice_boundaries, list
-    )
+    assert r.microservice_boundaries is None or isinstance(r.microservice_boundaries, list)
     assert r.distributed_trace is None or isinstance(r.distributed_trace, dict)
     assert r.global_flows is None or isinstance(r.global_flows, list)
     assert r.framework_contexts is None or isinstance(r.framework_contexts, list)
@@ -746,9 +716,7 @@ async def test_community_tier_gating_no_pro_features(tmp_path: Path, monkeypatch
     assert r.success is True
 
     # Community tier should not have Pro features
-    assert (
-        r.confidence_scores is None
-    ), "Community tier should not have confidence_scores"
+    assert r.confidence_scores is None, "Community tier should not have confidence_scores"
     assert (
         r.dependency_chains is None or len(r.dependency_chains) == 0
     ), "Community tier should not have dependency_chains"

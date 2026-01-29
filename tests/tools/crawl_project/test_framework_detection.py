@@ -25,11 +25,7 @@ class TestFrameworkDetection:
         assert result.files_analyzed
         file_paths = {f.path for f in result.files_analyzed}
         # Should have manage.py or urls.py typical of Django
-        assert any(
-            name in str(p)
-            for p in file_paths
-            for name in ["manage.py", "urls.py", "views.py"]
-        )
+        assert any(name in str(p) for p in file_paths for name in ["manage.py", "urls.py", "views.py"])
 
     def test_fastapi_framework_detection(self, fastapi_project):
         """Verify FastAPI framework is detected in FastAPI projects."""
@@ -51,10 +47,7 @@ class TestFrameworkDetection:
         languages = {f.language for f in result.files_analyzed}
         # Should detect TypeScript/JavaScript
         assert (
-            any(
-                lang in languages for lang in ["javascript", "typescript", "tsx", "jsx"]
-            )
-            or True
+            any(lang in languages for lang in ["javascript", "typescript", "tsx", "jsx"]) or True
         )  # Fallback if framework detection is minimal
 
     def test_framework_info_in_summary(self, flask_project):

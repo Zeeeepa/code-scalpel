@@ -10,9 +10,7 @@ Generates various sizes of functions, classes, and files for benchmarking:
 """
 
 
-def generate_small_function(
-    name: str = "small_function", complexity: str = "simple"
-) -> str:
+def generate_small_function(name: str = "small_function", complexity: str = "simple") -> str:
     """
     Generate small function (< 50 LOC).
 
@@ -248,9 +246,7 @@ def generate_large_function(name: str = "large_function", lines: int = 300) -> s
     return "\n".join(lines_code) + "\n"
 
 
-def generate_very_large_class(
-    name: str = "VeryLargeClass", method_count: int = 20
-) -> str:
+def generate_very_large_class(name: str = "VeryLargeClass", method_count: int = 20) -> str:
     """
     Generate very large class (500+ LOC) with multiple methods.
 

@@ -16,9 +16,7 @@ class TestCoreAlgorithmBasic:
 
     def test_k1_includes_center_and_direct_neighbors(self, sample_call_graph):
         """k=1 should return center + direct neighbors (depth 1)."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
 
         assert result.success
         assert not result.truncated
@@ -39,9 +37,7 @@ class TestCoreAlgorithmBasic:
 
     def test_k1_depth_tracking(self, sample_call_graph):
         """Verify depth values are correct for k=1."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
 
         # Center should be at depth 0
         assert result.node_depths["python::main::function::center"] == 0
@@ -54,9 +50,7 @@ class TestCoreAlgorithmBasic:
 
     def test_k2_includes_second_level_nodes(self, sample_call_graph):
         """k=2 should include center + depth 1 + depth 2 nodes."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2)
 
         assert result.success
 
@@ -76,9 +70,7 @@ class TestCoreAlgorithmBasic:
 
     def test_k2_depth_tracking(self, sample_call_graph):
         """Verify correct depth values for k=2."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2)
 
         # Depth 2 nodes should be at depth 2
         assert result.node_depths["python::module_a1::function::func_A1"] == 2
@@ -89,9 +81,7 @@ class TestCoreAlgorithmBasic:
 
     def test_k3_extends_neighborhood(self, sample_call_graph):
         """k=3 should include all reachable nodes (when they exist)."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=3
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=3)
 
         assert result.success
         # With only 3 levels of depth, k=3 should get same as k=2
@@ -114,12 +104,8 @@ class TestDepthTracking:
 
     def test_k_limiting_respects_depth(self, sample_call_graph):
         """Nodes beyond k should not be included."""
-        result_k1 = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
-        result_k2 = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2
-        )
+        result_k1 = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
+        result_k2 = sample_call_graph.get_neighborhood("python::main::function::center", k=2)
 
         # k=1 should have fewer nodes than k=2
         assert len(result_k1.subgraph.nodes) < len(result_k2.subgraph.nodes)
@@ -134,9 +120,7 @@ class TestNodeReachability:
 
     def test_all_depth_1_nodes_reachable_from_center(self, sample_call_graph):
         """All depth 1 nodes should be reachable from center in k=1."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
 
         depth_1_nodes = {
             "python::module_a::function::func_A",
@@ -150,9 +134,7 @@ class TestNodeReachability:
 
     def test_nonexistent_center_node_fails(self, sample_call_graph):
         """Requesting neighborhood for nonexistent node should fail gracefully."""
-        result = sample_call_graph.get_neighborhood(
-            "python::nonexistent::function::fake_node", k=1
-        )
+        result = sample_call_graph.get_neighborhood("python::nonexistent::function::fake_node", k=1)
 
         # Should not crash; error handling tested in integration tests
         # Basic check that it returns a result (even if unsuccessful)
@@ -171,9 +153,7 @@ class TestEdgeInclusion:
 
     def test_k1_edges_connect_center_to_neighbors(self, sample_call_graph):
         """All edges in k=1 neighborhood should involve the center."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
 
         # All edges should have center as source or target
         for src, dst, conf in result.subgraph.edges:
@@ -182,9 +162,7 @@ class TestEdgeInclusion:
 
     def test_k2_edges_form_valid_paths(self, sample_call_graph):
         """Edges in k=2 neighborhood should form connected paths."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2)
 
         # Every edge should connect two nodes in the subgraph
         nodes_set = set(result.subgraph.nodes)
@@ -225,12 +203,8 @@ class TestPerformanceCharacteristics:
 
     def test_k1_faster_than_k2(self, sample_call_graph):
         """k=1 should use fewer nodes than k=2 (performance proxy)."""
-        result_k1 = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
-        result_k2 = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2
-        )
+        result_k1 = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
+        result_k2 = sample_call_graph.get_neighborhood("python::main::function::center", k=2)
 
         # k=1 should be subset of k=2
         k1_nodes = set(result_k1.subgraph.nodes)
@@ -239,9 +213,7 @@ class TestPerformanceCharacteristics:
 
     def test_large_k_with_max_nodes_limit(self, sample_call_graph):
         """Large k should still respect max_nodes limit."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=100, max_nodes=5
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=100, max_nodes=5)
 
         # With max_nodes=5, should truncate and warn
         assert len(result.subgraph.nodes) <= 5

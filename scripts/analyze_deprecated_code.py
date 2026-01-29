@@ -103,9 +103,7 @@ class DeprecatedCodeAnalyzer:
 
             # Find legacy functions (no type hints)
             elif isinstance(node, ast.FunctionDef):
-                if not node.returns and not any(
-                    arg.annotation for arg in node.args.args
-                ):
+                if not node.returns and not any(arg.annotation for arg in node.args.args):
                     legacy_functions.append(node.name)
 
             # Check datetime.now() without timezone
@@ -163,9 +161,7 @@ class DeprecatedCodeAnalyzer:
             recs.append("Consider consolidating imports or using import aliases")
 
         if result["legacy_functions"]:
-            recs.append(
-                f"Add type hints to {len(result['legacy_functions'])} functions"
-            )
+            recs.append(f"Add type hints to {len(result['legacy_functions'])} functions")
 
         if result["has_datetime_now_without_tz"]:
             recs.append("Replace datetime.now() with timezone-aware alternatives")
@@ -191,15 +187,9 @@ class DeprecatedCodeAnalyzer:
 
         summary = {
             "total_files_analyzed": len(files),
-            "files_with_deprecation": sum(
-                1 for f in files if f["has_deprecation_marker"]
-            ),
-            "files_with_legacy_functions": sum(
-                1 for f in files if f["legacy_functions"]
-            ),
-            "files_with_datetime_issues": sum(
-                1 for f in files if f["has_datetime_now_without_tz"]
-            ),
+            "files_with_deprecation": sum(1 for f in files if f["has_deprecation_marker"]),
+            "files_with_legacy_functions": sum(1 for f in files if f["legacy_functions"]),
+            "files_with_datetime_issues": sum(1 for f in files if f["has_datetime_now_without_tz"]),
             "total_imports": sum(f["import_count"] for f in files),
             "total_callers": sum(f["caller_count"] for f in files),
         }
@@ -230,9 +220,7 @@ def main():
 
     # Determine exit code based on findings
     has_issues = any(
-        f["has_deprecation_marker"]
-        or f["legacy_functions"]
-        or f["has_datetime_now_without_tz"]
+        f["has_deprecation_marker"] or f["legacy_functions"] or f["has_datetime_now_without_tz"]
         for f in inventory["files"]
     )
 

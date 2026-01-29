@@ -60,9 +60,7 @@ def foo(a, b):
         pdg, call_graph = builder.build(code)
 
         # Check that function node exists
-        function_nodes = [
-            n for n, d in pdg.nodes(data=True) if d.get("type") == "function"
-        ]
+        function_nodes = [n for n, d in pdg.nodes(data=True) if d.get("type") == "function"]
         assert len(function_nodes) >= 1
 
         # Check that 'foo' is in call graph
@@ -207,11 +205,7 @@ def func():
         pdg, _ = builder.build(code)
 
         # Check for control dependency edges - the function body has control deps
-        control_edges = [
-            (u, v)
-            for u, v, d in pdg.edges(data=True)
-            if d.get("type") == "control_dependency"
-        ]
+        control_edges = [(u, v) for u, v, d in pdg.edges(data=True) if d.get("type") == "control_dependency"]
         # At minimum, function body should have control dependencies
         assert len(control_edges) >= 0  # Relaxed assertion as impl may vary
 
@@ -227,9 +221,7 @@ class TestBuildPdgFunction:
 
     def test_build_pdg_with_custom_options(self):
         """Test build_pdg with custom options."""
-        pdg, call_graph = build_pdg(
-            "x = 1", track_constants=False, interprocedural=False
-        )
+        pdg, call_graph = build_pdg("x = 1", track_constants=False, interprocedural=False)
         assert isinstance(pdg, nx.DiGraph)
 
     def test_build_pdg_complex_code(self):
@@ -336,9 +328,7 @@ class TestBuilderCoverageGaps:
 
     def test_scope_post_init_with_provided_variables(self):
         """Test Scope __post_init__ when variables is provided."""
-        scope = Scope(
-            type="function", name="test", node_id="n1", variables={"x": "def_x"}
-        )
+        scope = Scope(type="function", name="test", node_id="n1", variables={"x": "def_x"})
         assert scope.variables == {"x": "def_x"}
 
     def test_for_loop_with_else(self):
@@ -545,11 +535,7 @@ def test():
         pdg, _ = builder.build(code)
 
         # Find edges with data_dependency
-        data_edges = [
-            (s, t)
-            for s, t, d in pdg.edges(data=True)
-            if d.get("type") == "data_dependency"
-        ]
+        data_edges = [(s, t) for s, t, d in pdg.edges(data=True) if d.get("type") == "data_dependency"]
         # There should be an edge from x's definition to y's definition
         assert len(data_edges) >= 1
 
@@ -593,11 +579,7 @@ def test():
         assert len(assign_nodes) == 2  # x = 10 and x += 5
 
         # Check for data dependency from first x to augmented assignment
-        data_edges = [
-            (s, t)
-            for s, t, d in pdg.edges(data=True)
-            if d.get("type") == "data_dependency"
-        ]
+        data_edges = [(s, t) for s, t, d in pdg.edges(data=True) if d.get("type") == "data_dependency"]
         assert len(data_edges) >= 1
 
     def test_augmented_assignment_all_ops(self):
@@ -675,11 +657,7 @@ def test():
         pdg, _ = builder.build(code)
 
         # Should have a decorator_dependency edge
-        decorator_edges = [
-            (s, t)
-            for s, t, d in pdg.edges(data=True)
-            if d.get("type") == "decorator_dependency"
-        ]
+        decorator_edges = [(s, t) for s, t, d in pdg.edges(data=True) if d.get("type") == "decorator_dependency"]
         assert len(decorator_edges) >= 1
 
         # The call node should exist
@@ -698,11 +676,7 @@ def test():
         pdg, _ = builder.build(code)
 
         # No decorator_dependency edge since decorator returns None
-        [
-            (s, t)
-            for s, t, d in pdg.edges(data=True)
-            if d.get("type") == "decorator_dependency"
-        ]
+        [(s, t) for s, t, d in pdg.edges(data=True) if d.get("type") == "decorator_dependency"]
         # Edge count depends on implementation - just ensure no crash
         assert len(pdg.nodes()) >= 1
 
@@ -720,11 +694,7 @@ def test():
         call_nodes = [n for n, d in pdg.nodes(data=True) if d.get("type") == "call"]
         assert len(call_nodes) == 2
 
-        decorator_edges = [
-            (s, t)
-            for s, t, d in pdg.edges(data=True)
-            if d.get("type") == "decorator_dependency"
-        ]
+        decorator_edges = [(s, t) for s, t, d in pdg.edges(data=True) if d.get("type") == "decorator_dependency"]
         assert len(decorator_edges) >= 2
 
 

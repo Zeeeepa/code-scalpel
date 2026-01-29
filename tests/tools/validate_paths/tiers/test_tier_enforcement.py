@@ -18,9 +18,7 @@ class TestCommunityTierCapabilities:
     def test_community_has_core_features(self):
         """Community tier should have all core features."""
         caps = get_tool_capabilities("validate_paths", "community")
-        assert (
-            caps["enabled"] is True
-        ), "validate_paths should be enabled at community tier"
+        assert caps["enabled"] is True, "validate_paths should be enabled at community tier"
 
         expected_capabilities = {
             "path_accessibility_checking",
@@ -33,9 +31,7 @@ class TestCommunityTierCapabilities:
 
         actual_capabilities = set(caps.get("capabilities", []))
         for capability in expected_capabilities:
-            assert (
-                capability in actual_capabilities
-            ), f"Community tier missing capability: {capability}"
+            assert capability in actual_capabilities, f"Community tier missing capability: {capability}"
 
     def test_community_has_100_path_limit(self):
         """Community tier should enforce 100 path limit."""
@@ -58,9 +54,7 @@ class TestCommunityTierCapabilities:
         }
 
         for feature in pro_only_features:
-            assert (
-                feature not in capabilities
-            ), f"Community tier should NOT have feature: {feature}"
+            assert feature not in capabilities, f"Community tier should NOT have feature: {feature}"
 
     def test_community_lacks_enterprise_features(self):
         """Community tier should NOT have Enterprise features."""
@@ -76,29 +70,14 @@ class TestCommunityTierCapabilities:
         }
 
         for feature in enterprise_only_features:
-            assert (
-                feature not in capabilities
-            ), f"Community tier should NOT have feature: {feature}"
+            assert feature not in capabilities, f"Community tier should NOT have feature: {feature}"
 
     def test_community_capability_check_with_has_capability(self):
         """has_capability function should correctly report community capabilities."""
-        assert (
-            has_capability("validate_paths", "path_accessibility_checking", "community")
-            is True
-        )
-        assert (
-            has_capability(
-                "validate_paths", "docker_environment_detection", "community"
-            )
-            is True
-        )
-        assert (
-            has_capability("validate_paths", "path_alias_resolution", "community")
-            is False
-        )
-        assert (
-            has_capability("validate_paths", "permission_checks", "community") is False
-        )
+        assert has_capability("validate_paths", "path_accessibility_checking", "community") is True
+        assert has_capability("validate_paths", "docker_environment_detection", "community") is True
+        assert has_capability("validate_paths", "path_alias_resolution", "community") is False
+        assert has_capability("validate_paths", "permission_checks", "community") is False
 
 
 class TestProTierCapabilities:
@@ -120,9 +99,7 @@ class TestProTierCapabilities:
 
         actual_capabilities = set(caps.get("capabilities", []))
         for capability in expected_capabilities:
-            assert (
-                capability in actual_capabilities
-            ), f"Pro tier missing capability: {capability}"
+            assert capability in actual_capabilities, f"Pro tier missing capability: {capability}"
 
     def test_pro_has_advanced_features(self):
         """Pro tier should have advanced path resolution features."""
@@ -161,16 +138,11 @@ class TestProTierCapabilities:
         }
 
         for feature in enterprise_only_features:
-            assert (
-                feature not in capabilities
-            ), f"Pro tier should NOT have feature: {feature}"
+            assert feature not in capabilities, f"Pro tier should NOT have feature: {feature}"
 
     def test_pro_capability_check_with_has_capability(self):
         """has_capability function should correctly report pro capabilities."""
-        assert (
-            has_capability("validate_paths", "path_accessibility_checking", "pro")
-            is True
-        )
+        assert has_capability("validate_paths", "path_accessibility_checking", "pro") is True
         assert has_capability("validate_paths", "path_alias_resolution", "pro") is True
         assert has_capability("validate_paths", "permission_checks", "pro") is False
 
@@ -181,9 +153,7 @@ class TestEnterpriseTierCapabilities:
     def test_enterprise_has_all_features(self):
         """Enterprise tier should have all features."""
         caps = get_tool_capabilities("validate_paths", "enterprise")
-        assert (
-            caps["enabled"] is True
-        ), "validate_paths should be enabled at enterprise tier"
+        assert caps["enabled"] is True, "validate_paths should be enabled at enterprise tier"
 
         expected_capabilities = {
             "path_accessibility_checking",
@@ -206,9 +176,7 @@ class TestEnterpriseTierCapabilities:
 
         actual_capabilities = set(caps.get("capabilities", []))
         for capability in expected_capabilities:
-            assert (
-                capability in actual_capabilities
-            ), f"Enterprise tier missing capability: {capability}"
+            assert capability in actual_capabilities, f"Enterprise tier missing capability: {capability}"
 
     def test_enterprise_has_unlimited_paths(self):
         """Enterprise tier should have unlimited path validation."""
@@ -231,29 +199,14 @@ class TestEnterpriseTierCapabilities:
         }
 
         for feature in security_features:
-            assert (
-                feature in capabilities
-            ), f"Enterprise tier missing security feature: {feature}"
+            assert feature in capabilities, f"Enterprise tier missing security feature: {feature}"
 
     def test_enterprise_capability_check_with_has_capability(self):
         """has_capability function should correctly report enterprise capabilities."""
-        assert (
-            has_capability(
-                "validate_paths", "path_accessibility_checking", "enterprise"
-            )
-            is True
-        )
-        assert (
-            has_capability("validate_paths", "path_alias_resolution", "enterprise")
-            is True
-        )
-        assert (
-            has_capability("validate_paths", "permission_checks", "enterprise") is True
-        )
-        assert (
-            has_capability("validate_paths", "security_boundary_testing", "enterprise")
-            is True
-        )
+        assert has_capability("validate_paths", "path_accessibility_checking", "enterprise") is True
+        assert has_capability("validate_paths", "path_alias_resolution", "enterprise") is True
+        assert has_capability("validate_paths", "permission_checks", "enterprise") is True
+        assert has_capability("validate_paths", "security_boundary_testing", "enterprise") is True
 
 
 class TestTierFeatureGating:
@@ -261,47 +214,31 @@ class TestTierFeatureGating:
 
     def test_community_to_pro_feature_progression(self):
         """Features should progressively unlock from community to pro."""
-        community_caps = set(
-            get_tool_capabilities("validate_paths", "community")["capabilities"]
-        )
+        community_caps = set(get_tool_capabilities("validate_paths", "community")["capabilities"])
         pro_caps = set(get_tool_capabilities("validate_paths", "pro")["capabilities"])
 
         # Pro should have all community features plus more
-        assert (
-            community_caps <= pro_caps
-        ), "Pro tier should include all community features"
+        assert community_caps <= pro_caps, "Pro tier should include all community features"
 
         # Pro should have advanced features
-        assert len(pro_caps) > len(
-            community_caps
-        ), "Pro tier should have more capabilities than community"
+        assert len(pro_caps) > len(community_caps), "Pro tier should have more capabilities than community"
 
     def test_pro_to_enterprise_feature_progression(self):
         """Features should progressively unlock from pro to enterprise."""
         pro_caps = set(get_tool_capabilities("validate_paths", "pro")["capabilities"])
-        enterprise_caps = set(
-            get_tool_capabilities("validate_paths", "enterprise")["capabilities"]
-        )
+        enterprise_caps = set(get_tool_capabilities("validate_paths", "enterprise")["capabilities"])
 
         # Enterprise should have all pro features plus more
-        assert (
-            pro_caps <= enterprise_caps
-        ), "Enterprise tier should include all pro features"
+        assert pro_caps <= enterprise_caps, "Enterprise tier should include all pro features"
 
         # Enterprise should have security features
-        assert len(enterprise_caps) > len(
-            pro_caps
-        ), "Enterprise tier should have more capabilities than pro"
+        assert len(enterprise_caps) > len(pro_caps), "Enterprise tier should have more capabilities than pro"
 
     def test_limit_progression_across_tiers(self):
         """Limits should be more generous at higher tiers."""
-        community_limits = get_tool_capabilities("validate_paths", "community")[
-            "limits"
-        ]
+        community_limits = get_tool_capabilities("validate_paths", "community")["limits"]
         pro_limits = get_tool_capabilities("validate_paths", "pro")["limits"]
-        enterprise_limits = get_tool_capabilities("validate_paths", "enterprise")[
-            "limits"
-        ]
+        enterprise_limits = get_tool_capabilities("validate_paths", "enterprise")["limits"]
 
         # Community: 100 paths
         assert community_limits["max_paths"] == 100

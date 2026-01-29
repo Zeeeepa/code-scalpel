@@ -48,9 +48,7 @@ class Calculator:
         content = result["result"].get("content", [{}])[0].get("text", "")
         data = json.loads(content) if content else {}
         if data.get("success"):
-            print(
-                f"  ✓ Python function extracted: {data.get('target_code', '')[:50]}..."
-            )
+            print(f"  ✓ Python function extracted: {data.get('target_code', '')[:50]}...")
             return True
         else:
             print(f"  ✗ Failed: {data.get('error')}")
@@ -87,9 +85,7 @@ class Calculator {
         content = result["result"].get("content", [{}])[0].get("text", "")
         data = json.loads(content) if content else {}
         if data.get("success"):
-            print(
-                f"  ✓ TypeScript function extracted: {data.get('target_code', '')[:50]}..."
-            )
+            print(f"  ✓ TypeScript function extracted: {data.get('target_code', '')[:50]}...")
             return True
         else:
             print(f"  ✗ Failed: {data.get('error')}")
@@ -130,9 +126,7 @@ class DataHandler {
         content = result["result"].get("content", [{}])[0].get("text", "")
         data = json.loads(content) if content else {}
         if data.get("success"):
-            print(
-                f"  ✓ JavaScript class extracted: {data.get('target_code', '')[:50]}..."
-            )
+            print(f"  ✓ JavaScript class extracted: {data.get('target_code', '')[:50]}...")
             return True
         else:
             print(f"  ✗ Failed: {data.get('error')}")
@@ -212,9 +206,7 @@ def get_user(user_id):
 def test_get_file_context():
     """Test file context retrieval."""
     print("\n[TEST] get_file_context")
-    result = call_tool(
-        "get_file_context", {"file_path": "/app/code/src/code_scalpel/mcp/server.py"}
-    )
+    result = call_tool("get_file_context", {"file_path": "/app/code/src/code_scalpel/mcp/server.py"})
 
     if "result" in result:
         content = result["result"].get("content", [{}])[0].get("text", "")
@@ -244,9 +236,7 @@ def test_validate_paths():
         data = json.loads(content) if content else {}
         accessible = len(data.get("accessible", []))
         inaccessible = len(data.get("inaccessible", []))
-        print(
-            f"  ✓ Path validation: {accessible} accessible, {inaccessible} inaccessible"
-        )
+        print(f"  ✓ Path validation: {accessible} accessible, {inaccessible} inaccessible")
         return accessible > 0
     else:
         print(f"  ✗ Error: {result.get('error')}")
@@ -270,9 +260,7 @@ class Calculator:
         content = result["result"].get("content", [{}])[0].get("text", "")
         data = json.loads(content) if content else {}
         if data.get("success"):
-            print(
-                f"  ✓ Code analyzed: {data.get('function_count', 0)} functions, {data.get('class_count', 0)} classes"
-            )
+            print(f"  ✓ Code analyzed: {data.get('function_count', 0)} functions, {data.get('class_count', 0)} classes")
             return True
         else:
             print(f"  ✗ Failed: {data.get('error')}")

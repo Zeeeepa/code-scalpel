@@ -23,13 +23,9 @@ class TestScanDependenciesFailClosed:
         req_file.write_text("requests==2.28.0\n")
 
         # Mock OSV client to raise timeout
-        with patch(
-            "code_scalpel.security.dependencies.VulnerabilityScanner"
-        ) as mock_scanner_class:
+        with patch("code_scalpel.security.dependencies.VulnerabilityScanner") as mock_scanner_class:
             mock_scanner = MagicMock()
-            mock_scanner.osv_client.query_batch.side_effect = OSVError(
-                "Timeout after 30s"
-            )
+            mock_scanner.osv_client.query_batch.side_effect = OSVError("Timeout after 30s")
             mock_scanner_class.return_value.__enter__.return_value = mock_scanner
 
             result = _scan_dependencies_sync(
@@ -53,13 +49,9 @@ class TestScanDependenciesFailClosed:
         req_file = tmp_path / "requirements.txt"
         req_file.write_text("flask==2.0.0\n")
 
-        with patch(
-            "code_scalpel.security.dependencies.VulnerabilityScanner"
-        ) as mock_scanner_class:
+        with patch("code_scalpel.security.dependencies.VulnerabilityScanner") as mock_scanner_class:
             mock_scanner = MagicMock()
-            mock_scanner.osv_client.query_batch.side_effect = OSVError(
-                "Connection refused"
-            )
+            mock_scanner.osv_client.query_batch.side_effect = OSVError("Connection refused")
             mock_scanner_class.return_value.__enter__.return_value = mock_scanner
 
             result = _scan_dependencies_sync(
@@ -76,13 +68,9 @@ class TestScanDependenciesFailClosed:
         req_file = tmp_path / "requirements.txt"
         req_file.write_text("django==3.2.0\n")
 
-        with patch(
-            "code_scalpel.security.dependencies.VulnerabilityScanner"
-        ) as mock_scanner_class:
+        with patch("code_scalpel.security.dependencies.VulnerabilityScanner") as mock_scanner_class:
             mock_scanner = MagicMock()
-            mock_scanner.osv_client.query_batch.side_effect = OSVError(
-                "Rate limit exceeded"
-            )
+            mock_scanner.osv_client.query_batch.side_effect = OSVError("Rate limit exceeded")
             mock_scanner_class.return_value.__enter__.return_value = mock_scanner
 
             result = _scan_dependencies_sync(
@@ -100,9 +88,7 @@ class TestScanDependenciesFailClosed:
         req_file.write_text("requests==2.28.0\n")
 
         # Mock successful OSV response (no vulnerabilities)
-        with patch(
-            "code_scalpel.security.dependencies.VulnerabilityScanner"
-        ) as mock_scanner_class:
+        with patch("code_scalpel.security.dependencies.VulnerabilityScanner") as mock_scanner_class:
             mock_scanner = MagicMock()
             mock_scanner.osv_client.query_batch.return_value = {}  # No vulns found
             mock_scanner_class.return_value.__enter__.return_value = mock_scanner
@@ -121,9 +107,7 @@ class TestScanDependenciesFailClosed:
         req_file.write_text("requests==2.20.0\n")  # Known vulnerable version
 
         # Mock OSV response with vulnerability
-        with patch(
-            "code_scalpel.security.dependencies.VulnerabilityScanner"
-        ) as mock_scanner_class:
+        with patch("code_scalpel.security.dependencies.VulnerabilityScanner") as mock_scanner_class:
             mock_scanner = MagicMock()
             mock_scanner.osv_client.query_batch.return_value = {
                 "requests@2.20.0": [
@@ -165,9 +149,7 @@ class TestScanDependenciesFailClosed:
         req_file.write_text("flask==2.0.0\n")
 
         specific_error = "OSV API returned 503 Service Unavailable"
-        with patch(
-            "code_scalpel.security.dependencies.VulnerabilityScanner"
-        ) as mock_scanner_class:
+        with patch("code_scalpel.security.dependencies.VulnerabilityScanner") as mock_scanner_class:
             mock_scanner = MagicMock()
             mock_scanner.osv_client.query_batch.side_effect = OSVError(specific_error)
             mock_scanner_class.return_value.__enter__.return_value = mock_scanner
@@ -187,9 +169,7 @@ class TestScanDependenciesFailClosed:
         req_file = tmp_path / "requirements.txt"
         req_file.write_text("requests==2.28.0\n")
 
-        with patch(
-            "code_scalpel.security.dependencies.VulnerabilityScanner"
-        ) as mock_scanner_class:
+        with patch("code_scalpel.security.dependencies.VulnerabilityScanner") as mock_scanner_class:
             mock_scanner = MagicMock()
             mock_scanner.osv_client.query_batch.side_effect = OSVError("Network down")
             mock_scanner_class.return_value.__enter__.return_value = mock_scanner

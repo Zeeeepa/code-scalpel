@@ -133,8 +133,7 @@ class AnalysisResult:
         return {
             "paths": [p.to_dict() for p in self.paths],
             "all_variables": {
-                k: v.value if isinstance(v, InferredType) else str(v)
-                for k, v in self.all_variables.items()
+                k: v.value if isinstance(v, InferredType) else str(v) for k, v in self.all_variables.items()
             },
             "feasible_count": self.feasible_count,
             "infeasible_count": self.infeasible_count,
@@ -147,8 +146,7 @@ class AnalysisResult:
         return cls(
             paths=[PathResult.from_dict(p) for p in data.get("paths", [])],
             all_variables={
-                k: InferredType(v) if isinstance(v, str) else v
-                for k, v in data.get("all_variables", {}).items()
+                k: InferredType(v) if isinstance(v, str) else v for k, v in data.get("all_variables", {}).items()
             },
             feasible_count=data.get("feasible_count", 0),
             infeasible_count=data.get("infeasible_count", 0),
@@ -277,9 +275,7 @@ class SymbolicAnalyzer:
         # Fresh components for this analysis
         self._type_engine = TypeInferenceEngine()
         self._solver = ConstraintSolver(timeout_ms=self.solver_timeout)
-        self._interpreter = IRSymbolicInterpreter(
-            max_loop_iterations=self.max_loop_iterations
-        )
+        self._interpreter = IRSymbolicInterpreter(max_loop_iterations=self.max_loop_iterations)
 
         # Step 1: Type inference (Python only for now)
         inferred_types = {}
@@ -341,9 +337,7 @@ class SymbolicAnalyzer:
                 logger.debug(f"Creating symbolic parameter: {param_name} ({sort_name})")
                 # declare_symbolic expects z3.Sort objects (IntSort(), BoolSort(), etc.)
                 # param_sort is already the result of z3.IntSort(), so it's a Sort object
-                self._interpreter.declare_symbolic(
-                    param_name, cast(z3.Sort, param_sort)
-                )
+                self._interpreter.declare_symbolic(param_name, cast(z3.Sort, param_sort))
 
             # Execute the function body instead of module body
             modified_ir = IRModule(
@@ -460,9 +454,7 @@ class SymbolicAnalyzer:
         elif sort == z3.StringSort():
             var = z3.String(name)
         else:
-            raise NotImplementedError(
-                f"Only IntSort, BoolSort, and StringSort supported, got {sort}"
-            )
+            raise NotImplementedError(f"Only IntSort, BoolSort, and StringSort supported, got {sort}")
 
         self._declared_symbols[name] = var
         return var

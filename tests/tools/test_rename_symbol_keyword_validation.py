@@ -45,15 +45,11 @@ def helper():
 
     # CRITICAL: Verify the file was NOT modified
     current_content = test_file.read_text()
-    assert (
-        current_content == original_code
-    ), "File should not be modified when validation fails"
+    assert current_content == original_code, "File should not be modified when validation fails"
 
     # Verify no backup was created (since no modification occurred)
     backup_file = Path(str(test_file) + ".bak")
-    assert (
-        not backup_file.exists()
-    ), "Backup should not exist when validation fails early"
+    assert not backup_file.exists(), "Backup should not exist when validation fails early"
 
 
 @pytest.mark.asyncio
@@ -83,9 +79,7 @@ async def test_invalid_identifier_validation_before_file_modification(tmp_path):
 
     # CRITICAL: Verify the file was NOT modified
     current_content = test_file.read_text()
-    assert (
-        current_content == original_code
-    ), "File should not be modified when validation fails"
+    assert current_content == original_code, "File should not be modified when validation fails"
 
 
 @pytest.mark.asyncio
@@ -173,9 +167,7 @@ async def test_all_python_keywords_rejected_early(tmp_path):
         assert "reserved keyword" in result.error.lower()
 
         # Verify file unchanged
-        assert (
-            test_file.read_text() == original_code
-        ), f"File should be unchanged after rejecting '{kw}'"
+        assert test_file.read_text() == original_code, f"File should be unchanged after rejecting '{kw}'"
 
 
 @pytest.mark.asyncio
@@ -185,9 +177,7 @@ async def test_valid_rename_still_works():
     import tempfile
 
     # Use a temp file in the current working directory (within project)
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".py", delete=False, dir="."
-    ) as tmp:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, dir=".") as tmp:
         original_code = '''def process_data(x):
     """Process data."""
     return x * 2

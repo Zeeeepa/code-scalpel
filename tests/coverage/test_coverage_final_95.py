@@ -94,9 +94,7 @@ class TestPDGBuilderCoverage:
         """[20251217_TEST] Cover nested function handling."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = (
-            "\ndef outer():\n    def inner():\n        return 42\n    return inner()\n"
-        )
+        code = "\ndef outer():\n    def inner():\n        return 42\n    return inner()\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None

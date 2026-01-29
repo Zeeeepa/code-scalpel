@@ -260,11 +260,7 @@ class SecretsManager:
                     {
                         "name": name,
                         "type": secret.type,
-                        "expired_at": (
-                            secret.expires_at.isoformat()
-                            if secret.expires_at
-                            else "unknown"
-                        ),
+                        "expired_at": (secret.expires_at.isoformat() if secret.expires_at else "unknown"),
                     }
                 )
             elif secret.expires_at:
@@ -314,9 +310,5 @@ class SecretsManager:
             "required_total": len(self.REQUIRED_SECRETS),
             "optional_present": len(validation["optional"]),
             "invalid_count": len(validation["invalid"]),
-            "validation_status": (
-                "valid"
-                if not validation["missing"] and not validation["invalid"]
-                else "invalid"
-            ),
+            "validation_status": ("valid" if not validation["missing"] and not validation["invalid"] else "invalid"),
         }

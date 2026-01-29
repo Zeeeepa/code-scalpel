@@ -30,9 +30,7 @@ from typing import Any, Dict, List, Optional
 try:
     import yaml
 except ImportError:
-    raise ImportError(
-        "PyYAML is required for policy engine. Install with: pip install pyyaml"
-    )
+    raise ImportError("PyYAML is required for policy engine. Install with: pip install pyyaml")
 
 
 class PolicyError(Exception):
@@ -91,9 +89,7 @@ class Policy:
         try:
             PolicySeverity(self.severity)
         except ValueError:
-            raise PolicyError(
-                f"Invalid severity '{self.severity}' in policy '{self.name}'"
-            )
+            raise PolicyError(f"Invalid severity '{self.severity}' in policy '{self.name}'")
 
         # Validate action
         try:
@@ -235,9 +231,7 @@ class PolicyEngine:
         self.policy_path = Path(policy_path)
         self.policies: List[Policy] = []
         # [20240613_SECURITY] Persist used override codes to disk to enforce single-use guarantee across restarts
-        self._used_override_codes_path = (
-            self.policy_path.parent / "used_override_codes.json"
-        )
+        self._used_override_codes_path = self.policy_path.parent / "used_override_codes.json"
         self._used_override_codes: set[str] = self._load_used_override_codes()
 
         # [20251222_BUGFIX] Check OPA availability but don't require it at init time.
@@ -270,9 +264,7 @@ class PolicyEngine:
         if shutil.which("opa") is not None:
             return True
         try:
-            result = subprocess.run(
-                ["opa", "version"], capture_output=True, text=True, timeout=1
-            )
+            result = subprocess.run(["opa", "version"], capture_output=True, text=True, timeout=1)
             return result.returncode == 0
         except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
             return False
@@ -314,9 +306,7 @@ class PolicyEngine:
                 return set(codes)
             except Exception as e:
                 # Fail CLOSED - if we can't read the file, deny all overrides
-                raise PolicyError(
-                    f"Failed to load used override codes: {e}. Failing CLOSED."
-                )
+                raise PolicyError(f"Failed to load used override codes: {e}. Failing CLOSED.")
         return set()
 
     def _save_used_override_codes(self) -> None:
@@ -328,9 +318,7 @@ class PolicyEngine:
                 json.dump(list(self._used_override_codes), f)
         except Exception as e:
             # Fail CLOSED - if we can't write the file, deny all overrides
-            raise PolicyError(
-                f"Failed to save used override codes: {e}. Failing CLOSED."
-            )
+            raise PolicyError(f"Failed to save used override codes: {e}. Failing CLOSED.")
 
     def _load_policies(self) -> List[Policy]:
         """
@@ -379,9 +367,7 @@ class PolicyEngine:
     @staticmethod
     def _basic_validate_rego(rule: str, policy_name: str) -> None:
         if not rule or not isinstance(rule, str):
-            raise PolicyError(
-                f"Invalid Rego in policy '{policy_name}': empty rule. Failing CLOSED."
-            )
+            raise PolicyError(f"Invalid Rego in policy '{policy_name}': empty rule. Failing CLOSED.")
 
         # Strip comments and string literals, then perform simple balance checks.
         in_string: str | None = None
@@ -439,20 +425,14 @@ class PolicyEngine:
                 paren -= 1
 
             if brace < 0 or bracket < 0 or paren < 0:
-                raise PolicyError(
-                    f"Invalid Rego in policy '{policy_name}': unbalanced delimiters. Failing CLOSED."
-                )
+                raise PolicyError(f"Invalid Rego in policy '{policy_name}': unbalanced delimiters. Failing CLOSED.")
 
             i += 1
 
         if in_string is not None or brace != 0 or bracket != 0 or paren != 0:
-            raise PolicyError(
-                f"Invalid Rego in policy '{policy_name}': unbalanced delimiters. Failing CLOSED."
-            )
+            raise PolicyError(f"Invalid Rego in policy '{policy_name}': unbalanced delimiters. Failing CLOSED.")
         if not saw_package:
-            raise PolicyError(
-                f"Invalid Rego in policy '{policy_name}': missing package declaration. Failing CLOSED."
-            )
+            raise PolicyError(f"Invalid Rego in policy '{policy_name}': missing package declaration. Failing CLOSED.")
 
     def _validate_opa_available(self) -> None:
         """
@@ -464,9 +444,7 @@ class PolicyEngine:
             PolicyError: If OPA CLI not found
         """
         try:
-            result = subprocess.run(
-                ["opa", "version"], capture_output=True, text=True, timeout=5
-            )
+            result = subprocess.run(["opa", "version"], capture_output=True, text=True, timeout=5)
             if result.returncode != 0:
                 raise PolicyError("OPA CLI check failed. Failing CLOSED.")
         except FileNotFoundError:
@@ -495,14 +473,9 @@ class PolicyEngine:
                     timeout=10,
                 )
                 if result.returncode != 0:
-                    raise PolicyError(
-                        f"Invalid Rego in policy '{policy.name}': "
-                        f"{result.stderr.decode()}"
-                    )
+                    raise PolicyError(f"Invalid Rego in policy '{policy.name}': " f"{result.stderr.decode()}")
             except subprocess.TimeoutExpired:
-                raise PolicyError(
-                    f"Rego validation timeout for policy '{policy.name}'. Failing CLOSED."
-                )
+                raise PolicyError(f"Rego validation timeout for policy '{policy.name}'. Failing CLOSED.")
 
     def evaluate(self, operation: Operation) -> PolicyDecision:
         """
@@ -535,16 +508,12 @@ class PolicyEngine:
         for policy in self.policies:
             try:
                 # Write Rego policy and input to temp files
-                with tempfile.NamedTemporaryFile(
-                    mode="w", suffix=".rego", delete=False
-                ) as policy_file:
+                with tempfile.NamedTemporaryFile(mode="w", suffix=".rego", delete=False) as policy_file:
                     policy_file.write(policy.rule)
                     policy_file.flush()
                     policy_file_path = policy_file.name
 
-                with tempfile.NamedTemporaryFile(
-                    mode="w", suffix=".json", delete=False
-                ) as input_file:
+                with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as input_file:
                     json.dump(input_data, input_file)
                     input_file.flush()
                     input_file_path = input_file.name
@@ -595,11 +564,7 @@ class PolicyEngine:
                         deny_messages = expressions[0].get("value", [])
                         if deny_messages:
                             # Policy denied the operation
-                            message = (
-                                deny_messages[0]
-                                if isinstance(deny_messages, list)
-                                else str(deny_messages)
-                            )
+                            message = deny_messages[0] if isinstance(deny_messages, list) else str(deny_messages)
                             violations.append(
                                 PolicyViolation(
                                     policy_name=policy.name,
@@ -671,22 +636,15 @@ class PolicyEngine:
 
         for policy in self.policies:
             try:
-                if (
-                    self._policy_matches_operation(policy.rule, input_operation)
-                    is False
-                ):
+                if self._policy_matches_operation(policy.rule, input_operation) is False:
                     continue
 
                 matched, message = self._policy_matches_code(policy.rule, input_code)
 
                 # If the policy appears SQL-related, add semantic safety check.
-                sql_related = (
-                    "SELECT" in policy.rule.upper() or "SQL" in policy.name.upper()
-                )
+                sql_related = "SELECT" in policy.rule.upper() or "SQL" in policy.name.upper()
                 if matched and sql_related:
-                    if self._semantic_analyzer.has_parameterization(
-                        input_code, input_language
-                    ):
+                    if self._semantic_analyzer.has_parameterization(input_code, input_language):
                         matched = False
 
                 if matched:
@@ -796,9 +754,7 @@ class PolicyEngine:
 
         # Check if code was already used
         if human_code in self._used_override_codes:
-            return OverrideDecision(
-                approved=False, reason="Override code already used (single-use only)"
-            )
+            return OverrideDecision(approved=False, reason="Override code already used (single-use only)")
 
         # Mark code as used
         self._used_override_codes.add(human_code)

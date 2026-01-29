@@ -42,9 +42,7 @@ class ConcolicEngine:
     def __init__(self):
         pass
 
-    def execute(
-        self, code: str, initial_inputs: Dict[str, Any], max_iterations: int = 100
-    ) -> ConcolicResult:
+    def execute(self, code: str, initial_inputs: Dict[str, Any], max_iterations: int = 100) -> ConcolicResult:
         """
         Execute code concolically.
 

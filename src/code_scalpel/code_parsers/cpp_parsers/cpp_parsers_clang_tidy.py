@@ -63,9 +63,7 @@ class ClangTidyParser:
         self.config = ClangTidyConfig()
         self.checks: List[ClangTidyCheck] = []
 
-    def execute_clang_tidy(
-        self, paths: List[Path], config: Optional[ClangTidyConfig] = None
-    ) -> List[ClangTidyCheck]:
+    def execute_clang_tidy(self, paths: List[Path], config: Optional[ClangTidyConfig] = None) -> List[ClangTidyCheck]:
         raise NotImplementedError("Phase 2: Clang-Tidy execution")
 
     def parse_json_report(self, report_path: Path) -> List[ClangTidyCheck]:
@@ -74,25 +72,17 @@ class ClangTidyParser:
     def load_config(self, config_file: Path) -> ClangTidyConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_checks(
-        self, checks: List[ClangTidyCheck]
-    ) -> Dict[CheckCategory, List[ClangTidyCheck]]:
+    def categorize_checks(self, checks: List[ClangTidyCheck]) -> Dict[CheckCategory, List[ClangTidyCheck]]:
         raise NotImplementedError("Phase 2: Check categorization")
 
-    def detect_modernization_opportunities(
-        self, checks: List[ClangTidyCheck]
-    ) -> List[ClangTidyCheck]:
+    def detect_modernization_opportunities(self, checks: List[ClangTidyCheck]) -> List[ClangTidyCheck]:
         raise NotImplementedError("Phase 2: Modernization detection")
 
     def apply_fixes(self, checks: List[ClangTidyCheck]) -> Dict[str, int]:
         raise NotImplementedError("Phase 2: Auto-fix application")
 
-    def generate_report(
-        self, checks: List[ClangTidyCheck], format: str = "json"
-    ) -> str:
+    def generate_report(self, checks: List[ClangTidyCheck], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
-    def analyze_cpp_standard_compatibility(
-        self, checks: List[ClangTidyCheck], target_std: str
-    ) -> List[ClangTidyCheck]:
+    def analyze_cpp_standard_compatibility(self, checks: List[ClangTidyCheck], target_std: str) -> List[ClangTidyCheck]:
         raise NotImplementedError("Phase 2: Standard compatibility analysis")

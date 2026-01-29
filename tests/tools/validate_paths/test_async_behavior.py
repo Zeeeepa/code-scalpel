@@ -259,6 +259,4 @@ async def test_validate_paths_response_time_small_medium_large(monkeypatch):
             _unwrap_envelope_data(result).get("inaccessible", [])
         )
         assert total == len(paths)
-        assert (
-            duration < thresholds[key]
-        ), f"{key} batch exceeded threshold: {duration:.2f}s"
+        assert duration < thresholds[key], f"{key} batch exceeded threshold: {duration:.2f}s"

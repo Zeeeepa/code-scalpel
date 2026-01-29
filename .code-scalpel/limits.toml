@@ -1,6 +1,4 @@
 # Code Scalpel Tier Limits Configuration
-# [20251225_CONFIG] Centralized configuration for tier-based feature limits
-# [20251227_REFACTOR] Removed tier-based timeouts - use uniform generous safeguard
 #
 # This file defines the capability limits for each tool at each tier.
 # It is packaged with MCP server distributions and can be customized
@@ -18,9 +16,6 @@
 # ============================================================================
 # GLOBAL SETTINGS (apply to all tiers)
 # ============================================================================
-# [20251227_CONFIG] Timeouts are NOT tier-differentiated - they are safeguards.
-# The depth/file/node limits naturally bound execution time.
-# Timeout should only trigger for pathological cases (infinite loops, hung IO).
 
 [global]
 default_timeout_seconds = 120  # Generous safeguard for all tiers
@@ -28,7 +23,7 @@ default_timeout_seconds = 120  # Generous safeguard for all tiers
 # ============================================================================
 # SCANNER CONFIGURATION (Tier-Based Data Volume Limits)
 # ============================================================================
-# [20260126_ORACLE] Universal scanner limits that apply to ALL crawling tools.
+# Universal scanner limits that apply to ALL crawling tools.
 # These limits define the "perception layer" for each tier:
 # - Community: Can see shallow context (good for local refactoring)
 # - Pro: Can see project-wide context (good for safe refactoring)
@@ -40,14 +35,11 @@ default_timeout_seconds = 120  # Generous safeguard for all tiers
 # - Any tool that needs to understand project context
 
 [community.scanner]
-# Community tier: Limited visibility (safety net)
-# Good for: Single-file refactoring, local validation
 max_files = 50        # Stop after 50 files
 max_depth = 2         # Only follow imports 2 levels deep
 max_symbol_count = 1000
 
 [pro.scanner]
-# Pro tier: Full project visibility
 # Good for: Cross-file refactoring, architecture changes, confident decisions
 max_files = 2000      # Up to 2000 files
 max_depth = 10        # Follow imports 10 levels deep
@@ -71,25 +63,22 @@ languages = ["python", "javascript", "typescript", "java"]
 
 [pro.analyze_code]
 max_file_size_mb = 10
-# [20260110_BUGFIX] Removed go/rust until implementation exists (roadmap: Q1 2026)
 languages = ["python", "javascript", "typescript", "java"]
 
 [enterprise.analyze_code]
 max_file_size_mb = 100
-# languages unlimited - omit
 # languages unlimited - all languages supported
 
 # ----------------------------------------------------------------------------
 
 [community.get_file_context]
-# [20260123_FIX] Renamed to match features.py - this is an OUTPUT limit (lines returned)
 max_context_lines = 500
 
 [pro.get_file_context]
 max_context_lines = 2000
 
 [enterprise.get_file_context]
-# max_context_lines unlimited - omit
+# max_context_lines unlimited
 
 # ----------------------------------------------------------------------------
 
@@ -104,7 +93,7 @@ max_modules = 200
 detail_level = "detailed"
 
 [enterprise.get_project_map]
-# max_files unlimited - omit
+# max_files unlimited
 max_modules = 1000
 detail_level = "comprehensive"
 
@@ -129,14 +118,11 @@ complexity_analysis = false
 respect_gitignore = true
 
 [pro.crawl_project]
-# [20260106_FIX] max_files unlimited for Pro tier - removed hardcoded 1000 limit
-# to match features.py TOOL_CAPABILITIES which sets max_files = None
 parsing_enabled = true
 complexity_analysis = true
 respect_gitignore = true
 
 [enterprise.crawl_project]
-# max_files unlimited - omit
 parsing_enabled = true
 complexity_analysis = true
 respect_gitignore = true
@@ -154,7 +140,7 @@ max_depth = 50
 max_nodes = 500
 
 [enterprise.get_call_graph]
-# max_depth and max_nodes unlimited - omit
+# max_depth and max_nodes unlimited
 
 # ----------------------------------------------------------------------------
 
@@ -200,7 +186,7 @@ osv_lookup = true
 osv_lookup = true
 
 # ----------------------------------------------------------------------------
-# [20251231_FIX] v1.1 - Restored Community tier per verification document
+# Type Evaporation Scan
 
 [community.type_evaporation_scan]
 max_files = 50
@@ -247,13 +233,12 @@ languages = ["python", "javascript", "typescript", "java"]
 max_sinks = 50
 
 [pro.unified_sink_detect]
-# [20260110_BUGFIX] Align tier language contract with UnifiedSinkDetector (python/js/ts/java only)
 languages = ["python", "javascript", "typescript", "java"]
-# max_sinks unlimited - omit
+# max_sinks unlimited
 
 [enterprise.unified_sink_detect]
 # languages = "all" handled in code
-# max_sinks and custom_sinks_limit unlimited - omit
+# max_sinks and custom_sinks_limit unlimited
 
 # ----------------------------------------------------------------------------
 
@@ -267,7 +252,7 @@ max_paths = 100
 # max_paths unlimited - omit
 
 # ----------------------------------------------------------------------------
-# [20251231_CONFIG] Updated verify_policy_integrity limits per v1.0 roadmap
+# Policy Integrity Verification
 
 [community.verify_policy_integrity]
 max_policy_files = 50
@@ -276,10 +261,10 @@ max_policy_files = 50
 max_policy_files = 200
 
 [enterprise.verify_policy_integrity]
-# max_policy_files unlimited - omit
+# max_policy_files unlimited
 
 # ----------------------------------------------------------------------------
-# [20251226_CONFIG] Added code_policy_check limits
+# Code Policy Check
 
 [community.code_policy_check]
 max_files = 100
@@ -306,13 +291,11 @@ pdf_reports_enabled = true
 
 [community.extract_code]
 include_cross_file_deps = false
-# [20260111_BUGFIX] Fixed max_depth to match features.py (was 1, should be 0 - no context for Community)
 max_depth = 0
 max_extraction_size_mb = 1
 
 [pro.extract_code]
 include_cross_file_deps = true
-# Pro: direct dependencies only (tier contract); deeper recursion is Enterprise.
 max_depth = 1
 max_extraction_size_mb = 10
 
@@ -326,26 +309,21 @@ max_extraction_size_mb = 100
 [community.update_symbol]
 backup_enabled = true
 validation_level = "syntax"
-# [20260121_REFACTOR] Switched to stateless per-call throughput cap
-# Community: up to 10 updates per call; each call is independent (no session state)
 max_updates_per_call = 10
 
 [pro.update_symbol]
 backup_enabled = true
 validation_level = "semantic"
-# [20260121_REFACTOR] Per-call model; Pro has unlimited updates
 max_updates_per_call = -1
 
 [enterprise.update_symbol]
 backup_enabled = true
 validation_level = "full"
-# [20260121_REFACTOR] Per-call model; Enterprise has unlimited updates
 max_updates_per_call = -1
 
 # ----------------------------------------------------------------------------
 
 [community.rename_symbol]
-# Community: definition-only rename (no cross-file updates)
 max_files_searched = 0
 max_files_updated = 0
 
@@ -373,10 +351,9 @@ analysis_depth = "deep"
 
 # ----------------------------------------------------------------------------
 
-# [20251230_FEATURE] v1.0 roadmap alignment - updated limits
 [community.symbolic_execute]
-max_paths = 50  # Roadmap v1.0: 50 paths max
-max_depth = 10  # max loop iterations
+max_paths = 50
+max_depth = 10
 constraint_types = ["int", "bool", "string", "float"]
 
 [pro.symbolic_execute]
@@ -407,8 +384,7 @@ test_frameworks = "all"
 # ============================================================================
 # GROUP 5: ORACLE TOOLS (AI-ASSISTED CODE GENERATION)
 # ============================================================================
-# [20260126_ORACLE_PHASE1B] Refactored to be tier-agnostic.
-# Oracle is now a universal right: ALL tiers can use it.
+# Oracle tools are tier-agnostic - all tiers can use them.
 # The tier-based limits come implicitly from the scanner limits above:
 # - Community: Sees shallow context (50 files, depth 2) → safer but less informed specs
 # - Pro: Sees project context (2000 files, depth 10) → full architectural insights

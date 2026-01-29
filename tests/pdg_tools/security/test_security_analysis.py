@@ -352,10 +352,7 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_id)
         result = analyze_security(code)
 
         summary = result.summary()
-        assert (
-            "vulnerability" in summary.lower()
-            or "no vulnerabilities" in summary.lower()
-        )
+        assert "vulnerability" in summary.lower() or "no vulnerabilities" in summary.lower()
 
     def test_result_to_dict(self):
         """Result should serialize to dict."""
@@ -615,9 +612,7 @@ class TestSanitizerRegistry:
         # Clean up after test
         test_name = "_test_custom_sanitizer_123"
         try:
-            register_sanitizer(
-                test_name, clears_sinks={SecuritySink.SQL_QUERY}, full_clear=False
-            )
+            register_sanitizer(test_name, clears_sinks={SecuritySink.SQL_QUERY}, full_clear=False)
 
             assert test_name in SANITIZER_REGISTRY
             sanitizer = SANITIZER_REGISTRY[test_name]
@@ -1632,13 +1627,7 @@ class TestTaintTrackerConfigEdgeCases:
 
         # Config with invalid sanitizer format (not a list)
         fake_config = {
-            "tool": {
-                "code-scalpel": {
-                    "sanitizers": {
-                        "bad_sanitizer": "not_a_list"
-                    }  # Invalid - should be list
-                }
-            }
+            "tool": {"code-scalpel": {"sanitizers": {"bad_sanitizer": "not_a_list"}}}  # Invalid - should be list
         }
 
         with (

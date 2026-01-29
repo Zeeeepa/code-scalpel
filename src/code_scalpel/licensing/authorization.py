@@ -38,7 +38,7 @@ def compute_effective_tier_for_startup(
     if requested_tier is not None:
         requested_tier = requested_tier.strip().lower()
 
-    if requested_tier == "free":
+    if requested_tier == "community":
         requested_tier = "community"
     if requested_tier == "all":
         requested_tier = "enterprise"
@@ -49,8 +49,7 @@ def compute_effective_tier_for_startup(
         "enterprise",
     }:
         raise ValueError(
-            "Invalid tier. Expected one of: community, pro, enterprise "
-            "(or set CODE_SCALPEL_TIER/SCALPEL_TIER)"
+            "Invalid tier. Expected one of: community, pro, enterprise " "(or set CODE_SCALPEL_TIER/SCALPEL_TIER)"
         )
 
     # [20251229_BUGFIX] Remote verifier is authoritative when configured.
@@ -75,11 +74,9 @@ def compute_effective_tier_for_startup(
                     if (decision_allowed and ent is not None)
                     else "community"
                 )
-                ent_error = (
-                    ent.error if ent is not None else None
-                ) or "Verifier denied"
+                ent_error = (ent.error if ent is not None else None) or "Verifier denied"
 
-            if licensed_tier == "free":
+            if licensed_tier == "community":
                 licensed_tier = "community"
             if licensed_tier == "all":
                 licensed_tier = "enterprise"
@@ -108,9 +105,7 @@ def compute_effective_tier_for_startup(
                         "Purchase: http://codescalpel.dev/pricing"
                     )
 
-            effective_tier = (
-                requested_tier if requested_rank <= max_allowed_rank else licensed_tier
-            )
+            effective_tier = requested_tier if requested_rank <= max_allowed_rank else licensed_tier
             return effective_tier, None
     except Exception as exc:
         # If remote verifier is configured, don't fall back to local RS256 validation
@@ -124,9 +119,7 @@ def compute_effective_tier_for_startup(
         # If verifier is explicitly configured, fail closed rather than attempting
         # local RS256 validation which requires different key material.
         if remote_verifier_configured():
-            logger.warning(
-                "Verifier configured but failed - defaulting to Community tier"
-            )
+            logger.warning("Verifier configured but failed - defaulting to Community tier")
             return "community", f"Remote verifier error: {exc}"
 
         # Otherwise fall through to local validation mode
@@ -139,7 +132,7 @@ def compute_effective_tier_for_startup(
         licensed_tier = "community"
     else:
         licensed_tier = (license_data.tier or "community").strip().lower()
-    if licensed_tier == "free":
+    if licensed_tier == "community":
         licensed_tier = "community"
     if licensed_tier == "all":
         licensed_tier = "enterprise"
@@ -175,7 +168,5 @@ def compute_effective_tier_for_startup(
             )
 
     # Clamp to the maximum allowed by the license.
-    effective_tier = (
-        requested_tier if requested_rank <= max_allowed_rank else licensed_tier
-    )
+    effective_tier = requested_tier if requested_rank <= max_allowed_rank else licensed_tier
     return effective_tier, None

@@ -28,7 +28,7 @@ This document provides a comprehensive reference for all environment variables u
 | Property | Value |
 |----------|-------|
 | **Purpose** | Request a specific tier (downgrade only) |
-| **Valid Values** | `community`, `pro`, `enterprise`, `free` (alias for community), `all` (alias for enterprise) |
+| **Valid Values** | `community`, `pro`, `enterprise`, `all` (alias for enterprise) |
 | **Default** | Not set (uses licensed tier) |
 | **Applies To** | All tiers |
 

@@ -88,9 +88,7 @@ class ReleaseRunner:
         print(f"{Colors.BOLD}{Colors.BLUE}→ {title}{Colors.RESET}")
         print(f"{Colors.BOLD}{Colors.BLUE}{'=' * 70}{Colors.RESET}\n")
 
-    def run_command(
-        self, cmd: str, description: str, capture: bool = False
-    ) -> tuple[bool, str]:
+    def run_command(self, cmd: str, description: str, capture: bool = False) -> tuple[bool, str]:
         """Run a shell command and report results.
 
         Args:
@@ -530,12 +528,8 @@ class ReleaseRunner:
                 print(f"  {Colors.RED}✗{Colors.RESET} {check}")
 
         if total_checks > 0:
-            print(
-                f"\n{Colors.CYAN}Results: {len(self.passed_checks)}/{total_checks} passed{Colors.RESET}"
-            )
-        print(
-            f"{Colors.CYAN}Time elapsed: {elapsed.total_seconds():.1f}s{Colors.RESET}\n"
-        )
+            print(f"\n{Colors.CYAN}Results: {len(self.passed_checks)}/{total_checks} passed{Colors.RESET}")
+        print(f"{Colors.CYAN}Time elapsed: {elapsed.total_seconds():.1f}s{Colors.RESET}\n")
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
@@ -572,9 +566,7 @@ Examples:
         help="Project directory (default: current directory)",
     )
 
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable verbose output"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
 
     parser.add_argument(
         "--validate",
@@ -673,13 +665,7 @@ def main() -> int:
                 return 1
 
         # Step 5: Publish
-        if (
-            args.publish_all
-            or args.publish_pypi
-            or args.publish_github
-            or args.publish_docker
-            or args.publish_vscode
-        ):
+        if args.publish_all or args.publish_pypi or args.publish_github or args.publish_docker or args.publish_vscode:
             if not runner.publish_release(
                 pypi=args.publish_all or args.publish_pypi,
                 github=args.publish_all or args.publish_github,

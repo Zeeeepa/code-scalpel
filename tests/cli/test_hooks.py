@@ -193,9 +193,7 @@ class TestHookResponse:
 
     def test_to_json(self):
         """Test HookResponse JSON serialization."""
-        response = HookResponse(
-            status=HookStatus.LOGGED, files_modified=["/path/to/file.py"]
-        )
+        response = HookResponse(status=HookStatus.LOGGED, files_modified=["/path/to/file.py"])
         json_str = response.to_json()
         data = json.loads(json_str)
 
@@ -478,9 +476,7 @@ class TestInstallClaudeHooks:
             # Should have empty hook arrays
             pre_hooks = settings.get("hooks", {}).get("PreToolUse", [])
             post_hooks = settings.get("hooks", {}).get("PostToolUse", [])
-            scalpel_hooks = [
-                h for h in pre_hooks + post_hooks if "code-scalpel" in h.get("name", "")
-            ]
+            scalpel_hooks = [h for h in pre_hooks + post_hooks if "code-scalpel" in h.get("name", "")]
             assert len(scalpel_hooks) == 0
 
     def test_check_hooks_installed(self):

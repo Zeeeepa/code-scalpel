@@ -98,10 +98,7 @@ def create_user():
     assert len(result.generated_schemas) >= 1
     # Note: validation_code and compliance_report are excluded by response_config.json for token efficiency
     assert len(result.pydantic_models) >= 1
-    assert (
-        result.api_contract is not None
-        and result.api_contract.get("total_endpoints", 0) >= 1
-    )
+    assert result.api_contract is not None and result.api_contract.get("total_endpoints", 0) >= 1
     assert result.schema_coverage is not None
     # Custom rules
     assert len(result.custom_rule_violations) >= 1

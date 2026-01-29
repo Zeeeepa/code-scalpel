@@ -47,20 +47,14 @@ async def _get_call_graph_tool(
     Build a call graph showing function relationships in the project.
 
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Limits and optional enhancements are applied based on tool capabilities.
+    - Community: Max depth 3, max nodes 50, basic call graph only
+    - Pro: Max depth 50, max nodes 500, includes advanced features (path queries, focus mode, call context, confidence scoring)
+    - Enterprise: Unlimited depth and nodes, includes enterprise metrics (hot path identification, dead code detection, custom graph analysis)
 
     **Tier Capabilities:**
     - Community: Max depth 3, max nodes 50
-    - Pro: Max depth 50, max nodes 500
-    - Enterprise: Unlimited depth and nodes
-
-    **Advanced Features:**
-    - **Path Queries:** Use paths_from and paths_to to find all call paths between functions
-    - **Focus Mode:** Use focus_functions to extract a subgraph centered on specific functions
-    - **Call Context:** Each edge includes context (in_loop, in_try_block, in_conditional)
-    - **Confidence Scoring:** Each edge includes confidence (1.0=static, 0.8=type_hint, 0.5=inferred)
-    - **Source URIs:** Each node includes source_uri for IDE click-through (file:///path#L42)
+    - Pro: Max depth 50, max nodes 500, path queries, focus mode, call context, confidence scoring
+    - Enterprise: Unlimited depth and nodes, enterprise metrics (hot path identification, dead code detection, custom graph analysis)
 
     Args:
         project_root: Project root directory (default: server's project root)
@@ -101,8 +95,7 @@ async def _get_call_graph_tool(
     # [20260121_BUGFIX] Enable tier-driven advanced resolution and enterprise metrics
     advanced_resolution = "advanced_call_graph" in cap_set
     include_enterprise_metrics = bool(
-        {"hot_path_identification", "dead_code_detection", "custom_graph_analysis"}
-        & cap_set
+        {"hot_path_identification", "dead_code_detection", "custom_graph_analysis"} & cap_set
     )
 
     # [20260120_FEATURE] Call sync function with tier/capabilities for metadata transparency
@@ -429,14 +422,19 @@ async def _cross_file_security_scan_tool(
     """
     Perform cross-file security analysis tracking taint flow across module boundaries.
 
+    Use this tool to detect vulnerabilities where tainted data crosses
+    file boundaries before reaching a dangerous sink. This catches security
+    issues that single-file analysis would miss.
+
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Limits and optional enhancements are applied based on tool capabilities.
+    - Community: Basic cross-file scan with single-module taint tracking (max 10 modules, depth 3)
+    - Pro: Advanced taint tracking with framework-aware analysis (max 100 modules, depth 10)
+    - Enterprise: Project-wide scan with custom rules and global flows (unlimited modules/depth)
 
     **Tier Capabilities:**
-    - Community: Max modules 10, max depth 3
-    - Pro: Max modules 100, max depth 10
-    - Enterprise: Unlimited modules and depth
+    - Community: basic_cross_file_scan, single_module_taint_tracking, source_to_sink_tracing, basic_taint_propagation
+    - Pro: All Community + advanced_taint_tracking, framework_aware_taint, spring_bean_tracking, react_context_tracking, dependency_injection_resolution
+    - Enterprise: All Pro + project_wide_scan, custom_taint_rules, global_taint_flow, frontend_to_backend_tracing, api_to_database_tracing, microservice_boundary_crossing
 
     Args:
         project_root: Project root directory (default: server's project root)
@@ -449,16 +447,43 @@ async def _cross_file_security_scan_tool(
                         Set to None for no timeout (not recommended for large projects)
         max_modules: Maximum number of modules to analyze (default: 500)
                     Set to None for no limit (not recommended for large projects)
+        confidence_threshold: Minimum confidence score for vulnerability reporting (default: 0.7)
 
     Returns:
-        CrossFileSecurityResult with vulnerabilities, taint flows, and risk assessment
+        ToolResponseEnvelope with CrossFileSecurityResult:
+        - success: True if analysis completed successfully
+        - data: CrossFileSecurityResult containing:
+          - success: True if analysis succeeded
+          - server_version: Code Scalpel version
+          - tier_applied: Tier used ("community"/"pro"/"enterprise")
+          - max_depth_applied: Max depth limit applied (None=unlimited)
+          - max_modules_applied: Max modules limit applied (None=unlimited)
+          - framework_aware_enabled: Whether framework-aware tracking enabled (Pro+)
+          - enterprise_features_enabled: Whether enterprise features enabled
+          - files_analyzed: Number of files analyzed
+          - has_vulnerabilities: Whether vulnerabilities were found
+          - vulnerability_count: Total vulnerabilities found
+          - risk_level: Overall risk level ("low"/"medium"/"high"/"critical")
+          - vulnerabilities: List of CrossFileVulnerabilityModel with details
+          - taint_flows: List of TaintFlowModel showing data flow paths
+          - taint_sources: Functions containing taint sources
+          - dangerous_sinks: Functions containing dangerous sinks
+          - framework_contexts: Framework-aware context detection (Pro+)
+          - dependency_chains: Inter-file dependency chains (Pro+)
+          - confidence_scores: Heuristic confidence scores per flow (Pro+)
+          - global_flows: Global taint flows across service boundaries (Enterprise)
+          - microservice_boundaries: Detected service/domain boundaries (Enterprise)
+          - distributed_trace: Distributed trace representation (Enterprise)
+          - mermaid: Mermaid diagram of taint flows
+          - error: Error message if analysis failed
+        - error: Error message if tool execution failed
+        - tier_applied: Tier used for analysis
+        - duration_ms: Analysis duration in milliseconds
     """
     # [20251215_FEATURE] v2.0.0 - Progress token support
     # [20251220_FEATURE] v3.0.5 - Enhanced progress messages
     if ctx:
-        await ctx.report_progress(
-            progress=0, total=100, message="Starting cross-file security scan..."
-        )
+        await ctx.report_progress(progress=0, total=100, message="Starting cross-file security scan...")
 
     tier = _get_current_tier()
     caps = get_tool_capabilities("cross_file_security_scan", tier)

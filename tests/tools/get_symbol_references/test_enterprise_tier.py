@@ -2,9 +2,7 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_enterprise_codeowners_and_ownership(
-    make_project, patch_tier, patch_capabilities
-):
+async def test_enterprise_codeowners_and_ownership(make_project, patch_tier, patch_capabilities):
     """[20260104_TEST] Enterprise should attribute owners via CODEOWNERS when enabled."""
     import code_scalpel.mcp.tools.context as server
 

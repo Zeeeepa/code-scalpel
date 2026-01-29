@@ -312,9 +312,7 @@ async def test_tier_transition_community_to_pro_fields_appear(
 
     # Core fields should be the same
     assert data_comm.get("success") == data_pro.get("success")
-    assert data_comm.get("frontend_vulnerabilities") == data_pro.get(
-        "frontend_vulnerabilities"
-    )
+    assert data_comm.get("frontend_vulnerabilities") == data_pro.get("frontend_vulnerabilities")
 
 
 async def test_tier_transition_pro_to_enterprise_fields_appear(
@@ -397,10 +395,7 @@ async def test_tier_transition_pro_to_enterprise_fields_appear(
 
     # Enterprise should have fields that Pro doesn't
     # At minimum, api_contract or compliance_report should be present in Enterprise
-    assert (
-        data_ent.get("api_contract") is not None
-        or data_ent.get("compliance_report") is not None
-    )
+    assert data_ent.get("api_contract") is not None or data_ent.get("compliance_report") is not None
 
     # Pro-level fields should still be present
     assert "implicit_any_count" in data_ent
@@ -453,14 +448,10 @@ async def test_tier_capability_consistency_across_tiers(
     enterprise_caps = tiers_and_caps["enterprise"]
 
     # Pro should have at least community's capabilities (plus more)
-    assert community_caps.issubset(
-        pro_caps
-    ), f"Pro tier missing Community caps: {community_caps - pro_caps}"
+    assert community_caps.issubset(pro_caps), f"Pro tier missing Community caps: {community_caps - pro_caps}"
 
     # Enterprise should have at least pro's capabilities (plus more)
-    assert pro_caps.issubset(
-        enterprise_caps
-    ), f"Enterprise tier missing Pro caps: {pro_caps - enterprise_caps}"
+    assert pro_caps.issubset(enterprise_caps), f"Enterprise tier missing Pro caps: {pro_caps - enterprise_caps}"
 
     # Verify specific capabilities exist where expected
     # assert "envelope-v1" in community_caps

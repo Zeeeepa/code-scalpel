@@ -17,8 +17,7 @@ Migration:
 import warnings
 
 warnings.warn(
-    "code_scalpel.error_fixer is deprecated. "
-    "Import from code_scalpel.quality_assurance instead.",
+    "code_scalpel.error_fixer is deprecated. " "Import from code_scalpel.quality_assurance instead.",
     DeprecationWarning,
     stacklevel=2,
 )

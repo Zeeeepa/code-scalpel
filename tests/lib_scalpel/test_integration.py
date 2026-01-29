@@ -60,9 +60,7 @@ class DatabaseConnection:
 ''')
 
         # Step 1: Scan project
-        scanner = ProjectScanner(
-            root_dir=str(src_dir), max_files=10, max_depth=2, extract_symbols=True
-        )
+        scanner = ProjectScanner(root_dir=str(src_dir), max_files=10, max_depth=2, extract_symbols=True)
         graph = scanner.scan()
 
         assert graph is not None
@@ -125,9 +123,7 @@ def format_data():
 ''')
 
         # Scan project
-        scanner = ProjectScanner(
-            root_dir=str(src_dir), max_files=10, max_depth=3, extract_symbols=True
-        )
+        scanner = ProjectScanner(root_dir=str(src_dir), max_files=10, max_depth=3, extract_symbols=True)
         graph = scanner.scan()
 
         # Define governance rules
@@ -194,9 +190,7 @@ def func_b():
 ''')
 
         # Scan
-        scanner = ProjectScanner(
-            root_dir=str(src_dir), max_files=10, max_depth=2, extract_symbols=True
-        )
+        scanner = ProjectScanner(root_dir=str(src_dir), max_files=10, max_depth=2, extract_symbols=True)
         graph = scanner.scan()
 
         # Analyze
@@ -242,9 +236,7 @@ def invalid_function(
 ''')
 
         # Scan should handle errors gracefully
-        scanner = ProjectScanner(
-            root_dir=str(src_dir), max_files=10, max_depth=2, extract_symbols=True
-        )
+        scanner = ProjectScanner(root_dir=str(src_dir), max_files=10, max_depth=2, extract_symbols=True)
         graph = scanner.scan()
 
         # Should still have scanned the valid file
@@ -314,9 +306,7 @@ def create_user(name: str, email: Optional[str] = None) -> User:
 ''')
 
         # Scan with symbol extraction
-        scanner = ProjectScanner(
-            root_dir=str(src_dir), max_files=10, max_depth=2, extract_symbols=True
-        )
+        scanner = ProjectScanner(root_dir=str(src_dir), max_files=10, max_depth=2, extract_symbols=True)
         graph = scanner.scan()
 
         # Generate spec
@@ -358,9 +348,7 @@ def create_user(name: str, email: Optional[str] = None) -> User:
         file3.write_text("# Level 3")
 
         # Scan with limited depth
-        scanner = ProjectScanner(
-            root_dir=str(src_dir), max_files=10, max_depth=1, extract_symbols=True
-        )
+        scanner = ProjectScanner(root_dir=str(src_dir), max_files=10, max_depth=1, extract_symbols=True)
         graph = scanner.scan()
 
         # Should have limited the depth

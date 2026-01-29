@@ -127,12 +127,7 @@ class EvidenceRecorder:
         evidence_dir: Path,
         server: dict | None = None,
     ) -> None:
-        self._started_at_utc = (
-            datetime.now(timezone.utc)
-            .replace(microsecond=0)
-            .isoformat()
-            .replace("+00:00", "Z")
-        )
+        self._started_at_utc = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
         self._events: list[dict] = []
         self._tool_calls: list[dict] = []
         self._failure: dict | None = None
@@ -215,12 +210,7 @@ class EvidenceRecorder:
         }
 
     def write(self) -> None:
-        ended_at_utc = (
-            datetime.now(timezone.utc)
-            .replace(microsecond=0)
-            .isoformat()
-            .replace("+00:00", "Z")
-        )
+        ended_at_utc = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
         duration_seconds = time.monotonic() - self._started_monotonic
         status = "failed" if self._failure else "passed"
 
@@ -234,9 +224,7 @@ class EvidenceRecorder:
             "failure": self._failure,
         }
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(
-            json.dumps(report, indent=2, sort_keys=True), encoding="utf-8"
-        )
+        self.path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
 
         try:
             index_path = self.path.parent / "index.ndjson"
@@ -290,9 +278,7 @@ def _get_free_port() -> int:
         return int(sock.getsockname()[1])
 
 
-def _get_free_port_pair(
-    host: str = "127.0.0.1", attempts: int = 200
-) -> tuple[int, int]:
+def _get_free_port_pair(host: str = "127.0.0.1", attempts: int = 200) -> tuple[int, int]:
     for _ in range(attempts):
         base = _get_free_port()
         if base <= 0:
@@ -327,9 +313,7 @@ def _tool_json(result) -> dict:
     try:
         return json.loads(text)
     except json.JSONDecodeError as exc:
-        raise AssertionError(
-            "Tool content is not valid JSON; first 200 chars: " + repr(text[:200])
-        ) from exc
+        raise AssertionError("Tool content is not valid JSON; first 200 chars: " + repr(text[:200])) from exc
 
 
 def _ninja_warrior_root() -> Path:
@@ -341,9 +325,7 @@ def _ninja_warrior_root() -> Path:
 
 def _require_ninja_warrior() -> Path:
     if os.environ.get("RUN_NINJA_WARRIOR") != "1":
-        pytest.skip(
-            "Set RUN_NINJA_WARRIOR=1 to enable Ninja Warrior acceptance harness"
-        )
+        pytest.skip("Set RUN_NINJA_WARRIOR=1 to enable Ninja Warrior acceptance harness")
 
     root = _ninja_warrior_root()
     if not root.exists():
@@ -357,9 +339,7 @@ def _require_ninja_warrior() -> Path:
 
 def _require_ninja_warrior_heavy() -> None:
     if os.environ.get("RUN_NINJA_WARRIOR_HEAVY") != "1":
-        pytest.skip(
-            "Set RUN_NINJA_WARRIOR_HEAVY=1 to enable heavy Ninja Warrior harness"
-        )
+        pytest.skip("Set RUN_NINJA_WARRIOR_HEAVY=1 to enable heavy Ninja Warrior harness")
 
 
 @asynccontextmanager
@@ -381,12 +361,8 @@ async def _stdio_session_for_root(nw_root: Path):
     )
 
     async with AsyncExitStack() as stack:
-        read_stream, write_stream = await stack.enter_async_context(
-            stdio_client(server_params)
-        )
-        session = await stack.enter_async_context(
-            ClientSession(read_stream, write_stream)
-        )
+        read_stream, write_stream = await stack.enter_async_context(stdio_client(server_params))
+        session = await stack.enter_async_context(ClientSession(read_stream, write_stream))
         await session.initialize()
         yield session
 
@@ -431,9 +407,7 @@ async def _http_session_for_root(nw_root: Path, log_dir: Path, transport: str):
 
     try:
         if proc.poll() is not None:
-            raise RuntimeError(
-                f"{transport} MCP server exited early (code={proc.returncode})"
-            )
+            raise RuntimeError(f"{transport} MCP server exited early (code={proc.returncode})")
 
         _wait_for_tcp(host, mcp_port, timeout_s=30.0)
 
@@ -522,14 +496,10 @@ async def _call_tool_json(
         )
 
 
-async def _run_high_signal_subset(
-    session: ClientSession, nw_root: Path, *, evidence: EvidenceRecorder
-) -> None:
+async def _run_high_signal_subset(session: ClientSession, nw_root: Path, *, evidence: EvidenceRecorder) -> None:
     tools = await session.list_tools()
     tool_names = sorted({t.name for t in tools.tools})
-    evidence.record_event(
-        "list_tools", tool_count=len(tool_names), tool_names=tool_names
-    )
+    evidence.record_event("list_tools", tool_count=len(tool_names), tool_names=tool_names)
     assert len(tool_names) == 22
 
     analyze_json = await _call_tool_json(
@@ -585,9 +555,7 @@ async def _run_high_signal_subset(
     assert "risk_level" in xsec_json
 
 
-async def _run_heavy_graph_subset(
-    session: ClientSession, analysis_root: Path, *, evidence: EvidenceRecorder
-) -> None:
+async def _run_heavy_graph_subset(session: ClientSession, analysis_root: Path, *, evidence: EvidenceRecorder) -> None:
     crawl_json = await _call_tool_json(
         session,
         "crawl_project",
@@ -657,9 +625,7 @@ async def test_ninja_warrior_acceptance_http(tmp_path: Path):
     evidence: EvidenceRecorder | None = None
     try:
         with anyio.fail_after(360):
-            async with _http_session_for_root(
-                nw_root, evidence_dir, "streamable-http"
-            ) as (
+            async with _http_session_for_root(nw_root, evidence_dir, "streamable-http") as (
                 session,
                 meta,
             ):
@@ -770,9 +736,7 @@ async def test_ninja_warrior_acceptance_heavy_http(tmp_path: Path):
     evidence: EvidenceRecorder | None = None
     try:
         with anyio.fail_after(900):
-            async with _http_session_for_root(
-                nw_root, evidence_dir, "streamable-http"
-            ) as (
+            async with _http_session_for_root(nw_root, evidence_dir, "streamable-http") as (
                 session,
                 meta,
             ):

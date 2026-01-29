@@ -226,9 +226,7 @@ def mock_osv_error():
         if error_type == "URLError":
             return urllib.error.URLError("Connection failed")
         elif error_type == "HTTPError":
-            return urllib.error.HTTPError(
-                "https://api.osv.dev/v1/query", 503, "Service Unavailable", {}, None
-            )
+            return urllib.error.HTTPError("https://api.osv.dev/v1/query", 503, "Service Unavailable", {}, None)
         elif error_type == "Timeout":
             return TimeoutError("Request timeout")
         else:

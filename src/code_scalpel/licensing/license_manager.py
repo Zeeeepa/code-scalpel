@@ -140,9 +140,7 @@ class LicenseManager:
         self._license_info: Optional[LicenseInfo] = None
 
         # [20251225_FEATURE] P2_MEDIUM: License state persistence
-        self._persistence_path = persistence_path or Path(
-            ".code-scalpel/license/license_state.json"
-        )
+        self._persistence_path = persistence_path or Path(".code-scalpel/license/license_state.json")
 
         # [20251225_FEATURE] P2_MEDIUM: Seat tracking and concurrent usage
         self._active_users: Set[str] = set()
@@ -203,15 +201,11 @@ class LicenseManager:
 
                     # [20251225_FEATURE] P2_MEDIUM: Grace period support
                     if validation_result.status == ValidationStatus.EXPIRED:
-                        days_expired = (
-                            _utcnow_naive() - validation_result.expiration_date
-                        ).days
+                        days_expired = (_utcnow_naive() - validation_result.expiration_date).days
                         if days_expired <= self._default_grace_period_days:
                             is_valid = True
                             is_in_grace_period = True
-                            grace_period_days = (
-                                self._default_grace_period_days - days_expired
-                            )
+                            grace_period_days = self._default_grace_period_days - days_expired
                             logger.warning(
                                 f"License expired {days_expired} days ago, "
                                 f"in grace period ({grace_period_days} days remaining)"
@@ -225,17 +219,13 @@ class LicenseManager:
 
             # [20251225_FEATURE] P4_LOW: Custom license terms
             custom_terms: Mapping[str, str | bool] = (
-                dict(validation_result.custom_rules)
-                if validation_result and validation_result.custom_rules
-                else {}
+                dict(validation_result.custom_rules) if validation_result and validation_result.custom_rules else {}
             )
 
             self._license_info = LicenseInfo(
                 tier=tier,
                 is_valid=is_valid,
-                expiration_date=(
-                    validation_result.expiration_date if validation_result else None
-                ),
+                expiration_date=(validation_result.expiration_date if validation_result else None),
                 organization=organization,
                 seats=seats,
                 seats_used=seats_used,
@@ -348,8 +338,7 @@ class LicenseManager:
             "is_expired": info.days_until_expiration == 0,
             "is_in_grace_period": info.is_in_grace_period,
             "grace_period_days_remaining": info.grace_period_days,
-            "needs_renewal": info.days_until_expiration is not None
-            and info.days_until_expiration <= 30,
+            "needs_renewal": info.days_until_expiration is not None and info.days_until_expiration <= 30,
         }
 
     def get_renewal_reminder(self) -> Optional[str]:
@@ -402,15 +391,11 @@ class LicenseManager:
             # Check seat limit for ENTERPRISE tier
             if info.tier == "enterprise" and info.seats is not None:
                 if len(self._active_users) >= info.seats:
-                    logger.warning(
-                        f"Seat limit reached: {len(self._active_users)}/{info.seats}"
-                    )
+                    logger.warning(f"Seat limit reached: {len(self._active_users)}/{info.seats}")
                     return False
 
             self._active_users.add(user_id)
-            logger.info(
-                f"User {user_id} added. Active users: {len(self._active_users)}"
-            )
+            logger.info(f"User {user_id} added. Active users: {len(self._active_users)}")
 
             # Invalidate cached license info to reflect new seat count
             self._license_info = None
@@ -431,9 +416,7 @@ class LicenseManager:
         with self._user_lock:
             if user_id in self._active_users:
                 self._active_users.remove(user_id)
-                logger.info(
-                    f"User {user_id} removed. Active users: {len(self._active_users)}"
-                )
+                logger.info(f"User {user_id} removed. Active users: {len(self._active_users)}")
 
                 # Invalidate cached license info
                 self._license_info = None
@@ -465,12 +448,8 @@ class LicenseManager:
             return {
                 "active_users": len(self._active_users),
                 "seat_limit": info.seats if info.seats else -1,
-                "seats_available": (
-                    (info.seats - len(self._active_users)) if info.seats else -1
-                ),
-                "utilization_percent": (
-                    (len(self._active_users) / info.seats * 100) if info.seats else 0
-                ),
+                "seats_available": ((info.seats - len(self._active_users)) if info.seats else -1),
+                "utilization_percent": ((len(self._active_users) / info.seats * 100) if info.seats else 0),
             }
 
     def get_organization_info(self) -> Optional[Dict[str, Any]]:
@@ -536,9 +515,7 @@ class LicenseManager:
                 "tier": self._license_info.tier,
                 "is_valid": self._license_info.is_valid,
                 "expiration_date": (
-                    self._license_info.expiration_date.isoformat()
-                    if self._license_info.expiration_date
-                    else None
+                    self._license_info.expiration_date.isoformat() if self._license_info.expiration_date else None
                 ),
                 "organization": self._license_info.organization,
                 "seats": self._license_info.seats,
@@ -574,8 +551,7 @@ class LicenseManager:
             self._active_users = set(state.get("active_users", []))
 
             logger.debug(
-                f"License state loaded from {self._persistence_path}. "
-                f"Active users: {len(self._active_users)}"
+                f"License state loaded from {self._persistence_path}. " f"Active users: {len(self._active_users)}"
             )
 
         except (IOError, OSError, json.JSONDecodeError) as e:

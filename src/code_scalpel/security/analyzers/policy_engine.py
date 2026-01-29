@@ -137,10 +137,7 @@ class PolicyEngine:
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
                 func_name = self._get_function_name(node)
-                if func_name and any(
-                    log_func in func_name.lower()
-                    for log_func in ["log", "print", "logger"]
-                ):
+                if func_name and any(log_func in func_name.lower() for log_func in ["log", "print", "logger"]):
                     # Check arguments for sensitive keywords
                     for arg in node.args:
                         arg_str = ast.unparse(arg) if hasattr(ast, "unparse") else ""

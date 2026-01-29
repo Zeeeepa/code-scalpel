@@ -27,11 +27,7 @@ class TestTsconfigAliases:
 
     def test_load_wildcard_alias(self, tmp_path):
         """Test loading wildcard aliases from tsconfig.json."""
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {"@ui/*": ["./src/ui/*"], "@data/*": ["./packages/data/src/*"]}
-            }
-        }
+        tsconfig = {"compilerOptions": {"paths": {"@ui/*": ["./src/ui/*"], "@data/*": ["./packages/data/src/*"]}}}
 
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
@@ -64,9 +60,7 @@ class TestTsconfigAliases:
 
     def test_multiple_targets_uses_first(self, tmp_path):
         """Test that multiple targets use the first one."""
-        tsconfig = {
-            "compilerOptions": {"paths": {"@utils": ["./src/utils", "./lib/utils"]}}
-        }
+        tsconfig = {"compilerOptions": {"paths": {"@utils": ["./src/utils", "./lib/utils"]}}}
 
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
@@ -392,11 +386,7 @@ class TestMultiSourceAliases:
 
     def test_get_all_aliases(self, tmp_path):
         """Test retrieving all loaded aliases."""
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {"@ui/*": ["./src/ui/*"], "@data/*": ["./packages/data/*"]}
-            }
-        }
+        tsconfig = {"compilerOptions": {"paths": {"@ui/*": ["./src/ui/*"], "@data/*": ["./packages/data/*"]}}}
 
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:

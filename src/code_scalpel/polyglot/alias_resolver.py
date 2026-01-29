@@ -90,9 +90,7 @@ class AliasResolver:
 
                 # Resolve target relative to baseUrl
                 if base_url:
-                    resolved_target = str(
-                        (self.project_root / base_url / clean_target).resolve()
-                    )
+                    resolved_target = str((self.project_root / base_url / clean_target).resolve())
                 else:
                     resolved_target = str((self.project_root / clean_target).resolve())
 
@@ -183,9 +181,7 @@ class AliasResolver:
 
                 # Extract alias definitions using regex
                 # Pattern: '@alias': '/target' or '@alias': './target'
-                alias_pattern = re.compile(
-                    r"['\"](@[\w/]+)['\"]\s*:\s*['\"]([^'\"]+)['\"]\s*[,}]"
-                )
+                alias_pattern = re.compile(r"['\"](@[\w/]+)['\"]\s*:\s*['\"]([^'\"]+)['\"]\s*[,}]")
 
                 for match in alias_pattern.finditer(content):
                     alias = match.group(1)
@@ -261,9 +257,7 @@ class AliasResolver:
         """
         return alias in self.aliases
 
-    def resolve_to_file(
-        self, import_path: str, extensions: Optional[list[str]] = None
-    ) -> Optional[Path]:
+    def resolve_to_file(self, import_path: str, extensions: Optional[list[str]] = None) -> Optional[Path]:
         """
         Resolve an import path to an actual file.
 

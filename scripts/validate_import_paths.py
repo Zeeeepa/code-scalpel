@@ -89,18 +89,14 @@ class ImportPathValidator:
                             )
 
                             # Generate fix suggestion
-                            suggestion = self._generate_fix(
-                                import_line, replacement_template, result["category"]
-                            )
+                            suggestion = self._generate_fix(import_line, replacement_template, result["category"])
                             if suggestion:
                                 result["fix_suggestions"].append(suggestion)
 
                 # Check for problematic relative imports
                 if isinstance(node, ast.ImportFrom) and node.level > 0:
                     if self._is_problematic_relative(node, import_line):
-                        result["relative_imports"].append(
-                            {"line": node.lineno, "text": import_line}
-                        )
+                        result["relative_imports"].append({"line": node.lineno, "text": import_line})
 
     def _is_whitelisted(self, import_line: str) -> bool:
         """Check if import line is whitelisted."""
@@ -109,9 +105,7 @@ class ImportPathValidator:
                 return True
         return False
 
-    def _generate_fix(
-        self, original: str, template: str, category: str
-    ) -> Optional[Dict[str, str]]:
+    def _generate_fix(self, original: str, template: str, category: str) -> Optional[Dict[str, str]]:
         """Generate a fix suggestion."""
         # For tool imports, try to infer category from tool name
         if "{category}" in template:
@@ -185,25 +179,17 @@ class ImportPathValidator:
         for py_file in self.repo_root.rglob("*.py"):
             if py_file.is_file():
                 validation = self.validate_file(py_file)
-                if validation and (
-                    validation["deprecated_imports"] or validation["relative_imports"]
-                ):
+                if validation and (validation["deprecated_imports"] or validation["relative_imports"]):
                     files.append(validation)
 
         # Identify critical findings (deprecated imports in source code)
-        critical_findings = [
-            f for f in files if f["category"] == "source" and f["deprecated_imports"]
-        ]
+        critical_findings = [f for f in files if f["category"] == "source" and f["deprecated_imports"]]
 
         summary = {
-            "total_files_checked": len(
-                [f for f in self.repo_root.rglob("*.py") if f.is_file()]
-            ),
+            "total_files_checked": len([f for f in self.repo_root.rglob("*.py") if f.is_file()]),
             "files_with_issues": len(files),
             "critical_findings": len(critical_findings),
-            "total_deprecated_imports": sum(
-                len(f["deprecated_imports"]) for f in files
-            ),
+            "total_deprecated_imports": sum(len(f["deprecated_imports"]) for f in files),
             "total_fix_suggestions": sum(len(f["fix_suggestions"]) for f in files),
         }
 
@@ -217,9 +203,7 @@ class ImportPathValidator:
 def main():
     parser = argparse.ArgumentParser(description="Validate import paths")
     parser.add_argument("--root", required=True, type=Path, help="Repository root")
-    parser.add_argument(
-        "--whitelist", type=Path, help="Whitelist file with allowed deprecated imports"
-    )
+    parser.add_argument("--whitelist", type=Path, help="Whitelist file with allowed deprecated imports")
     parser.add_argument("--out-json", type=Path, help="Output JSON file")
 
     args = parser.parse_args()
@@ -227,11 +211,7 @@ def main():
     # Load whitelist if provided
     whitelist = None
     if args.whitelist and args.whitelist.exists():
-        whitelist = [
-            line.strip()
-            for line in args.whitelist.read_text().split("\n")
-            if line.strip()
-        ]
+        whitelist = [line.strip() for line in args.whitelist.read_text().split("\n") if line.strip()]
 
     validator = ImportPathValidator(args.root, whitelist)
     inventory = validator.build_inventory()
@@ -247,9 +227,7 @@ def main():
 
     print(f"Checked {inventory['summary']['total_files_checked']} files")
     print(f"Found {inventory['summary']['files_with_issues']} files with import issues")
-    print(
-        f"Critical issues in source code: {inventory['summary']['critical_findings']}"
-    )
+    print(f"Critical issues in source code: {inventory['summary']['critical_findings']}")
 
     if has_critical:
         print("CRITICAL: Deprecated imports found in source code")

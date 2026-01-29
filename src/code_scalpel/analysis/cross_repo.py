@@ -146,10 +146,7 @@ class CrossRepoLinker:
                 # Simple TOML parsing for dependencies
                 in_deps = False
                 for line in content.splitlines():
-                    if (
-                        "[project.dependencies]" in line
-                        or "[tool.poetry.dependencies]" in line
-                    ):
+                    if "[project.dependencies]" in line or "[tool.poetry.dependencies]" in line:
                         in_deps = True
                     elif line.startswith("[") and in_deps:
                         in_deps = False
@@ -160,11 +157,7 @@ class CrossRepoLinker:
                             deps.append(
                                 ExternalDependency(
                                     name=pkg_name,
-                                    version=(
-                                        parts[1].strip().strip('"')
-                                        if len(parts) > 1
-                                        else None
-                                    ),
+                                    version=(parts[1].strip().strip('"') if len(parts) > 1 else None),
                                     source="pypi",
                                     repo_name=repo_name,
                                     declared_in=str(pyproject.relative_to(repo_path)),
@@ -418,9 +411,7 @@ class CrossRepoLinker:
             lines.append(f'    {repo}["{repo}"]')
 
         # Add shared dependency edges
-        for dep_name, using_repos in list(shared_deps.items())[
-            :10
-        ]:  # Limit for readability
+        for dep_name, using_repos in list(shared_deps.items())[:10]:  # Limit for readability
             safe_name = dep_name.replace("-", "_").replace("@", "").replace("/", "_")
             lines.append(f'    {safe_name}(("{dep_name}"))')
             for repo in using_repos:
@@ -428,9 +419,7 @@ class CrossRepoLinker:
 
         # Add internal links
         for link in internal_links[:20]:  # Limit for readability
-            lines.append(
-                f"    {link.from_repo} -.-> |{link.to_package}| {link.to_repo}"
-            )
+            lines.append(f"    {link.from_repo} -.-> |{link.to_package}| {link.to_repo}")
 
         return "\n".join(lines)
 

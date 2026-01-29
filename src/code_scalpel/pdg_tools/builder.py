@@ -115,9 +115,7 @@ class PDGBuilder(ast.NodeVisitor):
         # Add parameter nodes
         for arg in node.args.args:
             arg_id = self._get_node_id("param")
-            self.graph.add_node(
-                arg_id, type="parameter", name=arg.arg, lineno=arg.lineno
-            )
+            self.graph.add_node(arg_id, type="parameter", name=arg.arg, lineno=arg.lineno)
             self.graph.add_edge(node_id, arg_id, type="parameter_dependency")
             if scope and scope.variables:
                 scope.variables[arg.arg] = arg_id
@@ -406,9 +404,7 @@ class PDGBuilder(ast.NodeVisitor):
             func_name = ast.unparse(node.func)
 
         # Add call node
-        self.graph.add_node(
-            node_id, type=NodeType.CALL.value, function=func_name, lineno=node.lineno
-        )
+        self.graph.add_node(node_id, type=NodeType.CALL.value, function=func_name, lineno=node.lineno)
 
         # Add to call graph if we're in a function
         if self.current_function:
@@ -429,17 +425,13 @@ class PDGBuilder(ast.NodeVisitor):
         # Add data dependencies for variables in argument
         for var in self._extract_variables(arg):
             if def_node := self._find_definition(var):
-                self.graph.add_edge(
-                    def_node, call_id, type="data_dependency", arg_index=index
-                )
+                self.graph.add_edge(def_node, call_id, type="data_dependency", arg_index=index)
 
     def _process_call_keyword(self, keyword: ast.keyword, call_id: str):
         """Process a function call keyword argument."""
         for var in self._extract_variables(keyword.value):
             if def_node := self._find_definition(var):
-                self.graph.add_edge(
-                    def_node, call_id, type="data_dependency", keyword=keyword.arg
-                )
+                self.graph.add_edge(def_node, call_id, type="data_dependency", keyword=keyword.arg)
 
     def _process_decorator(self, decorator: ast.AST, function_id: str):
         """Process a function decorator."""
@@ -487,9 +479,7 @@ class PDGBuilder(ast.NodeVisitor):
         return variables
 
 
-def build_pdg(
-    code: str, track_constants: bool = True, interprocedural: bool = True
-) -> tuple[nx.DiGraph, nx.DiGraph]:
+def build_pdg(code: str, track_constants: bool = True, interprocedural: bool = True) -> tuple[nx.DiGraph, nx.DiGraph]:
     """
     Build a Program Dependence Graph from Python code.
 

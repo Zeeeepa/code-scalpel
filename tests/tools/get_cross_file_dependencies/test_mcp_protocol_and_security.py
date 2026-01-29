@@ -25,9 +25,7 @@ def tool():
     return mcp._tool_manager._tools["get_cross_file_dependencies"]
 
 
-async def _invoke_tool(
-    tool: Any, project_root: Path, target_file: Path, target_symbol: str
-) -> Dict[str, Any]:
+async def _invoke_tool(tool: Any, project_root: Path, target_file: Path, target_symbol: str) -> Dict[str, Any]:
     """Helper to invoke the tool with minimal arguments for protocol tests.
 
     Wraps the raw tool result in an envelope structure matching the MCP contract,
@@ -64,9 +62,7 @@ async def _invoke_tool(
             error_info = {"error_code": "internal_error", "error": error_msg}
     else:
         # Raw result is the data itself
-        data_payload = (
-            raw_result if isinstance(raw_result, dict) else {"result": raw_result}
-        )
+        data_payload = raw_result if isinstance(raw_result, dict) else {"result": raw_result}
         warnings = []
         # Check if data indicates failure
         if isinstance(data_payload, dict) and data_payload.get("success") is False:
@@ -90,9 +86,7 @@ async def _invoke_tool(
 class TestMCPProtocol:
     """JSON-RPC style envelope validation for the tool boundary."""
 
-    async def test_jsonrpc_envelope_includes_metadata_and_payload(
-        self, monkeypatch, tmp_path, tool
-    ):
+    async def test_jsonrpc_envelope_includes_metadata_and_payload(self, monkeypatch, tmp_path, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "main.py"
@@ -127,9 +121,7 @@ class TestMCPProtocol:
         data = result.get("data") or {}
         assert data.get("success") is False or data == {}
 
-    async def test_async_concurrency_handles_parallel_requests(
-        self, monkeypatch, tmp_path, tool
-    ):
+    async def test_async_concurrency_handles_parallel_requests(self, monkeypatch, tmp_path, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         async def invoke(i: int):
@@ -182,9 +174,7 @@ class TestEdgeAndSecurityCases:
         data = result.get("data") or {}
         assert data.get("success") is False or data == {}
 
-    async def test_syntax_error_returns_structured_error(
-        self, monkeypatch, tmp_path, tool
-    ):
+    async def test_syntax_error_returns_structured_error(self, monkeypatch, tmp_path, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "broken.py"
@@ -200,9 +190,7 @@ class TestEdgeAndSecurityCases:
         data = result.get("data") or {}
         assert data.get("success") is False or data == {}
 
-    async def test_invalid_encoding_returns_error_envelope(
-        self, monkeypatch, tmp_path, tool
-    ):
+    async def test_invalid_encoding_returns_error_envelope(self, monkeypatch, tmp_path, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "invalid_encoding.py"
@@ -222,18 +210,14 @@ class TestEdgeAndSecurityCases:
         data = result.get("data") or {}
         assert data.get("success") is False or data == {}
 
-    async def test_secret_strings_not_leaked_on_error(
-        self, monkeypatch, tmp_path, caplog, tool
-    ):
+    async def test_secret_strings_not_leaked_on_error(self, monkeypatch, tmp_path, caplog, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
         caplog.set_level(logging.DEBUG)
 
         secret = "sk_live_123_SECRET_DO_NOT_LEAK"
 
         target_file = tmp_path / "secret_source.py"
-        target_file.write_text(
-            f"""def hidden():\n    api_key = '{secret}'\n    return api_key\n"""
-        )
+        target_file.write_text(f"""def hidden():\n    api_key = '{secret}'\n    return api_key\n""")
 
         # Force an error by requesting a missing symbol; include_code disabled to avoid payload echo.
         result = await tool.run(
@@ -259,9 +243,7 @@ class TestEdgeAndSecurityCases:
 class TestMultiLanguageSupport:
     """Multi-language parsing: verify unsupported-language error envelopes."""
 
-    async def test_javascript_returns_unsupported_language_error(
-        self, monkeypatch, tmp_path, tool
-    ):
+    async def test_javascript_returns_unsupported_language_error(self, monkeypatch, tmp_path, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "app.js"
@@ -286,20 +268,13 @@ class TestMultiLanguageSupport:
             assert isinstance(result["error"], dict)
         else:
             # Or success=False with no extracted symbols
-            assert (
-                data.get("success") is False
-                or len(data.get("extracted_symbols", [])) == 0
-            )
+            assert data.get("success") is False or len(data.get("extracted_symbols", [])) == 0
 
-    async def test_typescript_returns_unsupported_language_error(
-        self, monkeypatch, tmp_path, tool
-    ):
+    async def test_typescript_returns_unsupported_language_error(self, monkeypatch, tmp_path, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "app.ts"
-        target_file.write_text(
-            """function hello(): string {\n    return "world";\n}\n"""
-        )
+        target_file.write_text("""function hello(): string {\n    return "world";\n}\n""")
 
         result = await tool.run(
             {
@@ -317,20 +292,13 @@ class TestMultiLanguageSupport:
         if result.get("error"):
             assert isinstance(result["error"], dict)
         else:
-            assert (
-                data.get("success") is False
-                or len(data.get("extracted_symbols", [])) == 0
-            )
+            assert data.get("success") is False or len(data.get("extracted_symbols", [])) == 0
 
-    async def test_java_returns_unsupported_language_error(
-        self, monkeypatch, tmp_path, tool
-    ):
+    async def test_java_returns_unsupported_language_error(self, monkeypatch, tmp_path, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "App.java"
-        target_file.write_text(
-            """public class App {\n    public void hello() {}\n}\n"""
-        )
+        target_file.write_text("""public class App {\n    public void hello() {}\n}\n""")
 
         result = await tool.run(
             {
@@ -348,10 +316,7 @@ class TestMultiLanguageSupport:
         if result.get("error"):
             assert isinstance(result["error"], dict)
         else:
-            assert (
-                data.get("success") is False
-                or len(data.get("extracted_symbols", [])) == 0
-            )
+            assert data.get("success") is False or len(data.get("extracted_symbols", [])) == 0
 
 
 class TestProtocolStrictness:
@@ -368,9 +333,7 @@ class TestProtocolStrictness:
         assert tool.name == "get_cross_file_dependencies"
         # MCP tools don't require mcp_code-scalpel_ prefix in FastMCP
 
-    async def test_error_envelope_includes_error_code(
-        self, monkeypatch, tmp_path, tool
-    ):
+    async def test_error_envelope_includes_error_code(self, monkeypatch, tmp_path, tool):
         """Error responses include machine-parseable error_code."""
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
@@ -469,9 +432,7 @@ def target():
         symbols = data.get("extracted_symbols", [])
         assert any(s.get("name") == "target" for s in symbols)
 
-    async def test_function_with_docstring_extraction(
-        self, monkeypatch, tmp_path, tool
-    ):
+    async def test_function_with_docstring_extraction(self, monkeypatch, tmp_path, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "docstring.py"
@@ -596,9 +557,7 @@ class TestLimitsAndExhaustion:
 
             memory_growth = current_memory - baseline_memory
             # Allow up to 5MB growth for caching/overhead
-            assert (
-                memory_growth < 5 * 1024 * 1024
-            ), f"Memory grew by {memory_growth / 1024 / 1024:.2f}MB"
+            assert memory_growth < 5 * 1024 * 1024, f"Memory grew by {memory_growth / 1024 / 1024:.2f}MB"
         except ImportError:
             pytest.skip("tracemalloc not available")
 
@@ -608,9 +567,7 @@ class TestLimitsAndExhaustion:
 
         target_file = tmp_path / "large.py"
         # Create a file with many functions to test size handling
-        large_content = "\n".join(
-            [f"def func_{i}():\n    return {i}\n" for i in range(100)]
-        )
+        large_content = "\n".join([f"def func_{i}():\n    return {i}\n" for i in range(100)])
         target_file.write_text(large_content)
 
         result = await _invoke_tool(tool, tmp_path, target_file, "func_0")
@@ -678,9 +635,7 @@ class TestSecurityAndPrivacy:
         data = result.get("data") or {}
         assert data.get("success") is True or result.get("error")
 
-    async def test_secrets_redacted_with_include_code_on_error(
-        self, monkeypatch, tmp_path, caplog, tool
-    ):
+    async def test_secrets_redacted_with_include_code_on_error(self, monkeypatch, tmp_path, caplog, tool):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
         caplog.set_level(logging.DEBUG)
 

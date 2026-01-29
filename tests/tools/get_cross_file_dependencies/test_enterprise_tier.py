@@ -18,9 +18,7 @@ class TestEnterpriseUnlimitedDepth:
     """Enterprise tier should have unlimited depth."""
 
     @pytest.mark.asyncio
-    async def test_unlimited_depth_analysis(
-        self, enterprise_server, deep_chain_project
-    ):
+    async def test_unlimited_depth_analysis(self, enterprise_server, deep_chain_project):
         """Enterprise should analyze unlimited dependency depth."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=deep_chain_project["target_file"],
@@ -37,9 +35,7 @@ class TestEnterpriseArchitecturalRuleEngine:
     """Enterprise tier should integrate architectural rule engine."""
 
     @pytest.mark.asyncio
-    async def test_rule_engine_initialization(
-        self, enterprise_server, simple_two_file_project
-    ):
+    async def test_rule_engine_initialization(self, enterprise_server, simple_two_file_project):
         """Should initialize architectural rule engine."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -57,9 +53,7 @@ class TestEnterpriseLayerMapping:
     """Enterprise tier should provide layer mapping."""
 
     @pytest.mark.asyncio
-    async def test_layer_mapping_available(
-        self, enterprise_server, simple_two_file_project
-    ):
+    async def test_layer_mapping_available(self, enterprise_server, simple_two_file_project):
         """Should provide configured layer mapping."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -77,9 +71,7 @@ class TestEnterpriseCouplingLimits:
     """Enterprise tier should enforce coupling limits."""
 
     @pytest.mark.asyncio
-    async def test_coupling_violations_detected(
-        self, enterprise_server, simple_two_file_project
-    ):
+    async def test_coupling_violations_detected(self, enterprise_server, simple_two_file_project):
         """Should detect coupling limit violations."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -97,9 +89,7 @@ class TestEnterpriseExemptionPatterns:
     """Enterprise tier should support exemption patterns."""
 
     @pytest.mark.asyncio
-    async def test_exempted_files_tracked(
-        self, enterprise_server, simple_two_file_project
-    ):
+    async def test_exempted_files_tracked(self, enterprise_server, simple_two_file_project):
         """Should track exempted files."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -117,9 +107,7 @@ class TestEnterpriseBoundaryViolations:
     """Enterprise tier should detect boundary violations."""
 
     @pytest.mark.asyncio
-    async def test_boundary_violation_detection(
-        self, enterprise_server, simple_two_file_project
-    ):
+    async def test_boundary_violation_detection(self, enterprise_server, simple_two_file_project):
         """Should detect architectural boundary violations."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -136,9 +124,7 @@ class TestEnterpriseLayerViolations:
     """Enterprise tier should detect layer violations."""
 
     @pytest.mark.asyncio
-    async def test_layer_violation_detection(
-        self, enterprise_server, simple_two_file_project
-    ):
+    async def test_layer_violation_detection(self, enterprise_server, simple_two_file_project):
         """Should detect layer boundary violations."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],

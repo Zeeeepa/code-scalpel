@@ -121,11 +121,7 @@ class TypeChecker:
                     language="python",
                     checker="mypy",
                     output=result.stdout,
-                    errors=(
-                        errors
-                        if errors
-                        else ([result.stdout] if result.returncode != 0 else [])
-                    ),
+                    errors=(errors if errors else ([result.stdout] if result.returncode != 0 else [])),
                     warnings=warnings,
                     exit_code=result.returncode,
                 )
@@ -208,11 +204,7 @@ class TypeChecker:
                     language="typescript",
                     checker="tsc",
                     output=result.stdout + result.stderr,
-                    errors=(
-                        errors
-                        if errors
-                        else ([result.stdout] if result.returncode != 0 else [])
-                    ),
+                    errors=(errors if errors else ([result.stdout] if result.returncode != 0 else [])),
                     warnings=warnings,
                     exit_code=result.returncode,
                 )

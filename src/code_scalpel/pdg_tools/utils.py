@@ -43,14 +43,10 @@ class PDGUtils:
         node_data = pdg.nodes[node]
 
         # Get dependencies
-        dependencies = [
-            (pred, pdg.edges[pred, node]["type"]) for pred in pdg.predecessors(node)
-        ]
+        dependencies = [(pred, pdg.edges[pred, node]["type"]) for pred in pdg.predecessors(node)]
 
         # Get dependents
-        dependents = [
-            (succ, pdg.edges[node, succ]["type"]) for succ in pdg.successors(node)
-        ]
+        dependents = [(succ, pdg.edges[node, succ]["type"]) for succ in pdg.successors(node)]
 
         # Calculate node metrics
         metrics = PDGUtils.calculate_node_metrics(pdg, node)
@@ -66,9 +62,7 @@ class PDGUtils:
         )
 
     @staticmethod
-    def find_paths(
-        pdg: nx.DiGraph, source: str, target: str, dep_types: Optional[set[str]] = None
-    ) -> list[list[str]]:
+    def find_paths(pdg: nx.DiGraph, source: str, target: str, dep_types: Optional[set[str]] = None) -> list[list[str]]:
         """Find all paths between nodes considering dependency types."""
         if not pdg.has_node(source) or not pdg.has_node(target):
             return []
@@ -148,9 +142,7 @@ class PDGUtils:
         return set.intersection(*descendants)
 
     @staticmethod
-    def get_subgraph_between(
-        pdg: nx.DiGraph, start_nodes: list[str], end_nodes: list[str]
-    ) -> nx.DiGraph:
+    def get_subgraph_between(pdg: nx.DiGraph, start_nodes: list[str], end_nodes: list[str]) -> nx.DiGraph:
         """Extract subgraph between start and end nodes."""
         # Find all nodes in paths between start and end nodes
         nodes_in_paths = set()
@@ -174,9 +166,7 @@ class PDGUtils:
         return hashlib.sha256(data_str.encode()).hexdigest()[:16]
 
     @staticmethod
-    def find_similar_nodes(
-        pdg: nx.DiGraph, node: str, similarity_threshold: float = 0.8
-    ) -> list[str]:
+    def find_similar_nodes(pdg: nx.DiGraph, node: str, similarity_threshold: float = 0.8) -> list[str]:
         """Find nodes with similar structure and dependencies."""
         PDGUtils.compute_node_hash(pdg.nodes[node])
         similar_nodes = []
@@ -219,11 +209,7 @@ class PDGUtils:
                         sim_graph.add_edge(node1, node2, weight=similarity)
 
         # Find connected components (clusters)
-        clusters = [
-            cluster
-            for cluster in nx.connected_components(sim_graph)
-            if len(cluster) >= min_size
-        ]
+        clusters = [cluster for cluster in nx.connected_components(sim_graph) if len(cluster) >= min_size]
 
         return clusters
 
@@ -231,10 +217,7 @@ class PDGUtils:
     def export_to_json(pdg: nx.DiGraph, filepath: str):
         """Export PDG to JSON format."""
         data = {
-            "nodes": [
-                {"id": node, "data": PDGUtils._clean_for_json(data)}
-                for node, data in pdg.nodes(data=True)
-            ],
+            "nodes": [{"id": node, "data": PDGUtils._clean_for_json(data)} for node, data in pdg.nodes(data=True)],
             "edges": [
                 {
                     "source": source,

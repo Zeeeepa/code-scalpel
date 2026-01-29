@@ -329,9 +329,7 @@ class TestSchemaDriftDetectorProtobuf:
         breaking = result.breaking_changes
 
         # Should detect removed name field from User
-        field_removed = [
-            c for c in breaking if c.change_type == ChangeType.FIELD_REMOVED
-        ]
+        field_removed = [c for c in breaking if c.change_type == ChangeType.FIELD_REMOVED]
         assert len(field_removed) > 0
 
         # Should detect removed RPC
@@ -339,9 +337,7 @@ class TestSchemaDriftDetectorProtobuf:
         assert len(rpc_removed) > 0
 
         # Should detect removed enum value
-        enum_removed = [
-            c for c in breaking if c.change_type == ChangeType.ENUM_VALUE_REMOVED
-        ]
+        enum_removed = [c for c in breaking if c.change_type == ChangeType.ENUM_VALUE_REMOVED]
         assert len(enum_removed) > 0
 
     def test_detect_required_field_added(self):
@@ -349,11 +345,7 @@ class TestSchemaDriftDetectorProtobuf:
         detector = SchemaDriftDetector()
         result = detector.compare_protobuf(OLD_PROTO, NEW_PROTO_BREAKING)
 
-        required_added = [
-            c
-            for c in result.breaking_changes
-            if c.change_type == ChangeType.REQUIRED_FIELD_ADDED
-        ]
+        required_added = [c for c in result.breaking_changes if c.change_type == ChangeType.REQUIRED_FIELD_ADDED]
         assert len(required_added) > 0
         assert any("password" in c.field_name for c in required_added)
 
@@ -367,17 +359,11 @@ class TestSchemaDriftDetectorProtobuf:
         assert not result.has_breaking_changes()
 
         # Should detect new optional fields
-        optional_added = [
-            c
-            for c in result.changes
-            if c.change_type == ChangeType.OPTIONAL_FIELD_ADDED
-        ]
+        optional_added = [c for c in result.changes if c.change_type == ChangeType.OPTIONAL_FIELD_ADDED]
         assert len(optional_added) > 0
 
         # Should detect new enum values
-        enum_added = [
-            c for c in result.changes if c.change_type == ChangeType.ENUM_VALUE_ADDED
-        ]
+        enum_added = [c for c in result.changes if c.change_type == ChangeType.ENUM_VALUE_ADDED]
         assert len(enum_added) > 0
 
     def test_no_changes(self):
@@ -418,11 +404,7 @@ class TestSchemaDriftDetectorJsonSchema:
         detector = SchemaDriftDetector()
         result = detector.compare_json_schema(OLD_JSON_SCHEMA, NEW_JSON_SCHEMA_BREAKING)
 
-        type_changes = [
-            c
-            for c in result.breaking_changes
-            if c.change_type == ChangeType.FIELD_TYPE_CHANGED
-        ]
+        type_changes = [c for c in result.breaking_changes if c.change_type == ChangeType.FIELD_TYPE_CHANGED]
         assert len(type_changes) > 0
         # id changed from string to integer
         assert any("id" in c.path for c in type_changes)
@@ -432,11 +414,7 @@ class TestSchemaDriftDetectorJsonSchema:
         detector = SchemaDriftDetector()
         result = detector.compare_json_schema(OLD_JSON_SCHEMA, NEW_JSON_SCHEMA_BREAKING)
 
-        removed = [
-            c
-            for c in result.breaking_changes
-            if c.change_type == ChangeType.FIELD_REMOVED
-        ]
+        removed = [c for c in result.breaking_changes if c.change_type == ChangeType.FIELD_REMOVED]
         assert len(removed) > 0
         # name was removed
         assert any("name" in c.field_name for c in removed)
@@ -446,11 +424,7 @@ class TestSchemaDriftDetectorJsonSchema:
         detector = SchemaDriftDetector()
         result = detector.compare_json_schema(OLD_JSON_SCHEMA, NEW_JSON_SCHEMA_BREAKING)
 
-        enum_removed = [
-            c
-            for c in result.breaking_changes
-            if c.change_type == ChangeType.ENUM_VALUE_REMOVED
-        ]
+        enum_removed = [c for c in result.breaking_changes if c.change_type == ChangeType.ENUM_VALUE_REMOVED]
         assert len(enum_removed) > 0
         # "inactive" was removed
         assert any("inactive" in str(c.old_value) for c in enum_removed)
@@ -460,11 +434,7 @@ class TestSchemaDriftDetectorJsonSchema:
         detector = SchemaDriftDetector()
         result = detector.compare_json_schema(OLD_JSON_SCHEMA, NEW_JSON_SCHEMA_BREAKING)
 
-        made_required = [
-            c
-            for c in result.breaking_changes
-            if c.change_type == ChangeType.FIELD_MADE_REQUIRED
-        ]
+        made_required = [c for c in result.breaking_changes if c.change_type == ChangeType.FIELD_MADE_REQUIRED]
         assert len(made_required) > 0
         # age was made required
         assert any("age" in c.field_name for c in made_required)
@@ -474,11 +444,7 @@ class TestSchemaDriftDetectorJsonSchema:
         detector = SchemaDriftDetector()
         result = detector.compare_json_schema(OLD_JSON_SCHEMA, NEW_JSON_SCHEMA_BREAKING)
 
-        optional_added = [
-            c
-            for c in result.info_changes
-            if c.change_type == ChangeType.OPTIONAL_FIELD_ADDED
-        ]
+        optional_added = [c for c in result.info_changes if c.change_type == ChangeType.OPTIONAL_FIELD_ADDED]
         assert len(optional_added) > 0
         # profile was added
         assert any("profile" in c.field_name for c in optional_added)
@@ -595,11 +561,7 @@ class TestEdgeCases:
         result = detector.compare_protobuf(old_proto, new_proto)
 
         assert result.has_breaking_changes()
-        number_changed = [
-            c
-            for c in result.breaking_changes
-            if c.change_type == ChangeType.FIELD_NUMBER_CHANGED
-        ]
+        number_changed = [c for c in result.breaking_changes if c.change_type == ChangeType.FIELD_NUMBER_CHANGED]
         assert len(number_changed) == 1
 
 

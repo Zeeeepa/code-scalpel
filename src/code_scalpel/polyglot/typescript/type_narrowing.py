@@ -96,9 +96,7 @@ class TypeGuard:
     """Represents a detected type guard in code."""
 
     variable: str
-    guard_type: (
-        str  # 'typeof', 'instanceof', 'in', 'equality', 'truthiness', 'predicate'
-    )
+    guard_type: str  # 'typeof', 'instanceof', 'in', 'equality', 'truthiness', 'predicate'
     narrowed_to: NarrowedType
     condition_text: str
     line: int
@@ -185,9 +183,7 @@ class TypeNarrowing:
                 import tree_sitter_typescript
 
                 # Create Language object from the PyCapsule
-                typescript_lang = tree_sitter.Language(
-                    tree_sitter_typescript.language_typescript()
-                )
+                typescript_lang = tree_sitter.Language(tree_sitter_typescript.language_typescript())
                 self._parser = tree_sitter.Parser(typescript_lang)
             except Exception:
                 pass
@@ -225,9 +221,7 @@ class TypeNarrowing:
             )
         else:
             # Fallback: regex-based detection
-            self._analyze_regex(
-                code, type_guards, branch_states, taint_eliminated, taint_reduced
-            )
+            self._analyze_regex(code, type_guards, branch_states, taint_eliminated, taint_reduced)
 
         return NarrowingResult(
             type_guards=type_guards,
@@ -599,9 +593,7 @@ class TypeNarrowing:
                             taint_reduced,
                         )
 
-    def is_taint_eliminated(
-        self, variable: str, result: NarrowingResult, at_line: int | None = None
-    ) -> bool:
+    def is_taint_eliminated(self, variable: str, result: NarrowingResult, at_line: int | None = None) -> bool:
         """
         Check if taint is eliminated for a variable.
 
@@ -625,9 +617,7 @@ class TypeNarrowing:
 
         return False
 
-    def is_taint_reduced(
-        self, variable: str, result: NarrowingResult, at_line: int | None = None
-    ) -> bool:
+    def is_taint_reduced(self, variable: str, result: NarrowingResult, at_line: int | None = None) -> bool:
         """
         Check if taint risk is reduced (but not eliminated) for a variable.
 
@@ -649,9 +639,7 @@ class TypeNarrowing:
 
         return False
 
-    def get_narrowed_type(
-        self, variable: str, result: NarrowingResult, at_line: int
-    ) -> set[NarrowedType]:
+    def get_narrowed_type(self, variable: str, result: NarrowingResult, at_line: int) -> set[NarrowedType]:
         """
         Get the narrowed type(s) for a variable at a specific line.
 
@@ -664,11 +652,7 @@ class TypeNarrowing:
             Set of narrowed types (may include UNKNOWN if not narrowed)
         """
         # Find the most recent type guard for this variable before the line
-        relevant_guards = [
-            g
-            for g in result.type_guards
-            if g.variable == variable and g.line <= at_line
-        ]
+        relevant_guards = [g for g in result.type_guards if g.variable == variable and g.line <= at_line]
 
         if not relevant_guards:
             return {NarrowedType.UNKNOWN}

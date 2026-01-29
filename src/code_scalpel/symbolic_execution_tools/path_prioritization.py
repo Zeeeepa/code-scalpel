@@ -30,9 +30,7 @@ from .state_manager import SymbolicState
 class PrioritizationStrategy(Enum):
     """Path prioritization strategies."""
 
-    CRASH_FOCUSED = (
-        "crash"  # [20251226_FEATURE] v3.2.9 Pro tier - Prioritize error paths
-    )
+    CRASH_FOCUSED = "crash"  # [20251226_FEATURE] v3.2.9 Pro tier - Prioritize error paths
     COVERAGE_GUIDED = "coverage"  # Future: Target uncovered code
     SECURITY_FOCUSED = "security"  # Future: Prioritize paths to sinks
     COMPLEXITY_BASED = "complexity"  # Future: Simple paths first
@@ -205,9 +203,7 @@ class PathPrioritizer:
 
         return score
 
-    def prioritize_paths(
-        self, states: List[SymbolicState]
-    ) -> List[tuple[int, PathScore]]:
+    def prioritize_paths(self, states: List[SymbolicState]) -> List[tuple[int, PathScore]]:
         """
         Prioritize paths by crash likelihood or strategy.
 
@@ -283,9 +279,7 @@ class PathPrioritizer:
         return self._error_prone_lines.copy()
 
 
-def prioritize_for_crashes(
-    code: str, states: List[SymbolicState]
-) -> List[tuple[int, PathScore]]:
+def prioritize_for_crashes(code: str, states: List[SymbolicState]) -> List[tuple[int, PathScore]]:
     """
     Convenience function to prioritize paths for crash discovery.
 

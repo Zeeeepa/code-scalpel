@@ -132,9 +132,7 @@ def validate_path_security(path: Path, project_root: Path | None = None) -> Path
         root_resolved = project_root.resolve()
         # Simple check: resolved path must start with root path
         if not str(resolved).startswith(str(root_resolved)):
-            raise ValueError(
-                f"Access denied: {path} is outside project root {project_root}"
-            )
+            raise ValueError(f"Access denied: {path} is outside project root {project_root}")
         return resolved
     except Exception as e:
         raise ValueError(f"Invalid path: {e}")
@@ -167,10 +165,7 @@ def _unified_sink_detect_sync(
     ) -> str:
         """Generate a stable sink id for correlation across runs."""
 
-        raw = (
-            f"{lang}|{pattern}|{sink_type}|{line}|{column}|"
-            f"{vulnerability_type or ''}|{cwe_id or ''}"
-        )
+        raw = f"{lang}|{pattern}|{sink_type}|{line}|{column}|" f"{vulnerability_type or ''}|{cwe_id or ''}"
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
 
     def _snippet_from_source(line_no: int) -> str:
@@ -181,9 +176,7 @@ def _unified_sink_detect_sync(
             return lines[line_no - 1]
         return ""
 
-    def _truncate_snippet(
-        snippet: str, *, max_len: int = 200
-    ) -> tuple[str, bool, int | None]:
+    def _truncate_snippet(snippet: str, *, max_len: int = 200) -> tuple[str, bool, int | None]:
         if len(snippet) <= max_len:
             return snippet, False, None
         # Keep output length stable at max_len, ending with an ellipsis.
@@ -339,9 +332,7 @@ def _unified_sink_detect_sync(
                     "recommendation": "Validate payment inputs and use secure tokens.",
                 }
             )
-        if "email_send_detection" in caps_set and (
-            "SendGridAPIClient" in code or "mail.send" in code
-        ):
+        if "email_send_detection" in caps_set and ("SendGridAPIClient" in code or "mail.send" in code):
             logic_sinks.append(
                 {
                     "type": "EMAIL_SEND",
@@ -620,9 +611,7 @@ def _analyze_sink_context(
                 risk_reason = f"User input pattern '{pattern}' found in context"
                 break
 
-        if risk == "low" and (
-            "param" in context_window.lower() or "input" in context_window.lower()
-        ):
+        if risk == "low" and ("param" in context_window.lower() or "input" in context_window.lower()):
             risk = "medium"
             risk_reason = "Potential input handling detected"
 
@@ -764,13 +753,9 @@ def _build_sink_compliance_mapping(sinks: list[UnifiedDetectedSink]) -> dict[str
             "PCI-DSS: Implement input validation and output encoding per Requirement 6.5"
         )
     if "HIPAA" in standards_set:
-        compliance["recommendations"].append(
-            "HIPAA: Ensure PHI access controls meet Technical Safeguard requirements"
-        )
+        compliance["recommendations"].append("HIPAA: Ensure PHI access controls meet Technical Safeguard requirements")
     if "SOC2" in standards_set:
-        compliance["recommendations"].append(
-            "SOC2: Address security vulnerabilities per CC6.1 control requirements"
-        )
+        compliance["recommendations"].append("SOC2: Address security vulnerabilities per CC6.1 control requirements")
 
     return compliance
 
@@ -787,24 +772,18 @@ def _build_historical_comparison(sinks: list[UnifiedDetectedSink]) -> dict[str, 
             "timestamp": __import__("datetime").datetime.now().isoformat(),
             "total_sinks": len(sinks),
             "by_severity": {
-                "critical": sum(
-                    1 for s in sinks if "SQL" in (s.sink_type or "").upper()
-                ),
+                "critical": sum(1 for s in sinks if "SQL" in (s.sink_type or "").upper()),
                 "high": sum(
                     1
                     for s in sinks
-                    if "COMMAND" in (s.sink_type or "").upper()
-                    or "SHELL" in (s.sink_type or "").upper()
+                    if "COMMAND" in (s.sink_type or "").upper() or "SHELL" in (s.sink_type or "").upper()
                 ),
                 "medium": sum(1 for s in sinks if "XSS" in (s.sink_type or "").upper()),
                 "low": len(sinks)
                 - sum(
                     1
                     for s in sinks
-                    if any(
-                        k in (s.sink_type or "").upper()
-                        for k in ["SQL", "COMMAND", "SHELL", "XSS"]
-                    )
+                    if any(k in (s.sink_type or "").upper() for k in ["SQL", "COMMAND", "SHELL", "XSS"])
                 ),
             },
         },
@@ -861,9 +840,7 @@ def _generate_sink_remediation(
         cwe = sink.cwe_id
         if cwe and cwe in remediation_templates:
             template = remediation_templates[cwe]
-            fix = template.get(
-                lang_key, template.get("python", "Review and sanitize input")
-            )
+            fix = template.get(lang_key, template.get("python", "Review and sanitize input"))
 
             remediation.append(
                 {
@@ -1108,16 +1085,8 @@ def _generate_compliance_report(
     vulnerable_count: int,
 ) -> dict[str, Any]:
     """Generate compliance report for SOC2/ISO standards."""
-    license_issues = sum(
-        1
-        for d in dependencies
-        if hasattr(d, "license_compliant") and d.license_compliant is False
-    )
-    typosquat_risks = sum(
-        1
-        for d in dependencies
-        if hasattr(d, "typosquatting_risk") and d.typosquatting_risk is True
-    )
+    license_issues = sum(1 for d in dependencies if hasattr(d, "license_compliant") and d.license_compliant is False)
+    typosquat_risks = sum(1 for d in dependencies if hasattr(d, "typosquatting_risk") and d.typosquatting_risk is True)
 
     compliance_score = 100.0
     compliance_score -= severity_summary.get("CRITICAL", 0) * 20
@@ -1145,9 +1114,7 @@ def _generate_compliance_report(
         "license_issues": license_issues,
         "typosquatting_risks": typosquat_risks,
         "frameworks": ["SOC2", "ISO27001"],
-        "recommendations": _generate_compliance_recommendations(
-            severity_summary, license_issues, typosquat_risks
-        ),
+        "recommendations": _generate_compliance_recommendations(severity_summary, license_issues, typosquat_risks),
     }
 
 
@@ -1160,29 +1127,17 @@ def _generate_compliance_recommendations(
     recommendations = []
 
     if severity_summary.get("CRITICAL", 0) > 0:
-        recommendations.append(
-            f"URGENT: Remediate {severity_summary['CRITICAL']} critical vulnerabilities immediately"
-        )
+        recommendations.append(f"URGENT: Remediate {severity_summary['CRITICAL']} critical vulnerabilities immediately")
     if severity_summary.get("HIGH", 0) > 0:
-        recommendations.append(
-            f"HIGH PRIORITY: Address {severity_summary['HIGH']} high-severity vulnerabilities"
-        )
+        recommendations.append(f"HIGH PRIORITY: Address {severity_summary['HIGH']} high-severity vulnerabilities")
     if typosquat_risks > 0:
-        recommendations.append(
-            f"SECURITY: Review {typosquat_risks} packages flagged for potential typosquatting"
-        )
+        recommendations.append(f"SECURITY: Review {typosquat_risks} packages flagged for potential typosquatting")
     if license_issues > 0:
-        recommendations.append(
-            f"LEGAL: Review {license_issues} packages with license compliance issues"
-        )
+        recommendations.append(f"LEGAL: Review {license_issues} packages with license compliance issues")
     if severity_summary.get("MEDIUM", 0) > 0:
-        recommendations.append(
-            f"Plan remediation for {severity_summary['MEDIUM']} medium-severity vulnerabilities"
-        )
+        recommendations.append(f"Plan remediation for {severity_summary['MEDIUM']} medium-severity vulnerabilities")
     if not recommendations:
-        recommendations.append(
-            "No immediate action required - continue regular monitoring"
-        )
+        recommendations.append("No immediate action required - continue regular monitoring")
 
     return recommendations
 
@@ -1224,9 +1179,7 @@ def _extract_severity(vuln: dict[str, Any]) -> str:
     if "ecosystem_specific" in vuln:
         eco_severity = vuln["ecosystem_specific"].get("severity", "")
         if eco_severity.upper() in ("CRITICAL", "HIGH", "MEDIUM", "MODERATE", "LOW"):
-            return (
-                "MEDIUM" if eco_severity.upper() == "MODERATE" else eco_severity.upper()
-            )
+            return "MEDIUM" if eco_severity.upper() == "MODERATE" else eco_severity.upper()
 
     return "UNKNOWN"
 
@@ -1316,17 +1269,13 @@ def _scan_dependencies_sync(
                 # [20260116_BUGFIX] Cooperative cancellation for dependency scanning.
                 if ctx:
                     if hasattr(ctx, "should_cancel") and ctx.should_cancel():  # type: ignore[attr-defined]
-                        raise asyncio.CancelledError(
-                            "Dependency scan cancelled by user"
-                        )
+                        raise asyncio.CancelledError("Dependency scan cancelled by user")
                     if (
                         hasattr(ctx, "request_context")
                         and hasattr(ctx.request_context, "lifecycle_context")
                         and ctx.request_context.lifecycle_context.is_cancelled  # type: ignore[attr-defined]
                     ):
-                        raise asyncio.CancelledError(
-                            "Dependency scan cancelled by user"
-                        )
+                        raise asyncio.CancelledError("Dependency scan cancelled by user")
                 file_path = resolved_path / filename
                 if file_path.exists():
                     try:
@@ -1429,31 +1378,21 @@ def _scan_dependencies_sync(
             supply_chain_risk_score = None
             supply_chain_risk_factors = None
             if "supply_chain_risk_scoring" in caps_set:
-                supply_chain_risk_score, supply_chain_risk_factors = (
-                    _calculate_supply_chain_risk(
-                        dep.name,
-                        dep.version,
-                        (
-                            dep.ecosystem.value
-                            if hasattr(dep.ecosystem, "value")
-                            else str(dep.ecosystem)
-                        ),
-                        dep_vulns,
-                        is_imported,
-                        typosquatting_risk,
-                        license_compliant,
-                    )
+                supply_chain_risk_score, supply_chain_risk_factors = _calculate_supply_chain_risk(
+                    dep.name,
+                    dep.version,
+                    (dep.ecosystem.value if hasattr(dep.ecosystem, "value") else str(dep.ecosystem)),
+                    dep_vulns,
+                    is_imported,
+                    typosquatting_risk,
+                    license_compliant,
                 )
 
             dependency_infos.append(
                 DependencyInfo(
                     name=dep.name,
                     version=dep.version,
-                    ecosystem=(
-                        dep.ecosystem.value
-                        if hasattr(dep.ecosystem, "value")
-                        else str(dep.ecosystem)
-                    ),
+                    ecosystem=(dep.ecosystem.value if hasattr(dep.ecosystem, "value") else str(dep.ecosystem)),
                     file_path=getattr(dep, "file_path", "unknown"),
                     vulnerabilities=dep_vulns,
                     is_imported=is_imported,
@@ -1494,10 +1433,7 @@ def _scan_dependencies_sync(
                             "message": f"Package '{dep_info.name}' has non-compliant license: {dep_info.license}",
                         }
                     )
-                if (
-                    dep_info.supply_chain_risk_score
-                    and dep_info.supply_chain_risk_score >= 0.7
-                ):
+                if dep_info.supply_chain_risk_score and dep_info.supply_chain_risk_score >= 0.7:
                     policy_violations.append(
                         {
                             "type": "supply_chain",
@@ -1527,13 +1463,9 @@ def _scan_dependencies_sync(
         )
 
     except ImportError as exc:
-        return DependencyScanResult(
-            success=False, error=f"Dependency scanning unavailable: {exc}"
-        )
+        return DependencyScanResult(success=False, error=f"Dependency scanning unavailable: {exc}")
     except Exception as exc:
-        return DependencyScanResult(
-            success=False, error=f"Dependency scan failed: {exc}"
-        )
+        return DependencyScanResult(success=False, error=f"Dependency scan failed: {exc}")
 
 
 def _security_scan_sync(
@@ -1616,9 +1548,7 @@ def _security_scan_sync(
             scores[key] = 0.9 if vuln.severity.lower() in {"high", "critical"} else 0.7
         return scores
 
-    def _build_false_positive_analysis(
-        count: int, max_limit: int | None
-    ) -> dict[str, Any]:
+    def _build_false_positive_analysis(count: int, max_limit: int | None) -> dict[str, Any]:
         suppressed = 0
         if max_limit is not None and max_limit >= 0 and count > max_limit:
             suppressed = count - max_limit
@@ -1705,15 +1635,12 @@ def _security_scan_sync(
                 "severity": v.severity,
                 "line": v.line,
                 "description": v.description,
-                "priority_score": 100
-                - (get_priority(v)[0] * 20 + get_priority(v)[1] * 5),
+                "priority_score": 100 - (get_priority(v)[0] * 20 + get_priority(v)[1] * 5),
             }
             for idx, v in enumerate(sorted_vulns)
         ]
 
-    def _build_reachability_analysis(
-        vulns: list[VulnerabilityInfo], code_str: str
-    ) -> dict[str, Any]:
+    def _build_reachability_analysis(vulns: list[VulnerabilityInfo], code_str: str) -> dict[str, Any]:
         entry_point_patterns = [
             r"def main\s*\(",
             r"@app\.route\s*\(",
@@ -1755,11 +1682,7 @@ def _security_scan_sync(
                         "cwe": v.cwe,
                         "line": v.line,
                         "reachable": True,
-                        "reason": (
-                            "Downstream of entry point"
-                            if entry_points
-                            else "No entry point analysis possible"
-                        ),
+                        "reason": ("Downstream of entry point" if entry_points else "No entry point analysis possible"),
                     }
                 )
             else:
@@ -1783,9 +1706,7 @@ def _security_scan_sync(
             "analysis_confidence": "high" if entry_points else "low",
         }
 
-    def _build_false_positive_tuning(
-        vulns: list[VulnerabilityInfo], sanitizers: list[str]
-    ) -> dict[str, Any]:
+    def _build_false_positive_tuning(vulns: list[VulnerabilityInfo], sanitizers: list[str]) -> dict[str, Any]:
         tuning_suggestions: list[dict[str, Any]] = []
 
         if sanitizers:
@@ -1975,9 +1896,7 @@ def _security_scan_sync(
                 if "vulnerabilities" in cached:
                     vuln_list = cached["vulnerabilities"]
                     if vuln_list and isinstance(vuln_list[0], dict):
-                        cached["vulnerabilities"] = [
-                            VulnerabilityInfo(**v) for v in vuln_list
-                        ]
+                        cached["vulnerabilities"] = [VulnerabilityInfo(**v) for v in vuln_list]
                 return SecurityResult(**cached)
             return cached
 
@@ -1987,9 +1906,7 @@ def _security_scan_sync(
     try:
         if detected_language != "python":
             detector = _get_sink_detector()
-            detected_sinks = detector.detect_sinks(
-                code, detected_language, confidence_threshold
-            )
+            detected_sinks = detector.detect_sinks(code, detected_language, confidence_threshold)
 
             for sink in detected_sinks:
                 vulnerabilities.append(
@@ -2025,11 +1942,7 @@ def _security_scan_sync(
 
             for vuln in result.get("vulnerabilities", []):
                 sink_loc = vuln.get("sink_location")
-                line_number = (
-                    sink_loc[0]
-                    if sink_loc and isinstance(sink_loc, (list, tuple))
-                    else None
-                )
+                line_number = sink_loc[0] if sink_loc and isinstance(sink_loc, (list, tuple)) else None
 
                 vulnerabilities.append(
                     VulnerabilityInfo(
@@ -2062,9 +1975,7 @@ def _security_scan_sync(
     vuln_count = len(vulnerabilities)
     risk_level = "low"
     if vuln_count > 0:
-        risk_level = (
-            "medium" if vuln_count <= 2 else "high" if vuln_count <= 5 else "critical"
-        )
+        risk_level = "medium" if vuln_count <= 2 else "high" if vuln_count <= 5 else "critical"
 
     sanitizer_paths: list[str] | None = None
     confidence_scores: dict[str, float] | None = None
@@ -2078,27 +1989,17 @@ def _security_scan_sync(
     false_positive_tuning: dict[str, Any] | None = None
 
     # [20260120_BUGFIX] Normalize capability flags so Pro/Enterprise populate advanced fields
-    has_sanitizers = (
-        "sanitizer_detection" in caps_set or "sanitizer_recognition" in caps_set
-    )
+    has_sanitizers = "sanitizer_detection" in caps_set or "sanitizer_recognition" in caps_set
     has_confidence = "confidence_scores" in caps_set or "confidence_scoring" in caps_set
-    has_fp_analysis = (
-        "false_positive_analysis" in caps_set or "false_positive_reduction" in caps_set
-    )
-    has_policy = (
-        "policy_checks" in caps_set
-        or "custom_policy_engine" in caps_set
-        or "org_specific_rules" in caps_set
-    )
+    has_fp_analysis = "false_positive_analysis" in caps_set or "false_positive_reduction" in caps_set
+    has_policy = "policy_checks" in caps_set or "custom_policy_engine" in caps_set or "org_specific_rules" in caps_set
     has_compliance = (
         "compliance_mappings" in caps_set
         or "compliance_rule_checking" in caps_set
         or "compliance_reporting" in caps_set
     )
     has_priority = (
-        "priority_findings" in caps_set
-        or "priority_finding_ordering" in caps_set
-        or "priority_cve_alerts" in caps_set
+        "priority_findings" in caps_set or "priority_finding_ordering" in caps_set or "priority_cve_alerts" in caps_set
     )
 
     if has_sanitizers:
@@ -2106,30 +2007,21 @@ def _security_scan_sync(
     if has_confidence:
         confidence_scores = _build_confidence_scores(vulnerabilities)
     if has_fp_analysis:
-        false_positive_analysis = _build_false_positive_analysis(
-            len(vulnerabilities), limits.get("max_findings")
-        )
+        false_positive_analysis = _build_false_positive_analysis(len(vulnerabilities), limits.get("max_findings"))
     if has_policy:
         policy_violations = _detect_policy_violations(code)
     if has_compliance:
-        compliance_mappings = _build_compliance_mappings(
-            vulnerabilities, policy_violations or []
-        )
+        compliance_mappings = _build_compliance_mappings(vulnerabilities, policy_violations or [])
     if "custom_logging_rules" in caps_set:
         custom_rule_results = _detect_custom_logging_rules(code)
     if "remediation_suggestions" in caps_set:
         remediation_suggestions = _build_remediation_suggestions_list(vulnerabilities)
     if has_priority:
         priority_ordered_findings = _build_priority_ordered_findings(vulnerabilities)
-    if (
-        "reachability_analysis" in caps_set
-        or "vulnerability_reachability_analysis" in caps_set
-    ):
+    if "reachability_analysis" in caps_set or "vulnerability_reachability_analysis" in caps_set:
         reachability_analysis = _build_reachability_analysis(vulnerabilities, code)
     if "false_positive_tuning" in caps_set:
-        false_positive_tuning = _build_false_positive_tuning(
-            vulnerabilities, sanitizer_paths or []
-        )
+        false_positive_tuning = _build_false_positive_tuning(vulnerabilities, sanitizer_paths or [])
 
     return SecurityResult(
         success=True,
@@ -2350,9 +2242,7 @@ async def _scan_dependencies_impl(
 
     # [20251220_FEATURE] v3.0.5 - Progress reporting
     if ctx:
-        await ctx.report_progress(
-            0, 100, f"Scanning dependencies in {resolved_path}..."
-        )
+        await ctx.report_progress(0, 100, f"Scanning dependencies in {resolved_path}...")
 
     result = await asyncio.to_thread(
         _scan_dependencies_sync,
@@ -2366,9 +2256,7 @@ async def _scan_dependencies_impl(
 
     if ctx:
         vuln_count = result.total_vulnerabilities
-        await ctx.report_progress(
-            100, 100, f"Scan complete: {vuln_count} vulnerabilities found"
-        )
+        await ctx.report_progress(100, 100, f"Scan complete: {vuln_count} vulnerabilities found")
 
     return result
 
@@ -2419,9 +2307,7 @@ def _enforce_file_limits(
     if max_files is not None and max_files >= 0 and total_files > max_files:
         # Reserve at least one slot for backend code
         allowed_frontend = max(max_files - len(backend_files), 0)
-        warnings.append(
-            f"Truncated virtual files from {total_files} to {max_files} due to tier max_files limit"
-        )
+        warnings.append(f"Truncated virtual files from {total_files} to {max_files} due to tier max_files limit")
         frontend_files = frontend_files[:allowed_frontend] if allowed_frontend else []
 
     truncated_frontend = "\n\n".join(frontend_files) if frontend_files else ""
@@ -2448,9 +2334,7 @@ def _type_evaporation_scan_sync(
     """
     try:
         # Apply virtual file limits (// FILE: markers) before analysis
-        frontend_code, backend_code, warnings = _enforce_file_limits(
-            frontend_code, backend_code, max_files
-        )
+        frontend_code, backend_code, warnings = _enforce_file_limits(frontend_code, backend_code, max_files)
 
         # [20251230_FIX][tiering] Community tier is frontend-only per capability matrix.
         if frontend_only:
@@ -2485,9 +2369,7 @@ def _type_evaporation_scan_sync(
                 network_boundaries = _detect_network_boundaries(frontend_code)
                 library_boundaries = _detect_library_boundaries(frontend_code)
                 json_parse_locations = _detect_json_parse_locations(frontend_code)
-                boundary_violations = _detect_boundary_violations(
-                    frontend_code, frontend_result
-                )
+                boundary_violations = _detect_boundary_violations(frontend_code, frontend_result)
 
             return TypeEvaporationResultModel(
                 success=True,
@@ -2520,9 +2402,7 @@ def _type_evaporation_scan_sync(
             analyze_type_evaporation_cross_file,
         )
 
-        result = analyze_type_evaporation_cross_file(
-            frontend_code, backend_code, frontend_file, backend_file
-        )
+        result = analyze_type_evaporation_cross_file(frontend_code, backend_code, frontend_file, backend_file)
 
         all_vulns: list[VulnerabilityInfo] = []
 
@@ -2594,16 +2474,12 @@ def _type_evaporation_scan_sync(
             json_parse_locations = _detect_json_parse_locations(frontend_code)
 
             # Track boundary violations (unvalidated type assertions at boundaries)
-            boundary_violations = _detect_boundary_violations(
-                frontend_code, result.frontend_result
-            )
+            boundary_violations = _detect_boundary_violations(frontend_code, result.frontend_result)
 
         # [20251226_FEATURE] Enterprise tier: Schema generation and contract validation
         if enable_enterprise_features:
             # Generate Zod schemas for matched endpoints
-            generated_schemas = _generate_zod_schemas(
-                result.frontend_result.type_definitions, result.matched_endpoints
-            )
+            generated_schemas = _generate_zod_schemas(result.frontend_result.type_definitions, result.matched_endpoints)
 
             # Generate complete validation code
             if generated_schemas:
@@ -2715,11 +2591,7 @@ def _detect_implicit_any(code: str) -> int:
         # .json() call without 'as Type' or ': Type' annotation
         if ".json()" in line:
             # Check if there's a type annotation or cast
-            if (
-                " as " not in line and ": " not in line.split("=")[0]
-                if "=" in line
-                else True
-            ):
+            if " as " not in line and ": " not in line.split("=")[0] if "=" in line else True:
                 count += 1
 
         # Untyped destructuring from response
@@ -2729,11 +2601,7 @@ def _detect_implicit_any(code: str) -> int:
 
         # response.data without type (axios pattern)
         if ".data" in line and "response" in line.lower():
-            if (
-                " as " not in line and ":" not in line.split("=")[0]
-                if "=" in line
-                else True
-            ):
+            if " as " not in line and ":" not in line.split("=")[0] if "=" in line else True:
                 count += 1
 
     return count
@@ -2815,9 +2683,7 @@ def _detect_json_parse_locations(code: str) -> list[dict[str, Any]]:
 
     for i, line in enumerate(lines, 1):
         if "JSON.parse" in line:
-            has_validation = (
-                " as " in line or "schema" in line.lower() or "validate" in line.lower()
-            )
+            has_validation = " as " in line or "schema" in line.lower() or "validate" in line.lower()
             locations.append(
                 {
                     "line": i,
@@ -2830,9 +2696,7 @@ def _detect_json_parse_locations(code: str) -> list[dict[str, Any]]:
     return locations
 
 
-def _detect_boundary_violations(
-    code: str, frontend_result: Any
-) -> list[dict[str, Any]]:
+def _detect_boundary_violations(code: str, frontend_result: Any) -> list[dict[str, Any]]:
     """
     [20251226_FEATURE] Detect type violations at serialization boundaries.
 
@@ -2916,11 +2780,7 @@ def _ts_type_to_zod(type_name: str, definition: str) -> str | None:
             zod_type = _ts_primitive_to_zod(field_type)
             field_schemas.append(f"  {field_name}: {zod_type}")
 
-        return (
-            f"const {type_name}Schema = z.object({{\n"
-            + ",\n".join(field_schemas)
-            + "\n});"
-        )
+        return f"const {type_name}Schema = z.object({{\n" + ",\n".join(field_schemas) + "\n});"
 
     # Handle type alias with union
     union_match = re.search(r"type\s+\w+\s*=\s*(.+)", definition)
@@ -2936,9 +2796,7 @@ def _ts_type_to_zod(type_name: str, definition: str) -> str | None:
 
         # Primitive union: string | number
         parts = [p.strip() for p in union_value.split("|")]
-        if all(
-            p in ("string", "number", "boolean", "null", "undefined") for p in parts
-        ):
+        if all(p in ("string", "number", "boolean", "null", "undefined") for p in parts):
             zod_parts = [_ts_primitive_to_zod(p) for p in parts]
             return f"const {type_name}Schema = z.union([{', '.join(zod_parts)}]);"
 
@@ -3005,9 +2863,7 @@ def _generate_validation_code(schemas: list[dict[str, Any]]) -> str:
 
         # Add validation helper
         type_name = schema["type_name"]
-        lines.append(
-            f"export function validate{type_name}(data: unknown): {type_name} {{"
-        )
+        lines.append(f"export function validate{type_name}(data: unknown): {type_name} {{")
         lines.append(f"  return {type_name}Schema.parse(data);")
         lines.append("}")
         lines.append("")
@@ -3127,9 +2983,7 @@ def _validate_api_contract(
         # Check if backend has input validation vulnerability
         for vuln in backend_vulnerabilities:
             vuln_line = (
-                getattr(vuln, "sink_location", (0,))[0]
-                if hasattr(vuln, "sink_location") and vuln.sink_location
-                else 0
+                getattr(vuln, "sink_location", (0,))[0] if hasattr(vuln, "sink_location") and vuln.sink_location else 0
             )
             if abs(vuln_line - py_line) < 10:
                 contract["violations"].append(
@@ -3149,12 +3003,8 @@ def _validate_api_contract(
 
     # Generate recommendations
     if contract["violations"]:
-        contract["recommendations"].append(
-            "Add runtime validation (Pydantic/marshmallow) to backend endpoints"
-        )
-        contract["recommendations"].append(
-            "Use Zod schemas on frontend for response validation"
-        )
+        contract["recommendations"].append("Add runtime validation (Pydantic/marshmallow) to backend endpoints")
+        contract["recommendations"].append("Use Zod schemas on frontend for response validation")
 
     return contract
 
@@ -3177,22 +3027,14 @@ def _generate_remediation_suggestions(
     suggestions: list[dict[str, Any]] = []
 
     for vuln in vulnerabilities:
-        vuln_type = (
-            getattr(vuln, "type", str(vuln)) if hasattr(vuln, "type") else str(vuln)
-        )
+        vuln_type = getattr(vuln, "type", str(vuln)) if hasattr(vuln, "type") else str(vuln)
         vuln_line = getattr(vuln, "line", 0) if hasattr(vuln, "line") else 0
-        vuln_desc = (
-            getattr(vuln, "description", "") if hasattr(vuln, "description") else ""
-        )
+        vuln_desc = getattr(vuln, "description", "") if hasattr(vuln, "description") else ""
 
         suggestion: dict[str, Any] = {
             "vulnerability_type": vuln_type,
             "line": vuln_line,
-            "priority": (
-                "high"
-                if "Backend" in str(vuln_type) or "Cross-File" in str(vuln_type)
-                else "medium"
-            ),
+            "priority": ("high" if "Backend" in str(vuln_type) or "Cross-File" in str(vuln_type) else "medium"),
             "fixes": [],
         }
 
@@ -3249,9 +3091,7 @@ def _generate_remediation_suggestions(
 
         # Link to generated schemas if available
         if generated_schemas:
-            suggestion["available_schemas"] = [
-                s["type_name"] for s in generated_schemas
-            ]
+            suggestion["available_schemas"] = [s["type_name"] for s in generated_schemas]
         if pydantic_models:
             suggestion["available_models"] = [m["type_name"] for m in pydantic_models]
 
@@ -3375,11 +3215,7 @@ def _generate_type_compliance_report(
 
     # Count vulnerabilities by severity
     for vuln in vulnerabilities:
-        severity = (
-            getattr(vuln, "severity", "medium")
-            if hasattr(vuln, "severity")
-            else "medium"
-        )
+        severity = getattr(vuln, "severity", "medium") if hasattr(vuln, "severity") else "medium"
         severity = severity.lower() if isinstance(severity, str) else "medium"
 
         report["summary"]["total_issues"] += 1
@@ -3429,9 +3265,7 @@ def _generate_type_compliance_report(
 
         if total_endpoints > 0:
             contract_score = (validated / total_endpoints) * 20
-            report["compliance_score"] = min(
-                100, report["compliance_score"] + contract_score - 10
-            )
+            report["compliance_score"] = min(100, report["compliance_score"] + contract_score - 10)
 
         for violation in api_contract.get("violations", []):
             report["findings"].append(
@@ -3465,20 +3299,12 @@ def _generate_type_compliance_report(
 
     # Generate recommendations based on findings
     if report["summary"]["high"] > 0:
-        report["recommendations"].append(
-            "CRITICAL: Address high-severity type safety issues immediately"
-        )
+        report["recommendations"].append("CRITICAL: Address high-severity type safety issues immediately")
     if report["summary"]["medium"] > 3:
-        report["recommendations"].append(
-            "Consider adding runtime validation to reduce medium-severity issues"
-        )
+        report["recommendations"].append("Consider adding runtime validation to reduce medium-severity issues")
     if not generated_schemas:
-        report["recommendations"].append(
-            "Generate Zod schemas for frontend type validation"
-        )
+        report["recommendations"].append("Generate Zod schemas for frontend type validation")
     if api_contract and api_contract.get("violations"):
-        report["recommendations"].append(
-            "Align frontend/backend types to resolve contract violations"
-        )
+        report["recommendations"].append("Align frontend/backend types to resolve contract violations")
 
     return report

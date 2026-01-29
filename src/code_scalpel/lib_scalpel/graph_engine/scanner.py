@@ -120,9 +120,7 @@ class ProjectScanner:
         # Analyze each file and add to graph
         for file_path in python_files:
             if self.scanned_files >= self.max_files:
-                logger.debug(
-                    f"[ProjectScanner] Reached max_files limit ({self.max_files})"
-                )
+                logger.debug(f"[ProjectScanner] Reached max_files limit ({self.max_files})")
                 break
 
             self._analyze_file(file_path, graph)
@@ -218,9 +216,7 @@ class ProjectScanner:
             # Extract rich symbol information if enabled
             if self.extract_symbols and self.symbol_extractor:
                 symbol_table = self.symbol_extractor.extract_from_file(str(file_path))
-                self._enrich_with_symbols(
-                    symbol_table, file_path_relative, graph, str(file_node_id)
-                )
+                self._enrich_with_symbols(symbol_table, file_path_relative, graph, str(file_node_id))
 
             logger.debug(
                 f"[ProjectScanner] Analyzed {file_path_relative}: "
@@ -236,9 +232,7 @@ class ProjectScanner:
             logger.warning(f"[ProjectScanner] {error_msg}")
             self.errors.append((str(file_path), error_msg))
 
-    def _extract_symbols(
-        self, tree: ast.AST, file_path: Path, graph: UniversalGraph, file_node_id: str
-    ) -> None:
+    def _extract_symbols(self, tree: ast.AST, file_path: Path, graph: UniversalGraph, file_node_id: str) -> None:
         """Extract class and function definitions from AST.
 
         Args:
@@ -324,9 +318,7 @@ class ProjectScanner:
                     )
                     graph.add_edge(edge)
 
-    def _extract_imports(
-        self, tree: ast.AST, file_path: Path, graph: UniversalGraph, file_node_id: str
-    ) -> None:
+    def _extract_imports(self, tree: ast.AST, file_path: Path, graph: UniversalGraph, file_node_id: str) -> None:
         """Extract import statements and build dependency edges.
 
         Args:

@@ -144,9 +144,7 @@ class BudgetDecision:
             msg += "  - Simplify changes to avoid adding control flow complexity\n"
             msg += "  - Consider extracting methods instead of adding nested logic\n"
         if any(v.rule == "allowed_file_patterns" for v in self.violations):
-            msg += (
-                "  - Ensure files match allowed patterns (e.g., *.py, *.ts, *.java)\n"
-            )
+            msg += "  - Ensure files match allowed patterns (e.g., *.py, *.ts, *.java)\n"
         if any(v.rule == "forbidden_paths" for v in self.violations):
             msg += "  - Avoid modifying system/generated files (e.g., .git/, node_modules/)\n"
 
@@ -179,12 +177,8 @@ class ChangeBudget:
         self.max_lines_per_file = config.get("max_lines_per_file", 100)
         self.max_total_lines = config.get("max_total_lines", 300)
         self.max_complexity_increase = config.get("max_complexity_increase", 10)
-        self.allowed_file_patterns = config.get(
-            "allowed_file_patterns", ["*.py", "*.ts", "*.java"]
-        )
-        self.forbidden_paths = config.get(
-            "forbidden_paths", [".git/", "node_modules/", "__pycache__/"]
-        )
+        self.allowed_file_patterns = config.get("allowed_file_patterns", ["*.py", "*.ts", "*.java"])
+        self.forbidden_paths = config.get("forbidden_paths", [".git/", "node_modules/", "__pycache__/"])
 
     def validate_operation(self, operation: Operation) -> BudgetDecision:
         """
@@ -285,9 +279,7 @@ class ChangeBudget:
                 requires_review=True,
             )
 
-        return BudgetDecision(
-            allowed=True, reason="Within budget constraints", violations=[]
-        )
+        return BudgetDecision(allowed=True, reason="Within budget constraints", violations=[])
 
     def _calculate_complexity_delta(self, operation: Operation) -> int:
         """
@@ -310,11 +302,7 @@ class ChangeBudget:
             # Treat empty or None original_code (new file) as zero complexity.
             if change.modified_code is not None:
                 try:
-                    before_complexity = (
-                        self._measure_complexity(change.original_code)
-                        if change.original_code
-                        else 0
-                    )
+                    before_complexity = self._measure_complexity(change.original_code) if change.original_code else 0
                     after_complexity = self._measure_complexity(change.modified_code)
                     total_delta += after_complexity - before_complexity
                 except SyntaxError:
@@ -375,9 +363,7 @@ class ChangeBudget:
 
         for pattern in self.allowed_file_patterns:
             # Check both full path and filename
-            if fnmatch.fnmatch(normalized_path, pattern) or fnmatch.fnmatch(
-                filename, pattern
-            ):
+            if fnmatch.fnmatch(normalized_path, pattern) or fnmatch.fnmatch(filename, pattern):
                 return True
 
         return False
@@ -400,10 +386,7 @@ class ChangeBudget:
 
         for forbidden in self.forbidden_paths:
             # Check if path starts with or contains forbidden segment
-            if (
-                normalized_path.startswith(forbidden)
-                or f"/{forbidden}" in normalized_path
-            ):
+            if normalized_path.startswith(forbidden) or f"/{forbidden}" in normalized_path:
                 return True
 
         return False

@@ -2,7 +2,7 @@
 """
 Generate golden capability JSON files from limits.toml
 
-[20260127_FEATURE] Generates capabilities/free.json, pro.json, enterprise.json
+[20260127_FEATURE] Generates capabilities/community.json, pro.json, enterprise.json
 from the resolver.
 
 Usage:
@@ -25,9 +25,9 @@ from code_scalpel.capabilities import (
 def generate_capability_files():
     """Generate golden capability JSON files for all tiers."""
 
-    # Use canonical tier names (free instead of community for golden file)
+    # Use canonical tier names (community for golden file)
     tier_mapping = {
-        "community": "free",
+        "community": "community",
         "pro": "pro",
         "enterprise": "enterprise",
     }
@@ -56,9 +56,7 @@ def generate_capability_files():
         with open(output_file, "w") as f:
             json.dump(envelope, f, indent=2)
 
-        print(
-            f"✓ {output_file} ({len(caps)} tools, {envelope['available_count']} available)"
-        )
+        print(f"✓ {output_file} ({len(caps)} tools, {envelope['available_count']} available)")
 
     # Generate schema file
     schema_file = output_dir / "schema.json"

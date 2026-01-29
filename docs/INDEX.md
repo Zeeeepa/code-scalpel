@@ -254,7 +254,7 @@ Understanding what already exists before building on it.
 ### Golden Capability Files
 **What They Are:** Committed reference files for regression testing
 
-- `capabilities/free.json` - All capabilities at FREE tier
+- `capabilities/community.json` - All capabilities at COMMUNITY tier
 - `capabilities/pro.json` - All capabilities at PRO tier
 - `capabilities/enterprise.json` - All capabilities at ENTERPRISE tier
 
@@ -303,7 +303,7 @@ Code Scalpel Repository Root
 │       └── protocol.py                 ← NEW: get_capabilities() method
 │
 ├── capabilities/
-│   ├── free.json                       ← NEW: Golden file
+│   ├── community.json                       ← NEW: Golden file
 │   ├── pro.json                        ← NEW: Golden file
 │   ├── enterprise.json                 ← NEW: Golden file
 │   └── schema.json                     ← NEW: JSON schema

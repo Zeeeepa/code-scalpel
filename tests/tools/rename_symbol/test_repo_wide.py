@@ -34,9 +34,7 @@ class TestRepoWideBasics:
 
     def test_repo_wide_rename_init(self, temp_project):
         """RepoWideRename can be initialized."""
-        renamer = RepoWideRename(
-            project_root=temp_project, max_workers=4, batch_size=50
-        )
+        renamer = RepoWideRename(project_root=temp_project, max_workers=4, batch_size=50)
 
         assert renamer.project_root == temp_project
         assert renamer.max_workers == 4
@@ -137,9 +135,7 @@ class TestCandidateFileFinding:
         for i in range(150):
             (temp_project / f"file{i}.py").write_text(f"# File {i}")
 
-        candidates = renamer.find_candidate_files(
-            file_extensions={".py"}, progress_callback=track_progress
-        )
+        candidates = renamer.find_candidate_files(file_extensions={".py"}, progress_callback=track_progress)
 
         # Should have found at least 150 files
         assert len(candidates) >= 150

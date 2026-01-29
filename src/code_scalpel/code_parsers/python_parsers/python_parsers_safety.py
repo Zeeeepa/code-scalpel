@@ -78,9 +78,7 @@ class DependencyVulnerability:
         if not self.vulnerabilities:
             return "NONE"
 
-        highest = max(
-            (severities.get(v.severity, 0), v.severity) for v in self.vulnerabilities
-        )
+        highest = max((severities.get(v.severity, 0), v.severity) for v in self.vulnerabilities)
         return highest[1]
 
 
@@ -152,9 +150,7 @@ class SafetyParser:
             SafetyReport with vulnerability findings
 
         """
-        raise NotImplementedError(
-            "SafetyParser.analyze_requirements_file() not yet implemented"
-        )
+        raise NotImplementedError("SafetyParser.analyze_requirements_file() not yet implemented")
 
     def analyze_lock_file(self, lock_path: str | Path) -> SafetyReport:
         """
@@ -167,9 +163,7 @@ class SafetyParser:
             SafetyReport with vulnerability findings
 
         """
-        raise NotImplementedError(
-            "SafetyParser.analyze_lock_file() not yet implemented"
-        )
+        raise NotImplementedError("SafetyParser.analyze_lock_file() not yet implemented")
 
     def check_package(self, package_name: str, version: str) -> list[Vulnerability]:
         """

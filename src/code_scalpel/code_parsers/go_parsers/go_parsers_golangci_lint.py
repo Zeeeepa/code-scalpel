@@ -77,9 +77,7 @@ class GolangciLintParser:
         self.config = GolangciLintConfig()
         self.issues: List[LintIssue] = []
 
-    def execute_golangci_lint(
-        self, paths: List[Path], config: Optional[GolangciLintConfig] = None
-    ) -> List[LintIssue]:
+    def execute_golangci_lint(self, paths: List[Path], config: Optional[GolangciLintConfig] = None) -> List[LintIssue]:
         raise NotImplementedError("Phase 2: Golangci-lint execution")
 
     def parse_json_report(self, report_path: Path) -> List[LintIssue]:
@@ -88,9 +86,7 @@ class GolangciLintParser:
     def load_config(self, config_file: Path) -> GolangciLintConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_by_linter(
-        self, issues: List[LintIssue]
-    ) -> Dict[LinterType, List[LintIssue]]:
+    def categorize_by_linter(self, issues: List[LintIssue]) -> Dict[LinterType, List[LintIssue]]:
         raise NotImplementedError("Phase 2: Issue categorization by linter")
 
     def generate_report(self, issues: List[LintIssue], format: str = "json") -> str:

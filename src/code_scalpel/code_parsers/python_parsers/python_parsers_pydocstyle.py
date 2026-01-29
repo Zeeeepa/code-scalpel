@@ -317,22 +317,12 @@ class DocstringCoverage:
     @property
     def total_items(self) -> int:
         """Total documentable items."""
-        return (
-            self.total_modules
-            + self.total_classes
-            + self.total_functions
-            + self.total_methods
-        )
+        return self.total_modules + self.total_classes + self.total_functions + self.total_methods
 
     @property
     def documented_items(self) -> int:
         """Total documented items."""
-        return (
-            self.documented_modules
-            + self.documented_classes
-            + self.documented_functions
-            + self.documented_methods
-        )
+        return self.documented_modules + self.documented_classes + self.documented_functions + self.documented_methods
 
     @property
     def coverage_percent(self) -> float:
@@ -445,11 +435,7 @@ class FunctionDocstringQuality:
             return False
         if self.missing_params:
             return False
-        if (
-            self.has_return_annotation
-            and not self.returns_none
-            and not self.return_documented
-        ):
+        if self.has_return_annotation and not self.returns_none and not self.return_documented:
             return False
         if self.exceptions_raised and not self.exceptions_documented:
             return False
@@ -478,9 +464,7 @@ class FunctionDocstringQuality:
         # Exception documentation (10 points)
         if self.exceptions_raised:
             if self.exceptions_documented:
-                score += (
-                    10.0 * len(self.exceptions_documented) / len(self.exceptions_raised)
-                )
+                score += 10.0 * len(self.exceptions_documented) / len(self.exceptions_raised)
         else:
             score += 10.0
 
@@ -510,9 +494,7 @@ class ModuleDocstringQuality:
         """Average quality score across all functions/methods."""
         if not self.all_callables:
             return 100.0
-        return sum(f.quality_score for f in self.all_callables) / len(
-            self.all_callables
-        )
+        return sum(f.quality_score for f in self.all_callables) / len(self.all_callables)
 
     @property
     def complete_count(self) -> int:
@@ -545,14 +527,10 @@ class DocstringQualityAnalyzer:
     GOOGLE_RAISES_PATTERN = re.compile(r"^\s*Raises?:\s*$", re.MULTILINE)
     GOOGLE_EXAMPLES_PATTERN = re.compile(r"^\s*Examples?:\s*$", re.MULTILINE)
     GOOGLE_NOTES_PATTERN = re.compile(r"^\s*Notes?:\s*$", re.MULTILINE)
-    GOOGLE_DEPRECATED_PATTERN = re.compile(
-        r"^\s*Deprecated[:\s]", re.MULTILINE | re.IGNORECASE
-    )
+    GOOGLE_DEPRECATED_PATTERN = re.compile(r"^\s*Deprecated[:\s]", re.MULTILINE | re.IGNORECASE)
 
     # Parameter pattern for Google style: name (type): description OR name: description
-    GOOGLE_PARAM_PATTERN = re.compile(
-        r"^\s+(\w+)(?:\s*\(([^)]+)\))?:\s*(.*)$", re.MULTILINE
-    )
+    GOOGLE_PARAM_PATTERN = re.compile(r"^\s+(\w+)(?:\s*\(([^)]+)\))?:\s*(.*)$", re.MULTILINE)
 
     # NumPy style patterns
     NUMPY_PARAMS_PATTERN = re.compile(r"^Parameters\s*$", re.MULTILINE)
@@ -561,9 +539,7 @@ class DocstringQualityAnalyzer:
     NUMPY_PARAM_PATTERN = re.compile(r"^(\w+)\s*:\s*(\S.*)$", re.MULTILINE)
 
     # Sphinx style patterns
-    SPHINX_PARAM_PATTERN = re.compile(
-        r":param\s+(\w+)(?:\s+(\w+))?:\s*(.*)$", re.MULTILINE
-    )
+    SPHINX_PARAM_PATTERN = re.compile(r":param\s+(\w+)(?:\s+(\w+))?:\s*(.*)$", re.MULTILINE)
     SPHINX_RETURNS_PATTERN = re.compile(r":returns?:\s*(.*)$", re.MULTILINE)
     SPHINX_RAISES_PATTERN = re.compile(r":raises?\s+(\w+):\s*(.*)$", re.MULTILINE)
 
@@ -577,9 +553,7 @@ class DocstringQualityAnalyzer:
         source = path.read_text(encoding="utf-8")
         return self.analyze_source(source, str(path))
 
-    def analyze_source(
-        self, source: str, file_path: str = "<string>"
-    ) -> ModuleDocstringQuality:
+    def analyze_source(self, source: str, file_path: str = "<string>") -> ModuleDocstringQuality:
         """Analyze docstring quality from source code."""
         try:
             tree = ast.parse(source)
@@ -670,15 +644,11 @@ class DocstringQualityAnalyzer:
         # Check if function has any non-None return statements
         for child in ast.walk(node):
             if isinstance(child, ast.Return) and child.value is not None:
-                if not (
-                    isinstance(child.value, ast.Constant) and child.value.value is None
-                ):
+                if not (isinstance(child.value, ast.Constant) and child.value.value is None):
                     return False
         return True
 
-    def _get_raised_exceptions(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef
-    ) -> list[str]:
+    def _get_raised_exceptions(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
         """Get exception types raised in the function."""
         exceptions = []
         for child in ast.walk(node):
@@ -724,15 +694,12 @@ class DocstringQualityAnalyzer:
             or re.search(r"^Examples?\s*$", docstring, re.MULTILINE)
         )
         result.has_notes = bool(
-            self.GOOGLE_NOTES_PATTERN.search(docstring)
-            or re.search(r"^Notes?\s*$", docstring, re.MULTILINE)
+            self.GOOGLE_NOTES_PATTERN.search(docstring) or re.search(r"^Notes?\s*$", docstring, re.MULTILINE)
         )
         result.is_deprecated = bool(self.GOOGLE_DEPRECATED_PATTERN.search(docstring))
         if result.is_deprecated:
             # Try to extract deprecation reason
-            match = re.search(
-                r"Deprecated[:\s]+(.+?)(?:\n\n|$)", docstring, re.IGNORECASE | re.DOTALL
-            )
+            match = re.search(r"Deprecated[:\s]+(.+?)(?:\n\n|$)", docstring, re.IGNORECASE | re.DOTALL)
             if match:
                 result.deprecated_reason = match.group(1).strip()
 
@@ -765,9 +732,7 @@ class DocstringQualityAnalyzer:
                 section_end = self._find_next_section(docstring, returns_match.end())
                 returns_section = docstring[returns_match.end() : section_end].strip()
                 # Check if there's a type annotation in the return
-                result.return_type_documented = bool(
-                    re.match(r"^\s*\w+:", returns_section)
-                )
+                result.return_type_documented = bool(re.match(r"^\s*\w+:", returns_section))
 
         # Find Raises section
         raises_match = self.GOOGLE_RAISES_PATTERN.search(docstring)
@@ -856,9 +821,7 @@ class DocstringQualityAnalyzer:
 
         return min_pos
 
-    def _is_method(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef, tree: ast.Module
-    ) -> bool:
+    def _is_method(self, node: ast.FunctionDef | ast.AsyncFunctionDef, tree: ast.Module) -> bool:
         """Check if a function is a method within a class."""
         for cls in ast.walk(tree):
             if isinstance(cls, ast.ClassDef):
@@ -889,11 +852,7 @@ class DocstringQualityAnalyzer:
 
     def _check_return_issues(self, result: FunctionDocstringQuality) -> None:
         """Check for return documentation issues."""
-        if (
-            result.has_return_annotation
-            and not result.returns_none
-            and not result.return_documented
-        ):
+        if result.has_return_annotation and not result.returns_none and not result.return_documented:
             result.issues.append(
                 DocstringQualityIssue(
                     issue_type=DocstringQualityIssueType.MISSING_RETURN,
@@ -913,9 +872,7 @@ class DocstringQualityAnalyzer:
                     )
                 )
 
-    def _check_deprecation_issues(
-        self, docstring: str, result: FunctionDocstringQuality
-    ) -> None:
+    def _check_deprecation_issues(self, docstring: str, result: FunctionDocstringQuality) -> None:
         """Check for deprecation documentation issues."""
         if result.is_deprecated and not result.deprecated_reason:
             result.issues.append(
@@ -960,9 +917,7 @@ class PydocstyleReport:
     @property
     def missing_count(self) -> int:
         """Count of missing docstring violations."""
-        return len(
-            [v for v in self.violations if v.category == DocstyleCategory.MISSING]
-        )
+        return len([v for v in self.violations if v.category == DocstyleCategory.MISSING])
 
     def get_summary(self) -> dict[str, Any]:
         """Get a summary of the report."""
@@ -971,10 +926,7 @@ class PydocstyleReport:
             "convention": self.convention.value,
             "total_violations": self.violation_count,
             "missing_docstrings": self.missing_count,
-            "by_category": {
-                cat.value: len(violations)
-                for cat, violations in self.violations_by_category.items()
-            },
+            "by_category": {cat.value: len(violations) for cat, violations in self.violations_by_category.items()},
             "coverage_percent": self.coverage.coverage_percent,
         }
 
@@ -1394,9 +1346,7 @@ def format_pydocstyle_report(report: PydocstyleReport) -> str:
 
     if report.violations_by_category:
         lines.append("By category:")
-        for category, violations in sorted(
-            report.violations_by_category.items(), key=lambda x: -len(x[1])
-        ):
+        for category, violations in sorted(report.violations_by_category.items(), key=lambda x: -len(x[1])):
             lines.append(f"  {category.value}: {len(violations)}")
 
     lines.append("")

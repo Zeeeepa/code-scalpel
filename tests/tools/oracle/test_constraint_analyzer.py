@@ -89,11 +89,7 @@ class TestConstraintAnalyzer:
 
     def test_get_callers(self):
         """Test getting callers (inbound edges)."""
-        graph = MockGraph(
-            predecessors_map={
-                "src/auth.py": ["src/routes.py", "src/api.py", "src/cli.py"]
-            }
-        )
+        graph = MockGraph(predecessors_map={"src/auth.py": ["src/routes.py", "src/api.py", "src/cli.py"]})
 
         callers = self.analyzer._get_callers("src/auth.py", graph)
 
@@ -120,11 +116,7 @@ class TestConstraintAnalyzer:
 
     def test_get_callees(self):
         """Test getting callees (outbound edges)."""
-        graph = MockGraph(
-            successors_map={
-                "src/auth.py": ["src/utils.py", "src/models.py", "src/db.py"]
-            }
-        )
+        graph = MockGraph(successors_map={"src/auth.py": ["src/utils.py", "src/models.py", "src/db.py"]})
 
         callees = self.analyzer._get_callees("src/auth.py", graph)
 
@@ -286,23 +278,15 @@ class TestConstraintAnalyzer:
 
     def test_matches_pattern_direct_prefix(self):
         """Test pattern matching with direct prefix."""
-        assert ConstraintAnalyzer._matches_pattern(
-            "src/views/dashboard.py", "src/views"
-        )
+        assert ConstraintAnalyzer._matches_pattern("src/views/dashboard.py", "src/views")
         assert ConstraintAnalyzer._matches_pattern("src/views/home.py", "src/views")
-        assert not ConstraintAnalyzer._matches_pattern(
-            "src/utils/helpers.py", "src/views"
-        )
+        assert not ConstraintAnalyzer._matches_pattern("src/utils/helpers.py", "src/views")
 
     def test_matches_pattern_glob(self):
         """Test pattern matching with glob patterns."""
-        assert ConstraintAnalyzer._matches_pattern(
-            "src/views/dashboard.py", "src/views/*"
-        )
+        assert ConstraintAnalyzer._matches_pattern("src/views/dashboard.py", "src/views/*")
         assert ConstraintAnalyzer._matches_pattern("src/views/home.py", "src/views/*")
-        assert not ConstraintAnalyzer._matches_pattern(
-            "src/utils/helpers.py", "src/views/*"
-        )
+        assert not ConstraintAnalyzer._matches_pattern("src/utils/helpers.py", "src/views/*")
 
     def test_load_governance_rules_no_config(self):
         """Test loading governance rules with no config."""

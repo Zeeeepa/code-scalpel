@@ -37,24 +37,44 @@ async def symbolic_execute(
     max_paths: int | None = None,
     max_depth: int | None = None,
 ) -> ToolResponseEnvelope:
-    """Perform symbolic execution on Python code.
+    """
+    Perform symbolic execution on Python code.
+    Analyzes Python code symbolically to explore execution paths, discover constraints, and identify potential issues without concrete execution.
 
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Limits and optional enhancements are applied based on tool capabilities.
+    - Community: Basic symbolic execution (max_paths=50, max_depth=10, basic types)
+    - Pro: Advanced symbolic execution (max_paths=unlimited, max_depth=100, concolic execution)
+    - Enterprise: Unlimited symbolic execution (max_paths=unlimited, max_depth=unlimited, distributed execution, memory modeling)
 
     **Tier Capabilities:**
-    - Community: Max 50 paths, max depth 10, basic types (int/bool/string/float)
-    - Pro: Unlimited paths, max depth 100, extended types (includes list/dict)
-    - Enterprise: Unlimited paths and depth, all constraint types
+    - **Community:** Basic symbolic execution (max_paths=50, max_depth=10, constraint_types=["int", "bool", "string", "float"])
+    - **Pro:** Advanced symbolic execution (max_paths=unlimited, max_depth=100, constraint_types=["int", "bool", "string", "float", "list", "dict"], concolic execution)
+    - **Enterprise:** Unlimited symbolic execution (max_paths=unlimited, max_depth=unlimited, constraint_types="all", distributed execution, memory modeling)
 
-    Args:
-        code: Python code to symbolically execute
-        max_paths: Maximum number of execution paths to explore (tier-limited)
-        max_depth: Maximum loop unrolling depth (tier-limited)
+    **Args:**
+    - code (str): Python code to symbolically execute
+    - max_paths (int, optional): Maximum number of execution paths to explore (subject to tier limits)
+    - max_depth (int, optional): Maximum loop unrolling depth (subject to tier limits)
 
-    Returns:
-        ToolResponseEnvelope with symbolic execution results and tier metadata
+    **Returns:**
+    - ToolResponseEnvelope: Standardized MCP response envelope containing:
+      - data (SymbolicResult): Symbolic execution results with:
+        - success (bool): Whether analysis succeeded
+        - paths_explored (int): Number of execution paths explored
+        - paths (list[ExecutionPath]): Discovered execution paths with conditions and constraints
+        - symbolic_variables (list[str]): Variables treated symbolically
+        - constraints (list[str]): Discovered constraints
+        - total_paths (int, optional): Total paths discovered before limiting
+        - truncated (bool): Whether paths were limited by configuration
+        - truncation_warning (str, optional): Warning when results are limited
+        - path_prioritization (dict, optional): Path prioritization metadata (Pro/Enterprise)
+        - concolic_results (dict, optional): Concolic execution results (Pro/Enterprise)
+        - state_space_analysis (dict, optional): State space reduction analysis (Enterprise)
+        - memory_model (dict, optional): Memory modeling results (Enterprise)
+        - error (str, optional): Error message if analysis failed
+      - tier (str, optional): Applied tier ("community", "pro", "enterprise")
+      - error (ToolError, optional): Standardized error if operation failed
+      - warnings (list[str]): Non-fatal warnings from MCP boundary
     """
     started = time.perf_counter()
     try:
@@ -68,27 +88,19 @@ async def symbolic_execute(
 
         effective_max_paths: int | None
         if max_paths is None:
-            effective_max_paths = (
-                None if configured_max_paths is None else int(configured_max_paths)
-            )
+            effective_max_paths = None if configured_max_paths is None else int(configured_max_paths)
         else:
             effective_max_paths = int(max_paths)
             if configured_max_paths is not None:
-                effective_max_paths = min(
-                    effective_max_paths, int(configured_max_paths)
-                )
+                effective_max_paths = min(effective_max_paths, int(configured_max_paths))
 
         effective_max_depth: int | None
         if max_depth is None:
-            effective_max_depth = (
-                None if configured_max_depth is None else int(configured_max_depth)
-            )
+            effective_max_depth = None if configured_max_depth is None else int(configured_max_depth)
         else:
             effective_max_depth = int(max_depth)
             if configured_max_depth is not None:
-                effective_max_depth = min(
-                    effective_max_depth, int(configured_max_depth)
-                )
+                effective_max_depth = min(effective_max_depth, int(configured_max_depth))
 
         # [20260121_BUGFIX] Resolve helper at runtime; prefer sym_helpers to honor monkeypatches
         helper = sym_helpers._symbolic_execute_sync
@@ -149,7 +161,7 @@ async def generate_unit_tests(
     - `file_path`: Path to Python file containing the code
     - `function_name`: Name of function to generate tests for (requires file_path)
 
-    Args:
+    **Args:**
         code: Python code string to generate tests for
         file_path: Path to Python file to analyze
         function_name: Specific function name to target (optional)
@@ -157,7 +169,7 @@ async def generate_unit_tests(
         data_driven: Generate parameterized data-driven tests (Pro+)
         crash_log: Crash log for bug reproduction tests (Enterprise only)
 
-    Returns:
+    **Returns:**
         ToolResponseEnvelope with generated test cases and tier metadata
     """
     started = time.perf_counter()
@@ -306,27 +318,38 @@ async def simulate_refactor(
 ) -> ToolResponseEnvelope:
     """Simulate applying a code change and check for safety issues.
 
+    **Description:**
+    Verifies code changes are safe before applying them by detecting security issues and structural changes that could break functionality.
+
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Limits and optional enhancements are applied based on tool capabilities.
+    - Community: Basic refactor simulation (max 1MB file size, basic analysis depth)
+    - Pro: Advanced simulation with type checking (max 10MB file size, advanced analysis depth)
+    - Enterprise: Deep simulation with compliance validation (max 100MB file size, deep analysis depth)
 
     **Tier Capabilities:**
-    - Community: Max 1MB file size, basic analysis depth
-    - Pro: Max 10MB file size, advanced analysis depth
-    - Enterprise: Max 100MB file size, deep analysis depth
+    - Community: basic_simulation, structural_diff (max_file_size_mb=1, analysis_depth="basic")
+    - Pro: Community capabilities + advanced_simulation, behavior_preservation, type_checking, build_check (max_file_size_mb=10, analysis_depth="advanced")
+    - Enterprise: Pro capabilities + regression_prediction, impact_analysis, custom_rules, compliance_validation (max_file_size_mb=100, analysis_depth="deep")
 
-    **Change Specification (choose one):**
-    - `new_code`: Complete replacement code for the original
-    - `patch`: Diff/patch format describing the changes
-
-    Args:
+    **Args:**
         original_code: Original code before changes
         new_code: Complete new code after changes (alternative to patch)
         patch: Patch/diff describing the changes (alternative to new_code)
         strict_mode: Enable strict validation checks
 
-    Returns:
-        ToolResponseEnvelope with safety analysis results and tier metadata
+    **Returns:**
+        ToolResponseEnvelope:
+        - success: True if simulation succeeded
+        - data: RefactorSimulationResult with detailed safety analysis:
+            - success: Whether simulation succeeded
+            - is_safe: Whether the refactor is safe to apply
+            - status: Status (safe, unsafe, warning, or error)
+            - reason: Reason if not safe
+            - security_issues: List of security issues found with type, severity, line, description, CWE
+            - structural_changes: Dictionary of functions/classes added/removed/modified
+            - warnings: List of non-critical warnings
+            - error: Error message if simulation failed
+        - error: Error message if operation failed
     """
     started = time.perf_counter()
     try:

@@ -45,8 +45,6 @@ if __name__ == "__main__":
     # Ensure license path is visible when running directly
     os.environ.setdefault(
         "CODE_SCALPEL_LICENSE_PATH",
-        os.path.join(
-            os.path.dirname(__file__), "..", ".code-scalpel", "license", "license.jwt"
-        ),
+        os.path.join(os.path.dirname(__file__), "..", ".code-scalpel", "license", "license.jwt"),
     )
     asyncio.run(main())

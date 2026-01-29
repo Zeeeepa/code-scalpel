@@ -92,17 +92,13 @@ def _set_env(monkeypatch, *, url: str, cache_path: Path):
     monkeypatch.delenv(remote_verifier.VERIFIER_ENVIRONMENT_ENV_VAR, raising=False)
 
 
-def test_remote_verify_populates_cache_and_allows_when_valid(
-    tmp_path: Path, verifier_url: str, monkeypatch
-):
+def test_remote_verify_populates_cache_and_allows_when_valid(tmp_path: Path, verifier_url: str, monkeypatch):
     cache_path = tmp_path / "license_cache.json"
     _set_env(monkeypatch, url=verifier_url, cache_path=cache_path)
 
     remote_verifier._IN_MEMORY_CACHE = None
 
-    token = (
-        "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
-    )
+    token = "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
 
     decision = remote_verifier.authorize_token(token)
     assert decision.allowed is True
@@ -117,9 +113,7 @@ def test_cache_fresh_skips_remote_call(tmp_path: Path, verifier_url: str, monkey
 
     remote_verifier._IN_MEMORY_CACHE = None
 
-    token = (
-        "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
-    )
+    token = "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
 
     # First call hits remote and writes cache.
     decision1 = remote_verifier.authorize_token(token)
@@ -136,17 +130,13 @@ def test_cache_fresh_skips_remote_call(tmp_path: Path, verifier_url: str, monkey
     assert decision2.reason == "cache_fresh"
 
 
-def test_offline_grace_allows_only_with_hash_match_and_recent_cache(
-    tmp_path: Path, verifier_url: str, monkeypatch
-):
+def test_offline_grace_allows_only_with_hash_match_and_recent_cache(tmp_path: Path, verifier_url: str, monkeypatch):
     cache_path = tmp_path / "license_cache.json"
     _set_env(monkeypatch, url=verifier_url, cache_path=cache_path)
 
     remote_verifier._IN_MEMORY_CACHE = None
 
-    token = (
-        "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
-    )
+    token = "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
 
     base_time = 10_000.0
     monkeypatch.setattr(remote_verifier.time, "time", lambda: base_time)
@@ -177,9 +167,7 @@ def test_offline_grace_allows_only_with_hash_match_and_recent_cache(
     assert decision3.allowed is False
 
 
-def test_expiry_denies_even_during_grace(
-    tmp_path: Path, verifier_url: str, monkeypatch
-):
+def test_expiry_denies_even_during_grace(tmp_path: Path, verifier_url: str, monkeypatch):
     cache_path = tmp_path / "license_cache.json"
     _set_env(monkeypatch, url=verifier_url, cache_path=cache_path)
 
@@ -196,15 +184,11 @@ def test_expiry_denies_even_during_grace(
     assert decision.reason == "license_expired"
 
 
-def test_remote_verify_error_message_never_leaks_token(
-    tmp_path: Path, verifier_url: str, monkeypatch
-):
+def test_remote_verify_error_message_never_leaks_token(tmp_path: Path, verifier_url: str, monkeypatch):
     cache_path = tmp_path / "license_cache.json"
     _set_env(monkeypatch, url=verifier_url, cache_path=cache_path)
 
-    token = (
-        "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
-    )
+    token = "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
 
     def _down(*args, **kwargs):
         raise remote_verifier.urllib.error.URLError(f"network down: {token}")
@@ -238,9 +222,7 @@ def test_atomic_write_json_retries_on_transient_enoent(tmp_path: Path, monkeypat
     assert target.exists()
 
 
-def test_atomic_write_json_falls_back_to_direct_write_on_persistent_enoent(
-    tmp_path: Path, monkeypatch
-):
+def test_atomic_write_json_falls_back_to_direct_write_on_persistent_enoent(tmp_path: Path, monkeypatch):
     # [20251228_TEST] If rename keeps failing, we should still persist the cache
     # best-effort rather than crash the server.
     target = tmp_path / "license_cache.json"

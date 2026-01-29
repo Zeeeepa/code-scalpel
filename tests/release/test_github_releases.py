@@ -60,23 +60,17 @@ class TestGitHubReleaseManagerInit:
 
     def test_normalize_repo_url_https_format(self):
         """Test normalizing HTTPS URL."""
-        result = GitHubReleaseManager._normalize_repo_url(
-            "https://github.com/owner/repo"
-        )
+        result = GitHubReleaseManager._normalize_repo_url("https://github.com/owner/repo")
         assert result == "owner/repo"
 
     def test_normalize_repo_url_https_with_git_suffix(self):
         """Test normalizing HTTPS URL with .git suffix."""
-        result = GitHubReleaseManager._normalize_repo_url(
-            "https://github.com/owner/repo.git"
-        )
+        result = GitHubReleaseManager._normalize_repo_url("https://github.com/owner/repo.git")
         assert result == "owner/repo"
 
     def test_normalize_repo_url_ssh_format(self):
         """Test normalizing SSH URL."""
-        result = GitHubReleaseManager._normalize_repo_url(
-            "git@github.com:owner/repo.git"
-        )
+        result = GitHubReleaseManager._normalize_repo_url("git@github.com:owner/repo.git")
         assert result == "owner/repo"
 
     def test_get_origin_repo_url_success(self):
@@ -199,9 +193,7 @@ class TestGitHubReleaseManagerCreateRelease:
             mock_release.id = 12345
             mock_release.tag_name = "v1.0.0"
             mock_release.title = "Release 1.0.0"
-            mock_release.upload_url = (
-                "https://uploads.github.com/repos/owner/repo/releases/12345/assets"
-            )
+            mock_release.upload_url = "https://uploads.github.com/repos/owner/repo/releases/12345/assets"
 
             manager.repo.create_git_release.return_value = mock_release
 
@@ -230,9 +222,7 @@ class TestGitHubReleaseManagerCreateRelease:
             mock_release.id = 12346
             mock_release.tag_name = "v1.0.0-beta"
             mock_release.title = "Release 1.0.0-beta"
-            mock_release.upload_url = (
-                "https://uploads.github.com/repos/owner/repo/releases/12346/assets"
-            )
+            mock_release.upload_url = "https://uploads.github.com/repos/owner/repo/releases/12346/assets"
 
             manager.repo.create_git_release.return_value = mock_release
 
@@ -271,7 +261,9 @@ class TestGitHubReleaseManagerAssets:
                 mock_release = Mock()
                 mock_asset = Mock()
                 mock_asset.name = "package-1.0.0-py3-none-any.whl"
-                mock_asset.browser_download_url = "https://github.com/owner/repo/releases/download/v1.0.0/package-1.0.0-py3-none-any.whl"
+                mock_asset.browser_download_url = (
+                    "https://github.com/owner/repo/releases/download/v1.0.0/package-1.0.0-py3-none-any.whl"
+                )
                 mock_asset.size = 1024
 
                 mock_release.upload_asset.return_value = mock_asset

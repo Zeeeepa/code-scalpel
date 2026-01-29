@@ -25,10 +25,7 @@ def new_function():
         results = analyzer.analyze_file(test_file)
 
         assert results["has_deprecation_marker"]
-        assert any(
-            "deprecated" in marker["text"].lower()
-            for marker in results["deprecation_markers"]
-        )
+        assert any("deprecated" in marker["text"].lower() for marker in results["deprecation_markers"])
 
     def test_counts_imports_ast(self, tmp_path):
         """Test AST-based import counting."""

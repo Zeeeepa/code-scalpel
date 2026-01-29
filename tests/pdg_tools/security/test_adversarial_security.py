@@ -68,9 +68,7 @@ def execute_query():
     cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")  # SINK!
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(temp_project), entry_points=["executor.py"]
-        )
+        result = await cross_file_security_scan(project_root=str(temp_project), entry_points=["executor.py"])
 
         # Should detect the cross-file SQL injection
         assert result.success
@@ -102,9 +100,7 @@ async def dangerous_async(request_id: str):
     return query
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(temp_project), entry_points=["async_sink.py"]
-        )
+        result = await cross_file_security_scan(project_root=str(temp_project), entry_points=["async_sink.py"])
 
         assert result.success
 
@@ -135,9 +131,7 @@ def handle_request():
     with_callback(user_cmd, dangerous_callback)  # Taint flows through callback
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(temp_project), entry_points=["callback_sink.py"]
-        )
+        result = await cross_file_security_scan(project_root=str(temp_project), entry_points=["callback_sink.py"])
 
         assert result.success
         assert result.vulnerability_count > 0
@@ -172,9 +166,7 @@ def handler():
     execute(cmd)  # Taint flows through decorator
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(temp_project), entry_points=["decorated_sink.py"]
-        )
+        result = await cross_file_security_scan(project_root=str(temp_project), entry_points=["decorated_sink.py"])
 
         assert result.success
 
@@ -210,9 +202,7 @@ def safe_query():
     cursor.execute(f"SELECT * FROM users WHERE id = {safe_id}")
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(temp_project), entry_points=["safe_sink.py"]
-        )
+        result = await cross_file_security_scan(project_root=str(temp_project), entry_points=["safe_sink.py"])
 
         # Should NOT report vulnerability (sanitizer clears taint)
         assert result.success
@@ -247,9 +237,7 @@ def process_request():
         os.system(data)  # SINK - taint came through __enter__
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(temp_project), entry_points=["context_sink.py"]
-        )
+        result = await cross_file_security_scan(project_root=str(temp_project), entry_points=["context_sink.py"])
 
         assert result.success
 
@@ -283,9 +271,7 @@ def handle():
     handler.execute()  # Taint flows through inheritance
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(temp_project), entry_points=["derived_handler.py"]
-        )
+        result = await cross_file_security_scan(project_root=str(temp_project), entry_points=["derived_handler.py"])
 
         assert result.success
 
@@ -331,9 +317,7 @@ def run_query(name):
     return {sink_call}
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(temp_project), entry_points=["controller.py"]
-        )
+        result = await cross_file_security_scan(project_root=str(temp_project), entry_points=["controller.py"])
 
         assert result.success
         assert result.has_vulnerabilities

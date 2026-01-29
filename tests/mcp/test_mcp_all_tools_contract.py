@@ -24,9 +24,7 @@ except Exception:  # pragma: no cover - optional dependency may be absent
 
 if os.environ.get("CODE_SCALPEL_RUN_MCP_CONTRACT", "0") != "1":
     pytestmark = [
-        pytest.mark.skip(
-            "MCP contract suite skipped by default; set CODE_SCALPEL_RUN_MCP_CONTRACT=1 to run"
-        ),
+        pytest.mark.skip("MCP contract suite skipped by default; set CODE_SCALPEL_RUN_MCP_CONTRACT=1 to run"),
         pytest.mark.asyncio,
     ]
 else:
@@ -119,12 +117,7 @@ class ContractEvidenceRecorder:
         server: dict | None = None,
     ) -> None:
         self._started_monotonic = time.monotonic()
-        self._started_at_utc = (
-            datetime.now(timezone.utc)
-            .replace(microsecond=0)
-            .isoformat()
-            .replace("+00:00", "Z")
-        )
+        self._started_at_utc = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
         self._events: list[dict] = []
         self._tool_calls: list[dict] = []
         self._failure: dict | None = None
@@ -147,9 +140,7 @@ class ContractEvidenceRecorder:
                 "CI": os.environ.get("CI"),
                 "GITHUB_ACTIONS": os.environ.get("GITHUB_ACTIONS"),
                 "MCP_CONTRACT_TRANSPORT": os.environ.get("MCP_CONTRACT_TRANSPORT"),
-                "MCP_CONTRACT_ARTIFACT_DIR": os.environ.get(
-                    "MCP_CONTRACT_ARTIFACT_DIR"
-                ),
+                "MCP_CONTRACT_ARTIFACT_DIR": os.environ.get("MCP_CONTRACT_ARTIFACT_DIR"),
             },
             "server": server,
         }
@@ -195,12 +186,7 @@ class ContractEvidenceRecorder:
         }
 
     def write(self) -> None:
-        ended_at_utc = (
-            datetime.now(timezone.utc)
-            .replace(microsecond=0)
-            .isoformat()
-            .replace("+00:00", "Z")
-        )
+        ended_at_utc = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
         duration_seconds = time.monotonic() - self._started_monotonic
         status = "failed" if self._failure else "passed"
 
@@ -214,9 +200,7 @@ class ContractEvidenceRecorder:
             "failure": self._failure,
         }
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(
-            json.dumps(report, indent=2, sort_keys=True), encoding="utf-8"
-        )
+        self.path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
 
         try:
             index_path = self.path.parent / "index.ndjson"
@@ -273,9 +257,7 @@ def _get_free_port() -> int:
         return int(sock.getsockname()[1])
 
 
-def _get_free_port_pair(
-    host: str = "127.0.0.1", attempts: int = 200
-) -> tuple[int, int]:
+def _get_free_port_pair(host: str = "127.0.0.1", attempts: int = 200) -> tuple[int, int]:
     for _ in range(attempts):
         base = _get_free_port()
         if base <= 0:
@@ -322,9 +304,7 @@ def _tool_json(result) -> dict:
     try:
         return json.loads(text)
     except json.JSONDecodeError as exc:
-        raise AssertionError(
-            "Tool content is not valid JSON; first 200 chars: " + repr(text[:200])
-        ) from exc
+        raise AssertionError("Tool content is not valid JSON; first 200 chars: " + repr(text[:200])) from exc
 
 
 def _assert_envelope(payload: dict, *, tool_name: str) -> dict:
@@ -369,9 +349,7 @@ def _write_fixture_project(project_root: Path) -> dict[str, Path]:
     project_root.mkdir(parents=True, exist_ok=True)
     (project_root / "pkg").mkdir(parents=True, exist_ok=True)
 
-    (project_root / "requirements.txt").write_text(
-        "requests==2.32.3\n", encoding="utf-8"
-    )
+    (project_root / "requirements.txt").write_text("requests==2.32.3\n", encoding="utf-8")
 
     app_py = project_root / "app.py"
     app_py.write_text(
@@ -441,9 +419,7 @@ def _write_signed_policy_manifest(policy_dir: Path, secret: str) -> None:
     from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
 
     policy_dir.mkdir(parents=True, exist_ok=True)
-    (policy_dir / "policy.rego").write_text(
-        "package test\n\nallow { true }\n", encoding="utf-8"
-    )
+    (policy_dir / "policy.rego").write_text("package test\n\nallow { true }\n", encoding="utf-8")
 
     policy_files = ["policy.rego"]
     manifest = CryptographicPolicyVerifier.create_manifest(
@@ -521,9 +497,7 @@ async def _stdio_session(repo_root: Path, project_root: Path):
 
 
 @asynccontextmanager
-async def _http_session(
-    repo_root: Path, project_root: Path, *, transport: str, log_dir: Path
-):
+async def _http_session(repo_root: Path, project_root: Path, *, transport: str, log_dir: Path):
     """Start an HTTP transport MCP server and return a connected session.
 
     transport: "streamable-http" or "sse".
@@ -563,9 +537,7 @@ async def _http_session(
 
     try:
         if proc.poll() is not None:
-            raise RuntimeError(
-                f"{transport} MCP server exited early (code={proc.returncode})"
-            )
+            raise RuntimeError(f"{transport} MCP server exited early (code={proc.returncode})")
 
         _wait_for_tcp(host, mcp_port, timeout_s=30.0)
 
@@ -603,9 +575,7 @@ async def _http_session(
 
 
 @pytest.mark.parametrize("transport", _enabled_transports())
-async def test_mcp_all_tools_independent_contracts(
-    tmp_path: Path, transport: str, monkeypatch: pytest.MonkeyPatch
-):
+async def test_mcp_all_tools_independent_contracts(tmp_path: Path, transport: str, monkeypatch: pytest.MonkeyPatch):
     """Calls every MCP tool with a minimal, deterministic input.
 
     Goal: ensure each tool is callable, returns structured JSON, respects timeouts,
@@ -623,12 +593,7 @@ async def test_mcp_all_tools_independent_contracts(
     _write_signed_policy_manifest(policy_dir, secret=policy_secret)
 
     artifact_root = _artifact_root()
-    log_dir = (
-        artifact_root
-        / "logs"
-        / f"{transport}"
-        / datetime.now(timezone.utc).strftime("%Y%m%d")
-    )
+    log_dir = artifact_root / "logs" / f"{transport}" / datetime.now(timezone.utc).strftime("%Y%m%d")
 
     server_meta: dict | None = None
     if transport in ("streamable-http", "sse"):
@@ -647,9 +612,7 @@ async def test_mcp_all_tools_independent_contracts(
             if transport == "stdio":
                 session_cm = _stdio_session(repo_root, project_root)
             else:
-                session_cm = _http_session(
-                    repo_root, project_root, transport=transport, log_dir=log_dir
-                )
+                session_cm = _http_session(repo_root, project_root, transport=transport, log_dir=log_dir)
 
             async with session_cm as session:
                 tools = await session.list_tools()
@@ -686,9 +649,7 @@ async def test_mcp_all_tools_independent_contracts(
                     read_timeout=timedelta(seconds=20),
                     evidence=evidence,
                 )
-                sinks_data = _assert_envelope(
-                    sinks_json, tool_name="unified_sink_detect"
-                )
+                sinks_data = _assert_envelope(sinks_json, tool_name="unified_sink_detect")
                 assert sinks_data.get("success") is True
                 assert "sink_count" in sinks_data
 
@@ -864,9 +825,7 @@ def add(a, b):
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                refs_data = _assert_envelope(
-                    refs_json, tool_name="get_symbol_references"
-                )
+                refs_data = _assert_envelope(refs_json, tool_name="get_symbol_references")
                 assert refs_data.get("success") is True
 
                 call_graph_json = await _call_tool_json(
@@ -880,9 +839,7 @@ def add(a, b):
                     read_timeout=timedelta(seconds=90),
                     evidence=evidence,
                 )
-                call_graph_data = _assert_envelope(
-                    call_graph_json, tool_name="get_call_graph"
-                )
+                call_graph_data = _assert_envelope(call_graph_json, tool_name="get_call_graph")
                 assert call_graph_data.get("success") is True
 
                 neigh_json = await _call_tool_json(
@@ -899,9 +856,7 @@ def add(a, b):
                     read_timeout=timedelta(seconds=90),
                     evidence=evidence,
                 )
-                neigh_data = _assert_envelope(
-                    neigh_json, tool_name="get_graph_neighborhood"
-                )
+                neigh_data = _assert_envelope(neigh_json, tool_name="get_graph_neighborhood")
                 # This tool may legitimately return success False for missing nodes.
                 assert neigh_data.get("success") in (True, False)
 
@@ -923,9 +878,7 @@ def add(a, b):
                     session,
                     "get_cross_file_dependencies",
                     arguments={
-                        "target_file": str(
-                            files["service_py"].relative_to(project_root)
-                        ),
+                        "target_file": str(files["service_py"].relative_to(project_root)),
                         "target_symbol": "process_order",
                         "project_root": str(project_root),
                         "max_depth": 2,
@@ -935,9 +888,7 @@ def add(a, b):
                     read_timeout=timedelta(seconds=120),
                     evidence=evidence,
                 )
-                dep_data = _assert_envelope(
-                    dep_json, tool_name="get_cross_file_dependencies"
-                )
+                dep_data = _assert_envelope(dep_json, tool_name="get_cross_file_dependencies")
                 assert dep_data.get("success") is True
 
                 cross_sec_json = await _call_tool_json(
@@ -953,9 +904,7 @@ def add(a, b):
                     read_timeout=timedelta(seconds=180),
                     evidence=evidence,
                 )
-                cross_sec_data = _assert_envelope(
-                    cross_sec_json, tool_name="cross_file_security_scan"
-                )
+                cross_sec_data = _assert_envelope(cross_sec_json, tool_name="cross_file_security_scan")
                 assert cross_sec_data.get("success") is True
 
                 paths_json = await _call_tool_json(
@@ -984,9 +933,7 @@ def add(a, b):
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                policy_data = _assert_envelope(
-                    policy_json, tool_name="verify_policy_integrity"
-                )
+                policy_data = _assert_envelope(policy_json, tool_name="verify_policy_integrity")
                 assert policy_data.get("success") is True
                 assert "summary" in tev_data
         except BaseException as exc:  # noqa: BLE001

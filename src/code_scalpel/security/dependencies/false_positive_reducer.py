@@ -79,9 +79,7 @@ class FalsePositiveReducer:
         if is_dev_dependency:
             if self._is_dev_only_vulnerability(vulnerability):
                 is_false_positive = True
-                reasons.append(
-                    "Dev-only dependency - not present in production environment"
-                )
+                reasons.append("Dev-only dependency - not present in production environment")
                 risk_level = "DISMISSED"
 
         # Check reachability
@@ -91,9 +89,7 @@ class FalsePositiveReducer:
             risk_level = "LOW"  # Keep as LOW not DISMISSED (might become reachable)
 
         # Check version precision
-        version_check = self._check_version_false_positive(
-            package_version, vulnerability
-        )
+        version_check = self._check_version_false_positive(package_version, vulnerability)
         if version_check:
             is_false_positive = True
             reasons.append(version_check)
@@ -106,9 +102,7 @@ class FalsePositiveReducer:
             risk_level = self._reduce_risk_level(risk_level)
 
         # Generate recommendation
-        recommendation = self._generate_recommendation(
-            is_false_positive, risk_level, reasons, package_name
-        )
+        recommendation = self._generate_recommendation(is_false_positive, risk_level, reasons, package_name)
 
         # Determine confidence
         confidence = self._calculate_confidence(reasons, is_reachable)
@@ -139,9 +133,7 @@ class FalsePositiveReducer:
         combined = f"{summary} {details}"
         return any(indicator in combined for indicator in dev_indicators)
 
-    def _check_version_false_positive(
-        self, actual_version: str, vulnerability: dict[str, Any]
-    ) -> str | None:
+    def _check_version_false_positive(self, actual_version: str, vulnerability: dict[str, Any]) -> str | None:
         """
         Check if version is actually vulnerable.
 
@@ -189,9 +181,7 @@ class FalsePositiveReducer:
             # If parsing fails, be conservative
             return False
 
-    def _check_mitigation_factors(
-        self, package_name: str, vulnerability: dict[str, Any]
-    ) -> str | None:
+    def _check_mitigation_factors(self, package_name: str, vulnerability: dict[str, Any]) -> str | None:
         """
         Check for mitigation factors in the codebase.
 
@@ -243,10 +233,7 @@ class FalsePositiveReducer:
 
                 content = py_file.read_text(encoding="utf-8")
                 # Look for validation libraries
-                if any(
-                    lib in content
-                    for lib in ["validator", "sanitize", "escape", "bleach"]
-                ):
+                if any(lib in content for lib in ["validator", "sanitize", "escape", "bleach"]):
                     return True
         except Exception as e:
             logger.debug(f"Error checking input validation: {e}")
@@ -261,10 +248,7 @@ class FalsePositiveReducer:
                     continue
 
                 content = py_file.read_text(encoding="utf-8")
-                if any(
-                    pattern in content
-                    for pattern in ["html.escape", "escape(", "Markup("]
-                ):
+                if any(pattern in content for pattern in ["html.escape", "escape(", "Markup("]):
                     return True
         except Exception:
             pass
@@ -279,10 +263,7 @@ class FalsePositiveReducer:
                     continue
 
                 content = py_file.read_text(encoding="utf-8")
-                if any(
-                    pattern in content
-                    for pattern in ["ratelimit", "rate_limit", "throttle"]
-                ):
+                if any(pattern in content for pattern in ["ratelimit", "rate_limit", "throttle"]):
                     return True
         except Exception:
             pass

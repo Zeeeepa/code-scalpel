@@ -54,13 +54,9 @@ class ResponseEnvelope(BaseModel):
     )
 
     # Tool metadata
-    tool_id: str = Field(
-        ..., description="Canonical tool identifier (e.g., 'analyze_code')"
-    )
+    tool_id: str = Field(..., description="Canonical tool identifier (e.g., 'analyze_code')")
     tool_version: str = Field(..., description="Tool version (e.g., '1.0.0')")
-    tool_name: str = Field(
-        ..., description="Human-readable tool name (e.g., 'Code Analyzer')"
-    )
+    tool_name: str = Field(..., description="Human-readable tool name (e.g., 'Code Analyzer')")
 
     # Request metadata
     request_id: Optional[str] = Field(
@@ -173,9 +169,7 @@ class ResponseEnvelope(BaseModel):
         self.validation_passed = False
         return self
 
-    def with_suggestions(
-        self, suggestions: list[str], upgrade_hints: Optional[list[str]] = None
-    ) -> ResponseEnvelope:
+    def with_suggestions(self, suggestions: list[str], upgrade_hints: Optional[list[str]] = None) -> ResponseEnvelope:
         """Add self-correction suggestions to response.
 
         Args:

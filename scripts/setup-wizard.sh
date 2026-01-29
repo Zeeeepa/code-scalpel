@@ -165,7 +165,7 @@ if [ -n "$LICENSE_PATH" ]; then
 elif $INTERACTIVE; then
     echo ""
     echo "License options:"
-    echo "  1) Community (free) - Basic features, no license needed"
+    echo "  1) Community - Basic features, no license needed"
     echo "  2) Pro - Enhanced features (requires license file)"
     echo "  3) Enterprise - Full features (requires license file)"
     echo ""

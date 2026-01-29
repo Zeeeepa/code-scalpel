@@ -92,7 +92,5 @@ def start_license_revalidation_thread(interval_seconds: int = 24 * 60 * 60) -> N
             jitter = random.randint(0, 15 * 60)
             time.sleep(max(10, int(interval_seconds) + jitter))
 
-    t = threading.Thread(
-        target=_loop, name="code-scalpel-license-revalidate", daemon=True
-    )
+    t = threading.Thread(target=_loop, name="code-scalpel-license-revalidate", daemon=True)
     t.start()

@@ -25,8 +25,7 @@ class CppParserAdapter(IParser):
     def __init__(self):
         """Initialize the C++ parser adapter (stub)."""
         raise NotImplementedError(
-            "CppParserAdapter not yet implemented. "
-            "See TODO items in this file for implementation roadmap."
+            "CppParserAdapter not yet implemented. " "See TODO items in this file for implementation roadmap."
         )
 
     def parse(self, code: str) -> ParseResult:

@@ -29,9 +29,7 @@ class TestJavaNormalizer(unittest.TestCase):
 
         name_node = MagicMock()
         visitor.get_text = MagicMock(return_value="myMethod")
-        mock_method.child_by_field_name.side_effect = lambda name: (
-            name_node if name == "name" else None
-        )
+        mock_method.child_by_field_name.side_effect = lambda name: (name_node if name == "name" else None)
 
         result = visitor.visit_method_declaration(mock_method)
         self.assertIsInstance(result, IRFunctionDef)
@@ -186,11 +184,7 @@ class TestJavaNormalizer(unittest.TestCase):
             "arguments": args_node,
         }.get(name)
 
-        visitor.get_text = MagicMock(
-            side_effect=lambda n: {id(name_node): "method", id(object_node): "obj"}.get(
-                id(n)
-            )
-        )
+        visitor.get_text = MagicMock(side_effect=lambda n: {id(name_node): "method", id(object_node): "obj"}.get(id(n)))
 
         mock_arg_ir = MagicMock()
         visitor.visit = MagicMock(return_value=mock_arg_ir)
@@ -340,11 +334,7 @@ class TestJavaNormalizerIntegration(unittest.TestCase):
         inner = next(n for n in outer.body if isinstance(n, IRClassDef))
         self.assertEqual(inner.name, "Inner")
 
-        compute = next(
-            n
-            for n in outer.body
-            if isinstance(n, IRFunctionDef) and n.name == "compute"
-        )
+        compute = next(n for n in outer.body if isinstance(n, IRFunctionDef) and n.name == "compute")
         self.assertEqual(compute.return_type, "R")
         self.assertEqual(compute._metadata.get("type_params"), ["R extends Number"])
         self.assertEqual([p.name for p in compute.params], ["input"])

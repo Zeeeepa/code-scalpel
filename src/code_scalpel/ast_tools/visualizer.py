@@ -87,9 +87,7 @@ class ASTVisualizer:
             logger.error(f"Error visualizing AST: {str(e)}")
             raise
 
-    def visualize_diff(
-        self, tree1: ast.AST, tree2: ast.AST, output_file: str = "ast_diff"
-    ) -> None:
+    def visualize_diff(self, tree1: ast.AST, tree2: ast.AST, output_file: str = "ast_diff") -> None:
         """Visualize differences between two ASTs."""
         try:
             dot = self._create_digraph()
@@ -105,9 +103,7 @@ class ASTVisualizer:
             logger.error(f"Error visualizing AST differences: {str(e)}")
             raise
 
-    def create_interactive_visualization(
-        self, tree: ast.AST, output_file: str = "interactive_ast.html"
-    ) -> None:
+    def create_interactive_visualization(self, tree: ast.AST, output_file: str = "interactive_ast.html") -> None:
         """Create an interactive HTML visualization using d3.js."""
         try:
             # Convert AST to networkx graph
@@ -242,9 +238,7 @@ class ASTVisualizer:
 
         return style
 
-    def _analyze_differences(
-        self, tree1: ast.AST, tree2: ast.AST
-    ) -> dict[str, set[int]]:
+    def _analyze_differences(self, tree1: ast.AST, tree2: ast.AST) -> dict[str, set[int]]:
         """Analyze differences between two ASTs."""
         changes = {"added": set(), "removed": set(), "modified": set()}
 
@@ -253,11 +247,7 @@ class ASTVisualizer:
                 changes["added"].add(id(node2))
             elif node1 is not None and node2 is None:
                 changes["removed"].add(id(node1))
-            elif (
-                node1 is not None
-                and node2 is not None
-                and not self._nodes_equal(node1, node2)
-            ):
+            elif node1 is not None and node2 is not None and not self._nodes_equal(node1, node2):
                 changes["modified"].add(id(node1))
                 changes["modified"].add(id(node2))
 

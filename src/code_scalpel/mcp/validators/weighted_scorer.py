@@ -96,9 +96,7 @@ class WeightedSymbolMatcher:
             ScoredCandidate with detailed breakdown of scoring.
         """
         # 1. Base score: SequenceMatcher is more accurate than Levenshtein for code
-        base_score = difflib.SequenceMatcher(
-            None, target_symbol, candidate_symbol
-        ).ratio()
+        base_score = difflib.SequenceMatcher(None, target_symbol, candidate_symbol).ratio()
 
         # 2. Locality boost: +0.2 if in same scope
         locality_boost = 0.0

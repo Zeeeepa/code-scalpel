@@ -91,9 +91,7 @@ def _get_audit_log_path() -> Path:
     return Path(".code-scalpel") / "audit.jsonl"
 
 
-def _get_audit_entries_for_file(
-    file_path: str, audit_log_path: Optional[Path] = None
-) -> List[dict]:
+def _get_audit_entries_for_file(file_path: str, audit_log_path: Optional[Path] = None) -> List[dict]:
     """Get all audit entries for a specific file.
 
     Args:
@@ -124,15 +122,10 @@ def _get_audit_entries_for_file(
                 file_in_entry = details.get("file")
 
                 # Match by absolute or relative path
-                if any(
-                    f == abs_path or f == rel_path or f.endswith(rel_path)
-                    for f in files_modified
-                ):
+                if any(f == abs_path or f == rel_path or f.endswith(rel_path) for f in files_modified):
                     entries.append(entry)
                 elif file_in_entry and (
-                    file_in_entry == abs_path
-                    or file_in_entry == rel_path
-                    or file_in_entry.endswith(rel_path)
+                    file_in_entry == abs_path or file_in_entry == rel_path or file_in_entry.endswith(rel_path)
                 ):
                     entries.append(entry)
             except json.JSONDecodeError:
@@ -255,12 +248,8 @@ def git_hook_pre_commit() -> int:
         print("")
         # [20260116_BUGFIX] Updated remediation guidance to avoid referencing non-existent CLI command.
         print("To fix this:")
-        print(
-            "  1. Make changes through Code Scalpel MCP tools so an audit entry is created, OR"
-        )
-        print(
-            "  2. Add an audit entry for these changes according to your governance workflow, OR"
-        )
+        print("  1. Make changes through Code Scalpel MCP tools so an audit entry is created, OR")
+        print("  2. Add an audit entry for these changes according to your governance workflow, OR")
         print("  3. Use 'git commit --no-verify' with justification (logged)")
         print("")
 
@@ -342,9 +331,7 @@ def _log_blocked_commit(uncovered_files: List[str]) -> None:
         )
 
 
-def install_git_hooks(
-    repo_path: Optional[str] = None, force: bool = False
-) -> Tuple[bool, str]:
+def install_git_hooks(repo_path: Optional[str] = None, force: bool = False) -> Tuple[bool, str]:
     """Install Code Scalpel git hooks.
 
     This function installs pre-commit and commit-msg hooks that enforce

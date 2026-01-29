@@ -222,9 +222,7 @@ class TestLoggingFunctions:
     def test_log_tool_invocation(self):
         """Test log_tool_invocation function."""
         # Should not raise an error
-        log_tool_invocation(
-            "extract_code", params={"file_path": "/test.py", "target_name": "MyClass"}
-        )
+        log_tool_invocation("extract_code", params={"file_path": "/test.py", "target_name": "MyClass"})
 
     def test_log_tool_success(self):
         """Test log_tool_success function."""

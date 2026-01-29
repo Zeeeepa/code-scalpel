@@ -223,12 +223,8 @@ def install_claude_hooks(
         pre_hooks = existing_hooks.get("PreToolUse", [])
         post_hooks = existing_hooks.get("PostToolUse", [])
 
-        our_pre_hooks = [
-            h for h in pre_hooks if "code-scalpel" in h.get("name", "").lower()
-        ]
-        our_post_hooks = [
-            h for h in post_hooks if "code-scalpel" in h.get("name", "").lower()
-        ]
+        our_pre_hooks = [h for h in pre_hooks if "code-scalpel" in h.get("name", "").lower()]
+        our_post_hooks = [h for h in post_hooks if "code-scalpel" in h.get("name", "").lower()]
 
         if our_pre_hooks or our_post_hooks:
             return True, f"Code Scalpel hooks already installed in {settings_path}"
@@ -244,8 +240,7 @@ def install_claude_hooks(
                 settings["hooks"][hook_type] = [
                     h
                     for h in settings["hooks"][hook_type]
-                    if "code-scalpel" not in h.get("name", "").lower()
-                    and "governance" not in h.get("name", "").lower()
+                    if "code-scalpel" not in h.get("name", "").lower() and "governance" not in h.get("name", "").lower()
                 ]
 
     settings["hooks"] = _merge_hooks(settings["hooks"], hook_config["hooks"])
@@ -305,8 +300,7 @@ def uninstall_claude_hooks(
             settings["hooks"][hook_type] = [
                 h
                 for h in settings["hooks"][hook_type]
-                if "code-scalpel" not in h.get("name", "").lower()
-                and "governance" not in h.get("name", "").lower()
+                if "code-scalpel" not in h.get("name", "").lower() and "governance" not in h.get("name", "").lower()
             ]
             removed_count += original_count - len(settings["hooks"][hook_type])
 

@@ -242,9 +242,7 @@ dependencies = [
             )
 
             # Should have more deps when including dev
-            assert (
-                result_with_dev.total_dependencies >= result_no_dev.total_dependencies
-            )
+            assert result_with_dev.total_dependencies >= result_no_dev.total_dependencies
 
 
 class TestScanDependenciesAsync:
@@ -295,13 +293,9 @@ class TestSeveritySummary:
 
             assert result.success is True
             # Verify we got vulnerabilities from real OSV data
-            assert (
-                result.total_vulnerabilities >= 3
-            ), f"Expected at least 3 vulns, got: {result.total_vulnerabilities}"
+            assert result.total_vulnerabilities >= 3, f"Expected at least 3 vulns, got: {result.total_vulnerabilities}"
             # Verify severity summary has some entries (severity can vary over time)
-            assert (
-                sum(result.severity_summary.values()) >= 3
-            ), f"Expected severities, got: {result.severity_summary}"
+            assert sum(result.severity_summary.values()) >= 3, f"Expected severities, got: {result.severity_summary}"
             # Verify at least one package is marked vulnerable
             assert result.vulnerable_count >= 1
 
@@ -587,9 +581,7 @@ class TestPriorityValidationAndReliability:
                 "NEEDS_ATTENTION",
                 "NON_COMPLIANT",
             }
-            assert "frameworks" in report_data and {"SOC2", "ISO27001"}.issubset(
-                set(report_data.get("frameworks", []))
-            )
+            assert "frameworks" in report_data and {"SOC2", "ISO27001"}.issubset(set(report_data.get("frameworks", [])))
             assert isinstance(report_data.get("recommendations"), list)
 
     def test_invalid_path_type_returns_error(self):
@@ -600,9 +592,7 @@ class TestPriorityValidationAndReliability:
 
     def test_missing_path_returns_error(self):
         """Nonexistent path should return a clear error."""
-        result = _scan_dependencies_sync(
-            path="/no/such/path/for/scan", scan_vulnerabilities=False
-        )
+        result = _scan_dependencies_sync(path="/no/such/path/for/scan", scan_vulnerabilities=False)
         assert result.success is False
         assert "Path not found" in (result.error or "")
 
@@ -612,9 +602,7 @@ class TestPriorityValidationAndReliability:
             pkg_json = Path(tmpdir) / "package.json"
             pkg_json.write_text('{ "dependencies": { "foo": "1.0.0" ', encoding="utf-8")
 
-            result = _scan_dependencies_sync(
-                project_root=tmpdir, scan_vulnerabilities=False, tier="community"
-            )
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False, tier="community")
             assert result.success is True
             errors = result.errors or []
             assert any("Failed to parse" in e for e in errors), errors
@@ -625,9 +613,7 @@ class TestPriorityValidationAndReliability:
             req = Path(tmpdir) / "requirements.txt"
             req.write_bytes(b"\xff\xfe\xfa\xfb")
 
-            result = _scan_dependencies_sync(
-                project_root=tmpdir, scan_vulnerabilities=False
-            )
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
             assert result.success is True
             errors = result.errors or []
             assert any("Failed to parse" in e for e in errors), errors
@@ -646,9 +632,7 @@ class TestPriorityValidationAndReliability:
             )
 
             # [20260111_BUGFIX] Explicitly pass tier="community" to test limit enforcement
-            result = _scan_dependencies_sync(
-                project_root=tmpdir, scan_vulnerabilities=False, tier="community"
-            )
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False, tier="community")
             assert result.success is True
             assert result.total_dependencies == 50
             errors = result.errors or []
@@ -664,9 +648,7 @@ class TestPriorityValidationAndReliability:
                 encoding="utf-8",
             )
 
-            result = _scan_dependencies_sync(
-                project_root=tmpdir, scan_vulnerabilities=False
-            )
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
             assert result.success is True
             names = {d.name for d in result.dependencies}
             assert names == expected
@@ -675,21 +657,15 @@ class TestPriorityValidationAndReliability:
         """Unsupported manifest types should be ignored, producing zero deps."""
         with tempfile.TemporaryDirectory() as tmpdir:
             (Path(tmpdir) / "random.lock").write_text("foo", encoding="utf-8")
-            result = _scan_dependencies_sync(
-                project_root=tmpdir, scan_vulnerabilities=False
-            )
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
             assert result.success is True
             assert result.total_dependencies == 0
 
     def test_optional_fields_absent_for_community(self):
         """Community tier should not include Pro/Enterprise fields."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text(
-                "requests==2.25.0\n", encoding="utf-8"
-            )
-            result = _scan_dependencies_sync(
-                project_root=tmpdir, scan_vulnerabilities=False, tier="community"
-            )
+            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False, tier="community")
             assert result.compliance_report is None
             assert result.policy_violations is None
             for dep in result.dependencies:
@@ -699,26 +675,18 @@ class TestPriorityValidationAndReliability:
     def test_sequential_scans_stable(self):
         """Multiple sequential scans should not regress or leak errors."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text(
-                "requests==2.25.0\n", encoding="utf-8"
-            )
+            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
             for _ in range(50):
-                result = _scan_dependencies_sync(
-                    project_root=tmpdir, scan_vulnerabilities=False
-                )
+                result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
                 assert result.success is True
 
     def test_concurrent_scans_stable(self):
         """Concurrent scans should complete without deadlock/timeouts."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text(
-                "requests==2.25.0\n", encoding="utf-8"
-            )
+            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
 
             def run_scan():
-                res = _scan_dependencies_sync(
-                    project_root=tmpdir, scan_vulnerabilities=False
-                )
+                res = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
                 assert res.success is True
                 return res.total_dependencies
 
@@ -743,18 +711,14 @@ class TestPriorityValidationAndReliability:
                 raise TimeoutError("OSV timeout")
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text(
-                "requests==2.25.0\n", encoding="utf-8"
-            )
+            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
 
             with monkeypatch.context() as m:
                 m.setattr(
                     "code_scalpel.security.dependencies.VulnerabilityScanner",
                     FakeScanner,
                 )
-                result = _scan_dependencies_sync(
-                    project_root=tmpdir, scan_vulnerabilities=True
-                )
+                result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=True)
 
             assert result.success is True
             errors = result.errors or []

@@ -52,9 +52,7 @@ class ConstraintAnalyzer:
 
         # If no graph provided, return basic constraints
         if graph is None:
-            logger.debug(
-                f"No graph provided for {file_path}, returning basic constraints"
-            )
+            logger.debug(f"No graph provided for {file_path}, returning basic constraints")
             return constraints
 
         try:

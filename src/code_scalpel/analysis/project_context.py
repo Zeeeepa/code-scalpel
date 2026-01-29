@@ -180,10 +180,7 @@ class ProjectContext:
         dir_type = DirectoryType()
 
         # Vendor/third-party
-        if any(
-            x in path_lower
-            for x in ["node_modules", "vendor", "dependencies", "third-party"]
-        ):
+        if any(x in path_lower for x in ["node_modules", "vendor", "dependencies", "third-party"]):
             dir_type.is_vendor = True
             dir_type.confidence = 0.95
 
@@ -292,9 +289,7 @@ class ProjectContext:
 
         # Classify directories and score files
         for dir_info in project_map.directories:
-            self._dir_types[dir_info.path] = self._detect_directory_type(
-                dir_info.rel_path
-            )
+            self._dir_types[dir_info.path] = self._detect_directory_type(dir_info.rel_path)
 
         for file_info in project_map.files:
             self._file_scores[file_info.path] = self._score_file_importance(file_info)
@@ -416,9 +411,7 @@ class ProjectContext:
 
         try:
             # Load metadata
-            cursor.execute(
-                "SELECT * FROM metadata WHERE project_root = ?", (str(self.root_path),)
-            )
+            cursor.execute("SELECT * FROM metadata WHERE project_root = ?", (str(self.root_path),))
             row = cursor.fetchone()
             if not row:
                 return None
@@ -468,11 +461,7 @@ class ProjectContext:
         if not self._project_map:
             return []
 
-        return [
-            f
-            for f in self._project_map.files
-            if self._file_scores.get(f.path, 0.0) >= min_score
-        ]
+        return [f for f in self._project_map.files if self._file_scores.get(f.path, 0.0) >= min_score]
 
     def get_directories_by_type(self, dir_type: str) -> List[DirectoryInfo]:
         """Get all directories of a specific type."""

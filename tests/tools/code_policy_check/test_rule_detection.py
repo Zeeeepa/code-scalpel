@@ -27,9 +27,7 @@ from code_scalpel.mcp.server import code_policy_check
 # License file paths (relative to tests/)
 LICENSES_DIR = Path(__file__).parent.parent.parent / "licenses"
 PRO_LICENSE = LICENSES_DIR / "code_scalpel_license_pro_20260101_190345.jwt"
-ENTERPRISE_LICENSE = (
-    LICENSES_DIR / "code_scalpel_license_enterprise_20260101_190754.jwt"
-)
+ENTERPRISE_LICENSE = LICENSES_DIR / "code_scalpel_license_enterprise_20260101_190754.jwt"
 
 
 @pytest.fixture
@@ -263,9 +261,7 @@ os.system(f"cat {filename}")  # SEC003 violation
         assert len(violations) > 0, "Should detect SEC003: os.system() usage"
 
     @pytest.mark.asyncio
-    async def test_detects_sec004_subprocess_shell_true(
-        self, tmp_path, set_pro_license
-    ):
+    async def test_detects_sec004_subprocess_shell_true(self, tmp_path, set_pro_license):
         """Verify SEC004: subprocess with shell=True detection."""
         test_file = tmp_path / "test_subprocess_shell.py"
         test_file.write_text("""
@@ -580,14 +576,10 @@ def func(items=[]):
                 "ASYNC",
                 "BP",
             ], f"Rule ID {rule_id} has invalid category {category}"
-            assert (
-                number.isdigit()
-            ), f"Rule ID {rule_id} number part {number} is not numeric"
+            assert number.isdigit(), f"Rule ID {rule_id} number part {number} is not numeric"
 
     @pytest.mark.asyncio
-    async def test_violations_include_required_fields(
-        self, tmp_path, clear_license_env
-    ):
+    async def test_violations_include_required_fields(self, tmp_path, clear_license_env):
         """Verify all violations include required fields."""
         test_file = tmp_path / "test_required_fields.py"
         test_file.write_text("""

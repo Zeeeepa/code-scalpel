@@ -358,9 +358,7 @@ class TestTaintTrackerBranchCoverage:
 # =============================================================================
 
 
-@pytest.mark.skip(
-    reason="Autonomy is now a separate product boundary (codescalpel-agents package)"
-)
+@pytest.mark.skip(reason="Autonomy is now a separate product boundary (codescalpel-agents package)")
 class TestErrorToDiffBranchCoverage:
     """Target uncovered branches in error_to_diff.py."""
 

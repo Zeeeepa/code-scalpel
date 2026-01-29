@@ -186,9 +186,7 @@ class TestFunctionInfo:
 
     def test_qualified_name_method(self):
         """Test qualified name for class method."""
-        func = FunctionInfo(
-            name="method", lineno=1, complexity=1, is_method=True, class_name="MyClass"
-        )
+        func = FunctionInfo(name="method", lineno=1, complexity=1, is_method=True, class_name="MyClass")
         assert func.qualified_name == "MyClass.method"
 
 

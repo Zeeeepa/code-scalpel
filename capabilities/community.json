@@ -235,16 +235,6 @@
         "validate_schema": true,
         "validate_conflicts": true
       }
-    },
-    "write_perfect_code": {
-      "tool_id": "write_perfect_code",
-      "tier": "community",
-      "available": true,
-      "limits": {
-        "cache_ttl_seconds": 300,
-        "constraint_validation": true,
-        "ai_feedback_enabled": true
-      }
     }
   }
 }

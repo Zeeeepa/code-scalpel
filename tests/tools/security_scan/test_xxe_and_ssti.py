@@ -20,9 +20,7 @@ async def test_xxe_injection_detection():
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert any(
-        v.cwe == "CWE-611" or "xxe" in v.type.lower() for v in result.vulnerabilities
-    )
+    assert any(v.cwe == "CWE-611" or "xxe" in v.type.lower() for v in result.vulnerabilities)
 
 
 async def test_ssti_detection():
@@ -39,7 +37,4 @@ async def test_ssti_detection():
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert any(
-        v.cwe == "CWE-1336" or "template" in v.type.lower()
-        for v in result.vulnerabilities
-    )
+    assert any(v.cwe == "CWE-1336" or "template" in v.type.lower() for v in result.vulnerabilities)

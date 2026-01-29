@@ -18,7 +18,7 @@ Supports:
 
     - Implement request rate limiting by client ID
     - Add quota tracking (requests per hour/day)
-    - Support tiered rate limits (free/pro/enterprise)
+    - Support tiered rate limits (community/pro/enterprise)
 
     - Validate all MCP request payloads against JSON Schema
     - Implement strict type checking for response models

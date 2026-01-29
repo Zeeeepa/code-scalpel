@@ -12,9 +12,7 @@ class _DummyAuditLog:
     def __init__(self, events: List[Dict[str, Any]]):
         self._events = events
 
-    def get_events(
-        self, time_range: Tuple[datetime, datetime] | None = None
-    ) -> List[Dict[str, Any]]:  # noqa: ARG002
+    def get_events(self, time_range: Tuple[datetime, datetime] | None = None) -> List[Dict[str, Any]]:  # noqa: ARG002
         return self._events
 
 
@@ -174,9 +172,7 @@ def _install_fake_reportlab(monkeypatch) -> None:
 
     monkeypatch.setitem(sys.modules, "reportlab", fake_reportlab)
     monkeypatch.setitem(sys.modules, "reportlab.lib", fake_reportlab.lib)
-    monkeypatch.setitem(
-        sys.modules, "reportlab.lib.pagesizes", fake_reportlab.lib.pagesizes
-    )
+    monkeypatch.setitem(sys.modules, "reportlab.lib.pagesizes", fake_reportlab.lib.pagesizes)
     monkeypatch.setitem(sys.modules, "reportlab.lib.units", fake_reportlab.lib.units)
     monkeypatch.setitem(sys.modules, "reportlab.lib.styles", fake_reportlab.lib.styles)
     monkeypatch.setitem(sys.modules, "reportlab.lib.colors", fake_reportlab.lib.colors)

@@ -25,9 +25,7 @@ DEEP_DIVE_DIR = REPO_ROOT / "docs" / "tools" / "deep_dive"
 MATRIX_PATH = DEEP_DIVE_DIR / "TOOL_CAPABILITY_MATRIX.md"
 OUTPUT_PATH = REPO_ROOT / "website" / "assets" / "tool_catalog.json"
 
-GITHUB_DEEP_DIVE_BASE = (
-    "https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/tools/deep_dive/"
-)
+GITHUB_DEEP_DIVE_BASE = "https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/tools/deep_dive/"
 
 
 @dataclass(frozen=True)
@@ -183,11 +181,7 @@ def build_catalog() -> Dict[str, Any]:
     tools: List[Dict[str, Any]] = []
     for row in rows:
         deep_dive_path = DEEP_DIVE_DIR / row.deep_dive_file
-        deep_md = (
-            deep_dive_path.read_text(encoding="utf-8")
-            if deep_dive_path.exists()
-            else ""
-        )
+        deep_md = deep_dive_path.read_text(encoding="utf-8") if deep_dive_path.exists() else ""
 
         purpose_block = _extract_heading_section(deep_md, "Purpose Statement")
         benefits_block = _extract_heading_section(deep_md, "Key Benefits")
@@ -202,18 +196,12 @@ def build_catalog() -> Dict[str, Any]:
             "purpose": _first_paragraph(purpose_block) if purpose_block else "",
             "keyBenefits": _parse_bullets(benefits_block) if benefits_block else [],
             "whenToUse": _parse_bullets(when_block) if when_block else [],
-            "notSuitableFor": (
-                _parse_bullets(not_suitable_block) if not_suitable_block else []
-            ),
+            "notSuitableFor": (_parse_bullets(not_suitable_block) if not_suitable_block else []),
             "signature": _extract_signature(deep_md),
             "toolVersion": _extract_meta_field(deep_md, "Tool Version"),
             "lastUpdated": _extract_meta_field(deep_md, "Last Updated"),
             "deepDiveFile": row.deep_dive_file,
-            "deepDiveUrl": (
-                f"{GITHUB_DEEP_DIVE_BASE}{row.deep_dive_file}"
-                if row.deep_dive_file
-                else ""
-            ),
+            "deepDiveUrl": (f"{GITHUB_DEEP_DIVE_BASE}{row.deep_dive_file}" if row.deep_dive_file else ""),
         }
 
         tools.append(tool_obj)
@@ -232,9 +220,7 @@ def main() -> None:
     catalog = build_catalog()
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(
-        json.dumps(catalog, indent=2, sort_keys=False) + "\n", encoding="utf-8"
-    )
+    OUTPUT_PATH.write_text(json.dumps(catalog, indent=2, sort_keys=False) + "\n", encoding="utf-8")
 
     print(f"Wrote {OUTPUT_PATH} ({len(catalog['tools'])} tools)")
 

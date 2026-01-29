@@ -34,9 +34,7 @@ class TestSecurityScanFeatureGating:
 
     def test_security_scan_community_lacks_advanced_features(self, community_tier):
         """Community should not have advanced analysis features."""
-        assert not has_capability(
-            "security_scan", "context_aware_scanning", "community"
-        )
+        assert not has_capability("security_scan", "context_aware_scanning", "community")
         assert not has_capability("security_scan", "sanitizer_recognition", "community")
 
     def test_security_scan_pro_has_extended_features(self, pro_tier):
@@ -48,9 +46,7 @@ class TestSecurityScanFeatureGating:
         """Enterprise should have all features including custom policies."""
         assert has_capability("security_scan", "context_aware_scanning", "enterprise")
         assert has_capability("security_scan", "custom_policy_engine", "enterprise")
-        assert has_capability(
-            "security_scan", "priority_finding_ordering", "enterprise"
-        )
+        assert has_capability("security_scan", "priority_finding_ordering", "enterprise")
 
 
 class TestAnalyzeCodeLanguageGating:
@@ -63,9 +59,7 @@ class TestAnalyzeCodeLanguageGating:
         languages = limits.get("languages", [])
 
         expected = {"python", "javascript", "typescript", "java"}
-        assert expected.issubset(
-            set(languages)
-        ), f"Community missing languages: {expected - set(languages)}"
+        assert expected.issubset(set(languages)), f"Community missing languages: {expected - set(languages)}"
 
     def test_analyze_code_community_no_go_rust(self, community_tier):
         """Community should not have Go/Rust support."""
@@ -89,9 +83,7 @@ class TestAnalyzeCodeLanguageGating:
 
         # Pro should have at least Community languages
         expected = {"python", "javascript", "typescript", "java"}
-        assert expected.issubset(
-            set(languages)
-        ), f"Pro missing languages: {expected - set(languages)}"
+        assert expected.issubset(set(languages)), f"Pro missing languages: {expected - set(languages)}"
 
     def test_analyze_code_enterprise_unlimited_languages(self, enterprise_tier):
         """Enterprise tier should support all languages (omitted = unlimited)."""
@@ -121,9 +113,7 @@ class TestCodePolicyCheckComplianceGating:
         assert not has_capability("code_policy_check", "hipaa_compliance", "community")
         assert not has_capability("code_policy_check", "soc2_compliance", "community")
         assert not has_capability("code_policy_check", "gdpr_compliance", "community")
-        assert not has_capability(
-            "code_policy_check", "pci_dss_compliance", "community"
-        )
+        assert not has_capability("code_policy_check", "pci_dss_compliance", "community")
 
     def test_code_policy_check_pro_extended_compliance(self, pro_tier):
         """Pro should have extended compliance frameworks."""
@@ -141,9 +131,7 @@ class TestCodePolicyCheckComplianceGating:
         ]
 
         for framework in frameworks:
-            assert has_capability(
-                "code_policy_check", framework, "enterprise"
-            ), f"Enterprise should have {framework}"
+            assert has_capability("code_policy_check", framework, "enterprise"), f"Enterprise should have {framework}"
 
 
 class TestSymbolicExecutionGating:
@@ -160,9 +148,7 @@ class TestSymbolicExecutionGating:
 
     def test_symbolic_execute_community_no_advanced(self, community_tier):
         """Community should not have advanced constraint solving."""
-        assert not has_capability(
-            "symbolic_execute", "advanced_constraint_solving", "community"
-        )
+        assert not has_capability("symbolic_execute", "advanced_constraint_solving", "community")
 
     def test_symbolic_execute_pro_unlimited_paths(self, pro_tier):
         """Pro should allow unlimited paths."""
@@ -173,9 +159,7 @@ class TestSymbolicExecutionGating:
 
     def test_symbolic_execute_enterprise_advanced_features(self, enterprise_tier):
         """Enterprise should have advanced constraint solving."""
-        assert has_capability(
-            "symbolic_execute", "advanced_constraint_solving", "enterprise"
-        )
+        assert has_capability("symbolic_execute", "advanced_constraint_solving", "enterprise")
 
 
 class TestGenerateUnitTestsGating:
@@ -190,23 +174,17 @@ class TestGenerateUnitTestsGating:
         caps = get_tool_capabilities("generate_unit_tests", "community")
         limits = caps.get("limits", {})
 
-        assert (
-            limits.get("max_test_cases") == 5
-        ), "Community should generate max 5 test cases"
+        assert limits.get("max_test_cases") == 5, "Community should generate max 5 test cases"
 
     def test_generate_unit_tests_community_no_data_driven(self, community_tier):
         """Community should not have data-driven test generation."""
-        assert not has_capability(
-            "generate_unit_tests", "data_driven_tests", "community"
-        )
+        assert not has_capability("generate_unit_tests", "data_driven_tests", "community")
 
     def test_generate_unit_tests_pro_multiple_frameworks(self, pro_tier):
         """Pro should support multiple test frameworks."""
         frameworks = ["pytest_support", "unittest_support", "jest_support"]
         for framework in frameworks:
-            assert has_capability(
-                "generate_unit_tests", framework, "pro"
-            ), f"Pro should have {framework}"
+            assert has_capability("generate_unit_tests", framework, "pro"), f"Pro should have {framework}"
 
     def test_generate_unit_tests_pro_data_driven(self, pro_tier):
         """Pro should have data-driven test generation."""
@@ -224,9 +202,7 @@ class TestGenerateUnitTestsGating:
         ]
 
         for feature in features:
-            assert has_capability(
-                "generate_unit_tests", feature, "enterprise"
-            ), f"Enterprise should have {feature}"
+            assert has_capability("generate_unit_tests", feature, "enterprise"), f"Enterprise should have {feature}"
 
 
 class TestTypeEvaporationGating:
@@ -250,6 +226,4 @@ class TestTypeEvaporationGating:
 
     def test_type_evaporation_enterprise_schema_gen(self, enterprise_tier):
         """Enterprise should generate type schemas."""
-        assert has_capability(
-            "type_evaporation_scan", "schema_generation", "enterprise"
-        )
+        assert has_capability("type_evaporation_scan", "schema_generation", "enterprise")

@@ -15,9 +15,7 @@ except ImportError:
     TREE_SITTER_AVAILABLE = False
 
 
-pytestmark = pytest.mark.skipif(
-    not TREE_SITTER_AVAILABLE, reason="tree-sitter-javascript not installed"
-)
+pytestmark = pytest.mark.skipif(not TREE_SITTER_AVAILABLE, reason="tree-sitter-javascript not installed")
 
 
 @pytest.fixture

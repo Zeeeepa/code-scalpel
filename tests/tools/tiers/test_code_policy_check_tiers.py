@@ -116,6 +116,4 @@ async def test_code_policy_check_enterprise_all_compliance(enterprise_tier):
     ]
 
     for framework in compliance_frameworks:
-        assert has_capability(
-            "code_policy_check", framework, "enterprise"
-        ), f"Enterprise should have {framework}"
+        assert has_capability("code_policy_check", framework, "enterprise"), f"Enterprise should have {framework}"

@@ -69,10 +69,7 @@ async def test_mcp_response_tool_id(tmp_path: Path):
     # Tool result should contain expected fields (tool_id optional if implied by context)
     assert isinstance(data, dict)
     # Should have at least vulnerability-related fields
-    assert any(
-        key in data
-        for key in ["frontend_vulnerabilities", "backend_vulnerabilities", "success"]
-    )
+    assert any(key in data for key in ["frontend_vulnerabilities", "backend_vulnerabilities", "success"])
 
 
 async def test_mcp_response_tier_field(tmp_path: Path):

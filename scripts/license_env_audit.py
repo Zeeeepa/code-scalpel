@@ -17,24 +17,12 @@ patterns = {
     "monkeypatch.setenv": re.compile(
         r"monkeypatch\.setenv\(\s*['\"][^'\"]*CODE_SCALPEL_LICENSE_PATH[^'\"]*['\"]\s*,.*\)"
     ),
-    "monkeypatch.delenv": re.compile(
-        r"monkeypatch\.delenv\(\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"].*\)"
-    ),
-    "os.environ_assign": re.compile(
-        r"os\.environ\[(?:'|\")CODE_SCALPEL_LICENSE_PATH(?:'|\")\]\s*=\s*.*"
-    ),
-    "os.environ_pop": re.compile(
-        r"os\.environ\.pop\(\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"].*\)"
-    ),
-    "env_setdefault": re.compile(
-        r"\b(env|environment)\.setdefault\(\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"].*\)"
-    ),
-    "env_index_assign": re.compile(
-        r"\b(env|environment)\[\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"]\s*\]\s*=\s*.*"
-    ),
-    "env_pop": re.compile(
-        r"\b(env|environment)\.pop\(\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"].*\)"
-    ),
+    "monkeypatch.delenv": re.compile(r"monkeypatch\.delenv\(\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"].*\)"),
+    "os.environ_assign": re.compile(r"os\.environ\[(?:'|\")CODE_SCALPEL_LICENSE_PATH(?:'|\")\]\s*=\s*.*"),
+    "os.environ_pop": re.compile(r"os\.environ\.pop\(\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"].*\)"),
+    "env_setdefault": re.compile(r"\b(env|environment)\.setdefault\(\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"].*\)"),
+    "env_index_assign": re.compile(r"\b(env|environment)\[\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"]\s*\]\s*=\s*.*"),
+    "env_pop": re.compile(r"\b(env|environment)\.pop\(\s*['\"]CODE_SCALPEL_LICENSE_PATH['\"].*\)"),
     "other_var": re.compile(r"CODE_SCALPEL_(SECRET_KEY|ALLOW_HS256)"),
 }
 
@@ -75,21 +63,13 @@ def main():
             print(f"  {ln:4d}: {kind:20s}  {line}")
 
     print("\nSuggested next steps:")
-    print(
-        '  - For subprocess env dicts (look for env.setdefault or env["CODE_SCALPEL_LICENSE_PATH"] = ...),'
-    )
-    print(
-        "    prefer calling populate_subprocess_license_env(env, license_path=str(...)) before launching subprocess."
-    )
+    print('  - For subprocess env dicts (look for env.setdefault or env["CODE_SCALPEL_LICENSE_PATH"] = ...),')
+    print("    prefer calling populate_subprocess_license_env(env, license_path=str(...)) before launching subprocess.")
     print(
         "  - For in-process tests using monkeypatch.setenv(...), prefer the use_license fixture or set_hs256_license_env for HS256 tests."
     )
-    print(
-        "  - Remove direct os.environ modifications in favor of fixtures where possible to avoid cross-test leakage."
-    )
-    print(
-        "\nTo apply automated replacements, I can produce a codemod that edits files.\n"
-    )
+    print("  - Remove direct os.environ modifications in favor of fixtures where possible to avoid cross-test leakage.")
+    print("\nTo apply automated replacements, I can produce a codemod that edits files.\n")
 
 
 if __name__ == "__main__":

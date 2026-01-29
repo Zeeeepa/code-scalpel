@@ -136,9 +136,7 @@ print("\nResult: ", end="")
 try:
     tree = ast.parse(dirty_python_incomplete)
     print("✅ SILENT SUCCESS: ast.parse accepted incomplete code!")
-    print(
-        f"   Functions: {[n.name for n in tree.body if isinstance(n, ast.FunctionDef)]}"
-    )
+    print(f"   Functions: {[n.name for n in tree.body if isinstance(n, ast.FunctionDef)]}")
 except SyntaxError as e:
     print(f"⚠️  Failed: {e}")
 

@@ -261,9 +261,7 @@ from mypackage import core_function
         resolver = ImportResolver(temp_project)
         resolver.build()
 
-        orig_module, orig_name, chain = resolver.resolve_alias_chain(
-            "app", "core_function"
-        )
+        orig_module, orig_name, chain = resolver.resolve_alias_chain("app", "core_function")
 
         assert orig_module == "mypackage.core"
         assert orig_name == "core_function"
@@ -271,9 +269,7 @@ from mypackage import core_function
     def test_get_symbol_origin(self, temp_project: Path):
         """Test convenience method for getting symbol origin."""
         (temp_project / "base.py").write_text("def base_func(): pass")
-        (temp_project / "wrapper.py").write_text(
-            "from base import base_func as wrapped"
-        )
+        (temp_project / "wrapper.py").write_text("from base import base_func as wrapped")
         (temp_project / "main.py").write_text("from wrapper import wrapped as my_func")
 
         resolver = ImportResolver(temp_project)
@@ -349,14 +345,10 @@ class TestImportInfoDataclass:
         assert imp1.source_module == "utils"
 
         # With original_module (re-export)
-        imp2 = ImportInfo(
-            module="mypackage", name="helper", original_module="mypackage.internal"
-        )
+        imp2 = ImportInfo(module="mypackage", name="helper", original_module="mypackage.internal")
         assert imp2.source_module == "mypackage.internal"
 
-    @pytest.mark.skip(
-        reason="[20260117_TEST] ImportInfo.is_reexport field not implemented"
-    )
+    @pytest.mark.skip(reason="[20260117_TEST] ImportInfo.is_reexport field not implemented")
     def test_is_reexport_field(self, temp_project: Path):
         """Test is_reexport field defaults to False."""
         from code_scalpel.ast_tools.import_resolver import ImportInfo

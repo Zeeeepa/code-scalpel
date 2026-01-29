@@ -50,9 +50,7 @@ async def test_generate_unit_tests_community_limits_and_framework(monkeypatch):
     monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
     # Community: pytest only
-    bad = await server.generate_unit_tests(
-        code="def f():\n    return 1\n", framework="unittest"
-    )
+    bad = await server.generate_unit_tests(code="def f():\n    return 1\n", framework="unittest")
     assert bad.success is False
     assert "unsupported framework" in (bad.error or "").lower()
 
@@ -65,9 +63,7 @@ async def test_generate_unit_tests_community_limits_and_framework(monkeypatch):
     assert gated.success is False
     assert "data-driven" in (gated.error or "").lower()
 
-    ok = await server.generate_unit_tests(
-        code="def f():\n    return 1\n", framework="pytest"
-    )
+    ok = await server.generate_unit_tests(code="def f():\n    return 1\n", framework="pytest")
     assert ok.success is True
     assert calls, "sync path should be invoked for allowed request"
     assert calls[-1]["max_test_cases"] == 5
@@ -209,9 +205,7 @@ test_frameworks = ["pytest"]
     clear_cache()
     monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
-    ok = await server.generate_unit_tests(
-        code="def f():\n    return 1\n", framework="pytest"
-    )
+    ok = await server.generate_unit_tests(code="def f():\n    return 1\n", framework="pytest")
     assert ok.success is True
     assert calls
     assert calls[-1]["max_test_cases"] == 2

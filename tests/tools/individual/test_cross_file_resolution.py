@@ -103,9 +103,7 @@ class OrderProcessor:
         assert "TaxRate" in external_names
 
         # Check that TaxRate code was extracted
-        tax_rate_sym = next(
-            (s for s in result.external_symbols if s.name == "TaxRate"), None
-        )
+        tax_rate_sym = next((s for s in result.external_symbols if s.name == "TaxRate"), None)
         assert tax_rate_sym is not None
         assert "class TaxRate:" in tax_rate_sym.code
         assert "models.py" in tax_rate_sym.source_file
@@ -127,9 +125,7 @@ class OrderProcessor:
         assert "get_default_rate" in external_names
 
         # Check the function code
-        get_rate_sym = next(
-            (s for s in result.external_symbols if s.name == "get_default_rate"), None
-        )
+        get_rate_sym = next((s for s in result.external_symbols if s.name == "get_default_rate"), None)
         assert get_rate_sym is not None
         assert "def get_default_rate" in get_rate_sym.code
 
@@ -615,9 +611,7 @@ def create_user(name: str, email: str) -> UserModel:
         assert "UserModel" in symbol_names
         assert "BaseClass" in symbol_names
 
-    def test_resolve_function_with_transitive_class(
-        self, temp_project_transitive: Path
-    ):
+    def test_resolve_function_with_transitive_class(self, temp_project_transitive: Path):
         """Test resolving a function that uses a class with transitive deps."""
         services_path = temp_project_transitive / "services.py"
         extractor = SurgicalExtractor.from_file(str(services_path))

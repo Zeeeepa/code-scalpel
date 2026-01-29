@@ -145,10 +145,7 @@ def parse_node_id(id_string: str) -> UniversalNodeID:
     # Split by :: for main components
     parts = id_string.split("::")
     if len(parts) != 4:
-        raise ValueError(
-            f"Invalid node ID format: {id_string}. "
-            f"Expected: language::module::type::name[:method]"
-        )
+        raise ValueError(f"Invalid node ID format: {id_string}. " f"Expected: language::module::type::name[:method]")
 
     language, module, type_str, name_part = parts
 

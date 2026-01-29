@@ -82,13 +82,9 @@ def process_order(order_id, amount):
 class TestGetCrossFileDependenciesCommunityTier:
     """Community tier: max_depth = 1 (direct imports only)."""
 
-    def test_tier_gating_enforced(
-        self, temp_project_with_dependencies, community_tier, tier_limits
-    ):
+    def test_tier_gating_enforced(self, temp_project_with_dependencies, community_tier, tier_limits):
         """Verify community tier enforces max_depth limit from configuration."""
-        max_depth_limit = tier_limits["community"]["get_cross_file_dependencies"][
-            "max_depth"
-        ]
+        max_depth_limit = tier_limits["community"]["get_cross_file_dependencies"]["max_depth"]
 
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -104,13 +100,9 @@ class TestGetCrossFileDependenciesCommunityTier:
         # Community tier max_depth is enforced from limits.toml
         assert result.transitive_depth <= max_depth_limit
 
-    def test_direct_imports_only(
-        self, temp_project_with_dependencies, community_tier, tier_limits
-    ):
+    def test_direct_imports_only(self, temp_project_with_dependencies, community_tier, tier_limits):
         """Verify only direct dependencies analyzed (depth 1)."""
-        max_depth_limit = tier_limits["community"]["get_cross_file_dependencies"][
-            "max_depth"
-        ]
+        max_depth_limit = tier_limits["community"]["get_cross_file_dependencies"]["max_depth"]
 
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -128,13 +120,9 @@ class TestGetCrossFileDependenciesCommunityTier:
         # Max depth reached should not exceed tier limit
         assert result.max_depth_reached <= max_depth_limit
 
-    def test_files_limited_to_configured_max(
-        self, temp_project_with_dependencies, community_tier, tier_limits
-    ):
+    def test_files_limited_to_configured_max(self, temp_project_with_dependencies, community_tier, tier_limits):
         """Verify community tier max_files limit from configuration."""
-        max_files_limit = tier_limits["community"]["get_cross_file_dependencies"][
-            "max_files"
-        ]
+        max_files_limit = tier_limits["community"]["get_cross_file_dependencies"]["max_files"]
 
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -150,9 +138,7 @@ class TestGetCrossFileDependenciesCommunityTier:
         # Files analyzed should be within community limit
         assert result.files_analyzed <= max_files_limit
 
-    def test_confidence_decay_applied(
-        self, temp_project_with_dependencies, community_tier, tier_limits
-    ):
+    def test_confidence_decay_applied(self, temp_project_with_dependencies, community_tier, tier_limits):
         """Verify confidence score decays with depth."""
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -181,9 +167,7 @@ class TestGetCrossFileDependenciesCommunityTier:
 class TestGetCrossFileDependenciesProTier:
     """Pro tier: max_depth = 5 (deeper transitive dependencies)."""
 
-    def test_depth_limit_from_config(
-        self, temp_project_with_dependencies, pro_tier, tier_limits
-    ):
+    def test_depth_limit_from_config(self, temp_project_with_dependencies, pro_tier, tier_limits):
         """Verify pro tier enforces max_depth from configuration."""
         max_depth_limit = tier_limits["pro"]["get_cross_file_dependencies"]["max_depth"]
 
@@ -201,9 +185,7 @@ class TestGetCrossFileDependenciesProTier:
         # Pro tier max_depth is enforced from limits.toml
         assert result.transitive_depth <= max_depth_limit
 
-    def test_transitive_deps_analyzed(
-        self, temp_project_with_dependencies, pro_tier, tier_limits
-    ):
+    def test_transitive_deps_analyzed(self, temp_project_with_dependencies, pro_tier, tier_limits):
         """Verify transitive dependencies up to tier limit are analyzed."""
         max_depth_limit = tier_limits["pro"]["get_cross_file_dependencies"]["max_depth"]
 
@@ -221,9 +203,7 @@ class TestGetCrossFileDependenciesProTier:
         # Pro tier should find dependencies
         assert result.total_dependencies >= 1
 
-    def test_files_limited_to_configured_max(
-        self, temp_project_with_dependencies, pro_tier, tier_limits
-    ):
+    def test_files_limited_to_configured_max(self, temp_project_with_dependencies, pro_tier, tier_limits):
         """Verify pro tier max_files limit from configuration."""
         max_files_limit = tier_limits["pro"]["get_cross_file_dependencies"]["max_files"]
 
@@ -241,9 +221,7 @@ class TestGetCrossFileDependenciesProTier:
         # Files analyzed should be within pro limit
         assert result.files_analyzed <= max_files_limit
 
-    def test_confidence_decay_deep(
-        self, temp_project_with_dependencies, pro_tier, tier_limits
-    ):
+    def test_confidence_decay_deep(self, temp_project_with_dependencies, pro_tier, tier_limits):
         """Verify confidence_score decays with depth using 0.9 factor."""
         max_depth_limit = tier_limits["pro"]["get_cross_file_dependencies"]["max_depth"]
 
@@ -278,13 +256,9 @@ class TestGetCrossFileDependenciesProTier:
 class TestGetCrossFileDependenciesEnterpriseTier:
     """Enterprise tier: unlimited depth (full transitive closure)."""
 
-    def test_unlimited_depth(
-        self, temp_project_with_dependencies, enterprise_tier, tier_limits
-    ):
+    def test_unlimited_depth(self, temp_project_with_dependencies, enterprise_tier, tier_limits):
         """Verify enterprise tier has no depth limit (or very high limit)."""
-        max_depth_limit = tier_limits["enterprise"]["get_cross_file_dependencies"].get(
-            "max_depth"
-        )
+        max_depth_limit = tier_limits["enterprise"]["get_cross_file_dependencies"].get("max_depth")
 
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -304,13 +278,9 @@ class TestGetCrossFileDependenciesEnterpriseTier:
             # Unlimited - analyze up to actual graph depth
             assert result.transitive_depth is None or result.transitive_depth >= 5
 
-    def test_unlimited_files(
-        self, temp_project_with_dependencies, enterprise_tier, tier_limits
-    ):
+    def test_unlimited_files(self, temp_project_with_dependencies, enterprise_tier, tier_limits):
         """Verify enterprise tier has no file limit (or very high limit)."""
-        max_files_limit = tier_limits["enterprise"]["get_cross_file_dependencies"].get(
-            "max_files"
-        )
+        max_files_limit = tier_limits["enterprise"]["get_cross_file_dependencies"].get("max_files")
 
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -330,9 +300,7 @@ class TestGetCrossFileDependenciesEnterpriseTier:
             # Unlimited - no truncation
             assert result.truncated is False or result.files_truncated == 0
 
-    def test_all_dependencies_traversed(
-        self, temp_project_with_dependencies, enterprise_tier
-    ):
+    def test_all_dependencies_traversed(self, temp_project_with_dependencies, enterprise_tier):
         """Verify all dependencies are analyzed including deep nested ones."""
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -348,9 +316,7 @@ class TestGetCrossFileDependenciesEnterpriseTier:
         # Enterprise should find all modules (at least 6: a-f)
         assert result.total_dependencies >= 5
 
-    def test_confidence_decay_deep_analysis(
-        self, temp_project_with_dependencies, enterprise_tier
-    ):
+    def test_confidence_decay_deep_analysis(self, temp_project_with_dependencies, enterprise_tier):
         """Verify confidence_score still decays even with unlimited depth."""
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -417,9 +383,7 @@ class TestGetCrossFileDependenciesAsyncInterface:
     """Test async interface integration."""
 
     @pytest.mark.asyncio
-    async def test_async_interface_works(
-        self, temp_project_with_dependencies, pro_tier
-    ):
+    async def test_async_interface_works(self, temp_project_with_dependencies, pro_tier):
         """Verify async wrapper correctly calls sync implementation."""
         from code_scalpel.mcp.tools.graph import get_cross_file_dependencies
 

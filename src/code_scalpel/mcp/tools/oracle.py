@@ -156,16 +156,6 @@ async def write_perfect_code(
         - success: True if specification generated
         - data: Markdown constraint specification with symbols, graph, rules, context
         - error: Error message if generation failed (file not found, invalid instruction, etc.)
-
-    **Example:**
-        ```python
-        result = await write_perfect_code(
-            file_path="src/auth.py",
-            instruction="Add JWT token validation"
-        )
-        if result.success:
-            print(result.data)  # Markdown specification
-        ```
     """
     started = time.perf_counter()
     try:

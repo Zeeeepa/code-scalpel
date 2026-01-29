@@ -52,11 +52,7 @@ def _find_license_for_tier(tier: Tier) -> Optional[Path]:
     to allow early env var setup before server import. Validation will occur in the product
     code at runtime.
     """
-    candidates = (
-        PRO_CANDIDATES
-        if tier == "pro"
-        else (ENTERPRISE_CANDIDATES if tier == "enterprise" else [])
-    )
+    candidates = PRO_CANDIDATES if tier == "pro" else (ENTERPRISE_CANDIDATES if tier == "enterprise" else [])
     for path in candidates:
         if path.exists() and path.is_file():
             # Defer token validation to app code
@@ -168,9 +164,7 @@ def tier_context(tier: Tier, *, skip_if_missing: bool = False):
         clear_tier_caches()
 
 
-def populate_subprocess_license_env(
-    env: dict, *, license_path: str | None = None, secret: str | None = None
-) -> None:
+def populate_subprocess_license_env(env: dict, *, license_path: str | None = None, secret: str | None = None) -> None:
     """Populate an env dict used for subprocess invocations with license keys.
 
     Args:

@@ -49,18 +49,12 @@ class DataProcessor:
             assert len(graph.nodes) > 0
 
             # Find function node with parameters
-            func_nodes = [
-                n
-                for n in graph.nodes
-                if n.id.node_type.value == "function" and n.metadata.get("parameters")
-            ]
+            func_nodes = [n for n in graph.nodes if n.id.node_type.value == "function" and n.metadata.get("parameters")]
             assert len(func_nodes) > 0
 
             # Verify function has signature info
             func_node = func_nodes[0]
-            assert func_node.metadata[
-                "return_type"
-            ] is not None or "process_data" not in str(func_node.id)
+            assert func_node.metadata["return_type"] is not None or "process_data" not in str(func_node.id)
 
     def test_scan_without_symbol_extraction(self):
         """Test that scanner works without symbol extraction."""

@@ -185,9 +185,7 @@ class TestWeightedSymbolMatcher:
                 reason="test3",
             ),
         ]
-        ranked = WeightedSymbolMatcher.rank_candidates(
-            candidates, threshold=0.6, top_k=3
-        )
+        ranked = WeightedSymbolMatcher.rank_candidates(candidates, threshold=0.6, top_k=3)
         assert ranked[0].name == "bar"  # Highest score
         assert ranked[1].name == "baz"
         assert ranked[2].name == "foo"
@@ -217,9 +215,7 @@ class TestWeightedSymbolMatcher:
             ),
         ]
         # With threshold=0.6, only "high" (0.8) passes
-        ranked = WeightedSymbolMatcher.rank_candidates(
-            candidates, threshold=0.6, top_k=3
-        )
+        ranked = WeightedSymbolMatcher.rank_candidates(candidates, threshold=0.6, top_k=3)
         assert len(ranked) == 1
         assert ranked[0].name == "high"
 
@@ -238,9 +234,7 @@ class TestWeightedSymbolMatcher:
             )
             for i in range(10)
         ]
-        ranked = WeightedSymbolMatcher.rank_candidates(
-            candidates, threshold=None, top_k=3
-        )
+        ranked = WeightedSymbolMatcher.rank_candidates(candidates, threshold=None, top_k=3)
         assert len(ranked) == 3
 
 
@@ -401,9 +395,7 @@ def process_data():
         )
         validator = SemanticValidator()
         # Should not raise (use "function" not "functions", validator adds 's')
-        validator.validate_symbol_exists(
-            source, symbol_name="process_data", symbol_type="function"
-        )
+        validator.validate_symbol_exists(source, symbol_name="process_data", symbol_type="function")
 
     def test_fuzzy_match_with_typo(self):
         """Should suggest correct symbol when there's a typo."""
@@ -422,9 +414,7 @@ def calculate_total():
         validator = SemanticValidator()
         # Try to find "process_dta" (missing 'a')
         with pytest.raises(ValidationError) as exc_info:
-            validator.validate_symbol_exists(
-                source, symbol_name="process_dta", symbol_type="function"
-            )
+            validator.validate_symbol_exists(source, symbol_name="process_dta", symbol_type="function")
         error = exc_info.value
         # Should have suggestions
         assert error.suggestions is not None
@@ -447,9 +437,7 @@ def foo():
         validator = SemanticValidator()
         # Try something completely different
         with pytest.raises(ValidationError):
-            validator.validate_symbol_exists(
-                source, symbol_name="xyz", symbol_type="function"
-            )
+            validator.validate_symbol_exists(source, symbol_name="xyz", symbol_type="function")
         # May have no suggestions since "xyz" vs "foo" is very different
         # (depends on threshold, but likely empty or very few)
 
@@ -502,15 +490,11 @@ def foo():
         validator = SemanticValidator()
 
         # First call extracts and caches
-        validator.validate_symbol_exists(
-            source, symbol_name="foo", symbol_type="function"
-        )
+        validator.validate_symbol_exists(source, symbol_name="foo", symbol_type="function")
         cache_size_after_first = len(validator.symbol_cache)
 
         # Second call with same source should use cache
-        validator.validate_symbol_exists(
-            source, symbol_name="foo", symbol_type="function"
-        )
+        validator.validate_symbol_exists(source, symbol_name="foo", symbol_type="function")
         cache_size_after_second = len(validator.symbol_cache)
 
         # Cache size shouldn't grow (same key)
@@ -525,9 +509,7 @@ def foo():
             language=Language.PYTHON,
         )
         validator = SemanticValidator()
-        validator.validate_symbol_exists(
-            source, symbol_name="foo", symbol_type="function"
-        )
+        validator.validate_symbol_exists(source, symbol_name="foo", symbol_type="function")
         assert len(validator.symbol_cache) > 0
         validator.clear_cache()
         assert len(validator.symbol_cache) == 0

@@ -101,16 +101,10 @@ class TypeEvaporationResult:
     """Result of type evaporation analysis."""
 
     vulnerabilities: List[TypeEvaporationVulnerability] = field(default_factory=list)
-    type_definitions: Dict[str, Tuple[int, str]] = field(
-        default_factory=dict
-    )  # name -> (line, definition)
+    type_definitions: Dict[str, Tuple[int, str]] = field(default_factory=dict)  # name -> (line, definition)
     fetch_endpoints: List[Tuple[str, int]] = field(default_factory=list)  # (url, line)
-    dom_accesses: List[Tuple[str, int]] = field(
-        default_factory=list
-    )  # (element_id, line)
-    type_assertions: List[Tuple[str, int, str]] = field(
-        default_factory=list
-    )  # (type, line, context)
+    dom_accesses: List[Tuple[str, int]] = field(default_factory=list)  # (element_id, line)
+    type_assertions: List[Tuple[str, int, str]] = field(default_factory=list)  # (type, line, context)
     analyzed_lines: int = 0
 
     def has_vulnerabilities(self) -> bool:
@@ -122,9 +116,7 @@ class TypeEvaporationResult:
 
         lines = [f"Found {len(self.vulnerabilities)} type evaporation issue(s):"]
         for v in self.vulnerabilities:
-            lines.append(
-                f"  - {v.risk_type.name} at line {v.location[0]}: {v.description}"
-            )
+            lines.append(f"  - {v.risk_type.name} at line {v.location[0]}: {v.description}")
         return "\n".join(lines)
 
 
@@ -267,9 +259,7 @@ class TypeEvaporationDetector:
 
         return result
 
-    def _analyze_with_tree_sitter(
-        self, code: str, result: TypeEvaporationResult
-    ) -> None:
+    def _analyze_with_tree_sitter(self, code: str, result: TypeEvaporationResult) -> None:
         """Analyze using tree-sitter AST parsing."""
         assert self._parser is not None  # Caller must verify tree-sitter is available
         tree = self._parser.parse(bytes(code, "utf-8"))
@@ -282,9 +272,7 @@ class TypeEvaporationDetector:
         # Walk the AST
         self._walk_tree(root, code, lines, result)
 
-    def _extract_type_definitions(
-        self, root: TSNode, code: str, result: TypeEvaporationResult
-    ) -> None:
+    def _extract_type_definitions(self, root: TSNode, code: str, result: TypeEvaporationResult) -> None:
         """Extract type alias and interface definitions."""
 
         def visit(node: TSNode):
@@ -315,9 +303,7 @@ class TypeEvaporationDetector:
 
         visit(root)
 
-    def _walk_tree(
-        self, node: TSNode, code: str, lines: List[str], result: TypeEvaporationResult
-    ) -> None:
+    def _walk_tree(self, node: TSNode, code: str, lines: List[str], result: TypeEvaporationResult) -> None:
         """Walk the AST looking for type evaporation patterns."""
 
         # Check for type assertions: `value as Type`
@@ -332,9 +318,7 @@ class TypeEvaporationDetector:
         for child in node.children:
             self._walk_tree(child, code, lines, result)
 
-    def _check_type_assertion(
-        self, node: TSNode, code: str, lines: List[str], result: TypeEvaporationResult
-    ) -> None:
+    def _check_type_assertion(self, node: TSNode, code: str, lines: List[str], result: TypeEvaporationResult) -> None:
         """Check if a type assertion is on untrusted input."""
         line_num = node.start_point[0] + 1
         col_num = node.start_point[1]
@@ -347,9 +331,7 @@ class TypeEvaporationDetector:
                 type_node = child
                 break
 
-        type_name = (
-            code[type_node.start_byte : type_node.end_byte] if type_node else "unknown"
-        )
+        type_name = code[type_node.start_byte : type_node.end_byte] if type_node else "unknown"
 
         # Check if the expression being cast is from DOM or external source
         expr_text = ""
@@ -362,9 +344,9 @@ class TypeEvaporationDetector:
         result.type_assertions.append((type_name, line_num, snippet))
 
         # Check if this is on DOM input
-        is_dom_input = any(
-            pattern in expr_text for pattern in self.DOM_INPUT_PATTERNS
-        ) or any(prop in expr_text for prop in self.DOM_VALUE_PROPERTIES)
+        is_dom_input = any(pattern in expr_text for pattern in self.DOM_INPUT_PATTERNS) or any(
+            prop in expr_text for prop in self.DOM_VALUE_PROPERTIES
+        )
 
         # Check for chained assertions like: (x as HTMLInputElement).value as Role
         # This is the dangerous pattern in the test file
@@ -383,9 +365,7 @@ class TypeEvaporationDetector:
                 )
             )
 
-    def _check_call_expression(
-        self, node: TSNode, code: str, lines: List[str], result: TypeEvaporationResult
-    ) -> None:
+    def _check_call_expression(self, node: TSNode, code: str, lines: List[str], result: TypeEvaporationResult) -> None:
         """Check call expressions for DOM access and serialization."""
         func_name = self._get_function_name(node, code)
 
@@ -441,9 +421,7 @@ class TypeEvaporationDetector:
         if self._is_fetch_like(func_name):
             self._check_fetch_call(node, code, lines, result)
 
-    def _check_fetch_call(
-        self, node: TSNode, code: str, lines: List[str], result: TypeEvaporationResult
-    ) -> None:
+    def _check_fetch_call(self, node: TSNode, code: str, lines: List[str], result: TypeEvaporationResult) -> None:
         """Extract endpoint URL from fetch call."""
         line_num = node.start_point[0] + 1
         snippet = code[node.start_byte : node.end_byte]
@@ -503,10 +481,7 @@ class TypeEvaporationDetector:
                 result.type_assertions.append((type_name, i, line.strip()))
 
                 # Check if DOM input
-                if (
-                    any(pattern in line for pattern in self.DOM_INPUT_PATTERNS)
-                    or ".value" in line
-                ):
+                if any(pattern in line for pattern in self.DOM_INPUT_PATTERNS) or ".value" in line:
                     result.vulnerabilities.append(
                         TypeEvaporationVulnerability(
                             risk_type=TypeEvaporationRisk.UNSAFE_TYPE_ASSERTION,
@@ -530,25 +505,19 @@ class TypeEvaporationDetector:
             if "fetch(" in line:
                 url_match = re.search(r"fetch\s*\(\s*(['\"`])([^'\"`]+)\1", line)
                 if url_match:
-                    result.fetch_endpoints.append(
-                        (self._normalize_endpoint_candidate(url_match.group(2)), i)
-                    )
+                    result.fetch_endpoints.append((self._normalize_endpoint_candidate(url_match.group(2)), i))
                 else:
                     # Template strings / concatenations: try to salvage a path suffix
                     tmpl = re.search(r"fetch\s*\(\s*(`)([^`]+)`", line)
                     if tmpl:
-                        result.fetch_endpoints.append(
-                            (self._normalize_endpoint_candidate(tmpl.group(2)), i)
-                        )
+                        result.fetch_endpoints.append((self._normalize_endpoint_candidate(tmpl.group(2)), i))
 
             axios_match = re.search(
                 r"\baxios\.(get|post|put|delete|patch)\s*\(\s*(['\"`])([^'\"`]+)\2",
                 line,
             )
             if axios_match:
-                result.fetch_endpoints.append(
-                    (self._normalize_endpoint_candidate(axios_match.group(3)), i)
-                )
+                result.fetch_endpoints.append((self._normalize_endpoint_candidate(axios_match.group(3)), i))
 
             # JSON.stringify boundary
             if "JSON.stringify" in line:
@@ -585,9 +554,7 @@ class CrossFileTypeEvaporationResult:
 
     def summary(self) -> str:
         lines = ["=== Cross-File Type Evaporation Analysis ==="]
-        lines.append(
-            f"Frontend vulnerabilities: {len(self.frontend_result.vulnerabilities)}"
-        )
+        lines.append(f"Frontend vulnerabilities: {len(self.frontend_result.vulnerabilities)}")
         lines.append(f"Backend vulnerabilities: {len(self.backend_vulnerabilities)}")
         lines.append(f"Matched endpoints: {len(self.matched_endpoints)}")
         lines.append(f"Cross-file issues: {len(self.cross_file_issues)}")
@@ -595,9 +562,7 @@ class CrossFileTypeEvaporationResult:
         if self.matched_endpoints:
             lines.append("\nEndpoint Correlations:")
             for endpoint, ts_line, py_line in self.matched_endpoints:
-                lines.append(
-                    f"  - {endpoint}: TS line {ts_line} → Python line {py_line}"
-                )
+                lines.append(f"  - {endpoint}: TS line {ts_line} → Python line {py_line}")
 
         return "\n".join(lines)
 
@@ -638,9 +603,7 @@ def analyze_type_evaporation_cross_file(
     # Extract Python routes
     py_routes: Dict[str, int] = {}
     # Support Flask/FastAPI blueprints/routers (e.g., @bp.route, @router.get, @app.post)
-    route_pattern = re.compile(
-        r'@\w+\.(route|get|post|put|delete|patch)\s*\(\s*["\']([^"\']+)["\']'
-    )
+    route_pattern = re.compile(r'@\w+\.(route|get|post|put|delete|patch)\s*\(\s*["\']([^"\']+)["\']')
     for i, line in enumerate(python_code.splitlines(), 1):
         match = route_pattern.search(line)
         if match:

@@ -52,9 +52,7 @@ class TestSimulateRefactorCommunityTier:
         limits = capabilities.get("limits", {}) or {}
         analysis_depth = limits.get("analysis_depth")
         max_size = limits.get("max_file_size_mb")
-        assert (
-            analysis_depth == "basic"
-        ), f"Community should have basic analysis, got {analysis_depth}"
+        assert analysis_depth == "basic", f"Community should have basic analysis, got {analysis_depth}"
         assert max_size == 1, f"Community should have 1MB limit, got {max_size}"
 
     def test_community_max_file_size_limit(self, community_tier):
@@ -62,9 +60,7 @@ class TestSimulateRefactorCommunityTier:
         capabilities = get_tool_capabilities("simulate_refactor", "community") or {}
         limits = capabilities.get("limits", {}) or {}
         max_size = limits.get("max_file_size_mb")
-        assert (
-            max_size == 1
-        ), f"Community should have max_file_size_mb=1, got {max_size}"
+        assert max_size == 1, f"Community should have max_file_size_mb=1, got {max_size}"
 
 
 class TestSimulateRefactorProTier:
@@ -82,18 +78,14 @@ class TestSimulateRefactorProTier:
         """Verify behavior equivalence checking in Pro tier."""
         capabilities = get_tool_capabilities("simulate_refactor", "pro") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert (
-            "behavior_preservation" in cap_set
-        ), "Pro should have behavior_preservation"
+        assert "behavior_preservation" in cap_set, "Pro should have behavior_preservation"
 
     def test_test_execution_simulation(self, pro_tier):
         """Verify test execution simulation for Pro tier."""
         capabilities = get_tool_capabilities("simulate_refactor", "pro") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
         # build_check capability enables test/build execution
-        assert (
-            "build_check" in cap_set
-        ), "Pro should have build_check for test simulation"
+        assert "build_check" in cap_set, "Pro should have build_check for test simulation"
 
     def test_type_checking_enabled(self, pro_tier):
         """Verify type checking is enabled in Pro tier."""
@@ -113,9 +105,7 @@ class TestSimulateRefactorProTier:
         limits = capabilities.get("limits", {}) or {}
         analysis_depth = limits.get("analysis_depth")
         max_size = limits.get("max_file_size_mb")
-        assert (
-            analysis_depth == "advanced"
-        ), f"Pro should have advanced analysis, got {analysis_depth}"
+        assert analysis_depth == "advanced", f"Pro should have advanced analysis, got {analysis_depth}"
         assert max_size == 10, f"Pro should have 10MB limit, got {max_size}"
 
     def test_pro_max_file_size_limit(self, pro_tier):
@@ -144,9 +134,7 @@ class TestSimulateRefactorEnterpriseTier:
         """Verify regression prediction in Enterprise tier."""
         capabilities = get_tool_capabilities("simulate_refactor", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert (
-            "regression_prediction" in cap_set
-        ), "Enterprise should have regression_prediction"
+        assert "regression_prediction" in cap_set, "Enterprise should have regression_prediction"
 
     def test_impact_analysis_performed(self, enterprise_tier):
         """Verify impact analysis is performed in Enterprise tier."""
@@ -164,9 +152,7 @@ class TestSimulateRefactorEnterpriseTier:
         """Verify compliance validation in Enterprise tier."""
         capabilities = get_tool_capabilities("simulate_refactor", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert (
-            "compliance_validation" in cap_set
-        ), "Enterprise should have compliance_validation"
+        assert "compliance_validation" in cap_set, "Enterprise should have compliance_validation"
 
     def test_enterprise_deep_analysis_depth(self, enterprise_tier):
         """Verify Enterprise tier uses deep analysis depth."""
@@ -174,9 +160,7 @@ class TestSimulateRefactorEnterpriseTier:
         limits = capabilities.get("limits", {}) or {}
         analysis_depth = limits.get("analysis_depth")
         max_size = limits.get("max_file_size_mb")
-        assert (
-            analysis_depth == "deep"
-        ), f"Enterprise should have deep analysis, got {analysis_depth}"
+        assert analysis_depth == "deep", f"Enterprise should have deep analysis, got {analysis_depth}"
         assert max_size == 100, f"Enterprise should have 100MB limit, got {max_size}"
 
     def test_enterprise_max_file_size_limit(self, enterprise_tier):
@@ -184,9 +168,7 @@ class TestSimulateRefactorEnterpriseTier:
         capabilities = get_tool_capabilities("simulate_refactor", "enterprise") or {}
         limits = capabilities.get("limits", {}) or {}
         max_size = limits.get("max_file_size_mb")
-        assert (
-            max_size == 100
-        ), f"Enterprise should have max_file_size_mb=100, got {max_size}"
+        assert max_size == 100, f"Enterprise should have max_file_size_mb=100, got {max_size}"
 
 
 class TestSimulateRefactorCrossTierComparison:
@@ -214,9 +196,7 @@ class TestSimulateRefactorCrossTierComparison:
         assert pro_depth == "advanced"
         assert ent_depth == "deep"
 
-    def test_file_size_limits_progression(
-        self, community_tier, pro_tier, enterprise_tier
-    ):
+    def test_file_size_limits_progression(self, community_tier, pro_tier, enterprise_tier):
         """Verify file size limits progress across tiers."""
         comm_caps = get_tool_capabilities("simulate_refactor", "community") or {}
         pro_caps = get_tool_capabilities("simulate_refactor", "pro") or {}
@@ -234,27 +214,21 @@ class TestSimulateRefactorCrossTierComparison:
 class TestSimulateRefactorConsistency:
     """Consistency and core capability tests (4 tests)."""
 
-    def test_basic_simulation_across_all_tiers(
-        self, community_tier, pro_tier, enterprise_tier
-    ):
+    def test_basic_simulation_across_all_tiers(self, community_tier, pro_tier, enterprise_tier):
         """Verify basic_simulation is in all tiers."""
         for tier in ["community", "pro", "enterprise"]:
             capabilities = get_tool_capabilities("simulate_refactor", tier) or {}
             cap_set = set(capabilities.get("capabilities", []) or [])
             assert "basic_simulation" in cap_set, f"{tier} should have basic_simulation"
 
-    def test_structural_diff_across_all_tiers(
-        self, community_tier, pro_tier, enterprise_tier
-    ):
+    def test_structural_diff_across_all_tiers(self, community_tier, pro_tier, enterprise_tier):
         """Verify structural_diff is in all tiers."""
         for tier in ["community", "pro", "enterprise"]:
             capabilities = get_tool_capabilities("simulate_refactor", tier) or {}
             cap_set = set(capabilities.get("capabilities", []) or [])
             assert "structural_diff" in cap_set, f"{tier} should have structural_diff"
 
-    def test_enterprise_has_advanced_features_pro_lacks(
-        self, pro_tier, enterprise_tier
-    ):
+    def test_enterprise_has_advanced_features_pro_lacks(self, pro_tier, enterprise_tier):
         """Verify Enterprise has features that Pro lacks."""
         pro_caps = get_tool_capabilities("simulate_refactor", "pro") or {}
         ent_caps = get_tool_capabilities("simulate_refactor", "enterprise") or {}

@@ -374,9 +374,7 @@ class TestExtractWithCustomPatternMatchProperties:
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
         module_file = tmp_path / "models.py"
-        module_file.write_text(
-            "class UserModel:\n" "    pass\n" "\n" "def get_user():\n" "    pass\n"
-        )
+        module_file.write_text("class UserModel:\n" "    pass\n" "\n" "def get_user():\n" "    pass\n")
 
         result = extract_with_custom_pattern(
             pattern="User|get",
@@ -430,9 +428,7 @@ class TestExtractWithCustomPatternEdgeCases:
         """Test when no patterns match."""
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
-        (tmp_path / "module.py").write_text(
-            "def func_a():\n" "    pass\n" "\n" "def func_b():\n" "    pass\n"
-        )
+        (tmp_path / "module.py").write_text("def func_a():\n" "    pass\n" "\n" "def func_b():\n" "    pass\n")
 
         result = extract_with_custom_pattern(
             pattern="nonexistent_pattern",
@@ -560,9 +556,7 @@ class TestExtractWithCustomPatternExplanation:
         """Test that explanation contains scan statistics."""
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
-        (tmp_path / "module.py").write_text(
-            "def func1():\n" "    pass\n" "\n" "def func2():\n" "    pass\n"
-        )
+        (tmp_path / "module.py").write_text("def func1():\n" "    pass\n" "\n" "def func2():\n" "    pass\n")
 
         result = extract_with_custom_pattern(
             pattern="func",
@@ -572,6 +566,4 @@ class TestExtractWithCustomPatternExplanation:
 
         assert result.success is True
         assert result.explanation is not None
-        assert (
-            "Scanned" in result.explanation or "scanned" in result.explanation.lower()
-        )
+        assert "Scanned" in result.explanation or "scanned" in result.explanation.lower()

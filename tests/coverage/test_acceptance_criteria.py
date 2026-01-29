@@ -99,12 +99,8 @@ def test_AC3_agent_blocked_from_modifying_policy_files(acceptance_test_env):
 
     # Create operations that target protected files
     protected_operations = [
-        Operation(
-            type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
-        ),
-        Operation(
-            type="file_write", affected_files=[Path(".code-scalpel/budget.yaml")]
-        ),
+        Operation(type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]),
+        Operation(type="file_write", affected_files=[Path(".code-scalpel/budget.yaml")]),
         Operation(type="file_delete", affected_files=[Path("scalpel.policy.yaml")]),
     ]
 
@@ -114,9 +110,7 @@ def test_AC3_agent_blocked_from_modifying_policy_files(acceptance_test_env):
             tr.prevent_policy_modification(operation)
 
     # Normal files should be allowed
-    normal_operation = Operation(
-        type="file_write", affected_files=[Path("src/main.py")]
-    )
+    normal_operation = Operation(type="file_write", affected_files=[Path("src/main.py")])
     assert tr.prevent_policy_modification(normal_operation) is True
 
     print("✅ AC3: Agent blocked from modifying policy files")
@@ -132,9 +126,7 @@ def test_AC4_policy_modification_attempts_logged(acceptance_test_env):
     tr = TamperResistance(policy_path=str(policy_file))
 
     # Attempt to modify policy file
-    operation = Operation(
-        type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
-    )
+    operation = Operation(type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")])
 
     try:
         tr.prevent_policy_modification(operation)
@@ -174,9 +166,7 @@ def test_AC5_totp_based_human_verification(acceptance_test_env):
     import hmac
 
     secret = os.environ.get("SCALPEL_TOTP_SECRET", "default-totp-secret")
-    valid_code = hmac.new(
-        secret.encode(), challenge.encode(), hashlib.sha256
-    ).hexdigest()[:8]
+    valid_code = hmac.new(secret.encode(), challenge.encode(), hashlib.sha256).hexdigest()[:8]
 
     # Valid code should pass
     assert tr._verify_totp(valid_code, challenge) is True
@@ -258,9 +248,7 @@ def test_AC8_overrides_logged_with_justification(acceptance_test_env, monkeypatc
     import hmac
 
     secret = os.environ.get("SCALPEL_TOTP_SECRET", "default-totp-secret")
-    valid_code = hmac.new(
-        secret.encode(), fixed_challenge.encode(), hashlib.sha256
-    ).hexdigest()[:8]
+    valid_code = hmac.new(secret.encode(), fixed_challenge.encode(), hashlib.sha256).hexdigest()[:8]
 
     response_data = {
         "code": valid_code,
@@ -272,16 +260,10 @@ def test_AC8_overrides_logged_with_justification(acceptance_test_env, monkeypatc
         json.dump(response_data, f)
 
     # Request override
-    operation = Operation(
-        type="security_override", affected_files=[Path("src/critical.py")]
-    )
-    policy_decision = PolicyDecision(
-        allowed=False, violated_policies=["security_check"], severity="HIGH"
-    )
+    operation = Operation(type="security_override", affected_files=[Path("src/critical.py")])
+    policy_decision = PolicyDecision(allowed=False, violated_policies=["security_check"], severity="HIGH")
 
-    tr.require_human_override(
-        operation=operation, policy_decision=policy_decision, timeout_seconds=2
-    )
+    tr.require_human_override(operation=operation, policy_decision=policy_decision, timeout_seconds=2)
 
     # Verify override was logged with justification
     events = tr.audit_log.get_events(event_type="OVERRIDE_APPROVED")
@@ -308,9 +290,7 @@ def test_AC9_events_signed_with_hmac(acceptance_test_env):
     audit_log = AuditLog(log_path=str(acceptance_test_env["audit_log_path"]))
 
     # Record event
-    audit_log.record_event(
-        event_type="TEST_EVENT", severity="MEDIUM", details={"test": "data"}
-    )
+    audit_log.record_event(event_type="TEST_EVENT", severity="MEDIUM", details={"test": "data"})
 
     # Verify event has HMAC signature
     with open(audit_log.log_path, "r") as f:
@@ -332,9 +312,7 @@ def test_AC10_log_integrity_verifiable(acceptance_test_env):
 
     # Record multiple events
     for i in range(5):
-        audit_log.record_event(
-            event_type=f"EVENT_{i}", severity="LOW", details={"index": i}
-        )
+        audit_log.record_event(event_type=f"EVENT_{i}", severity="LOW", details={"index": i})
 
     # Verify integrity passes
     assert audit_log.verify_integrity() is True
@@ -351,9 +329,7 @@ def test_AC11_tampering_detected_and_reported(acceptance_test_env):
     audit_log = AuditLog(log_path=str(acceptance_test_env["audit_log_path"]))
 
     # Record valid event
-    audit_log.record_event(
-        event_type="VALID_EVENT", severity="LOW", details={"valid": True}
-    )
+    audit_log.record_event(event_type="VALID_EVENT", severity="LOW", details={"valid": True})
 
     # Tamper with log (add event with invalid signature)
     with open(audit_log.log_path, "a") as f:
@@ -431,9 +407,7 @@ def test_AC_INTEGRATION_full_workflow(acceptance_test_env):
     print("✅ 1. Policy integrity verified")
 
     # 2. Block policy modification
-    operation = Operation(
-        type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
-    )
+    operation = Operation(type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")])
     with pytest.raises(PolicyModificationError):
         tr.prevent_policy_modification(operation)
     print("✅ 2. Policy modification blocked")

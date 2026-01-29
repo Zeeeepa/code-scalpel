@@ -81,9 +81,7 @@ class TestAnalyzeCodeKernelAdapter:
 
         adapter = get_adapter()
 
-        with pytest.raises(
-            ValueError, match="Either 'code' or 'file_path' must be provided"
-        ):
+        with pytest.raises(ValueError, match="Either 'code' or 'file_path' must be provided"):
             adapter.create_source_context(code=None, file_path=None)
 
     def test_validate_input_success(self):
@@ -120,21 +118,15 @@ class TestAnalyzeCodeKernelAdapter:
 
         assert hints is not None
         assert len(hints) == 2
-        assert any(
-            h.feature == "cognitive_complexity" and h.tier == "PRO" for h in hints
-        )
-        assert any(
-            h.feature == "custom_rules" and h.tier == "ENTERPRISE" for h in hints
-        )
+        assert any(h.feature == "cognitive_complexity" and h.tier == "PRO" for h in hints)
+        assert any(h.feature == "custom_rules" and h.tier == "ENTERPRISE" for h in hints)
 
     def test_create_upgrade_hints_pro_tier(self):
         """Test upgrade hints for pro tier (some features already included)."""
         from code_scalpel.mcp.v1_1_kernel_adapter import get_adapter
 
         adapter = get_adapter()
-        hints = adapter.create_upgrade_hints(
-            tier="pro", requested_features=["cognitive_complexity", "custom_rules"]
-        )
+        hints = adapter.create_upgrade_hints(tier="pro", requested_features=["cognitive_complexity", "custom_rules"])
 
         assert hints is not None
         # cognitive_complexity is pro, so no hint for community/pro
@@ -206,9 +198,7 @@ class TestAnalyzeCodeToolIntegration:
         try:
             result = await analyze_code()
             # If it returns a result, check for error in envelope
-            assert result.error is not None or (
-                hasattr(result, "data") and result.data.get("error")
-            )
+            assert result.error is not None or (hasattr(result, "data") and result.data.get("error"))
         except (TypeError, ValueError):
             # Expected: missing required arguments
             pass
@@ -220,9 +210,7 @@ class TestAnalyzeCodeToolIntegration:
         result = await analyze_code(file_path="/nonexistent/path/to/file.py")
 
         # Should handle error gracefully - check envelope error or data error
-        assert result.error is not None or (
-            hasattr(result, "data") and result.data.get("error")
-        )
+        assert result.error is not None or (hasattr(result, "data") and result.data.get("error"))
 
     async def test_analyze_code_maintains_backward_compatibility(self):
         """Test that basic analyze_code functionality is unchanged."""
@@ -301,9 +289,7 @@ class TestHybridArchitecture:
 
         # Create source contexts with different languages
         ctx1 = adapter.create_source_context(code="def foo(): pass", language="python")
-        ctx2 = adapter.create_source_context(
-            code="function bar() {}", language="javascript"
-        )
+        ctx2 = adapter.create_source_context(code="function bar() {}", language="javascript")
 
         # Verify they don't interfere with each other
         assert ctx1.language.value == "python"

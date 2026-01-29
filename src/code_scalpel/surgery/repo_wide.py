@@ -196,9 +196,7 @@ class RepoWideRename:
 
         for root, dirs, files in os.walk(self.project_root):
             # Skip excluded directories (modify in-place to prune walk)
-            dirs[:] = [
-                d for d in dirs if d not in self.SKIP_DIRS and not d.startswith(".")
-            ]
+            dirs[:] = [d for d in dirs if d not in self.SKIP_DIRS and not d.startswith(".")]
 
             for filename in files:
                 file_path = Path(root) / filename
@@ -279,9 +277,7 @@ class RepoWideRename:
                 batch_results["files_scanned"] += 1
             except Exception as e:
                 batch_results["files_failed"] += 1
-                batch_results["errors"].append(
-                    {"file": str(file_path), "error": str(e)}
-                )
+                batch_results["errors"].append({"file": str(file_path), "error": str(e)})
 
         return batch_results
 
@@ -320,9 +316,7 @@ class RepoWideRename:
             if progress_callback:
                 progress_callback(count, -1)  # -1 indicates scanning phase
 
-        candidate_files = self.find_candidate_files(
-            file_extensions=file_extensions, progress_callback=scan_progress
-        )
+        candidate_files = self.find_candidate_files(file_extensions=file_extensions, progress_callback=scan_progress)
 
         total_files = len(candidate_files)
         result.files_scanned = total_files
@@ -336,17 +330,11 @@ class RepoWideRename:
         files_with_symbol = []
 
         # Split into batches
-        batches = [
-            candidate_files[i : i + self.batch_size]
-            for i in range(0, total_files, self.batch_size)
-        ]
+        batches = [candidate_files[i : i + self.batch_size] for i in range(0, total_files, self.batch_size)]
 
         completed = 0
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {
-                executor.submit(self.process_file_batch, batch, old_name): batch
-                for batch in batches
-            }
+            futures = {executor.submit(self.process_file_batch, batch, old_name): batch for batch in batches}
 
             for future in as_completed(futures):
                 try:
@@ -367,9 +355,7 @@ class RepoWideRename:
             result.files_updated = len(files_with_symbol)
             # Note: Actual rename implementation would go here
             # For now, we just track which files would be updated
-            result.warnings.append(
-                f"Dry-run mode: would update {len(files_with_symbol)} files"
-            )
+            result.warnings.append(f"Dry-run mode: would update {len(files_with_symbol)} files")
         else:
             result.files_updated = 0
             result.files_skipped = total_files - len(files_with_symbol)

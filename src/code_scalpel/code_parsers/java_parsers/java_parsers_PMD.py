@@ -174,9 +174,7 @@ class PMDParser:
         content = Path(xml_file).read_text()
         return self.parse_xml(content)
 
-    def get_by_priority(
-        self, violations: list[PMDViolation], max_priority: int = 2
-    ) -> list[PMDViolation]:
+    def get_by_priority(self, violations: list[PMDViolation], max_priority: int = 2) -> list[PMDViolation]:
         """
         Filter violations by priority.
 
@@ -189,9 +187,7 @@ class PMDParser:
         """
         return [v for v in violations if v.priority <= max_priority]
 
-    def get_by_ruleset(
-        self, violations: list[PMDViolation], ruleset: str
-    ) -> list[PMDViolation]:
+    def get_by_ruleset(self, violations: list[PMDViolation], ruleset: str) -> list[PMDViolation]:
         """
         Filter violations by ruleset.
 
