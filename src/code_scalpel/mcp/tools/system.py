@@ -1,7 +1,4 @@
-"""System and capability tools for Code Scalpel MCP server.
-
-[20260127_FEATURE] Add get_capabilities() tool to expose tier-aware capabilities.
-"""
+"""System and capability tools for Code Scalpel MCP server."""
 
 from __future__ import annotations
 
@@ -23,37 +20,39 @@ async def get_capabilities(
     tier: str | None = None,
     ctx: Context | None = None,
 ) -> ToolResponseEnvelope:
-    """
-    Get the capabilities available for the current license tier.
+    """Get the capabilities available for the current license tier.
 
-    Returns a complete list of all Code Scalpel tools and their availability/limits at the specified tier or current tier.
+    Returns a complete list of all Code Scalpel tools and their availability/limits
+    at the specified tier or current tier.
 
     **Tier Behavior:**
-    - All tiers: Tool is available.
-    - Provides information about capabilities available at different tiers.
+    - Community: Returns capabilities for community tier (basic limits on all tools)
+    - Pro: Returns capabilities for pro tier (expanded limits on most tools)
+    - Enterprise: Returns capabilities for enterprise tier (no limits on core tools)
 
     **Tier Capabilities:**
-    - **Community:** Returns capabilities for community tier (basic limits on all tools)
-    - **Pro:** Returns capabilities for pro tier (expanded limits on most tools)
-    - **Enterprise:** Returns capabilities for enterprise tier (no limits on core tools)
+    - Community: Returns community tier capabilities and limits
+    - Pro: Returns pro tier capabilities and limits
+    - Enterprise: Returns enterprise tier capabilities and limits
 
     **Args:**
-    - tier (str, optional): Tier to query (defaults to current tier from license). Must be one of: "community", "pro", "enterprise"
+        tier (str, optional): Tier to query. Default: current tier from license. Options: "community", "pro", "enterprise".
+        ctx (Context, optional): MCP context for progress reporting.
 
     **Returns:**
-    - ToolResponseEnvelope: Standardized MCP response envelope containing:
-      - data (dict): Capabilities information with:
+        ToolResponseEnvelope containing capabilities dict with:
         - tier (str): The tier that was queried
         - tool_count (int): Total number of tools
         - available_count (int): Number of tools available at this tier
-        - capabilities (dict): Dictionary mapping tool_id -> capability info for each tool:
+        - capabilities (dict): Maps tool_id to capability info:
           - tool_id (str): The tool identifier
           - tier (str): The tier being described
-          - available (bool): Whether the tool is available at this tier
-          - limits (dict): The limits applied to this tool at this tier
-      - tier (str, optional): Applied tier ("community", "pro", "enterprise")
-      - error (ToolError, optional): Standardized error if operation failed
-      - warnings (list[str]): Non-fatal warnings from MCP boundary
+          - available (bool): Whether tool is available at this tier
+          - limits (dict): The limits applied at this tier
+          - capabilities (list): Feature list for this tier
+        - error (str): Error message if operation failed
+        - tier_applied (str): Tier used for analysis
+        - duration_ms (int): Analysis duration in milliseconds
     """
     started = time.perf_counter()
     current_tier = _get_current_tier()
