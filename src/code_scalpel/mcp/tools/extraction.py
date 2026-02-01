@@ -13,6 +13,7 @@ from code_scalpel.mcp.helpers import extraction_helpers as _helpers
 from code_scalpel.mcp.models.core import PatchResultModel
 from code_scalpel.mcp.protocol import mcp, _get_current_tier
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
+from code_scalpel.mcp.oracle_middleware import with_oracle_resilience, SymbolStrategy, RenameSymbolStrategy
 from code_scalpel import __version__ as _pkg_version
 
 _extract_code = getattr(_helpers, "extract_code", None) or getattr(_helpers, "_extract_code_impl", None)
@@ -24,6 +25,7 @@ if _extract_code is None or _rename_symbol is None or _update_symbol is None:
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="extract_code", strategy=SymbolStrategy)
 async def extract_code(
     target_type: str,
     target_name: str,
@@ -166,6 +168,7 @@ async def extract_code(
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="rename_symbol", strategy=RenameSymbolStrategy)
 async def rename_symbol(
     file_path: str,
     target_type: str,
@@ -250,6 +253,7 @@ async def rename_symbol(
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="update_symbol", strategy=SymbolStrategy)
 async def update_symbol(
     file_path: str,
     target_type: str,

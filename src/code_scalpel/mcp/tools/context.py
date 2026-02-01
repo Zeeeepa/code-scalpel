@@ -13,10 +13,12 @@ from code_scalpel.mcp.helpers.context_helpers import (
 )
 from code_scalpel.mcp.protocol import mcp, _get_current_tier
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
+from code_scalpel.mcp.oracle_middleware import with_oracle_resilience, SymbolStrategy, PathStrategy
 from code_scalpel import __version__ as _pkg_version
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="crawl_project", strategy=PathStrategy)
 async def crawl_project(
     root_path: str | None = None,
     exclude_dirs: list[str] | None = None,
@@ -108,6 +110,7 @@ async def crawl_project(
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="get_file_context", strategy=PathStrategy)
 async def get_file_context(file_path: str) -> ToolResponseEnvelope:
     """Get a file overview without reading full content.
 
@@ -193,6 +196,7 @@ async def get_file_context(file_path: str) -> ToolResponseEnvelope:
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="get_symbol_references", strategy=SymbolStrategy)
 async def get_symbol_references(
     symbol_name: str,
     project_root: str | None = None,

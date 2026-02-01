@@ -102,7 +102,7 @@ def activate_tier(tier: Tier, *, skip_if_missing: bool = False) -> Optional[Path
         os.environ["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = "1"
         os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
         # Explicit requested tier useful for transparency in some helpers
-        os.environ["CODE_SCALPEL_TIER"] = "community"
+        os.environ["CODE_SCALPEL_TIER"] = tier
         return None
 
     # pro/enterprise require license
@@ -121,7 +121,7 @@ def activate_tier(tier: Tier, *, skip_if_missing: bool = False) -> Optional[Path
             # Fall back to community explicitly
             os.environ["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = "1"
             os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
-            os.environ["CODE_SCALPEL_TIER"] = "community"
+            os.environ["CODE_SCALPEL_TIER"] = tier
             return None
 
     # Set license env before any Code Scalpel imports

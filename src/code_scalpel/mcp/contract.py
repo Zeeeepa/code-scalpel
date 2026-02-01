@@ -62,6 +62,7 @@ ErrorCode = Literal[
     "not_implemented",
     "upgrade_required",
     "dependency_unavailable",
+    "correction_needed",
     "internal_error",
 ]
 

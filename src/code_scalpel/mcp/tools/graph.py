@@ -6,6 +6,7 @@ import asyncio
 from typing import Any
 
 from code_scalpel.mcp.contract import ToolResponseEnvelope, envelop_tool_function
+from code_scalpel.mcp.oracle_middleware import with_oracle_resilience, SymbolStrategy, PathStrategy, NodeIdFormatStrategy
 
 from mcp.server.fastmcp import Context
 
@@ -29,6 +30,7 @@ def _get_current_tier() -> str:
     return get_tier()
 
 
+@with_oracle_resilience(tool_id="get_call_graph", strategy=SymbolStrategy)
 async def _get_call_graph_tool(
     project_root: str | None = None,
     entry_point: str | None = None,
@@ -139,6 +141,8 @@ get_call_graph = mcp.tool()(
 )
 
 
+@with_oracle_resilience(tool_id="get_graph_neighborhood", strategy=SymbolStrategy)
+@with_oracle_resilience(tool_id="get_graph_neighborhood", strategy=NodeIdFormatStrategy)
 async def _get_graph_neighborhood_tool(
     center_node_id: str,
     k: int = 2,
@@ -182,6 +186,25 @@ async def _get_graph_neighborhood_tool(
         - tier_applied (str): Tier used for analysis
         - duration_ms (int): Analysis duration in milliseconds
     """
+    # Pre-validation: Check node ID format early to fail fast
+    import re
+    node_id_pattern = r'^[a-z]+::[^:]+::(function|class|method)::[^:]+$'
+    if not re.match(node_id_pattern, center_node_id):
+        # Raise ValidationError to trigger oracle suggestions
+        from code_scalpel.mcp.validators.core import ValidationError
+        raise ValidationError(
+            f"Invalid node ID format: '{center_node_id}'. "
+            "Expected format: language::module::type::name (e.g., python::app.routes::function::handle_request)"
+        )
+
+    # Pre-validation: Check parameter ranges
+    if k < 1:
+        raise ValueError("Parameter 'k' must be >= 1")
+    if max_nodes < 1:
+        raise ValueError("Parameter 'max_nodes' must be >= 1")
+    if direction not in ["outgoing", "incoming", "both"]:
+        raise ValueError(f"Parameter 'direction' must be 'outgoing', 'incoming', or 'both', got '{direction}'")
+
     return await asyncio.to_thread(
         _get_graph_neighborhood_sync,
         center_node_id,
@@ -347,6 +370,7 @@ get_project_map = mcp.tool()(
 )
 
 
+@with_oracle_resilience(tool_id="get_cross_file_dependencies", strategy=SymbolStrategy)
 async def _get_cross_file_dependencies_tool(
     target_file: str,
     target_symbol: str,
@@ -445,6 +469,7 @@ get_cross_file_dependencies = mcp.tool()(
 )
 
 
+@with_oracle_resilience(tool_id="cross_file_security_scan", strategy=PathStrategy)
 async def _cross_file_security_scan_tool(
     project_root: str | None = None,
     entry_points: list[str] | None = None,

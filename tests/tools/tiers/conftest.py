@@ -97,7 +97,7 @@ def _find_valid_license(tier: str) -> Path | None:
 
 
 @pytest.fixture
-def pro_tier():
+def pro_tier(monkeypatch):
     """
     Fixture that sets up Pro tier for testing.
 
@@ -107,6 +107,10 @@ def pro_tier():
     """
     # Activate Pro tier via license file or env fallback
     license_path = activate_tier("pro", skip_if_missing=False)
+    if license_path is None:
+        # Mock _get_current_tier to return "pro" when no license
+        from code_scalpel.mcp.protocol import _get_current_tier
+        monkeypatch.setattr("code_scalpel.mcp.protocol._get_current_tier", lambda: "pro")
     try:
         yield {
             "tier": "pro",
@@ -118,7 +122,7 @@ def pro_tier():
 
 
 @pytest.fixture
-def enterprise_tier():
+def enterprise_tier(monkeypatch):
     """
     Fixture that sets up Enterprise tier for testing.
 
@@ -128,6 +132,10 @@ def enterprise_tier():
     """
     # Activate Enterprise tier via license file or env fallback
     license_path = activate_tier("enterprise", skip_if_missing=False)
+    if license_path is None:
+        # Mock _get_current_tier to return "enterprise" when no license
+        from code_scalpel.mcp.protocol import _get_current_tier
+        monkeypatch.setattr("code_scalpel.mcp.protocol._get_current_tier", lambda: "enterprise")
     try:
         yield {
             "tier": "enterprise",
@@ -136,7 +144,6 @@ def enterprise_tier():
         }
     finally:
         clear_tier_caches()
-
 
 @pytest.fixture
 def community_tier():
