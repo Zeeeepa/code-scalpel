@@ -26,6 +26,8 @@ jobs:
       with:
         fetch-depth: 0
         fetch-tags: true
+    - name: Fix git safe directory
+      run: git config --global --add safe.directory $GITHUB_WORKSPACE
     - name: Resolve tag
       id: resolve
       shell: bash
