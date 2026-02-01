@@ -25,7 +25,7 @@ from __future__ import annotations
 import os
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal, Optional, Any
 
 # [20260120_TEST] Candidate license locations (ordered)
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -87,7 +87,9 @@ def clear_tier_caches() -> None:
         pass
 
 
-def activate_tier(tier: Tier, *, skip_if_missing: bool = False) -> Optional[Path]:
+def activate_tier(
+    tier: Tier, *, skip_if_missing: bool = False, monkeypatch: Any = None
+) -> Optional[Path]:
     """Activate a tier by setting environment variables before imports.
 
     - community: disables license discovery and removes LICENSE_PATH
@@ -101,12 +103,24 @@ def activate_tier(tier: Tier, *, skip_if_missing: bool = False) -> Optional[Path
     # Ensure caches are clear before modifying environment
     clear_tier_caches()
 
+    def _set(key: str, value: str) -> None:
+        if monkeypatch:
+            monkeypatch.setenv(key, value)
+        else:
+            os.environ[key] = value
+
+    def _del(key: str) -> None:
+        if monkeypatch:
+            monkeypatch.delenv(key, raising=False)
+        else:
+            os.environ.pop(key, None)
+
     tier = (tier or "community").lower()  # type: ignore[assignment]
     if tier == "community":
-        os.environ["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = "1"
-        os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
+        _set("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+        _del("CODE_SCALPEL_LICENSE_PATH")
         # Explicit requested tier useful for transparency in some helpers
-        os.environ["CODE_SCALPEL_TIER"] = tier
+        _set("CODE_SCALPEL_TIER", tier)
         return None
 
     # pro/enterprise require license
@@ -123,16 +137,16 @@ def activate_tier(tier: Tier, *, skip_if_missing: bool = False) -> Optional[Path
                 raise RuntimeError(f"No valid {tier} license file found for tests")
         else:
             # Fall back to community explicitly
-            os.environ["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = "1"
-            os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
-            os.environ["CODE_SCALPEL_TIER"] = tier
+            _set("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+            _del("CODE_SCALPEL_LICENSE_PATH")
+            _set("CODE_SCALPEL_TIER", tier)
             return None
 
     # Set license env before any Code Scalpel imports
-    os.environ.pop("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", None)
-    os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
+    _del("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY")
+    _set("CODE_SCALPEL_LICENSE_PATH", str(license_path))
     # Allow tests to explicitly request the same tier (downgrade only semantics still enforced)
-    os.environ["CODE_SCALPEL_TIER"] = tier
+    _set("CODE_SCALPEL_TIER", tier)
     return license_path
 
 

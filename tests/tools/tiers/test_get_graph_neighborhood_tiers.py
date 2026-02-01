@@ -18,7 +18,8 @@ class TestCommunityTierLimits:
         """Community tier should enforce max_k=1 limit from limits.toml."""
         # Create test project
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     helper()
 
@@ -30,7 +31,8 @@ def util():
 
 def core():
     pass
-""")
+"""
+        )
 
         # Request k=5 (beyond Community's limit of k=1)
         result = await get_graph_neighborhood(
@@ -54,7 +56,8 @@ def core():
     async def test_community_nodes_limit_enforced(self, tmp_path, community_tier):
         """Community tier should enforce max_nodes=20 limit."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     for i in range(10):
         func_a()
@@ -64,7 +67,8 @@ def center():
 def func_a(): pass
 def func_b(): pass
 def func_c(): pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
@@ -126,13 +130,15 @@ def func_c(): pass
     async def test_community_mermaid_generated(self, tmp_path, community_tier):
         """Community tier should generate basic Mermaid diagrams."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     helper()
 
 def helper():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
@@ -174,7 +180,8 @@ class TestProTierCapabilities:
     async def test_pro_k_limit_extended(self, tmp_path, pro_tier):
         """Pro tier should support k=5 (vs Community k=1)."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     depth1()
 
@@ -192,7 +199,8 @@ def depth4():
 
 def depth5():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
@@ -212,12 +220,14 @@ def depth5():
     async def test_pro_nodes_limit_extended(self, tmp_path, pro_tier):
         """Pro tier should support max_nodes=100 (vs Community 20)."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     func_a()
 
 def func_a(): pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
@@ -253,7 +263,8 @@ def func_a(): pass
     async def test_pro_has_semantic_neighbors_capability(self, tmp_path, pro_tier):
         """Pro tier should have semantic_neighbors capability."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def process_order(user_id):
     validate()
 
@@ -262,7 +273,8 @@ def validate():
 
 def process_user():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::process_order",
@@ -278,13 +290,15 @@ def process_user():
     async def test_pro_has_logical_relationship_detection(self, tmp_path, pro_tier):
         """Pro tier should have logical_relationship_detection capability."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def validate_order(order_id):
     check_stock()
 
 def check_stock():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::validate_order",
@@ -300,13 +314,15 @@ def check_stock():
     async def test_pro_mermaid_with_metadata(self, tmp_path, pro_tier):
         """Pro tier should generate Mermaid with enhanced metadata."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     helper()
 
 def helper():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
@@ -327,7 +343,8 @@ class TestEnterpriseTierCapabilities:
     async def test_enterprise_unlimited_k(self, tmp_path, enterprise_tier):
         """Enterprise tier should support unlimited k depth."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def d0(): d1()
 def d1(): d2()
 def d2(): d3()
@@ -339,7 +356,8 @@ def d7(): d8()
 def d8(): d9()
 def d9(): d10()
 def d10(): pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::d0",
@@ -361,7 +379,8 @@ def d10(): pass
     async def test_enterprise_unlimited_nodes(self, tmp_path, enterprise_tier):
         """Enterprise tier should support unlimited nodes (no max_nodes limit)."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     for i in range(20):
         func_a()
@@ -373,7 +392,8 @@ def func_a(): pass
 def func_b(): pass
 def func_c(): pass
 def func_d(): pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
@@ -408,7 +428,8 @@ def func_d(): pass
     ):
         """Enterprise tier should have graph_query_language capability."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def process():
     validate()
 
@@ -417,7 +438,8 @@ def validate():
 
 def process_user():
     pass
-""")
+"""
+        )
 
         # Enterprise should accept and support query parameter
         result = await get_graph_neighborhood(
@@ -454,11 +476,13 @@ def process_user():
     ):
         """Enterprise tier should have path_constraint_queries capability."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def a(): b()
 def b(): c()
 def c(): pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::a",
@@ -474,7 +498,8 @@ def c(): pass
     async def test_enterprise_hot_nodes_detection(self, tmp_path, enterprise_tier):
         """Enterprise tier should populate hot nodes (high-degree nodes)."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def hub():
     a()
     b()
@@ -483,7 +508,8 @@ def hub():
 def a(): pass
 def b(): pass
 def c(): pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::hub",
@@ -504,14 +530,16 @@ class TestCrossTierComparison:
     async def test_community_vs_pro_k_limit_difference(self, tmp_path):
         """Compare Community k=1 vs Pro k=5 on same graph."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def d0(): d1()
 def d1(): d2()
 def d2(): d3()
 def d3(): d4()
 def d4(): d5()
 def d5(): pass
-""")
+"""
+        )
 
         # Community tier
         from tests.utils.tier_setup import activate_tier
@@ -550,7 +578,8 @@ def d5(): pass
     async def test_community_truncation_at_20_nodes(self, tmp_path, community_tier):
         """Community tier should truncate at max_nodes=20."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     f1()
     f2()
@@ -559,7 +588,8 @@ def center():
 def f1(): pass
 def f2(): pass
 def f3(): pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
@@ -584,13 +614,15 @@ class TestCapabilityGating:
     ):
         """Verify Community output does NOT contain semantic neighbor metadata."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def calculate():
     pass
 
 def compute():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::calculate",
@@ -612,13 +644,15 @@ def compute():
     ):
         """Verify Community does NOT include LOGICAL_RELATED edge types."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def validate():
     pass
 
 def verify():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::validate",
@@ -678,7 +712,8 @@ class TestDirectionFiltering:
     async def test_direction_filtering_community(self, tmp_path, community_tier):
         """Community should filter by direction: incoming, outgoing, both."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def caller():
     target()
 
@@ -687,7 +722,8 @@ def target():
 
 def callee():
     pass
-""")
+"""
+        )
 
         # Test both direction
         result = await get_graph_neighborhood(
@@ -717,13 +753,15 @@ class TestConfidenceThreshold:
     async def test_min_confidence_filtering(self, tmp_path, community_tier):
         """min_confidence parameter should filter low-confidence edges."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     high_conf()
 
 def high_conf():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
@@ -749,13 +787,15 @@ class TestMermaidGeneration:
     async def test_mermaid_generation_community(self, tmp_path, community_tier):
         """Community should generate valid Mermaid diagrams."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def main():
     helper()
 
 def helper():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::main",
@@ -773,7 +813,8 @@ def helper():
     async def test_mermaid_generation_enterprise(self, tmp_path, enterprise_tier):
         """Enterprise should generate Mermaid with depth-based styling."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def d0():
     d1()
 
@@ -782,7 +823,8 @@ def d1():
 
 def d2():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::d0",
@@ -804,13 +846,15 @@ class TestNodeDepthTracking:
     async def test_node_depths_populated(self, tmp_path, community_tier):
         """Node depths should be populated in result."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     level1()
 
 def level1():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
@@ -834,13 +878,15 @@ class TestEdgeMetadata:
     async def test_edge_type_and_confidence_populated(self, tmp_path, community_tier):
         """Edges should include type and confidence."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def caller():
     target()
 
 def target():
     pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::caller",
@@ -865,7 +911,8 @@ class TestTruncationProtection:
     async def test_truncation_warning_community(self, tmp_path, community_tier):
         """Community should warn when truncated at max_nodes=20."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def center():
     a()
     b()
@@ -876,7 +923,8 @@ def a(): pass
 def b(): pass
 def c(): pass
 def d(): pass
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",

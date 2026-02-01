@@ -1,6 +1,6 @@
 # Code Scalpel: Surgical Code Operations for AI Agents
 
-**Latest Release: v1.2.1 | January 27, 2026**
+**Latest Release: v1.3.0 | February 1, 2026**
 
 Code Scalpel is the bridge between **Generative AI** and **Reliable Software Engineering**.
 
@@ -236,7 +236,7 @@ claude mcp add codescalpel --transport stdio uvx codescalpel mcp
 
 ## Release Information
 **Launch Date**: January 2026
-**Version**: v1.0.0
+**Version**: v1.3.0
 **License**: MIT (Community)
 
 Code Scalpel is built for the new era of **Agentic Engineering**. It is not just a linter; it is the sensory and actuator system for the next generation of AI developers.

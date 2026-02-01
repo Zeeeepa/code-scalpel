@@ -79,7 +79,7 @@ def get_user(user_id):
         result = security_scan(code=vulnerable_code)
         assert result.has_vulnerabilities
         assert result.vulnerability_count >= 1
-        assert any("SQL" in v.type for v in result.vulnerabilities)
+        assert any("SQL" in v["type"] for v in result.vulnerabilities)
 
     async def test_symbolic_execute_community(self):
         """Test symbolic_execute at community tier."""

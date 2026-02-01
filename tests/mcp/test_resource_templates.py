@@ -152,11 +152,13 @@ class TestCodeResourceTemplate:
             try:
                 # Create test file
                 test_file = Path(tmpdir) / "utils.py"
-                test_file.write_text('''
+                test_file.write_text(
+                    '''
 def calculate_tax(amount):
     """Calculate tax."""
     return amount * 0.1
-''')
+'''
+                )
 
                 # Test resource access
                 result_json = await get_code_resource(
@@ -196,11 +198,13 @@ def calculate_tax(amount):
                 components_dir = Path(tmpdir) / "components"
                 components_dir.mkdir()
                 test_file = components_dir / "Button.tsx"
-                test_file.write_text("""
+                test_file.write_text(
+                    """
 export function Button({ label }: { label: string }) {
   return <button>{label}</button>;
 }
-""")
+"""
+                )
 
                 # Test resource access
                 result_json = await get_code_resource(

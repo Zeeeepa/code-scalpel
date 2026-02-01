@@ -6,8 +6,23 @@ All MCP tool functions are async and return Pydantic models.
 
 import pytest
 
+from code_scalpel.mcp.contract import ToolError
+
 # Mark entire module as async
 pytestmark = pytest.mark.asyncio
+
+
+def get_error_message(error) -> str:
+    """[20260201_BUGFIX] Extract error message from either string or ToolError.
+
+    The Oracle middleware may enhance errors to ToolError objects,
+    so tests need to handle both string and ToolError error fields.
+    """
+    if error is None:
+        return ""
+    if isinstance(error, ToolError):
+        return error.error
+    return str(error)
 
 
 class TestAnalyzeCodeTool:
@@ -82,7 +97,7 @@ def complex_func(x):
         result = await analyze_code("")
         assert result.success is False
         assert result.error is not None
-        assert "empty" in result.error.lower()
+        assert "empty" in get_error_message(result.error).lower()
 
     async def test_analyze_syntax_error(self):
         """Test handling syntax errors."""
@@ -92,7 +107,7 @@ def complex_func(x):
         result = await analyze_code(code)
         assert result.success is False
         assert result.error is not None
-        assert "syntax" in result.error.lower()
+        assert "syntax" in get_error_message(result.error).lower()
 
     async def test_analyze_async_function(self):
         """Test analyzing async functions."""
@@ -422,7 +437,10 @@ class TestMCPIntegration:
         large_code = "x = 1\n" * ((MAX_CODE_SIZE // 6) + 1)  # +1 to exceed limit
         result = await analyze_code(large_code)
         assert result.success is False
-        assert "size" in result.error.lower() or "exceed" in result.error.lower()
+        assert (
+            "size" in get_error_message(result.error).lower()
+            or "exceed" in get_error_message(result.error).lower()
+        )
 
     async def test_analysis_pipeline(self):
         """Test running multiple analyses on the same code."""
@@ -714,7 +732,7 @@ class Calculator:
             code=code, target_type="function", target_name="nonexistent"
         )
         assert result.success is False
-        assert "not found" in result.error.lower()
+        assert "not found" in get_error_message(result.error).lower()
 
     async def test_extract_unknown_target_type(self):
         """Test extraction with unknown target type."""
@@ -723,7 +741,7 @@ class Calculator:
         code = "def foo(): pass"
         result = await extract_code(code=code, target_type="variable", target_name="x")
         assert result.success is False
-        assert "unknown target_type" in result.error.lower()
+        assert "unknown target_type" in get_error_message(result.error).lower()
 
     async def test_extract_token_estimate(self):
         """Test that token estimation is included."""
@@ -784,7 +802,10 @@ class MyClass:
 
         result = await extract_code(target_type="function", target_name="foo")
         assert result.success is False
-        assert "file_path" in result.error.lower() or "code" in result.error.lower()
+        assert (
+            "file_path" in get_error_message(result.error).lower()
+            or "code" in get_error_message(result.error).lower()
+        )
 
 
 class TestExtractCodeFromFile:
@@ -951,8 +972,8 @@ def unrelated():
         assert result.success is False
         # [20251214_BUGFIX] Updated to match PathResolver's detailed error messages
         assert (
-            "cannot access file" in result.error.lower()
-            or "not found" in result.error.lower()
+            "cannot access file" in get_error_message(result.error).lower()
+            or "not found" in get_error_message(result.error).lower()
         )
 
     async def test_extract_function_not_found_in_file(self, tmp_path):
@@ -970,7 +991,7 @@ def unrelated():
         )
 
         assert result.success is False
-        assert "not found" in result.error.lower()
+        assert "not found" in get_error_message(result.error).lower()
 
     async def test_token_savings_demonstration(self, tmp_path):
         """Demonstrate the token savings of file-based extraction."""
@@ -1139,7 +1160,7 @@ class Calculator:
         )
 
         assert result.success is False
-        assert "not found" in result.error.lower()
+        assert "not found" in get_error_message(result.error).lower()
 
     async def test_update_function_not_found(self, tmp_path, monkeypatch):
         """Test behavior when function doesn't exist - should return error."""
@@ -1159,7 +1180,7 @@ class Calculator:
         # [20260113_FIX] Correct behavior: error when function not found
         assert result.success is False
         assert result.error is not None
-        assert "not found" in result.error.lower()
+        assert "not found" in get_error_message(result.error).lower()
 
     async def test_update_invalid_syntax(self, tmp_path, monkeypatch):
         """Test error when new code has syntax error."""
@@ -1177,7 +1198,7 @@ class Calculator:
         )
 
         assert result.success is False
-        assert "syntax" in result.error.lower()
+        assert "syntax" in get_error_message(result.error).lower()
 
     async def test_update_invalid_target_type(self, tmp_path, monkeypatch):
         """Test error for invalid target type."""
@@ -1195,7 +1216,7 @@ class Calculator:
         )
 
         assert result.success is False
-        assert "invalid" in result.error.lower()
+        assert "invalid" in get_error_message(result.error).lower()
 
     async def test_update_method_invalid_format(self, tmp_path, monkeypatch):
         """Test error when method name doesn't have ClassName.method format."""
@@ -1331,7 +1352,8 @@ class TestCrossFileDependenciesMCP:
         """Create a multi-file project for cross-file tests."""
         # models.py
         models_py = tmp_path / "models.py"
-        models_py.write_text('''"""Models module."""
+        models_py.write_text(
+            '''"""Models module."""
 
 class TaxRate:
     """Tax rate configuration."""
@@ -1346,11 +1368,13 @@ class TaxRate:
 def get_default_rate() -> float:
     """Get the default tax rate."""
     return 0.1
-''')
+'''
+        )
 
         # utils.py
         utils_py = tmp_path / "utils.py"
-        utils_py.write_text('''"""Utilities module."""
+        utils_py.write_text(
+            '''"""Utilities module."""
 
 from models import TaxRate, get_default_rate
 
@@ -1364,12 +1388,19 @@ def calculate_tax(amount: float) -> float:
 def simple_function():
     """No external dependencies."""
     return 42
-''')
+'''
+        )
 
         return tmp_path
 
-    async def test_cross_file_deps_resolves_class(self, multi_file_project):
+    async def test_cross_file_deps_resolves_class(
+        self, multi_file_project, monkeypatch
+    ):
         """Test that cross-file deps resolves imported classes."""
+        monkeypatch.setattr(
+            "code_scalpel.mcp.helpers.extraction_helpers.get_current_tier",
+            lambda: "pro",
+        )
         from code_scalpel.mcp.server import extract_code
 
         result = await extract_code(
@@ -1387,8 +1418,14 @@ def simple_function():
         assert "class TaxRate" in result.context_code
         assert "models.py" in result.context_code
 
-    async def test_cross_file_deps_resolves_function(self, multi_file_project):
+    async def test_cross_file_deps_resolves_function(
+        self, multi_file_project, monkeypatch
+    ):
         """Test that cross-file deps resolves imported functions."""
+        monkeypatch.setattr(
+            "code_scalpel.mcp.helpers.extraction_helpers.get_current_tier",
+            lambda: "pro",
+        )
         from code_scalpel.mcp.server import extract_code
 
         result = await extract_code(
@@ -1404,8 +1441,12 @@ def simple_function():
         assert "get_default_rate" in result.context_code
         assert "def get_default_rate" in result.context_code
 
-    async def test_cross_file_deps_full_code(self, multi_file_project):
+    async def test_cross_file_deps_full_code(self, multi_file_project, monkeypatch):
         """Test that full_code contains external deps + target."""
+        monkeypatch.setattr(
+            "code_scalpel.mcp.helpers.extraction_helpers.get_current_tier",
+            lambda: "pro",
+        )
         from code_scalpel.mcp.server import extract_code
 
         result = await extract_code(
@@ -1422,8 +1463,12 @@ def simple_function():
         assert "def calculate_tax" in result.full_code
         assert "# From" in result.full_code
 
-    async def test_cross_file_deps_context_items(self, multi_file_project):
+    async def test_cross_file_deps_context_items(self, multi_file_project, monkeypatch):
         """Test that context_items lists resolved symbols."""
+        monkeypatch.setattr(
+            "code_scalpel.mcp.helpers.extraction_helpers.get_current_tier",
+            lambda: "pro",
+        )
         from code_scalpel.mcp.server import extract_code
 
         result = await extract_code(
@@ -1440,8 +1485,12 @@ def simple_function():
         context_str = " ".join(result.context_items)
         assert "TaxRate" in context_str
 
-    async def test_cross_file_deps_no_deps(self, multi_file_project):
+    async def test_cross_file_deps_no_deps(self, multi_file_project, monkeypatch):
         """Test function with no external dependencies."""
+        monkeypatch.setattr(
+            "code_scalpel.mcp.helpers.extraction_helpers.get_current_tier",
+            lambda: "pro",
+        )
         from code_scalpel.mcp.server import extract_code
 
         result = await extract_code(
@@ -1455,8 +1504,12 @@ def simple_function():
         assert "simple_function" in result.target_code
         assert result.context_code == ""  # No external deps
 
-    async def test_cross_file_deps_requires_file_path(self):
+    async def test_cross_file_deps_requires_file_path(self, monkeypatch):
         """Test that cross-file deps requires file_path (not code)."""
+        monkeypatch.setattr(
+            "code_scalpel.mcp.helpers.extraction_helpers.get_current_tier",
+            lambda: "pro",
+        )
         from code_scalpel.mcp.server import extract_code
 
         code = """
@@ -1478,8 +1531,12 @@ def my_func():
         # Without file_path, can't resolve external deps
         assert "TaxRate" not in result.context_code or result.context_code == ""
 
-    async def test_cross_file_deps_token_savings(self, multi_file_project):
+    async def test_cross_file_deps_token_savings(self, multi_file_project, monkeypatch):
         """Test that cross-file extraction is token-efficient."""
+        monkeypatch.setattr(
+            "code_scalpel.mcp.helpers.extraction_helpers.get_current_tier",
+            lambda: "pro",
+        )
         from code_scalpel.mcp.server import extract_code
 
         result = await extract_code(
@@ -1510,7 +1567,8 @@ class TestGetFileContext:
 
         # Create a test file
         test_file = tmp_path / "test_module.py"
-        test_file.write_text('''
+        test_file.write_text(
+            '''
 """A test module."""
 
 import os
@@ -1525,7 +1583,8 @@ class MyClass:
     
     def method(self):
         return "hello"
-''')
+'''
+        )
 
         result = await get_file_context(str(test_file))
 
@@ -1549,10 +1608,12 @@ class MyClass:
         from code_scalpel.mcp.server import get_file_context
 
         test_file = tmp_path / "vulnerable.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def dangerous_eval(user_input):
     return eval(user_input)  # Security issue!
-""")
+"""
+        )
 
         result = await get_file_context(str(test_file))
 
@@ -1567,7 +1628,7 @@ def dangerous_eval(user_input):
 
         assert result.success is False
         assert result.error is not None
-        assert "not found" in result.error.lower()
+        assert "not found" in get_error_message(result.error).lower()
 
     async def test_get_file_context_syntax_error(self, tmp_path):
         """Test handling of file with syntax error."""
@@ -1580,14 +1641,15 @@ def dangerous_eval(user_input):
 
         assert result.success is False
         assert result.error is not None
-        assert "syntax" in result.error.lower()
+        assert "syntax" in get_error_message(result.error).lower()
 
     async def test_get_file_context_exports(self, tmp_path):
         """Test detection of __all__ exports."""
         from code_scalpel.mcp.server import get_file_context
 
         test_file = tmp_path / "exports.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 __all__ = ["public_func", "PublicClass"]
 
 def public_func():
@@ -1598,7 +1660,8 @@ def _private_func():
 
 class PublicClass:
     pass
-""")
+"""
+        )
 
         result = await get_file_context(str(test_file))
 
@@ -1616,28 +1679,34 @@ class TestGetSymbolReferences:
 
         # Create multiple files that reference a function
         utils_file = tmp_path / "utils.py"
-        utils_file.write_text('''
+        utils_file.write_text(
+            '''
 def helper_function():
     """The helper function definition."""
     return 42
-''')
+'''
+        )
 
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 from utils import helper_function
 
 def main():
     result = helper_function()
     return result
-""")
+"""
+        )
 
         test_file = tmp_path / "test_utils.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 from utils import helper_function
 
 def test_helper():
     assert helper_function() == 42
-""")
+"""
+        )
 
         result = await get_symbol_references("helper_function", str(tmp_path))
 
@@ -1651,19 +1720,23 @@ def test_helper():
         from code_scalpel.mcp.server import get_symbol_references
 
         models_file = tmp_path / "models.py"
-        models_file.write_text("""
+        models_file.write_text(
+            """
 class User:
     def __init__(self, name):
         self.name = name
-""")
+"""
+        )
 
         service_file = tmp_path / "service.py"
-        service_file.write_text("""
+        service_file.write_text(
+            """
 from models import User
 
 def create_user(name):
     return User(name)
-""")
+"""
+        )
 
         result = await get_symbol_references("User", str(tmp_path))
 
@@ -1710,12 +1783,14 @@ def create_user(name):
         from code_scalpel.mcp.server import get_symbol_references
 
         test_file = tmp_path / "code.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def target_function():
     return "result"
 
 result = target_function()
-""")
+"""
+        )
 
         result = await get_symbol_references("target_function", str(tmp_path))
 
@@ -1742,21 +1817,25 @@ class TestGetCrossFileDependencies:
 
         # Create utils.py with a helper function
         utils_file = tmp_path / "utils.py"
-        utils_file.write_text("""
+        utils_file.write_text(
+            """
 def format_string(s):
     \"\"\"Format a string.\"\"\"
     return s.strip().upper()
-""")
+"""
+        )
 
         # Create main.py that uses the helper
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 from utils import format_string
 
 def process_data(data):
     \"\"\"Process data using utility function.\"\"\"
     return format_string(data)
-""")
+"""
+        )
 
         result = await get_cross_file_dependencies(
             target_file="main.py",
@@ -1778,18 +1857,22 @@ def process_data(data):
         from code_scalpel.mcp.server import get_cross_file_dependencies
 
         helper_file = tmp_path / "helper.py"
-        helper_file.write_text("""
+        helper_file.write_text(
+            """
 def helper():
     return "help"
-""")
+"""
+        )
 
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 from helper import helper
 
 def main():
     return helper()
-""")
+"""
+        )
 
         result = await get_cross_file_dependencies(
             target_file="main.py",
@@ -1808,10 +1891,12 @@ def main():
         from code_scalpel.mcp.server import get_cross_file_dependencies
 
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def target_func():
     return 42
-""")
+"""
+        )
 
         result = await get_cross_file_dependencies(
             target_file="main.py",
@@ -1832,18 +1917,22 @@ def target_func():
 
         # Create files with imports
         a_file = tmp_path / "a.py"
-        a_file.write_text("""
+        a_file.write_text(
+            """
 def func_a():
     return 1
-""")
+"""
+        )
 
         b_file = tmp_path / "b.py"
-        b_file.write_text("""
+        b_file.write_text(
+            """
 from a import func_a
 
 def func_b():
     return func_a() + 1
-""")
+"""
+        )
 
         result = await get_cross_file_dependencies(
             target_file="b.py",
@@ -1897,20 +1986,24 @@ def func_b():
 
         # Create circular import situation
         a_file = tmp_path / "a.py"
-        a_file.write_text("""
+        a_file.write_text(
+            """
 from b import func_b
 
 def func_a():
     return func_b()
-""")
+"""
+        )
 
         b_file = tmp_path / "b.py"
-        b_file.write_text("""
+        b_file.write_text(
+            """
 from a import func_a
 
 def func_b():
     return func_a()
-""")
+"""
+        )
 
         result = await get_cross_file_dependencies(
             target_file="a.py",
@@ -1928,26 +2021,32 @@ def func_b():
 
         # Create a chain of dependencies
         c_file = tmp_path / "c.py"
-        c_file.write_text("""
+        c_file.write_text(
+            """
 def func_c():
     return "c"
-""")
+"""
+        )
 
         b_file = tmp_path / "b.py"
-        b_file.write_text("""
+        b_file.write_text(
+            """
 from c import func_c
 
 def func_b():
     return func_c()
-""")
+"""
+        )
 
         a_file = tmp_path / "a.py"
-        a_file.write_text("""
+        a_file.write_text(
+            """
 from b import func_b
 
 def func_a():
     return func_b()
-""")
+"""
+        )
 
         # With max_depth=1, should only get immediate dependencies
         result = await get_cross_file_dependencies(
@@ -1973,10 +2072,12 @@ class TestCrossFileSecurityScan:
         from code_scalpel.mcp.server import cross_file_security_scan
 
         safe_file = tmp_path / "safe.py"
-        safe_file.write_text("""
+        safe_file.write_text(
+            """
 def safe_function(x):
     return x * 2
-""")
+"""
+        )
 
         result = await cross_file_security_scan(project_root=str(tmp_path))
 
@@ -1991,18 +2092,21 @@ def safe_function(x):
 
         # Create routes.py with user input
         routes_file = tmp_path / "routes.py"
-        routes_file.write_text("""
+        routes_file.write_text(
+            """
 from flask import request
 from db import execute_query
 
 def search():
     query = request.args.get('q')
     return execute_query(query)
-""")
+"""
+        )
 
         # Create db.py with SQL execution
         db_file = tmp_path / "db.py"
-        db_file.write_text("""
+        db_file.write_text(
+            """
 import sqlite3
 
 def execute_query(query):
@@ -2010,7 +2114,8 @@ def execute_query(query):
     cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM users WHERE name = '{query}'")
     return cursor.fetchall()
-""")
+"""
+        )
 
         result = await cross_file_security_scan(project_root=str(tmp_path))
 
@@ -2022,20 +2127,24 @@ def execute_query(query):
         from code_scalpel.mcp.server import cross_file_security_scan
 
         input_file = tmp_path / "input.py"
-        input_file.write_text("""
+        input_file.write_text(
+            """
 def get_user_input():
     return input("Enter data: ")
-""")
+"""
+        )
 
         process_file = tmp_path / "process.py"
-        process_file.write_text("""
+        process_file.write_text(
+            """
 from input import get_user_input
 import os
 
 def process():
     data = get_user_input()
     os.system(data)
-""")
+"""
+        )
 
         result = await cross_file_security_scan(project_root=str(tmp_path))
 
@@ -2046,10 +2155,12 @@ def process():
         from code_scalpel.mcp.server import cross_file_security_scan
 
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def test_func():
     return 42
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(tmp_path), include_diagram=True
@@ -2073,13 +2184,15 @@ def test_func():
         from code_scalpel.mcp.server import cross_file_security_scan
 
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def main():
     return "main"
 
 def other():
     return "other"
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(tmp_path),
@@ -2093,10 +2206,12 @@ def other():
         from code_scalpel.mcp.server import cross_file_security_scan
 
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def test():
     pass
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(tmp_path),
@@ -2111,10 +2226,12 @@ def test():
 
         # Create safe code
         safe_file = tmp_path / "safe.py"
-        safe_file.write_text("""
+        safe_file.write_text(
+            """
 def safe_func():
     return 42
-""")
+"""
+        )
 
         result = await cross_file_security_scan(project_root=str(tmp_path))
 

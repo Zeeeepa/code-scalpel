@@ -2,10 +2,18 @@ import types
 
 import networkx as nx
 
+import pytest
+
+try:
+    from code_scalpel.integrations import rest_api_server
+    from code_scalpel.integrations.rest_api_server import MCPServerConfig
+
+    HAS_SERVER = True
+except ImportError:
+    HAS_SERVER = False
+
 from code_scalpel.code_analyzer import CodeAnalyzer
 from code_scalpel.generators.test_generator import TestGenerator
-from code_scalpel.integrations import rest_api_server
-from code_scalpel.integrations.rest_api_server import MCPServerConfig
 from code_scalpel.pdg_tools.visualizer import PDGVisualizer
 
 # [20251214_TEST] Target high-yield coverage gaps (CodeAnalyzer, TestGenerator, PDGVisualizer, REST API)
@@ -73,7 +81,11 @@ def test_pdg_visualizer_styles_and_wrapping():
 
 
 def test_rest_api_server_validation_and_analyze(monkeypatch):
+    if not HAS_SERVER:
+        pytest.skip("Skipping REST API tests (flask/server not installed)")
+
     class DummyScalpel:
+
         def __init__(self, cache_enabled=True):
             self.cache_enabled = cache_enabled
 

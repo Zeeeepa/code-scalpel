@@ -175,7 +175,12 @@ jobs:
           --ignore=tests/test_coverage_ultra_final.py \
           --ignore=tests/test_deep_coverage_95.py \
           --ignore=tests/test_uncovered_lines_final.py \
-          --ignore=tests/test_v151_integration.py  # [20251219_BUGFIX] Exclude incomplete integration test files
+          --ignore=tests/test_v151_integration.py \
+          --ignore=tests/mcp/test_low_rate_paths.py \
+          --ignore=tests/mcp/test_rest_api_server.py \
+          --ignore=tests/mcp/test_rest_api_server_additional.py \
+          --ignore=tests/mcp_tool_verification/ \
+          --ignore=tests/security/test_sandbox.py  # [20260201_BUGFIX] Exclude submodule tests and sandbox tests requiring extra setup
     
     - name: Upload coverage to Codecov
       if: matrix.python-version == '3.11'

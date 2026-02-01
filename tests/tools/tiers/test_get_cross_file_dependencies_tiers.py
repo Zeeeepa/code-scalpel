@@ -15,66 +15,80 @@ from code_scalpel.mcp.helpers.graph_helpers import _get_cross_file_dependencies_
 def temp_project_with_dependencies(tmp_path):
     """Create nested dependency chain for depth testing."""
     # Create module_f.py (depth 6 - deepest)
-    (tmp_path / "module_f.py").write_text('''
+    (tmp_path / "module_f.py").write_text(
+        '''
 def helper_f():
     """Deepest dependency (depth 6)."""
     return "f"
-''')
+'''
+    )
 
     # Create module_e.py (depth 5) - imports module_f
-    (tmp_path / "module_e.py").write_text('''
+    (tmp_path / "module_e.py").write_text(
+        '''
 from module_f import helper_f
 
 def helper_e():
     """Depth 5 dependency."""
     return helper_f()
-''')
+'''
+    )
 
     # Create module_d.py (depth 4) - imports module_e
-    (tmp_path / "module_d.py").write_text('''
+    (tmp_path / "module_d.py").write_text(
+        '''
 from module_e import helper_e
 
 def helper_d():
     """Depth 4 dependency."""
     return helper_e()
-''')
+'''
+    )
 
     # Create module_c.py (depth 3) - imports module_d
-    (tmp_path / "module_c.py").write_text('''
+    (tmp_path / "module_c.py").write_text(
+        '''
 from module_d import helper_d
 
 def helper_c():
     """Depth 3 dependency."""
     return helper_d()
-''')
+'''
+    )
 
     # Create module_b.py (depth 2) - imports module_c
-    (tmp_path / "module_b.py").write_text('''
+    (tmp_path / "module_b.py").write_text(
+        '''
 from module_c import helper_c
 
 def helper_b():
     """Depth 2 dependency."""
     return helper_c()
-''')
+'''
+    )
 
     # Create module_a.py (depth 1) - imports module_b
-    (tmp_path / "module_a.py").write_text('''
+    (tmp_path / "module_a.py").write_text(
+        '''
 from module_b import helper_b
 
 def calculate(amount):
     """Depth 1 dependency - direct import."""
     return 100 + amount + len(str(helper_b()))
-''')
+'''
+    )
 
     # Create main.py (depth 0 - target)
-    (tmp_path / "main.py").write_text('''
+    (tmp_path / "main.py").write_text(
+        '''
 from module_a import calculate
 
 def process_order(order_id, amount):
     """Main function that depends on module_a.calculate."""
     total = calculate(amount)
     return {"order_id": order_id, "total": total}
-''')
+'''
+    )
 
     return tmp_path
 
@@ -378,23 +392,29 @@ class TestGetCrossFileDependenciesEnterpriseTier:
     def test_circular_dependency_detection(self, tmp_path, enterprise_tier):
         """Verify circular dependency detection is active in enterprise tier."""
         # Create circular dependencies
-        (tmp_path / "module_x.py").write_text("""
+        (tmp_path / "module_x.py").write_text(
+            """
 from module_y import func_y
 def func_x():
     return func_y()
-""")
+"""
+        )
 
-        (tmp_path / "module_y.py").write_text("""
+        (tmp_path / "module_y.py").write_text(
+            """
 from module_x import func_x
 def func_y():
     return func_x()
-""")
+"""
+        )
 
-        (tmp_path / "main.py").write_text("""
+        (tmp_path / "main.py").write_text(
+            """
 from module_x import func_x
 def start():
     return func_x()
-""")
+"""
+        )
 
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",

@@ -17,7 +17,9 @@ from code_scalpel.mcp.models.core import (
     SymbolicResult,
     TestGenerationResult,
 )
-from code_scalpel.licensing import tier_detector
+
+# [20260201_BUGFIX] Use JWT-aware get_current_tier for proper license validation
+from code_scalpel.licensing.jwt_validator import get_current_tier as _get_current_tier
 from code_scalpel.parsing import ParsingError, parse_python_code
 
 logger = logging.getLogger(__name__)
@@ -356,7 +358,7 @@ def _symbolic_execute_sync(
     [20251226_FEATURE] Enforce tier/tool limits via limits.toml (max_paths/max_depth/constraint_types).
     [20251230_FEATURE] v1.0 roadmap alignment - tier-aware Pro/Enterprise features.
     """
-    tier = tier or tier_detector.get_current_tier()
+    tier = tier or _get_current_tier()
     caps = capabilities or get_tool_capabilities("symbolic_execute", tier)
     caps_set = set(caps.get("capabilities", set()) or [])
     limits = caps.get("limits", {}) or {}
@@ -792,7 +794,8 @@ def _simulate_refactor_sync(
         from code_scalpel.generators import RefactorSimulator
 
         # [20251230_FEATURE] Get tier capabilities
-        tier = tier_detector.get_current_tier()
+        # [20260201_BUGFIX] Use JWT-aware tier detection
+        tier = _get_current_tier()
         caps = get_tool_capabilities("simulate_refactor", tier) or {}
         cap_set = set(caps.get("capabilities", set()) or [])
 

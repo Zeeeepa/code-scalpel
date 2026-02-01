@@ -172,13 +172,16 @@ async def test_enterprise_provides_risk_scoring(
     project_root = tmp_path / "proj"
     _write_fixture_project(project_root)
 
+    # [20260201_FIX] Use complete, parseable Python code for sink detection
     code = """
-# Critical risk: Direct string formatting
-cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
+import sqlite3
 
-# High risk: Variable as string
-sql = query
-cursor.execute(sql)
+def vulnerable_query(user_id):
+    conn = sqlite3.connect('test.db')
+    cursor = conn.cursor()
+    # Critical risk: Direct string formatting
+    cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
+    return cursor.fetchall()
 """
 
     repo_root = _repo_root()
@@ -250,9 +253,16 @@ async def test_enterprise_enables_remediation_suggestions(
     project_root = tmp_path / "proj"
     _write_fixture_project(project_root)
 
+    # [20260201_FIX] Use complete, parseable Python code for sink detection
     code = """
-# Vulnerable SQL injection
-cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
+import sqlite3
+
+def get_user(user_id):
+    conn = sqlite3.connect('test.db')
+    cursor = conn.cursor()
+    # Vulnerable SQL injection
+    cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
+    return cursor.fetchone()
 """
 
     repo_root = _repo_root()
@@ -382,20 +392,21 @@ async def test_enterprise_full_feature_set(
     project_root = tmp_path / "proj"
     _write_fixture_project(project_root)
 
-    # Comprehensive code with multiple vulnerability types
+    # [20260201_FIX] Use complete, parseable Python code for sink detection
     code = """
 import subprocess
-from django.db.models import Q
+import sqlite3
 
-# SQL Injection (multiple patterns)
-cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
-User.objects.raw("SELECT * FROM users WHERE active = %s", [True])
+def run_command(user_input):
+    # Command Injection
+    subprocess.call(f"echo {user_input}", shell=True)
 
-# Command Injection
-subprocess.call(f"echo {user_input}", shell=True)
-
-# XSS-like pattern (in Python comment, but useful for test)
-# eval(user_input)
+def query_user(user_id):
+    conn = sqlite3.connect('test.db')
+    cursor = conn.cursor()
+    # SQL Injection
+    cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
+    return cursor.fetchone()
 """
 
     repo_root = _repo_root()

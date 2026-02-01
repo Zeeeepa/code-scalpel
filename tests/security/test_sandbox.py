@@ -22,6 +22,9 @@ if agents_tests not in sys.path:
 try:
     from autonomy.test_sandbox import *  # noqa: F401, F403
 except ImportError as e:
-    raise ImportError(
-        "This test requires the agents package. Install with: pip install code-scalpel[agents]"
-    ) from e
+    import pytest
+
+    pytest.skip(
+        f"This test requires the agents package. Install with: pip install code-scalpel[agents] (Error: {e})",
+        allow_module_level=True,
+    )

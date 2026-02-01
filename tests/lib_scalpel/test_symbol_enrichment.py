@@ -20,7 +20,8 @@ class TestProjectScannerSymbolEnrichment:
 
             # Create a test file with function and class
             test_file = tmpdir_path / "test_module.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 def process_data(data: list) -> dict:
     '''Process data and return results.'''
     return {'count': len(data)}
@@ -34,7 +35,8 @@ class DataProcessor:
     def process(self, items):
         '''Process items.'''
         return items
-""")
+"""
+            )
 
             # Scan with symbol extraction enabled
             scanner = ProjectScanner(
@@ -88,14 +90,16 @@ class DataProcessor:
             tmpdir_path = Path(tmpdir)
 
             test_file = tmpdir_path / "classes.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 class Calculator:
     def add(self, a: int, b: int) -> int:
         return a + b
     
     def subtract(self, a: int, b: int) -> int:
         return a - b
-""")
+"""
+            )
 
             scanner = ProjectScanner(
                 root_dir=tmpdir_path,
@@ -145,7 +149,8 @@ class Calculator:
             tmpdir_path = Path(tmpdir)
 
             test_file = tmpdir_path / "mixed.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 import json
 from typing import Dict
 
@@ -155,7 +160,8 @@ def helper():
 class Manager:
     def task(self):
         pass
-""")
+"""
+            )
 
             scanner = ProjectScanner(
                 root_dir=tmpdir_path,
@@ -176,7 +182,8 @@ class Manager:
             tmpdir_path = Path(tmpdir)
 
             test_file = tmpdir_path / "signatures.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 def simple():
     '''Simple function.'''
     pass
@@ -189,7 +196,8 @@ def with_args(a: int, b: str) -> bool:
 def decorated():
     '''Decorated function.'''
     pass
-""")
+"""
+            )
 
             scanner = ProjectScanner(
                 root_dir=tmpdir_path,
@@ -237,11 +245,13 @@ class TestSymbolExtractorIntegration:
             tmpdir_path = Path(tmpdir)
 
             test_file = tmpdir_path / "metadata.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 def example(x, y) -> int:
     '''Example function.'''
     return x + y
-""")
+"""
+            )
 
             scanner = ProjectScanner(
                 root_dir=tmpdir_path,

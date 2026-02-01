@@ -30,7 +30,8 @@ class TestResolverLimitsFileOverride:
         """Resolver should use CODE_SCALPEL_LIMITS_FILE override."""
         # Create a minimal custom limits file
         custom_limits = tmp_path / "custom_limits.toml"
-        custom_limits.write_text("""
+        custom_limits.write_text(
+            """
 [community]
 get_file_context = { available = true, max_lines = 999 }
 
@@ -39,7 +40,8 @@ get_file_context = { available = true, max_lines = 1999 }
 
 [enterprise]
 get_file_context = { available = true, max_lines = 9999 }
-""")
+"""
+        )
 
         os.environ["CODE_SCALPEL_LIMITS_FILE"] = str(custom_limits)
         reload_limits_cache()
@@ -57,7 +59,8 @@ get_file_context = { available = true, max_lines = 9999 }
         """Resolver cache should be cleared when override changes."""
         # Create first custom limits file
         limits_v1 = tmp_path / "limits_v1.toml"
-        limits_v1.write_text("""
+        limits_v1.write_text(
+            """
 [community]
 get_file_context = { available = true, max_lines = 100 }
 
@@ -66,7 +69,8 @@ get_file_context = { available = true, max_lines = 100 }
 
 [enterprise]
 get_file_context = { available = true, max_lines = 100 }
-""")
+"""
+        )
 
         # Load first version
         os.environ["CODE_SCALPEL_LIMITS_FILE"] = str(limits_v1)
@@ -76,7 +80,8 @@ get_file_context = { available = true, max_lines = 100 }
 
         # Change to second version
         limits_v2 = tmp_path / "limits_v2.toml"
-        limits_v2.write_text("""
+        limits_v2.write_text(
+            """
 [community]
 get_file_context = { available = true, max_lines = 200 }
 
@@ -85,7 +90,8 @@ get_file_context = { available = true, max_lines = 200 }
 
 [enterprise]
 get_file_context = { available = true, max_lines = 200 }
-""")
+"""
+        )
 
         os.environ["CODE_SCALPEL_LIMITS_FILE"] = str(limits_v2)
         reload_limits_cache()
@@ -132,7 +138,8 @@ class TestResolverEnvironmentPrecedence:
     def test_limits_file_override_precedence(self, clear_capabilities_cache, tmp_path):
         """CODE_SCALPEL_LIMITS_FILE should take precedence."""
         custom_limits = tmp_path / "override_limits.toml"
-        custom_limits.write_text("""
+        custom_limits.write_text(
+            """
 [community]
 get_file_context = { available = true, max_lines = 12345 }
 
@@ -141,7 +148,8 @@ get_file_context = { available = true, max_lines = 12345 }
 
 [enterprise]
 get_file_context = { available = true, max_lines = 12345 }
-""")
+"""
+        )
 
         os.environ["CODE_SCALPEL_LIMITS_FILE"] = str(custom_limits)
         reload_limits_cache()

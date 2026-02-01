@@ -86,14 +86,17 @@ async def test_missing_frontend_code_parameter(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    # [20260120_FIX] MCP returns validation errors via isError=True, not JSON envelope
-    # Missing required parameters trigger pydantic validation which the MCP framework
-    # catches and returns as an error response.
-    assert payload.isError is True
-    assert payload.content, "Error result should have content describing the error"
-    # Error message should mention the missing field
-    error_text = payload.content[0].text if payload.content else ""
-    assert "frontend_code" in error_text.lower() or "required" in error_text.lower()
+    # [20260201_FIX] MCP returns validation errors in envelope.error, not isError flag
+    # The Oracle middleware and tool design puts errors in structuredContent['error']
+    env = payload.structuredContent
+    assert env is not None, "Should have structured content"
+    assert env.get("error") is not None, "Should have error in envelope"
+    error_msg = env["error"].get("error", "").lower()
+    assert (
+        "frontend_code" in error_msg
+        or "required" in error_msg
+        or "must be provided" in error_msg
+    )
 
 
 async def test_missing_backend_code_parameter(tmp_path: Path):
@@ -111,12 +114,16 @@ async def test_missing_backend_code_parameter(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    # [20260120_FIX] MCP returns validation errors via isError=True
-    assert payload.isError is True
-    assert payload.content, "Error result should have content describing the error"
-    # Error message should mention the missing field
-    error_text = payload.content[0].text if payload.content else ""
-    assert "backend_code" in error_text.lower() or "required" in error_text.lower()
+    # [20260201_FIX] MCP returns validation errors in envelope.error, not isError flag
+    env = payload.structuredContent
+    assert env is not None, "Should have structured content"
+    assert env.get("error") is not None, "Should have error in envelope"
+    error_msg = env["error"].get("error", "").lower()
+    assert (
+        "backend_code" in error_msg
+        or "required" in error_msg
+        or "must be provided" in error_msg
+    )
 
 
 async def test_invalid_frontend_code_type(tmp_path: Path):

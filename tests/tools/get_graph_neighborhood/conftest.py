@@ -384,7 +384,8 @@ def temp_project_dir(tmp_path):
 
     # Create a main module
     main_py = src_dir / "main.py"
-    main_py.write_text("""
+    main_py.write_text(
+        """
 def center_function():
     return func_a()
 
@@ -393,17 +394,20 @@ def func_a():
 
 def func_a1():
     return "result"
-""")
+"""
+    )
 
     # Create dependent modules
     utils_py = src_dir / "utils.py"
-    utils_py.write_text("""
+    utils_py.write_text(
+        """
 def func_b():
     return func_b1()
 
 def func_b1():
     return "utility"
-""")
+"""
+    )
 
     return project_dir
 

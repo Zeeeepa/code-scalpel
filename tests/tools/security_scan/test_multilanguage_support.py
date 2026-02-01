@@ -9,14 +9,19 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_javascript_dom_xss_via_file_path(tmp_path):
-    js_code = textwrap.dedent("""
+    js_code = (
+        textwrap.dedent(
+            """
         function render(userInput) {
           document.getElementById('t').innerHTML = userInput;
           document.write(userInput);
           const el = document.getElementById('c');
           el.insertAdjacentHTML('beforeend', userInput);
         }
-        """).strip() + "\n"
+        """
+        ).strip()
+        + "\n"
+    )
     js_file = tmp_path / "sample.js"
     js_file.write_text(js_code, encoding="utf-8")
 
@@ -34,14 +39,19 @@ async def test_javascript_dom_xss_via_file_path(tmp_path):
 # [20260107_TEST] TypeScript language support tests
 async def test_typescript_dom_xss(tmp_path):
     """TypeScript innerHTML XSS detection."""
-    ts_code = textwrap.dedent("""
+    ts_code = (
+        textwrap.dedent(
+            """
         function renderUser(name: string): void {
           const userDiv = document.getElementById('user');
           if (userDiv) {
             userDiv.innerHTML = name; // XSS vulnerability
           }
         }
-        """).strip() + "\n"
+        """
+        ).strip()
+        + "\n"
+    )
     ts_file = tmp_path / "app.ts"
     ts_file.write_text(ts_code, encoding="utf-8")
 
@@ -61,12 +71,17 @@ async def test_typescript_dom_xss(tmp_path):
 )
 async def test_typescript_sql_injection(tmp_path):
     """TypeScript SQL injection via template strings."""
-    ts_code = textwrap.dedent("""
+    ts_code = (
+        textwrap.dedent(
+            """
         async function getUser(id: string): Promise<any> {
           const query = `SELECT * FROM users WHERE id=${id}`;  // SQL injection
           return await database.query(query);
         }
-        """).strip() + "\n"
+        """
+        ).strip()
+        + "\n"
+    )
     ts_file = tmp_path / "db.ts"
     ts_file.write_text(ts_code, encoding="utf-8")
 
@@ -86,12 +101,17 @@ async def test_typescript_sql_injection(tmp_path):
 )
 async def test_typescript_command_injection(tmp_path):
     """TypeScript command injection via child_process."""
-    ts_code = textwrap.dedent("""
+    ts_code = (
+        textwrap.dedent(
+            """
         import { exec } from 'child_process';
         function runCommand(userCmd: string): void {
           exec(`ls -la ${userCmd}`);  // Command injection
         }
-        """).strip() + "\n"
+        """
+        ).strip()
+        + "\n"
+    )
     ts_file = tmp_path / "cmd.ts"
     ts_file.write_text(ts_code, encoding="utf-8")
 
@@ -109,13 +129,18 @@ async def test_typescript_command_injection(tmp_path):
 # [20260107_TEST] Java language support tests
 async def test_java_sql_injection_spring(tmp_path):
     """Java Spring SQL injection detection."""
-    java_code = textwrap.dedent("""
+    java_code = (
+        textwrap.dedent(
+            """
         @GetMapping("/user")
         public User getUser(@RequestParam String id) {
           String query = "SELECT * FROM users WHERE id=" + id;  // SQL injection
           return jdbcTemplate.queryForObject(query, User.class);
         }
-        """).strip() + "\n"
+        """
+        ).strip()
+        + "\n"
+    )
     java_file = tmp_path / "UserController.java"
     java_file.write_text(java_code, encoding="utf-8")
 
@@ -135,12 +160,17 @@ async def test_java_sql_injection_spring(tmp_path):
 )
 async def test_java_jndi_injection(tmp_path):
     """Java JNDI injection detection (Log4Shell variant)."""
-    java_code = textwrap.dedent("""
+    java_code = (
+        textwrap.dedent(
+            """
         public void logUserInput(String input) {
           Context context = new InitialContext();
           context.lookup(input);  // JNDI injection vulnerability
         }
-        """).strip() + "\n"
+        """
+        ).strip()
+        + "\n"
+    )
     java_file = tmp_path / "Logger.java"
     java_file.write_text(java_code, encoding="utf-8")
 
@@ -158,12 +188,17 @@ async def test_java_jndi_injection(tmp_path):
 )
 async def test_java_xss_jsp(tmp_path):
     """Java JSP XSS detection."""
-    java_code = textwrap.dedent("""
+    java_code = (
+        textwrap.dedent(
+            """
         <%
         String userName = request.getParameter("name");
         out.println("<div>" + userName + "</div>");  // XSS
         %>
-        """).strip() + "\n"
+        """
+        ).strip()
+        + "\n"
+    )
     jsp_file = tmp_path / "user.jsp"
     jsp_file.write_text(java_code, encoding="utf-8")
 

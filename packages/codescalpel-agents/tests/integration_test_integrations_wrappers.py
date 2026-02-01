@@ -46,21 +46,25 @@ def greet(name: str) -> str:
 def test_crewai_symbolic_and_security_analysis():
     scalpel = CrewAIScalpel(cache_enabled=False)
 
-    symbolic_result = scalpel.analyze_symbolic("""\
+    symbolic_result = scalpel.analyze_symbolic(
+        """\
 import math
 
 def branch(x: int) -> int:
     if x > 0:
         return x + 1
     return -x
-""")
+"""
+    )
     assert symbolic_result["success"] is True
     assert symbolic_result["total_paths"] >= 1
 
-    security_result = scalpel.analyze_security("""\
+    security_result = scalpel.analyze_security(
+        """\
 def safe_path(value: str) -> str:
     return value.replace("..", "")
-""")
+"""
+    )
     assert security_result["success"] is True
     assert security_result.get("risk_level") in {"low", "medium", "high", "critical"}
 

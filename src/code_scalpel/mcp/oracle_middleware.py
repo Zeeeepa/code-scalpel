@@ -600,9 +600,25 @@ def with_oracle_resilience(
                 # Call the original tool function
                 result = await func(*args, **kwargs)
 
-                # Post-process: Check if result is an error envelope that can be enhanced
+                # [20260201_BUGFIX] Two-stage post-processing for error envelopes
+                # Stage 2a: Check envelope.error field
                 if isinstance(result, ToolResponseEnvelope) and result.error:
                     enhanced = _enhance_error_envelope(
+                        result, tool_id, strategy, kwargs, started
+                    )
+                    if enhanced:
+                        return enhanced
+
+                # [20260201_BUGFIX] Stage 2b: Check data.error field (tools that return
+                # errors in response.data instead of response.error)
+                # NOTE: Use model_dump() to access the actual envelope.error field,
+                # because result.error might delegate to data["error"] via __getattr__
+                envelope_dict = result.model_dump()
+                if (
+                    isinstance(result, ToolResponseEnvelope)
+                    and envelope_dict.get("error") is None
+                ):
+                    enhanced = _enhance_data_error(
                         result, tool_id, strategy, kwargs, started
                     )
                     if enhanced:
@@ -800,6 +816,117 @@ def _enhance_error_envelope(
                 duration_ms=duration_ms,
                 error=enhanced_error,
             )
+
+    return None
+
+
+def _enhance_data_error(
+    envelope: ToolResponseEnvelope,
+    tool_id: str,
+    strategy: type[RecoveryStrategy],
+    kwargs: dict,
+    started: float,
+) -> ToolResponseEnvelope | None:
+    """Post-process envelopes where error is in data.error field (Stage 2b).
+
+    [20260201_BUGFIX] Some tools return errors in response.data.error instead of
+    response.error. This function handles that case by checking data.error and
+    enhancing the envelope when correctable errors are found.
+
+    Args:
+        envelope: The tool response envelope (with error possibly in data.error)
+        tool_id: Tool ID for logging
+        strategy: Recovery strategy to use
+        kwargs: Original tool kwargs
+        started: Start time for duration calculation
+
+    Returns:
+        Enhanced envelope with suggestions, or None if not correctable
+    """
+    # Check if data is a dict with an error field
+    if not envelope.data or not isinstance(envelope.data, dict):
+        return None
+
+    data_error = envelope.data.get("error")
+    if not data_error or not isinstance(data_error, str):
+        return None
+
+    # Also check for success=False pattern
+    if envelope.data.get("success") is not False:
+        return None
+
+    error_msg = data_error
+    logger.debug(f"Oracle: Checking data.error field in {tool_id}: {error_msg[:100]}")
+
+    # Check if this looks like a correctable error (symbol or path not found)
+    is_symbol_error = "not found" in error_msg.lower() and any(
+        word in error_msg.lower() for word in ["symbol", "function", "class", "method"]
+    )
+    is_path_error = any(
+        phrase in error_msg.lower()
+        for phrase in ["cannot access file", "file not found", "no such file", "path"]
+    )
+
+    if not is_symbol_error and not is_path_error:
+        return None
+
+    logger.info(f"Oracle: Post-processing data.error in {tool_id}")
+
+    # Build context for strategy
+    context = {
+        "file_path": kwargs.get("file_path"),
+        "code": kwargs.get("code"),
+        "symbol_name": kwargs.get("target_name") or kwargs.get("symbol_name"),
+    }
+
+    # Create a fake error for the strategy
+    if is_symbol_error:
+        error = ValidationError(error_msg)
+    else:
+        error = FileNotFoundError(error_msg)
+
+    suggestions = strategy.suggest(error, context)
+
+    if suggestions:
+        # Enhance the error message with suggestions
+        suggestion_names = [
+            s.get("symbol") or s.get("path") or s.get("hint", "")
+            for s in suggestions
+            if s.get("symbol") or s.get("path") or s.get("hint")
+        ]
+        enhanced_msg = error_msg
+        if suggestion_names:
+            enhanced_msg = (
+                f"{error_msg} Did you mean: {', '.join(suggestion_names[:3])}?"
+            )
+
+        # Create enhanced error in envelope.error (proper location)
+        enhanced_error = ToolError(
+            error=enhanced_msg,
+            error_code="correction_needed",
+            error_details={
+                "suggestions": suggestions,
+                "hint": enhanced_msg,
+                "original_location": "data.error",
+            },
+        )
+
+        duration_ms = int((time.perf_counter() - started) * 1000)
+        tier = _get_current_tier()
+
+        # Return new envelope with error promoted to envelope.error
+        # Keep data but mark it as having been enhanced
+        enhanced_data = dict(envelope.data)
+        enhanced_data["_oracle_enhanced"] = True
+
+        return make_envelope(
+            data=enhanced_data,
+            tool_id=tool_id,
+            tool_version=_pkg_version,
+            tier=tier,
+            duration_ms=duration_ms,
+            error=enhanced_error,
+        )
 
     return None
 

@@ -1,11 +1,21 @@
 # [20251214_TEST] Added low-rate coverage tests for CLI error paths, caching, integrations, and visualization branches.
+# [20260201_BUGFIX] Skip entire module if optional integrations not installed
 import ast
 from types import SimpleNamespace
 
 import networkx as nx
 import pytest
 
+# Skip this entire module if optional packages aren't installed
+try:
+    import codescalpel_agents  # noqa: F401
+except ImportError:
+    pytest.skip("Requires pip install code-scalpel[agents]", allow_module_level=True)
+
+pytest.importorskip("flask", reason="Requires pip install code-scalpel[web]")
+
 from code_scalpel import cli
+
 from code_scalpel.analysis.code_analyzer import AnalysisLevel, CodeAnalyzer
 from code_scalpel.integrations.crewai import CrewAIScalpel
 from code_scalpel.integrations.rest_api_server import MCPServerConfig, create_app

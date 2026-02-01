@@ -154,7 +154,7 @@ async def test_http_transport_endpoint_path_matches_fastmcp_defaults(
                         tool_names = {t.name for t in tools.tools}
                         assert "analyze_code" in tool_names
                         assert "get_cross_file_dependencies" in tool_names
-                        assert len(tool_names) == 22
+                        assert len(tool_names) == 23
             else:
                 try:
                     r = httpx.get(url, timeout=httpx.Timeout(2.0, read=0.2))

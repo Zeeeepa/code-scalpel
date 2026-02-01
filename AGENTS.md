@@ -227,13 +227,14 @@ Before committing code, ensure:
 
 ## Helpful Resources
 
-- **Tool Specifications:** `DOCSTRING_SPECIFICATIONS.md` (all 24 tools)
+- **Tool Specifications:** `docs/reference/DOCSTRING_SPECIFICATIONS.md` (all 24 tools)
 - **Comprehensive Guidelines:** `.github/copilot-instructions.md` (836 lines, detailed rules)
-- **Architecture:** `DEVELOPMENT_ROADMAP.md` (strategic direction)
-- **Audit Report:** `AUDIT_REPORT.md` (tool inventory and status)
+- **Oracle Middleware:** `docs/oracle/ORACLE_INTEGRATION_GUIDE.md` (error recovery)
+- **Architecture:** `docs/architecture/CODEBASE_EXPLORATION_REPORT.md` (system overview)
+- **Audit Report:** `docs/reference/AUDIT_REPORT.md` (tool inventory and status)
 
 ---
 
-**Last Updated:** January 29, 2026  
-**Project Version:** 1.2.1  
+**Last Updated:** February 1, 2026  
+**Project Version:** 1.3.0  
 **Python Support:** 3.10, 3.11, 3.12, 3.13

@@ -89,13 +89,15 @@ class TestMCPResponseTierMetadata:
         """MCP response should include 'tier' field in metadata or response."""
         # Create a simple test project
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return bar()
 
 def bar():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",
@@ -114,13 +116,15 @@ def bar():
     async def test_community_tier_metadata_correct(self, use_community_tier, tmp_path):
         """Community tier MCP response should indicate 'community' tier."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return bar()
 
 def bar():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",
@@ -136,13 +140,15 @@ def bar():
     async def test_pro_tier_metadata_correct(self, use_pro_tier, tmp_path):
         """Pro tier MCP response should indicate 'pro' tier."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return bar()
 
 def bar():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",
@@ -160,13 +166,15 @@ def bar():
     ):
         """Enterprise tier MCP response should indicate 'enterprise' tier."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return bar()
 
 def bar():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",
@@ -230,10 +238,12 @@ class TestMCPLicenseExpirationWarnings:
     async def test_valid_license_no_expiration_warning(self, use_pro_tier, tmp_path):
         """Valid, non-expiring license should not generate warnings."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",

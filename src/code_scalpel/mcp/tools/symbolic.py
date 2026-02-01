@@ -11,7 +11,9 @@ from importlib import import_module
 import code_scalpel.licensing.features as feature_caps
 from code_scalpel.mcp.helpers import symbolic_helpers as sym_helpers
 from code_scalpel.mcp.models.core import TestGenerationResult
-from code_scalpel.licensing import tier_detector
+
+# [20260201_BUGFIX] Use JWT-aware get_current_tier for proper license validation
+from code_scalpel.licensing.jwt_validator import get_current_tier as _jwt_get_tier
 
 # pragma: no cover
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
@@ -78,7 +80,7 @@ async def symbolic_execute(
     """
     started = time.perf_counter()
     try:
-        tier = tier_detector.get_current_tier()
+        tier = _jwt_get_tier()
         caps = feature_caps.get_tool_capabilities("symbolic_execute", tier)
         limits = caps.get("limits", {}) if isinstance(caps, dict) else {}
 
@@ -198,7 +200,7 @@ async def generate_unit_tests(
     """
     started = time.perf_counter()
     try:
-        tier = tier_detector.get_current_tier()
+        tier = _jwt_get_tier()
         caps = feature_caps.get_tool_capabilities("generate_unit_tests", tier)
         limits = caps.get("limits", {})
         cap_set = caps.get("capabilities", set())
@@ -377,7 +379,7 @@ async def simulate_refactor(
     """
     started = time.perf_counter()
     try:
-        tier = tier_detector.get_current_tier()
+        tier = _jwt_get_tier()
         caps = feature_caps.get_tool_capabilities("simulate_refactor", tier)
         limits = caps.get("limits", {})
         tool_caps = caps.get("capabilities", set())

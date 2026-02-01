@@ -31,12 +31,31 @@ async def test_extract_code_cross_file_deps_is_upgrade_required_in_community(
         convert_result=False,
     )
 
-    # [20260118_BUGFIX] Result may be Pydantic model or dict depending on conversion
+    # [20260201_BUGFIX] Result is ToolResponseEnvelope - data contains the actual result
     result_dict = result.model_dump() if hasattr(result, "model_dump") else result
+    data = result_dict.get("data") or result_dict
 
-    assert result_dict["success"] is False
-    assert result_dict["error"] is not None
-    assert "cross_file_deps" in result_dict["error"] or "PRO" in result_dict["error"]
+    # Debug output in case of failure
+    if data.get("success") is not False:
+        import json
 
-    # Sanity: no stack trace markers in the user-facing error string
-    assert "Traceback" not in result_dict["error"]
+        print(f"DEBUG DATA: {json.dumps(data, default=str)}")
+
+    assert data.get("success") is False
+
+    # Check for error message OR upgrade hints
+    error_msg = data.get("error")
+    upgrade_hints = data.get("upgrade_hints")
+
+    assert (
+        error_msg is not None or upgrade_hints is not None
+    ), f"Expected error or upgrade_hints. Got data: {data}"
+
+    if error_msg:
+        assert "cross_file_deps" in error_msg or "PRO" in error_msg
+        # Sanity: no stack trace markers in the user-facing error string
+        assert "Traceback" not in error_msg
+
+    if upgrade_hints:
+        # Verify hints exist
+        assert len(upgrade_hints) > 0

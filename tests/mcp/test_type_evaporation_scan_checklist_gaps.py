@@ -155,11 +155,27 @@ async def test_type_evaporation_scan_missing_required_parameter(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    # [20260120_FIX] MCP returns validation errors via isError=True, not JSON envelope
-    assert payload.isError is True
+    # [20260201_FIX] Tool catches exception and returns Envelope with error.
+    # FastMCP sees this as success (function returned), but envelope contains error.
+    assert payload.isError is False
     assert payload.content, "Error should have content describing the error"
-    error_text = payload.content[0].text if payload.content else ""
-    assert "frontend_code" in error_text.lower() or "required" in error_text.lower()
+
+    import json
+
+    content_text = payload.content[0].text
+    try:
+        data = json.loads(content_text)
+        # Check if it's an envelope with error
+        assert data.get("error") is not None
+        error_msg = str(data.get("error"))
+        # Also check if it's the specific error we expect
+        assert "frontend_code" in error_msg.lower() or "required" in error_msg.lower()
+    except json.JSONDecodeError:
+        # Fallback if it returned text error (unlikely given implementation)
+        assert (
+            "frontend_code" in content_text.lower()
+            or "required" in content_text.lower()
+        )
 
 
 async def test_type_evaporation_scan_optional_file_names_default(tmp_path: Path):
@@ -463,14 +479,16 @@ async def test_type_evaporation_scan_enterprise_performance_at_scale(
     # Create 500 virtual files with complex patterns
     frontend_segments = []
     for i in range(500):
-        frontend_segments.append(f"""// FILE: complex{i}.ts
+        frontend_segments.append(
+            f"""// FILE: complex{i}.ts
 interface Data{i} {{ id: string; value: number; }}
 async function process{i}() {{
   const r = await fetch('/api/data{i}');
   const data: Data{i} = await r.json();
   return {{ id: data.id, calculated: data.value * 2 }};
 }}
-""")
+"""
+        )
     frontend_code = "\n".join(frontend_segments)
 
     backend_code = """

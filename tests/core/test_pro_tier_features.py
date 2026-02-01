@@ -36,7 +36,8 @@ class TestWildcardExpansion:
         """Test expanding wildcard import with explicit __all__."""
         # Create module with __all__
         utils_py = temp_project / "utils.py"
-        utils_py.write_text("""
+        utils_py.write_text(
+            """
 __all__ = ["helper_func", "HelperClass", "CONSTANT"]
 
 def helper_func():
@@ -53,7 +54,8 @@ class _PrivateClass:
 
 CONSTANT = 42
 _PRIVATE_CONSTANT = 99
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -73,7 +75,8 @@ _PRIVATE_CONSTANT = 99
         """Test expanding wildcard import without __all__ - returns public symbols."""
         # Create module without __all__
         utils_py = temp_project / "utils.py"
-        utils_py.write_text("""
+        utils_py.write_text(
+            """
 def helper_func():
     pass
 
@@ -84,7 +87,8 @@ class HelperClass:
     pass
 
 CONSTANT = 42
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -100,14 +104,16 @@ CONSTANT = 42
     def test_expand_wildcard_concatenated_all(self, temp_project: Path):
         """Test expanding __all__ with list concatenation."""
         utils_py = temp_project / "utils.py"
-        utils_py.write_text("""
+        utils_py.write_text(
+            """
 __all__ = ["func_a", "func_b"] + ["func_c"]
 
 def func_a(): pass
 def func_b(): pass
 def func_c(): pass
 def func_d(): pass  # Not in __all__
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -126,11 +132,13 @@ def func_d(): pass  # Not in __all__
         helpers_py.write_text("def assist(): pass")
 
         main_py = temp_project / "main.py"
-        main_py.write_text("""
+        main_py.write_text(
+            """
 from utils import *
 from helpers import *
 import os
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -147,23 +155,29 @@ import os
         """Test expanding all wildcard imports in a module."""
         # Create source modules
         utils_py = temp_project / "utils.py"
-        utils_py.write_text("""
+        utils_py.write_text(
+            """
 __all__ = ["helper"]
 def helper(): pass
-""")
+"""
+        )
 
         helpers_py = temp_project / "helpers.py"
-        helpers_py.write_text("""
+        helpers_py.write_text(
+            """
 __all__ = ["assist", "support"]
 def assist(): pass
 def support(): pass
-""")
+"""
+        )
 
         main_py = temp_project / "main.py"
-        main_py.write_text("""
+        main_py.write_text(
+            """
 from utils import *
 from helpers import *
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -186,20 +200,24 @@ class TestReexportResolution:
         pkg_dir.mkdir()
 
         # Internal module
-        (pkg_dir / "internal.py").write_text("""
+        (pkg_dir / "internal.py").write_text(
+            """
 def helper_func():
     pass
 
 class InternalClass:
     pass
-""")
+"""
+        )
 
         # Package __init__ re-exports symbols
-        (pkg_dir / "__init__.py").write_text("""
+        (pkg_dir / "__init__.py").write_text(
+            """
 from mypackage.internal import helper_func, InternalClass
 
 __all__ = ["helper_func", "InternalClass"]
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -214,19 +232,25 @@ __all__ = ["helper_func", "InternalClass"]
     def test_resolve_alias_chain_simple(self, temp_project: Path):
         """Test resolving a simple import alias chain."""
         # Create modules
-        (temp_project / "internal.py").write_text('''
+        (temp_project / "internal.py").write_text(
+            '''
 def original_func():
     """The real implementation."""
     pass
-''')
+'''
+        )
 
-        (temp_project / "wrapper.py").write_text("""
+        (temp_project / "wrapper.py").write_text(
+            """
 from internal import original_func as wrapped_func
-""")
+"""
+        )
 
-        (temp_project / "main.py").write_text("""
+        (temp_project / "main.py").write_text(
+            """
 from wrapper import wrapped_func as my_func
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -243,20 +267,26 @@ from wrapper import wrapped_func as my_func
         pkg_dir = temp_project / "mypackage"
         pkg_dir.mkdir()
 
-        (pkg_dir / "core.py").write_text("""
+        (pkg_dir / "core.py").write_text(
+            """
 def core_function():
     pass
-""")
+"""
+        )
 
-        (pkg_dir / "__init__.py").write_text("""
+        (pkg_dir / "__init__.py").write_text(
+            """
 from mypackage.core import core_function
 
 __all__ = ["core_function"]
-""")
+"""
+        )
 
-        (temp_project / "app.py").write_text("""
+        (temp_project / "app.py").write_text(
+            """
 from mypackage import core_function
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -290,19 +320,23 @@ from mypackage import core_function
         pkg_a = temp_project / "pkg_a"
         pkg_a.mkdir()
         (pkg_a / "impl.py").write_text("def a_func(): pass")
-        (pkg_a / "__init__.py").write_text("""
+        (pkg_a / "__init__.py").write_text(
+            """
 from pkg_a.impl import a_func
 __all__ = ["a_func"]
-""")
+"""
+        )
 
         # Package B
         pkg_b = temp_project / "pkg_b"
         pkg_b.mkdir()
         (pkg_b / "impl.py").write_text("class BClass: pass")
-        (pkg_b / "__init__.py").write_text("""
+        (pkg_b / "__init__.py").write_text(
+            """
 from pkg_b.impl import BClass
 __all__ = ["BClass"]
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -317,12 +351,16 @@ __all__ = ["BClass"]
     def test_circular_alias_detection(self, temp_project: Path):
         """Test detection of circular alias chains."""
         # Create circular imports (unusual but possible)
-        (temp_project / "mod_a.py").write_text("""
+        (temp_project / "mod_a.py").write_text(
+            """
 from mod_b import func_b as func_a
-""")
-        (temp_project / "mod_b.py").write_text("""
+"""
+        )
+        (temp_project / "mod_b.py").write_text(
+            """
 from mod_a import func_a as func_b
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()

@@ -443,7 +443,8 @@ async def test_tier_capability_consistency_across_tiers(
             )
 
         env_json = _tool_json(payload)
-        capabilities = set(env_json.get("capabilities", []))
+        # [20260201_FIX] Handle None capabilities (possible in some tiers)
+        capabilities = set(env_json.get("capabilities") or [])
         tiers_and_caps[tier_name] = capabilities
 
     # Verify tier progression: community ⊆ pro ⊆ enterprise

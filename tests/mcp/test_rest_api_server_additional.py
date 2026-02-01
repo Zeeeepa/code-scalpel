@@ -1,6 +1,13 @@
+"""
+[20260201_BUGFIX] Skip entire module if codescalpel_web not installed.
+"""
+
 import json
 
 import pytest
+
+# Skip this entire module if optional packages aren't installed
+pytest.importorskip("flask", reason="Requires pip install code-scalpel[web]")
 
 from code_scalpel.integrations.rest_api_server import (
     MCPServerConfig,

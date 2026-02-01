@@ -789,11 +789,11 @@ Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operati
 | Autonomy Engine | Stable | 90%+ |
 | Unified Cache | Stable | 95%+ |
 
-**Test Suite:** 4,033 tests passing (100% pass rate)
+**Test Suite:** 4,100+ tests passing (100% pass rate)
 **Coverage Gate:** ≥90% combined (statement + branch)
 **Current Coverage:** 94.86% combined (96.28% stmt, 90.95% branch)
 
-**MCP Tools (Current - v1.0.0 - 22 tools):**
+**MCP Tools (Current - v1.3.0 - 22 tools):**
 - `analyze_code` - Parse and extract code structure (Python, JS, TS, Java)
 - `extract_code` - Surgical extraction by symbol name with cross-file deps
 - `update_symbol` - Safely replace functions/classes/methods in files
@@ -813,19 +813,20 @@ Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operati
 - `get_graph_neighborhood` - Extract k-hop neighborhood subgraph
 - `get_project_map` - Generate comprehensive project structure map
 - `validate_paths` - Validate path accessibility for Docker deployments
-- `verify_policy_integrity` - Cryptographic policy file verification (v3.0.0)
+- `verify_policy_integrity` - Cryptographic policy file verification
 - `code_policy_check` - Check code against style guides and compliance standards
-- `type_evaporation_scan` - Detect TypeScript type evaporation vulnerabilities (v3.0.4)
+- `type_evaporation_scan` - Detect TypeScript type evaporation vulnerabilities
 
-**Latest Release:** v1.0.0
-- Release Date: January 20, 2026
-- Release Notes: `docs/release_notes/RELEASE_NOTES_v1.0.0.md`
-- Evidence Files: `release_artifacts/v1.0.0/`
+**Latest Release:** v1.3.0
+- Release Date: February 1, 2026
+- Release Notes: `docs/release_notes/RELEASE_NOTES_v1.3.0.md`
+- Evidence Files: `release_artifacts/v1.3.0/`
 - **Key Changes:**
-  - Cache consolidation: merged `cache/analysis_cache.py` + `utilities/cache.py` → `cache/unified_cache.py` (677 LOC → 714 LOC unified)
-  - Eliminated 277 lines of redundancy while preserving all features
-  - Updated 20 MCP tools documentation (was incorrectly listed as 19)
-  - All imports updated to use unified cache API
+  - Oracle Resilience Middleware for automatic AI agent error recovery
+  - Symbol fuzzy matching (typo correction) via Levenshtein distance
+  - Path resolution with workspace-aware suggestions
+  - Stage 2 error enhancement for both `envelope.error` and `data.error`
+  - 61 Oracle middleware tests (100% pass rate)
 
 ## Communication
 

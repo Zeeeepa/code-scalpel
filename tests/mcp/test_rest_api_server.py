@@ -1,8 +1,15 @@
 """
 [20251214_TEST] REST API server endpoint coverage.
+[20260201_BUGFIX] Skip entire module if codescalpel_web not installed.
 """
 
+import pytest
+
+# Skip this entire module if optional packages aren't installed
+pytest.importorskip("flask", reason="Requires pip install code-scalpel[web]")
+
 import json
+
 
 from code_scalpel.integrations.rest_api_server import MCPServerConfig, create_app
 

@@ -1,8 +1,84 @@
-# Code Scalpel – Pre-Release Pipeline Documentation Index
+# Code Scalpel Documentation Index
 
-**Created:** January 27, 2026  
-**Status:** Architecture Complete & Ready for Implementation  
-**Version:** 1.0
+**Updated:** February 1, 2026  
+**Version:** 1.3.0
+
+---
+
+## Quick Links
+
+- **[Getting Started](getting_started/getting_started.md)** - Installation and first steps
+- **[Installing for Claude](INSTALLING_FOR_CLAUDE.md)** - Claude Desktop/VSCode integration
+- **[Setup Checklist](SETUP_CHECKLIST.md)** - 5-minute setup guide
+- **[Oracle Resilience](oracle/ORACLE_RESILIENCE_QUICKSTART.md)** - Automatic error recovery (NEW in v1.3)
+
+---
+
+## Documentation by Category
+
+### 🚀 Getting Started
+- [Getting Started Guide](getting_started/getting_started.md)
+- [Installing for Claude](INSTALLING_FOR_CLAUDE.md)
+- [Setup Checklist](SETUP_CHECKLIST.md)
+- [Beginner Guide](BEGINNER_GUIDE.md)
+- [Beginner FAQ](BEGINNER_FAQ.md)
+
+### 🔧 Oracle Resilience Middleware (v1.3.0)
+- [Quick Start](oracle/ORACLE_RESILIENCE_QUICKSTART.md) - Get started with Oracle
+- [Integration Guide](oracle/ORACLE_INTEGRATION_GUIDE.md) - Complete integration reference
+- [Implementation Details](ORACLE_RESILIENCE_IMPLEMENTATION.md) - Technical deep dive
+- [Test Cases](ORACLE_RESILIENCE_TEST_CASES.md) - Test coverage documentation
+- [Comprehensive Analysis](oracle/ORACLE_COMPREHENSIVE_ANALYSIS.md) - Full analysis report
+
+### 📖 Reference Documentation
+- [Quick Reference](QUICK_REFERENCE.md) - Common operations at a glance
+- [Docstring Specifications](reference/DOCSTRING_SPECIFICATIONS.md) - MCP tool documentation
+- [Docstring Examples](reference/DOCSTRING_EXAMPLES.md) - Usage examples
+- [Audit Report](reference/AUDIT_REPORT.md) - Tool inventory and status
+
+### 🏗️ Architecture
+- [Codebase Exploration](architecture/CODEBASE_EXPLORATION_REPORT.md) - System overview
+- [Tier Testing Architecture](architecture/TIER_TESTING_ARCHITECTURE.md) - Licensing tiers
+- [Deterministic Implementation](DETERMINISTIC_IMPLEMENTATION_SUMMARY.md) - Parsing guarantees
+- [Project Awareness Engine](PROJECT_AWARENESS_ENGINE.md) - Intelligent codebase analysis
+
+### 🔒 Security & Compliance
+- [App Security Methodology](app_sec_star_methodology.md) - Security analysis approach
+- [GitHub Secrets](GITHUB_SECRETS.md) - Secret management
+
+### 📦 Release & Deployment
+- [Release Process](RELEASE_PROCESS.md) - How to release
+- [Releasing Guide](RELEASING.md) - Detailed release steps
+- [Pre-Release Pipeline](PRE_RELEASE_PIPELINE.md) - CI/CD validation
+- [Pre-Release Walkthrough](PRE_RELEASE_WALKTHROUGH.md) - Step-by-step guide
+
+### 🧪 Testing
+- [Testing Framework](TESTING_FRAMEWORK.md) - Test organization
+- [Testing Guide](TESTING.md) - How to run tests
+- [Stress Testing](stress_test.md) - Performance testing
+
+### 📁 Subdirectories
+- `archive/` - Historical documentation
+- `getting_started/` - Onboarding materials
+- `guides/` - How-to guides
+- `oracle/` - Oracle middleware documentation (NEW)
+- `reference/` - API and specification docs
+- `release_automation/` - Release tooling docs
+- `release_notes/` - Version release notes
+- `roadmap/` - Future plans
+- `tools/` - Tool-specific documentation
+
+---
+
+## Version History
+
+| Version | Date | Highlights |
+|---------|------|------------|
+| v1.3.0 | 2026-02-01 | Oracle Resilience Middleware |
+| v1.2.1 | 2026-01-26 | UVX entry point fix |
+| v1.2.0 | 2026-01-26 | Project Awareness Engine |
+| v1.1.0 | 2026-01-26 | Kernel Integration |
+| v1.0.0 | 2026-01-20 | Initial release |
 
 ---
 

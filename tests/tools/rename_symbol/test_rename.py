@@ -10,7 +10,8 @@ class TestRename(unittest.TestCase):
         self.test_file = tempfile.NamedTemporaryFile(
             mode="w+", delete=False, suffix=".py"
         )
-        self.test_file.write("""
+        self.test_file.write(
+            """
 def old_func():
     pass
 
@@ -20,7 +21,8 @@ class OldClass:
 
 async def old_async_func():
     pass
-""")
+"""
+        )
         self.test_file.close()
         self.patcher = SurgicalPatcher.from_file(self.test_file.name)
 

@@ -129,7 +129,8 @@ class TestGetCallGraphSync:
     def sample_project(self, tmp_path):
         """Create a sample project for testing."""
         main_py = tmp_path / "main.py"
-        main_py.write_text("""
+        main_py.write_text(
+            """
 def main():
     helper()
     print("done")
@@ -139,7 +140,8 @@ def helper():
 
 if __name__ == "__main__":
     main()
-""")
+"""
+        )
         return tmp_path
 
     def test_sync_returns_result(self, sample_project):
@@ -168,7 +170,8 @@ if __name__ == "__main__":
 
     def test_sync_detects_main_block_entry_point(self, tmp_path):
         """Functions called from __main__ block are treated as entry points."""
-        (tmp_path / "app.py").write_text("""
+        (tmp_path / "app.py").write_text(
+            """
 def run():
     helper()
 
@@ -177,7 +180,8 @@ def helper():
 
 if __name__ == \"__main__\":
     run()
-""")
+"""
+        )
 
         result = _get_call_graph_sync(str(tmp_path), None, 10, False)
         entry_points = {n.name for n in result.nodes if n.is_entry_point}
@@ -441,12 +445,15 @@ class TestJavaScriptSupport:
 
     @pytest.mark.asyncio
     async def test_js_project_generates_nodes_and_edges(self, tmp_path):
-        (tmp_path / "util.js").write_text("""
+        (tmp_path / "util.js").write_text(
+            """
 export function foo() {
     return 1;
 }
-""")
-        (tmp_path / "index.js").write_text("""
+"""
+        )
+        (tmp_path / "index.js").write_text(
+            """
 import { foo } from './util.js';
 
 function main() {
@@ -454,7 +461,8 @@ function main() {
 }
 
 main();
-""")
+"""
+        )
 
         result = await get_call_graph(
             project_root=str(tmp_path), include_circular_import_check=False
@@ -476,13 +484,16 @@ class TestTypeScriptSupport:
     @pytest.mark.asyncio
     async def test_ts_project_generates_nodes_and_edges(self, tmp_path):
         # [20260122_TEST] Ensure TypeScript call mapping works end-to-end
-        (tmp_path / "util.ts").write_text("""
+        (tmp_path / "util.ts").write_text(
+            """
 export function foo(value: number): number {
     return value + 1;
 }
-""")
+"""
+        )
 
-        (tmp_path / "index.ts").write_text("""
+        (tmp_path / "index.ts").write_text(
+            """
 import { foo } from './util.ts';
 
 function main(): number {
@@ -490,7 +501,8 @@ function main(): number {
 }
 
 main();
-""")
+"""
+        )
 
         result = await get_call_graph(
             project_root=str(tmp_path), include_circular_import_check=False

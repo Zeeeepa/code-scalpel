@@ -294,7 +294,7 @@ async def test_mcp_stdio_invokes_all_tools(tmp_path: Path):
 
             tools = await session.list_tools()
             tool_names = {t.name for t in tools.tools}
-            assert len(tool_names) == 22
+            assert len(tool_names) == 23
 
             # 1) Analysis
             r = await session.call_tool(

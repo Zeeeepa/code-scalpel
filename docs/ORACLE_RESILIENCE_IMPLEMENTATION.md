@@ -404,11 +404,68 @@ After validating the pilot tools, expand oracle resilience to remaining 15 tools
 | Files Created | 3 |
 | Files Modified | 5 |
 | Lines of Code (new) | ~1,700 |
-| Test Cases | 18 (100% passing) |
-| Tools Integrated | 7 (pilot) |
+| Test Cases | 61 (100% passing) |
+| Tools Integrated | 13 (of 19 total) |
+| Tools Excluded | 6 (by design) |
 | Error Codes Added | 1 (correction_needed) |
-| Recovery Strategies | 3 (Symbol, Path, Safety) |
+| Recovery Strategies | 6 (Symbol, Path, Safety, NodeIdFormat, MethodNameFormat, GenerateTests) |
 | Backward Compatibility | 100% ✅ |
+
+---
+
+## Excluded Tools (By Design)
+
+The following 6 tools intentionally **do not** have `@with_oracle_resilience` because their input types do not benefit from fuzzy correction:
+
+### 1. `analyze_code` (analyze.py)
+**Reason**: Has built-in oracle functionality (`_find_similar_file_paths`)
+- Already includes file path suggestion logic in error handling (lines 227-248)
+- Returns `oracle_suggestion` in error details when file not found
+- Adding decorator would be redundant
+
+### 2. `get_capabilities` (system.py)
+**Reason**: System introspection tool, no correctable parameters
+- Only takes `tier` parameter (enum-like: "community", "pro", "enterprise")
+- Invalid tiers already return clear error with valid options
+- No file paths or symbol names to fuzzy-match
+
+### 3. `symbolic_execute` (symbolic.py)
+**Reason**: Takes code strings, not correctable identifiers
+- Input is raw `code` string for symbolic execution
+- No file paths or symbol names that could be typos
+- Errors are execution/constraint errors, not lookup failures
+
+### 4. `simulate_refactor` (symbolic.py)
+**Reason**: Takes code strings, not correctable identifiers
+- Input is `original_code` and `new_code` strings
+- No file paths or symbol names that could be typos
+- Errors are structural/safety analysis failures
+
+### 5. `unified_sink_detect` (security.py)
+**Reason**: Takes code strings, not correctable identifiers
+- Input is raw `code` string for sink detection
+- Language is auto-detected or validated against fixed set
+- No file paths or symbol names that could be typos
+
+### 6. `write_perfect_code` (oracle.py)
+**Reason**: Part of the Oracle pipeline itself
+- Documented as a "pipeline trigger, not a standard MCP tool"
+- Invoked by the Oracle system for constraint generation
+- Adding oracle resilience would create circular dependency
+
+### Design Principle
+
+Oracle resilience adds value when:
+1. Tool accepts **file paths** that could have typos → PathStrategy
+2. Tool accepts **symbol names** that could be misspelled → SymbolStrategy
+3. Tool accepts **node IDs** with specific format → NodeIdFormatStrategy
+4. Tool accepts **method references** with format constraints → MethodNameFormatStrategy
+
+Oracle resilience does NOT add value when:
+1. Tool only accepts raw code strings (no identifiers to correct)
+2. Tool only accepts enum-like values with clear valid options
+3. Tool is part of the oracle infrastructure itself
+4. Tool already has equivalent suggestion logic built-in
 
 ---
 

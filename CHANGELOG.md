@@ -7,13 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for v1.3.0
+### Planned
 - Smart path suggestions for file resolution
 - Cache invalidation strategies (TTL-based)
 - Parallel file scanning for large projects
 - Incremental project updates
 - Custom language profile support
 - Language Server Protocol (LSP) integration
+
+---
+
+## [1.3.0] - 2026-02-01
+
+### Added
+- **Oracle Resilience Middleware**: Automatic error recovery for AI agent mistakes
+  - `@with_oracle_resilience` decorator for MCP tools
+  - Symbol fuzzy matching with Levenshtein distance (typo correction)
+  - Path resolution with workspace-aware suggestions
+  - `SymbolStrategy`: Recovers from symbol name typos (e.g., "procss_data" → "process_data")
+  - `PathStrategy`: Recovers from path errors with intelligent suggestions
+  - `SafetyStrategy`: Validates refactoring operations
+  - `NodeIdFormatStrategy`: Recovers from node ID format errors
+  - `MethodNameFormatStrategy`: Recovers from method name format errors
+  - `CompositeStrategy`: Chain multiple strategies for complex recovery
+- **Stage 2 Error Enhancement**: Oracle now enhances both `envelope.error` and `data.error` patterns
+  - `_enhance_error_envelope()`: Processes top-level envelope errors
+  - `_enhance_data_error()`: Processes nested data.error patterns
+  - Consistent error enhancement across all error locations
+- 61 comprehensive Oracle middleware tests (100% pass rate)
+- Tier isolation tests verifying Oracle behavior across Community/Pro/Enterprise
+
+### Changed
+- Updated test suite to handle Oracle-enhanced `ToolError` objects
+  - Added `get_error_message()` helper for backward-compatible error checking
+  - Tests now work with both string errors and `ToolError` objects
+- Moved documentation to organized subdirectories:
+  - Oracle docs → `docs/oracle/`
+  - Docstring analysis → `docs/reference/`
+  - Architecture docs → `docs/architecture/`
+- Cleaned up root directory (removed 10+ markdown files to proper locations)
+
+### Fixed
+- Black formatting exclusion for `tests/mcp_tool_verification/` (intentionally broken test files)
+- Unused imports in test files cleaned up
+- `envelope.error` check now uses `model_dump()` for proper Pydantic v2 handling
+
+### Documentation
+- Added Oracle Resilience documentation suite:
+  - `docs/oracle/ORACLE_INTEGRATION_GUIDE.md` - Complete integration guide
+  - `docs/oracle/ORACLE_RESILIENCE_QUICKSTART.md` - Quick start guide
+  - `docs/oracle/ORACLE_COMPREHENSIVE_ANALYSIS.md` - Deep dive analysis
+  - `docs/ORACLE_RESILIENCE_IMPLEMENTATION.md` - Implementation details
+  - `docs/ORACLE_RESILIENCE_TEST_CASES.md` - Test case documentation
 
 ---
 

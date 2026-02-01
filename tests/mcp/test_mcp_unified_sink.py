@@ -28,13 +28,14 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_input)
         assert result.success
         assert result.language == "python"
         assert result.sink_count > 0
-        assert len(result.sinks) > 0
+        sinks = result.data.get("sinks", [])
+        assert len(sinks) > 0
 
         # Should detect cursor.execute (Taint boosted to 0.95)
-        sql_sinks = [s for s in result.sinks if s.pattern == "cursor.execute"]
+        sql_sinks = [s for s in sinks if s["pattern"] == "cursor.execute"]
         assert len(sql_sinks) > 0
-        assert sql_sinks[0].confidence == 0.95
-        assert sql_sinks[0].sink_type == "SQL_QUERY"
+        assert sql_sinks[0]["confidence"] == 0.95
+        assert sql_sinks[0]["sink_type"] == "SQL_QUERY"
 
     async def test_typescript_xss_detection(self):
         """Test detecting XSS in TypeScript code."""
@@ -49,9 +50,10 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_input)
         assert result.sink_count > 0
 
         # Should detect innerHTML
-        xss_sinks = [s for s in result.sinks if s.pattern == "innerHTML"]
+        sinks = result.data.get("sinks", [])
+        xss_sinks = [s for s in sinks if s["pattern"] == "innerHTML"]
         assert len(xss_sinks) > 0
-        assert xss_sinks[0].confidence == 1.0
+        assert xss_sinks[0]["confidence"] == 1.0
 
     async def test_javascript_command_injection(self):
         """Test detecting command injection in JavaScript."""
@@ -65,7 +67,8 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_input)
         assert result.sink_count > 0
 
         # Should detect eval
-        eval_sinks = [s for s in result.sinks if s.pattern == "eval"]
+        sinks = result.data.get("sinks", [])
+        eval_sinks = [s for s in sinks if s["pattern"] == "eval"]
         assert len(eval_sinks) > 0
 
     async def test_confidence_filtering(self):
@@ -89,7 +92,8 @@ open(filename)
             code=code, language="python", confidence_threshold=0.4
         )
         assert result_low.success
-        patterns_low = [s.pattern for s in result_low.sinks]
+        sinks_low = result_low.data.get("sinks", [])
+        patterns_low = [s["pattern"] for s in sinks_low]
         assert "cursor.execute" in patterns_low
         assert "open" in patterns_low
 
@@ -102,11 +106,12 @@ open(filename)
         )
 
         assert result.success
-        assert len(result.sinks) > 0
+        sinks = result.data.get("sinks", [])
+        assert len(sinks) > 0
 
         # SQL injection should map to A03:2021
-        sql_sink = result.sinks[0]
-        assert sql_sink.owasp_category == "A03:2021 – Injection"
+        sql_sink = sinks[0]
+        assert sql_sink.get("owasp_category") == "A03:2021 – Injection"
 
     async def test_coverage_summary(self):
         """Test coverage summary in results."""
@@ -159,4 +164,4 @@ def add(a, b):
 
         assert result.success
         assert result.sink_count == 0
-        assert len(result.sinks) == 0
+        assert len(result.data.get("sinks", [])) == 0

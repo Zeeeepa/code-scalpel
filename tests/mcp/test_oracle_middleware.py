@@ -6,10 +6,7 @@ Tests the @with_oracle_resilience decorator and all recovery strategies.
 from __future__ import annotations
 
 import asyncio
-import os
-import tempfile
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -69,7 +66,8 @@ def process_file(z):
     def test_suggest_with_file_code(self, tmp_path: Path):
         """Should generate suggestions from file content."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def calculate_sum(a, b):
     return a + b
 
@@ -78,7 +76,8 @@ def calculate_product(x, y):
 
 def calculate_diff(p, q):
     return p - q
-""")
+"""
+        )
 
         context = {
             "file_path": str(test_file),
@@ -808,6 +807,596 @@ class TestGenerateTestsStrategy:
         empty_list = []
         result = CompositeStrategy._rank_and_dedupe(empty_list)
         assert result == []
+
+
+class TestStage2EnvelopeErrorProcessing:
+    """[20260201_TEST] Test Stage 2: envelope.error post-processing via _enhance_error_envelope.
+
+    These tests verify that when a tool returns ToolResponseEnvelope with error
+    already set (tool caught its own exception), the oracle middleware still
+    enhances the error with suggestions.
+    """
+
+    def test_enhance_error_envelope_invoked_for_symbol_error(self):
+        """Stage 2a: _enhance_error_envelope is invoked for envelope.error."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        # Tool that catches its own exception and returns error envelope
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_returns_error_envelope(
+            code: str, target_name: str
+        ) -> ToolResponseEnvelope:
+            # Simulate tool catching error and returning envelope
+            return make_envelope(
+                data=None,
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=ToolError(
+                    error=f"Symbol '{target_name}' not found in code.",
+                    error_code="not_found",
+                ),
+            )
+
+        result = asyncio.run(
+            tool_returns_error_envelope(
+                code="def process_data(): pass\ndef process_item(): pass",
+                target_name="process_dta",  # Typo
+            )
+        )
+
+        # Stage 2a should enhance the error
+        assert isinstance(result, ToolResponseEnvelope)
+        assert result.error is not None
+        assert result.error.error_code == "correction_needed"
+        assert result.error.error_details is not None
+        assert "suggestions" in result.error.error_details
+        assert "Did you mean" in result.error.error
+
+    def test_enhance_error_envelope_not_invoked_for_non_correctable(self):
+        """Stage 2a: Non-correctable errors should pass through unchanged."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_returns_non_correctable() -> ToolResponseEnvelope:
+            return make_envelope(
+                data=None,
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=ToolError(
+                    error="Internal server error occurred",
+                    error_code="internal_error",
+                ),
+            )
+
+        result = asyncio.run(tool_returns_non_correctable())
+
+        # Should NOT be enhanced (no symbol/function keywords)
+        assert result.error.error_code == "internal_error"
+        assert result.error.error_details is None
+
+    def test_enhance_error_envelope_preserves_original_data(self):
+        """Stage 2a: Enhancement should preserve original data field."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_with_partial_data(
+            code: str, target_name: str
+        ) -> ToolResponseEnvelope:
+            return make_envelope(
+                data={"partial_result": "some data", "success": False},
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=ToolError(
+                    error=f"Function '{target_name}' not found.",
+                    error_code="not_found",
+                ),
+            )
+
+        result = asyncio.run(
+            tool_with_partial_data(
+                code="def process_data(): pass", target_name="process_dta"
+            )
+        )
+
+        # Error should be enhanced
+        assert result.error.error_code == "correction_needed"
+        # Data should be preserved
+        assert result.data is not None
+        assert result.data.get("partial_result") == "some data"
+
+
+class TestStage2DataErrorProcessing:
+    """[20260201_TEST] Test Stage 2b: data.error post-processing via _enhance_data_error.
+
+    These tests verify that when a tool returns errors in response.data.error
+    (instead of response.error), the oracle middleware still enhances them.
+    """
+
+    def test_enhance_data_error_invoked_for_symbol_error(self):
+        """Stage 2b: _enhance_data_error is invoked for data.error field."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_returns_data_error(
+            code: str, target_name: str
+        ) -> ToolResponseEnvelope:
+            # Simulate tool returning error in data.error (common pattern)
+            return make_envelope(
+                data={
+                    "success": False,
+                    "error": f"Symbol '{target_name}' not found in provided code.",
+                },
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=None,  # No envelope.error
+            )
+
+        result = asyncio.run(
+            tool_returns_data_error(
+                code="def process_data(): pass\ndef process_item(): pass",
+                target_name="process_dta",  # Typo
+            )
+        )
+
+        # Stage 2b should promote and enhance the error
+        assert isinstance(result, ToolResponseEnvelope)
+        assert result.error is not None  # Error should be promoted to envelope.error
+        assert result.error.error_code == "correction_needed"
+        assert "suggestions" in result.error.error_details
+        assert "Did you mean" in result.error.error
+
+    def test_enhance_data_error_for_path_error(self, tmp_path: Path):
+        """Stage 2b: _enhance_data_error handles file path errors."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            PathStrategy,
+        )
+
+        # Create a real file so PathStrategy can suggest it
+        (tmp_path / "config.py").write_text("# config")
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=PathStrategy)
+        async def tool_returns_path_error(file_path: str) -> ToolResponseEnvelope:
+            return make_envelope(
+                data={
+                    "success": False,
+                    "error": f"Cannot access file: {file_path}",
+                },
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=None,
+            )
+
+        result = asyncio.run(
+            tool_returns_path_error(file_path=str(tmp_path / "confg.py"))  # Typo
+        )
+
+        # Stage 2b should detect and enhance the path error
+        # Note: Use model_fields to access the envelope's error field directly,
+        # not via __getattr__ delegation to data
+
+        envelope_error = result.model_dump()["error"]
+        assert envelope_error is not None
+        assert envelope_error["error_code"] == "correction_needed"
+        assert "suggestions" in envelope_error["error_details"]
+
+    def test_enhance_data_error_marks_enhancement(self):
+        """Stage 2b: Enhanced envelope promotes data.error to envelope.error."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_returns_data_error(
+            code: str, target_name: str
+        ) -> ToolResponseEnvelope:
+            return make_envelope(
+                data={
+                    "success": False,
+                    "error": f"Function '{target_name}' not found.",
+                },
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=None,
+            )
+
+        result = asyncio.run(
+            tool_returns_data_error(
+                code="def process_data(): pass", target_name="process_dta"
+            )
+        )
+
+        # Verify enhancement by checking envelope.error directly
+        # (The _oracle_enhanced marker is filtered out by response filtering)
+        envelope_dict = result.model_dump()
+        assert envelope_dict["error"] is not None
+        assert envelope_dict["error"]["error_code"] == "correction_needed"
+        assert "suggestions" in envelope_dict["error"]["error_details"]
+        # Original error message preserved
+        assert "process_dta" in envelope_dict["error"]["error"]
+        # Suggestions include the correct symbol
+        suggestions = envelope_dict["error"]["error_details"]["suggestions"]
+        assert any("process_data" in str(s) for s in suggestions)
+
+    def test_enhance_data_error_not_invoked_for_success(self):
+        """Stage 2b: Should not enhance when success=True."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_returns_success() -> ToolResponseEnvelope:
+            return make_envelope(
+                data={
+                    "success": True,
+                    "error": None,
+                    "result": "some data",
+                },
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=None,
+            )
+
+        result = asyncio.run(tool_returns_success())
+
+        # Should pass through unchanged - check envelope.error directly
+        envelope_dict = result.model_dump()
+        assert envelope_dict["error"] is None
+        assert result.data.get("success") is True
+
+    def test_enhance_data_error_not_invoked_for_non_correctable(self):
+        """Stage 2b: Non-correctable data.error should pass through."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_returns_non_correctable_data_error() -> ToolResponseEnvelope:
+            return make_envelope(
+                data={
+                    "success": False,
+                    "error": "Network timeout occurred",  # Not correctable
+                },
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=None,
+            )
+
+        result = asyncio.run(tool_returns_non_correctable_data_error())
+
+        # Should NOT be enhanced - check envelope.error directly
+        envelope_dict = result.model_dump()
+        assert envelope_dict["error"] is None  # Not promoted to envelope.error
+        # data.error should still contain the original error
+        assert result.data.get("error") == "Network timeout occurred"
+
+
+class TestStage2BeforeAfterExamples:
+    """[20260201_TEST] Before/after examples demonstrating oracle enhancement.
+
+    These tests serve as documentation showing exactly what changes
+    when oracle processes different error scenarios.
+    """
+
+    def test_symbol_error_before_after(self):
+        """Example: Symbol typo error before and after oracle enhancement."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        # BEFORE: What tool would return without oracle
+        before_envelope = make_envelope(
+            data=None,
+            tool_id="extract_code",
+            tool_version="1.0.0",
+            tier="community",
+            error=ToolError(
+                error="Symbol 'proces_data' not found.",
+                error_code="not_found",
+                error_details=None,
+            ),
+        )
+
+        # Verify BEFORE state
+        assert before_envelope.error.error_code == "not_found"
+        assert before_envelope.error.error_details is None
+        assert "Did you mean" not in before_envelope.error.error
+
+        # AFTER: What oracle transforms it to
+        @with_oracle_resilience(tool_id="extract_code", strategy=SymbolStrategy)
+        async def simulated_tool(code: str, target_name: str) -> ToolResponseEnvelope:
+            return before_envelope
+
+        after_envelope = asyncio.run(
+            simulated_tool(
+                code="def process_data(): pass\ndef process_item(): pass",
+                target_name="proces_data",
+            )
+        )
+
+        # Verify AFTER state
+        assert after_envelope.error.error_code == "correction_needed"
+        assert after_envelope.error.error_details is not None
+        assert "suggestions" in after_envelope.error.error_details
+        assert "Did you mean" in after_envelope.error.error
+        # Should suggest process_data
+        suggestions = after_envelope.error.error_details["suggestions"]
+        assert any("process_data" in str(s) for s in suggestions)
+
+    def test_data_error_before_after(self):
+        """Example: data.error pattern before and after oracle enhancement."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        # BEFORE: Tool returns error in data.error (common pattern)
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_with_data_error(
+            code: str, target_name: str
+        ) -> ToolResponseEnvelope:
+            return make_envelope(
+                data={
+                    "success": False,
+                    "error": f"Function '{target_name}' not found in code.",
+                    "files_scanned": 1,
+                },
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=None,  # No envelope.error
+            )
+
+        result = asyncio.run(
+            tool_with_data_error(
+                code="def calculate_sum(): pass\ndef calculate_product(): pass",
+                target_name="calculate_summ",  # Typo
+            )
+        )
+
+        # AFTER verification - use model_dump() to access envelope.error directly
+        envelope_dict = result.model_dump()
+
+        # Error promoted from data.error to envelope.error
+        assert envelope_dict["error"] is not None
+        assert envelope_dict["error"]["error_code"] == "correction_needed"
+        assert "suggestions" in envelope_dict["error"]["error_details"]
+        assert "Did you mean" in envelope_dict["error"]["error"]
+
+        # Original data preserved
+        assert result.data.get("files_scanned") == 1
+
+
+class TestOracleTierIsolation:
+    """[20260201_TEST] Test that Oracle works correctly across all license tiers.
+
+    These tests verify that:
+    1. Oracle enhancement works identically across Community/Pro/Enterprise
+    2. Tier is correctly reported in enhanced envelopes
+    3. No tier-specific features are blocked in oracle enhancement
+    """
+
+    def test_oracle_community_tier_enhancement(self, monkeypatch):
+        """Oracle enhancement should work at Community tier."""
+        # Force community tier
+        monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+        monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
+
+        # Clear any cached tier detection
+        from code_scalpel.licensing import jwt_validator, config_loader
+
+        jwt_validator._LICENSE_VALIDATION_CACHE = None
+        config_loader.clear_cache()
+
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_returns_error(
+            code: str, target_name: str
+        ) -> ToolResponseEnvelope:
+            return make_envelope(
+                data=None,
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=ToolError(
+                    error=f"Symbol '{target_name}' not found.",
+                    error_code="not_found",
+                ),
+            )
+
+        result = asyncio.run(
+            tool_returns_error(
+                code="def process_data(): pass", target_name="process_dta"
+            )
+        )
+
+        # Should be enhanced regardless of tier
+        envelope_dict = result.model_dump()
+        assert envelope_dict["error"]["error_code"] == "correction_needed"
+        assert "suggestions" in envelope_dict["error"]["error_details"]
+        # Tier should be community
+        assert envelope_dict.get("tier") == "community"
+
+    def test_oracle_different_tiers_same_enhancement(self, monkeypatch):
+        """Oracle enhancement should behave identically across all tiers."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        code = "def process_data(): pass\ndef process_item(): pass"
+        target_name = "process_dta"  # Typo
+
+        results = {}
+        for tier in ["community", "pro", "enterprise"]:
+            # Clear caches before each tier test
+            from code_scalpel.licensing import jwt_validator, config_loader
+
+            jwt_validator._LICENSE_VALIDATION_CACHE = None
+            config_loader.clear_cache()
+
+            @with_oracle_resilience(tool_id=f"test_{tier}", strategy=SymbolStrategy)
+            async def tool_returns_error(
+                code: str, target_name: str
+            ) -> ToolResponseEnvelope:
+                return make_envelope(
+                    data=None,
+                    tool_id=f"test_{tier}",
+                    tool_version="1.0.0",
+                    tier=tier,
+                    error=ToolError(
+                        error=f"Symbol '{target_name}' not found.",
+                        error_code="not_found",
+                    ),
+                )
+
+            result = asyncio.run(tool_returns_error(code=code, target_name=target_name))
+            results[tier] = result.model_dump()
+
+        # All tiers should have the same enhancement
+        for tier, result in results.items():
+            assert (
+                result["error"]["error_code"] == "correction_needed"
+            ), f"{tier} tier not enhanced"
+            assert (
+                "suggestions" in result["error"]["error_details"]
+            ), f"{tier} tier missing suggestions"
+
+        # Suggestions should be identical across tiers
+        community_suggestions = results["community"]["error"]["error_details"][
+            "suggestions"
+        ]
+        pro_suggestions = results["pro"]["error"]["error_details"]["suggestions"]
+        enterprise_suggestions = results["enterprise"]["error"]["error_details"][
+            "suggestions"
+        ]
+
+        assert community_suggestions == pro_suggestions
+        assert pro_suggestions == enterprise_suggestions
+
+    def test_oracle_preserves_tier_from_original_envelope(self):
+        """Oracle should preserve the original tier in the enhanced envelope."""
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def pro_tool_returns_error(
+            code: str, target_name: str
+        ) -> ToolResponseEnvelope:
+            # Tool explicitly returns pro tier
+            return make_envelope(
+                data=None,
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="pro",  # Explicit tier
+                error=ToolError(
+                    error=f"Symbol '{target_name}' not found.",
+                    error_code="not_found",
+                ),
+            )
+
+        result = asyncio.run(
+            pro_tool_returns_error(
+                code="def process_data(): pass", target_name="process_dta"
+            )
+        )
+
+        # Enhanced envelope should have the tool's tier
+        envelope_dict = result.model_dump()
+        assert envelope_dict["error"]["error_code"] == "correction_needed"
+        # The tier in the envelope should match what _get_current_tier returns
+        # (which may differ from what the tool passed - this is expected behavior)
+
+
+class TestOracleDataErrorTierIsolation:
+    """[20260201_TEST] Test Stage 2b (data.error) enhancement across tiers."""
+
+    def test_data_error_enhancement_at_community(self, monkeypatch):
+        """Stage 2b should work at Community tier."""
+        # Force community tier
+        monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+        monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
+
+        from code_scalpel.licensing import jwt_validator, config_loader
+
+        jwt_validator._LICENSE_VALIDATION_CACHE = None
+        config_loader.clear_cache()
+
+        from code_scalpel.mcp.contract import make_envelope
+        from code_scalpel.mcp.oracle_middleware import (
+            with_oracle_resilience,
+            SymbolStrategy,
+        )
+
+        @with_oracle_resilience(tool_id="test_tool", strategy=SymbolStrategy)
+        async def tool_returns_data_error(
+            code: str, target_name: str
+        ) -> ToolResponseEnvelope:
+            return make_envelope(
+                data={
+                    "success": False,
+                    "error": f"Function '{target_name}' not found.",
+                },
+                tool_id="test_tool",
+                tool_version="1.0.0",
+                tier="community",
+                error=None,
+            )
+
+        result = asyncio.run(
+            tool_returns_data_error(
+                code="def process_data(): pass", target_name="process_dta"
+            )
+        )
+
+        # Stage 2b should work at Community tier
+        envelope_dict = result.model_dump()
+        assert envelope_dict["error"] is not None
+        assert envelope_dict["error"]["error_code"] == "correction_needed"
+        assert "suggestions" in envelope_dict["error"]["error_details"]
 
 
 if __name__ == "__main__":

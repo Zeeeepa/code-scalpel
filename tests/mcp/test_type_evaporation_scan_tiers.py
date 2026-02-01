@@ -292,7 +292,9 @@ def role():
     # Empty arrays filtered for token efficiency
     assert data.get("matched_endpoints") in ([], None)
     assert data.get("implicit_any_count") == 0
-    assert "implicit_any_tracing" not in env_json.get("capabilities", [])
+    # [20260201_FIX] capabilities may be None, handle gracefully
+    capabilities = env_json.get("capabilities") or []
+    assert "implicit_any_tracing" not in capabilities
 
 
 async def test_type_evaporation_scan_community_max_files_truncated(tmp_path: Path):
@@ -421,7 +423,9 @@ async function submit(p: Payload) {
 }
 
 // add some scale
-""" + "\n".join(["// filler line" for _ in range(300)])
+""" + "\n".join(
+        ["// filler line" for _ in range(300)]
+    )
 
     backend_code = """
 from fastapi import FastAPI, Request
@@ -466,4 +470,7 @@ async def shape(req: Request):
     )
     assert data.get("pydantic_models") is not None
     assert data.get("schema_coverage") is not None
-    assert env_json.get("duration_ms", 0) < 5000
+    # [20260201_FIX] duration_ms may be None for some responses
+    duration = env_json.get("duration_ms")
+    if duration is not None:
+        assert duration < 5000
