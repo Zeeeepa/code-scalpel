@@ -18,6 +18,7 @@ from code_scalpel.mcp.helpers.security_helpers import (
 )
 from code_scalpel.mcp.protocol import mcp, _get_current_tier
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
+from code_scalpel.mcp.oracle_middleware import with_oracle_resilience, PathStrategy
 from code_scalpel import __version__ as _pkg_version
 
 
@@ -119,6 +120,7 @@ async def unified_sink_detect(
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="type_evaporation_scan", strategy=PathStrategy)
 async def type_evaporation_scan(
     frontend_code: str | None = None,
     backend_code: str | None = None,
@@ -182,9 +184,13 @@ async def type_evaporation_scan(
     try:
         # Validate input: at least one way to provide each code
         if frontend_code is None and frontend_file_path is None:
-            raise ValueError("Either 'frontend_code' or 'frontend_file_path' must be provided")
+            raise ValueError(
+                "Either 'frontend_code' or 'frontend_file_path' must be provided"
+            )
         if backend_code is None and backend_file_path is None:
-            raise ValueError("Either 'backend_code' or 'backend_file_path' must be provided")
+            raise ValueError(
+                "Either 'backend_code' or 'backend_file_path' must be provided"
+            )
 
         # Read from files if codes not provided
         if frontend_code is None and frontend_file_path is not None:
@@ -231,8 +237,12 @@ async def type_evaporation_scan(
 
         # At this point, both frontend_code and backend_code are guaranteed to be set
         # (validated above at lines 111-133)
-        assert frontend_code is not None, "frontend_code must be provided or read from file"
-        assert backend_code is not None, "backend_code must be provided or read from file"
+        assert (
+            frontend_code is not None
+        ), "frontend_code must be provided or read from file"
+        assert (
+            backend_code is not None
+        ), "backend_code must be provided or read from file"
 
         result = await asyncio.to_thread(
             _type_evaporation_scan_sync,
@@ -268,6 +278,7 @@ async def type_evaporation_scan(
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="scan_dependencies", strategy=PathStrategy)
 async def scan_dependencies(
     path: str | None = None,
     project_root: str | None = None,
@@ -325,7 +336,9 @@ async def scan_dependencies(
         caps = get_tool_capabilities("scan_dependencies", tier)
 
         if ctx:
-            await ctx.report_progress(0, 100, f"Scanning dependencies in {resolved_path}...")
+            await ctx.report_progress(
+                0, 100, f"Scanning dependencies in {resolved_path}..."
+            )
 
         result = await asyncio.to_thread(
             _scan_dependencies_sync,
@@ -340,7 +353,9 @@ async def scan_dependencies(
 
         if ctx:
             vuln_count = result.total_vulnerabilities
-            await ctx.report_progress(100, 100, f"Scan complete: {vuln_count} vulnerabilities found")
+            await ctx.report_progress(
+                100, 100, f"Scan complete: {vuln_count} vulnerabilities found"
+            )
 
         duration_ms = int((time.perf_counter() - started) * 1000)
         return make_envelope(
@@ -365,6 +380,7 @@ async def scan_dependencies(
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="security_scan", strategy=PathStrategy)
 async def security_scan(
     code: Optional[str] = None,
     file_path: Optional[str] = None,
@@ -417,7 +433,9 @@ async def security_scan(
     try:
         tier = _get_current_tier()
         caps = get_tool_capabilities("security_scan", tier)
-        result = await asyncio.to_thread(_security_scan_sync, code, file_path, tier, caps, confidence_threshold)
+        result = await asyncio.to_thread(
+            _security_scan_sync, code, file_path, tier, caps, confidence_threshold
+        )
         duration_ms = int((time.perf_counter() - started) * 1000)
         return make_envelope(
             data=result,

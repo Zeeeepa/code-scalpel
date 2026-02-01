@@ -37,8 +37,7 @@ class TestSymbolStrategy:
     def test_suggest_missing_file_and_code(self):
         """Should return empty list if both file and code are missing."""
         result = SymbolStrategy.suggest(
-            ValidationError("Symbol not found"),
-            {"symbol_name": "foo"}
+            ValidationError("Symbol not found"), {"symbol_name": "foo"}
         )
         assert result == []
 
@@ -60,8 +59,7 @@ def process_file(z):
         }
 
         result = SymbolStrategy.suggest(
-            ValidationError("Symbol 'process_dta' not found."),
-            context
+            ValidationError("Symbol 'process_dta' not found."), context
         )
 
         # Should get suggestions for similar symbols
@@ -88,8 +86,7 @@ def calculate_diff(p, q):
         }
 
         result = SymbolStrategy.suggest(
-            ValidationError("Symbol 'calculate_sum_total' not found."),
-            context
+            ValidationError("Symbol 'calculate_sum_total' not found."), context
         )
 
         # Should get suggestions
@@ -111,7 +108,7 @@ class TestPathStrategy:
         """Should return empty list if parent directory doesn't exist."""
         result = PathStrategy.suggest(
             FileNotFoundError("File not found"),
-            {"file_path": "/nonexistent/dir/file.py"}
+            {"file_path": "/nonexistent/dir/file.py"},
         )
         assert result == []
 
@@ -122,13 +119,10 @@ class TestPathStrategy:
         (tmp_path / "utils.py").write_text("# utils")
         (tmp_path / "helpers.py").write_text("# helpers")
 
-        context = {
-            "file_path": str(tmp_path / "auth_utils.py")  # Doesn't exist
-        }
+        context = {"file_path": str(tmp_path / "auth_utils.py")}  # Doesn't exist
 
         result = PathStrategy.suggest(
-            FileNotFoundError(f"File not found: {tmp_path / 'auth_utils.py'}"),
-            context
+            FileNotFoundError(f"File not found: {tmp_path / 'auth_utils.py'}"), context
         )
 
         # Should suggest similar filenames
@@ -141,13 +135,11 @@ class TestPathStrategy:
         """Should suggest correct file for typo."""
         (tmp_path / "authentication.py").write_text("# auth code")
 
-        context = {
-            "file_path": str(tmp_path / "autentication.py")  # Typo: missing 'h'
-        }
+        context = {"file_path": str(tmp_path / "autentication.py")}  # Typo: missing 'h'
 
         result = PathStrategy.suggest(
             FileNotFoundError(f"File not found: {tmp_path / 'autentication.py'}"),
-            context
+            context,
         )
 
         # Should find 'authentication.py' as suggestion
@@ -163,6 +155,7 @@ class TestOracleResilienceDecorator:
     def test_non_async_function_raises_error(self):
         """Decorator should reject non-async functions."""
         with pytest.raises(TypeError, match="async"):
+
             @with_oracle_resilience(tool_id="test_tool")
             def sync_func():  # type: ignore
                 pass
@@ -175,10 +168,7 @@ class TestOracleResilienceDecorator:
             raise ValidationError(f"Symbol '{target_name}' not found.")
 
         result = asyncio.run(
-            failing_tool(
-                code="def process_data(): pass",
-                target_name="process_dta"
-            )
+            failing_tool(code="def process_data(): pass", target_name="process_dta")
         )
 
         # Should return ToolResponseEnvelope with correction_needed
@@ -246,7 +236,7 @@ class TestOracleResilienceDecorator:
         result = asyncio.run(
             failing_tool(
                 code="def process_data(): pass\ndef process_item(): pass",
-                target_name="process_dta"
+                target_name="process_dta",
             )
         )
 
@@ -278,7 +268,7 @@ def process_item(): pass
 def process_file(): pass
 def foo(): pass
 """,
-                target_name="process_dta"
+                target_name="process_dta",
             )
         )
 
@@ -295,12 +285,7 @@ def foo(): pass
         async def sample_tool(code: str, target_name: str) -> ToolResponseEnvelope:
             raise ValidationError(f"Symbol '{target_name}' not found.")
 
-        result = asyncio.run(
-            sample_tool(
-                code="def foo(): pass",
-                target_name="bar"
-            )
-        )
+        result = asyncio.run(sample_tool(code="def foo(): pass", target_name="bar"))
 
         # Check that result is a valid envelope
         assert isinstance(result, ToolResponseEnvelope)
@@ -326,8 +311,7 @@ class TestNodeIdFormatStrategy:
 
         for node_id in valid_ids:
             result = NodeIdFormatStrategy.suggest(
-                ValidationError("Invalid format"),
-                {"center_node_id": node_id}
+                ValidationError("Invalid format"), {"center_node_id": node_id}
             )
             assert result == [], f"Valid ID '{node_id}' should return empty list"
 
@@ -335,7 +319,7 @@ class TestNodeIdFormatStrategy:
         """Node IDs with missing components should get suggestions."""
         result = NodeIdFormatStrategy.suggest(
             ValidationError("Invalid format"),
-            {"center_node_id": "python::app.main::function"}  # Missing name
+            {"center_node_id": "python::app.main::function"},  # Missing name
         )
 
         assert len(result) > 0
@@ -345,7 +329,7 @@ class TestNodeIdFormatStrategy:
         """Invalid type should get suggestion."""
         result = NodeIdFormatStrategy.suggest(
             ValidationError("Invalid format"),
-            {"center_node_id": "python::app.main::invalid::process_data"}
+            {"center_node_id": "python::app.main::invalid::process_data"},
         )
 
         assert len(result) > 0
@@ -355,7 +339,7 @@ class TestNodeIdFormatStrategy:
         """Too many components should get suggestion."""
         result = NodeIdFormatStrategy.suggest(
             ValidationError("Invalid format"),
-            {"center_node_id": "python::app::main::function::process::data"}  # 6 parts
+            {"center_node_id": "python::app::main::function::process::data"},  # 6 parts
         )
 
         assert len(result) > 0
@@ -370,7 +354,7 @@ class TestMethodNameFormatStrategy:
         # Not a method extraction, should return empty
         result = MethodNameFormatStrategy.suggest(
             ValidationError("Invalid"),
-            {"symbol_name": "validate_email", "target_type": "function"}
+            {"symbol_name": "validate_email", "target_type": "function"},
         )
         assert result == []
 
@@ -378,7 +362,7 @@ class TestMethodNameFormatStrategy:
         """Method without dot should get suggestion."""
         result = MethodNameFormatStrategy.suggest(
             ValidationError("Invalid"),
-            {"symbol_name": "validate_email", "target_type": "method"}
+            {"symbol_name": "validate_email", "target_type": "method"},
         )
 
         assert len(result) > 0
@@ -388,7 +372,7 @@ class TestMethodNameFormatStrategy:
         """Valid Class.method format should return empty list."""
         result = MethodNameFormatStrategy.suggest(
             ValidationError("Invalid"),
-            {"symbol_name": "User.validate_email", "target_type": "method"}
+            {"symbol_name": "User.validate_email", "target_type": "method"},
         )
         assert result == []
 
@@ -396,7 +380,7 @@ class TestMethodNameFormatStrategy:
         """Too many dots in method name should get suggestion."""
         result = MethodNameFormatStrategy.suggest(
             ValidationError("Invalid"),
-            {"symbol_name": "User.Profile.validate_email", "target_type": "method"}
+            {"symbol_name": "User.Profile.validate_email", "target_type": "method"},
         )
 
         assert len(result) > 0
@@ -406,14 +390,14 @@ class TestMethodNameFormatStrategy:
         """Missing class or method name should get suggestion."""
         result = MethodNameFormatStrategy.suggest(
             ValidationError("Invalid"),
-            {"symbol_name": ".validate_email", "target_type": "method"}
+            {"symbol_name": ".validate_email", "target_type": "method"},
         )
 
         assert len(result) > 0
 
         result = MethodNameFormatStrategy.suggest(
             ValidationError("Invalid"),
-            {"symbol_name": "User.", "target_type": "method"}
+            {"symbol_name": "User.", "target_type": "method"},
         )
 
         assert len(result) > 0
@@ -439,10 +423,7 @@ def process_item(y):
         }
 
         composite = CompositeStrategy([SymbolStrategy, SafetyStrategy])
-        result = composite.suggest(
-            ValidationError("Symbol not found"),
-            context
-        )
+        result = composite.suggest(ValidationError("Symbol not found"), context)
 
         # Should get suggestions from both strategies
         # SymbolStrategy suggests 'process_data'
@@ -486,8 +467,7 @@ def process_item(y):
     def test_composite_strategy_top_3_limit(self):
         """CompositeStrategy should return at most 3 suggestions."""
         suggestions = [
-            {"symbol": f"var_{i}", "score": 1.0 - (i * 0.1)}
-            for i in range(10)
+            {"symbol": f"var_{i}", "score": 1.0 - (i * 0.1)} for i in range(10)
         ]
 
         composite = CompositeStrategy([SymbolStrategy])
@@ -525,14 +505,10 @@ def process_files(directory):
     return manager.list_files(directory)
 """
         # Test with typo "write_file" -> "write_fil"
-        context = {
-            "code": code,
-            "symbol_name": "write_fil"
-        }
+        context = {"code": code, "symbol_name": "write_fil"}
 
         result = SymbolStrategy.suggest(
-            ValidationError("Symbol 'write_fil' not found."),
-            context
+            ValidationError("Symbol 'write_fil' not found."), context
         )
 
         # Should suggest similar methods
@@ -555,8 +531,7 @@ def process_files(directory):
         # Test finding similar file in wrong directory
         context = {"file_path": str(src / "utils_helper.py")}
         result = PathStrategy.suggest(
-            FileNotFoundError(f"File not found: {src / 'utils_helper.py'}"),
-            context
+            FileNotFoundError(f"File not found: {src / 'utils_helper.py'}"), context
         )
 
         # Should suggest utils.py
@@ -575,8 +550,7 @@ class TestGetFileContextOracle:
         # Test with typo - oracle should suggest utils.py
         context = {"file_path": str(tmp_path / "utils_typo.py")}
         result = PathStrategy.suggest(
-            FileNotFoundError(f"File not found: {tmp_path / 'utils_typo.py'}"),
-            context
+            FileNotFoundError(f"File not found: {tmp_path / 'utils_typo.py'}"), context
         )
 
         # Should get suggestion for similar file
@@ -597,8 +571,7 @@ class TestCrawlProjectOracle:
         # Test with typo in directory name
         context = {"file_path": str(tmp_path / "scr")}  # Typo: scr instead of src
         result = PathStrategy.suggest(
-            FileNotFoundError(f"Directory not found: {tmp_path / 'scr'}"),
-            context
+            FileNotFoundError(f"Directory not found: {tmp_path / 'scr'}"), context
         )
 
         # Note: PathStrategy suggests files, not directories, so this might return empty
@@ -619,8 +592,7 @@ class TestCrossFileSecurityScanOracle:
         # Test with typo in project root
         context = {"file_path": str(tmp_path / "aap")}  # Typo
         result = PathStrategy.suggest(
-            FileNotFoundError(f"Project root not found: {tmp_path / 'aap'}"),
-            context
+            FileNotFoundError(f"Project root not found: {tmp_path / 'aap'}"), context
         )
 
         # Oracle should handle this gracefully
@@ -654,8 +626,7 @@ def calculate_total(items):
         from code_scalpel.mcp.oracle_middleware import RenameSymbolStrategy
 
         result = RenameSymbolStrategy.suggest(
-            ValidationError("Collision detected"),
-            context
+            ValidationError("Collision detected"), context
         )
 
         # Should detect the collision
@@ -679,8 +650,7 @@ def process_data(x):
         from code_scalpel.mcp.oracle_middleware import RenameSymbolStrategy
 
         result = RenameSymbolStrategy.suggest(
-            ValidationError("Check collision"),
-            context
+            ValidationError("Check collision"), context
         )
 
         # Should not detect collision for unique name
@@ -711,8 +681,7 @@ def calcualte_total(items):  # Typo in source
         from code_scalpel.mcp.oracle_middleware import RenameSymbolStrategy
 
         result = RenameSymbolStrategy.suggest(
-            ValidationError("Multiple issues"),
-            context
+            ValidationError("Multiple issues"), context
         )
 
         # Should return suggestions (either for typo or collision detection)
@@ -729,8 +698,7 @@ class TestGraphNodeIdPreValidation:
         # In real use, this would be caught by NodeIdFormatStrategy
 
         result = NodeIdFormatStrategy.suggest(
-            ValidationError("Invalid format"),
-            {"center_node_id": "invalid_format"}
+            ValidationError("Invalid format"), {"center_node_id": "invalid_format"}
         )
 
         assert len(result) > 0
@@ -740,7 +708,7 @@ class TestGraphNodeIdPreValidation:
         """Valid node ID format should pass pre-validation."""
         result = NodeIdFormatStrategy.suggest(
             ValidationError("Should be valid"),
-            {"center_node_id": "python::app.routes::function::handle_request"}
+            {"center_node_id": "python::app.routes::function::handle_request"},
         )
 
         # Valid format should return empty suggestions
@@ -750,13 +718,96 @@ class TestGraphNodeIdPreValidation:
         """Node ID with missing components should be flagged."""
         result = NodeIdFormatStrategy.suggest(
             ValidationError("Invalid"),
-            {"center_node_id": "python::app.routes::function"}  # Missing name
+            {"center_node_id": "python::app.routes::function"},  # Missing name
         )
 
         assert len(result) > 0
         # Check that the suggestion includes info about expected format
-        all_hints = "".join(str(r.get("hint", "")) + str(r.get("example", "")) for r in result)
-        assert "parts" in all_hints.lower() or "expected" in all_hints.lower() or "format" in all_hints.lower()
+        all_hints = "".join(
+            str(r.get("hint", "")) + str(r.get("example", "")) for r in result
+        )
+        assert (
+            "parts" in all_hints.lower()
+            or "expected" in all_hints.lower()
+            or "format" in all_hints.lower()
+        )
+
+
+class TestPolicyToolsOracle:
+    """Test policy tools with oracle resilience."""
+
+    def test_validate_paths_oracle(self, tmp_path: Path):
+        """PathStrategy should suggest correct files for typos in path list."""
+        (tmp_path / "config.yaml").write_text("# config")
+        result = PathStrategy.suggest(
+            FileNotFoundError(f"Path not found: {tmp_path / 'config_typo.yaml'}"),
+            {"file_path": str(tmp_path / "config_typo.yaml")},
+        )
+        assert len(result) > 0
+        assert any("config.yaml" in r.get("path", "") for r in result)
+
+    def test_code_policy_check_oracle(self, tmp_path: Path):
+        """Policy tool should use PathStrategy for file validation."""
+        (tmp_path / "policy.txt").write_text("# policy")
+        result = PathStrategy.suggest(
+            FileNotFoundError(str(tmp_path / "polciy.txt")),
+            {"file_path": str(tmp_path / "polciy.txt")},
+        )
+        assert len(result) > 0
+
+
+class TestSecurityToolsOracle:
+    """Test security tools with oracle resilience."""
+
+    def test_type_evaporation_scan_oracle(self, tmp_path: Path):
+        """Security tool should suggest files for frontend/backend path typos."""
+        (tmp_path / "frontend.ts").write_text("// frontend")
+        result = PathStrategy.suggest(
+            FileNotFoundError(str(tmp_path / "frontned.ts")),
+            {"file_path": str(tmp_path / "frontned.ts")},
+        )
+        assert len(result) > 0
+
+    def test_scan_dependencies_oracle(self, tmp_path: Path):
+        """Dependency scanner should use PathStrategy for path validation."""
+        (tmp_path / "src").mkdir()
+        result = PathStrategy.suggest(
+            FileNotFoundError(str(tmp_path / "scr")),
+            {"file_path": str(tmp_path / "scr")},
+        )
+        assert isinstance(result, list)
+
+    def test_security_scan_oracle(self, tmp_path: Path):
+        """Security scanner should suggest files for path typos."""
+        (tmp_path / "app.py").write_text("# app")
+        result = PathStrategy.suggest(
+            FileNotFoundError(str(tmp_path / "ap.py")),
+            {"file_path": str(tmp_path / "ap.py")},
+        )
+        assert len(result) > 0
+
+
+class TestGenerateTestsStrategy:
+    """Test GenerateTestsStrategy for combined file and function validation."""
+
+    def test_generate_tests_with_file_typo(self, tmp_path: Path):
+        """GenerateTestsStrategy should suggest files for path typos."""
+        from code_scalpel.mcp.oracle_middleware import GenerateTestsStrategy
+
+        (tmp_path / "app.py").write_text("def process_data(): pass")
+        context = {"file_path": str(tmp_path / "aap.py")}
+        result = GenerateTestsStrategy.suggest(
+            FileNotFoundError(str(tmp_path / "aap.py")), context
+        )
+        assert len(result) > 0
+
+    def test_composite_deduplication_edge_case(self):
+        """CompositeStrategy should handle empty suggestion lists."""
+        from code_scalpel.mcp.oracle_middleware import CompositeStrategy
+
+        empty_list = []
+        result = CompositeStrategy._rank_and_dedupe(empty_list)
+        assert result == []
 
 
 if __name__ == "__main__":

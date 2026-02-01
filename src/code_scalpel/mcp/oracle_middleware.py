@@ -121,11 +121,13 @@ class SymbolStrategy(RecoveryStrategy):
                     for i, suggestion in enumerate(ve.suggestions[:3], 1):  # Top 3
                         # Calculate score (linear falloff from 0.95)
                         score = 0.95 - (i - 1) * 0.05
-                        suggestions.append({
-                            "symbol": suggestion,
-                            "score": max(0.6, score),
-                            "reason": "fuzzy_match"
-                        })
+                        suggestions.append(
+                            {
+                                "symbol": suggestion,
+                                "score": max(0.6, score),
+                                "reason": "fuzzy_match",
+                            }
+                        )
                 return suggestions
 
         except Exception as e:
@@ -168,8 +170,7 @@ class PathStrategy(RecoveryStrategy):
         # Get all files in parent directory
         try:
             siblings = [
-                f for f in os.listdir(parent)
-                if os.path.isfile(os.path.join(parent, f))
+                f for f in os.listdir(parent) if os.path.isfile(os.path.join(parent, f))
             ]
         except (OSError, PermissionError):
             return []
@@ -185,11 +186,13 @@ class PathStrategy(RecoveryStrategy):
             ratio = SequenceMatcher(None, filename.lower(), sibling.lower()).ratio()
             if ratio > 0.6:  # Threshold
                 full_path = os.path.join(parent, sibling)
-                matches.append({
-                    "path": full_path,
-                    "score": round(ratio, 2),
-                    "reason": "path_similarity"
-                })
+                matches.append(
+                    {
+                        "path": full_path,
+                        "score": round(ratio, 2),
+                        "reason": "path_similarity",
+                    }
+                )
 
         # Sort by score descending
         matches.sort(key=lambda x: x["score"], reverse=True)
@@ -229,11 +232,13 @@ class SafetyStrategy(RecoveryStrategy):
             elif code:
                 content = code
             else:
-                return [{
-                    "hint": f"Rename to '{new_name}'. Verify uniqueness in scope.",
-                    "reason": "collision_risk",
-                    "score": 0.6
-                }]
+                return [
+                    {
+                        "hint": f"Rename to '{new_name}'. Verify uniqueness in scope.",
+                        "reason": "collision_risk",
+                        "score": 0.6,
+                    }
+                ]
 
             # Use SemanticValidator to get accurate symbol information
             try:
@@ -249,16 +254,18 @@ class SafetyStrategy(RecoveryStrategy):
                 try:
                     validator.validate_symbol_exists(source_ctx, new_name)
                     # If validation passed, symbol exists
-                    return [{
-                        "hint": f"Symbol '{new_name}' already exists in this file. Choose a unique name.",
-                        "reason": "name_collision_detected",
-                        "score": 0.99,
-                        "suggestions": [
-                            f"{new_name}_new",
-                            f"{new_name}_v2",
-                            f"{new_name}_backup"
-                        ]
-                    }]
+                    return [
+                        {
+                            "hint": f"Symbol '{new_name}' already exists in this file. Choose a unique name.",
+                            "reason": "name_collision_detected",
+                            "score": 0.99,
+                            "suggestions": [
+                                f"{new_name}_new",
+                                f"{new_name}_v2",
+                                f"{new_name}_backup",
+                            ],
+                        }
+                    ]
                 except ValidationError:
                     # Symbol doesn't exist, no collision
                     pass
@@ -267,13 +274,16 @@ class SafetyStrategy(RecoveryStrategy):
                 logger.debug(f"SafetyStrategy semantic check failed: {e}")
                 # Fall back to regex-based detection
                 import re
+
                 pattern = rf"\b(?:def|class)\s+{re.escape(new_name)}\b"
                 if re.search(pattern, content):
-                    return [{
-                        "hint": f"Symbol '{new_name}' already exists. Choose a unique name.",
-                        "reason": "name_collision_detected",
-                        "score": 0.99
-                    }]
+                    return [
+                        {
+                            "hint": f"Symbol '{new_name}' already exists. Choose a unique name.",
+                            "reason": "name_collision_detected",
+                            "score": 0.99,
+                        }
+                    ]
 
         except Exception as e:
             logger.debug(f"SafetyStrategy check failed: {e}")
@@ -307,7 +317,7 @@ class NodeIdFormatStrategy(RecoveryStrategy):
 
         # Expected format: language::module::type::name
         # Example: python::app.main::function::process_data
-        pattern = r'^[a-z]+::[^:]+::(function|class|method)::[^:]+$'
+        pattern = r"^[a-z]+::[^:]+::(function|class|method)::[^:]+$"
 
         if re.match(pattern, node_id):
             # Format is actually valid
@@ -318,28 +328,34 @@ class NodeIdFormatStrategy(RecoveryStrategy):
         expected_parts = 4
 
         if len(parts) < expected_parts:
-            return [{
-                "hint": f"Node ID format should be: language::module::type::name. Got {len(parts)} parts, expected {expected_parts}.",
-                "reason": "format_error",
-                "score": 0.3,
-                "example": "python::app.routes::function::handle_request"
-            }]
+            return [
+                {
+                    "hint": f"Node ID format should be: language::module::type::name. Got {len(parts)} parts, expected {expected_parts}.",
+                    "reason": "format_error",
+                    "score": 0.3,
+                    "example": "python::app.routes::function::handle_request",
+                }
+            ]
         elif len(parts) > expected_parts:
-            return [{
-                "hint": f"Node ID has too many components. Expected 4 (language::module::type::name), got {len(parts)}.",
-                "reason": "format_error",
-                "score": 0.3,
-                "example": "python::app.routes::function::handle_request"
-            }]
+            return [
+                {
+                    "hint": f"Node ID has too many components. Expected 4 (language::module::type::name), got {len(parts)}.",
+                    "reason": "format_error",
+                    "score": 0.3,
+                    "example": "python::app.routes::function::handle_request",
+                }
+            ]
         else:
             # Has 4 parts but invalid type or format
             if parts[2] not in ["function", "class", "method"]:
-                return [{
-                    "hint": f"Type '{parts[2]}' is invalid. Expected 'function', 'class', or 'method'.",
-                    "reason": "format_error",
-                    "score": 0.4,
-                    "example": f"{parts[0]}::{parts[1]}::function::{parts[3]}"
-                }]
+                return [
+                    {
+                        "hint": f"Type '{parts[2]}' is invalid. Expected 'function', 'class', or 'method'.",
+                        "reason": "format_error",
+                        "score": 0.4,
+                        "example": f"{parts[0]}::{parts[1]}::function::{parts[3]}",
+                    }
+                ]
 
         return []
 
@@ -369,29 +385,35 @@ class MethodNameFormatStrategy(RecoveryStrategy):
 
         # Method names should have format: ClassName.method_name
         if "." not in target_name:
-            return [{
-                "hint": f"Method name should use format 'ClassName.method_name', but got '{target_name}'.",
-                "reason": "format_error",
-                "score": 0.5,
-                "example": "User.validate_email"
-            }]
+            return [
+                {
+                    "hint": f"Method name should use format 'ClassName.method_name', but got '{target_name}'.",
+                    "reason": "format_error",
+                    "score": 0.5,
+                    "example": "User.validate_email",
+                }
+            ]
 
         # Has dot, check structure
         parts = target_name.split(".")
         if len(parts) != 2:
-            return [{
-                "hint": f"Method name should have exactly one dot separating class and method (e.g., 'User.validate'), but got '{target_name}'.",
-                "reason": "format_error",
-                "score": 0.4
-            }]
+            return [
+                {
+                    "hint": f"Method name should have exactly one dot separating class and method (e.g., 'User.validate'), but got '{target_name}'.",
+                    "reason": "format_error",
+                    "score": 0.4,
+                }
+            ]
 
         class_name, method_name = parts
         if not class_name or not method_name:
-            return [{
-                "hint": f"Invalid method format: both ClassName and method_name must be non-empty. Got '{target_name}'.",
-                "reason": "format_error",
-                "score": 0.3
-            }]
+            return [
+                {
+                    "hint": f"Invalid method format: both ClassName and method_name must be non-empty. Got '{target_name}'.",
+                    "reason": "format_error",
+                    "score": 0.3,
+                }
+            ]
 
         return []
 
@@ -439,13 +461,13 @@ class RenameSymbolStrategy(RecoveryStrategy):
             else:
                 key = ("unknown", str(suggestion))
 
-            if key not in seen or suggestion.get("score", 0) > seen[key].get("score", 0):
+            if key not in seen or suggestion.get("score", 0) > seen[key].get(
+                "score", 0
+            ):
                 seen[key] = suggestion
 
         sorted_suggestions = sorted(
-            seen.values(),
-            key=lambda x: x.get("score", 0),
-            reverse=True
+            seen.values(), key=lambda x: x.get("score", 0), reverse=True
         )
 
         return sorted_suggestions[:3]
@@ -466,7 +488,9 @@ class CompositeStrategy(RecoveryStrategy):
         """
         self.strategies = strategies
 
-    def suggest(self, error: Exception, context: dict[str, Any]) -> list[dict[str, Any]]:
+    def suggest(
+        self, error: Exception, context: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Apply all strategies and combine suggestions.
 
         Args:
@@ -515,14 +539,14 @@ class CompositeStrategy(RecoveryStrategy):
                 key = ("unknown", str(suggestion))
 
             # Keep suggestion with highest score
-            if key not in seen or suggestion.get("score", 0) > seen[key].get("score", 0):
+            if key not in seen or suggestion.get("score", 0) > seen[key].get(
+                "score", 0
+            ):
                 seen[key] = suggestion
 
         # Sort by score descending and return top 3
         sorted_suggestions = sorted(
-            seen.values(),
-            key=lambda x: x.get("score", 0),
-            reverse=True
+            seen.values(), key=lambda x: x.get("score", 0), reverse=True
         )
 
         return sorted_suggestions[:3]
@@ -612,9 +636,7 @@ def with_oracle_resilience(
                         if s.get("symbol") or s.get("path") or s.get("hint")
                     ]
                     if suggestion_names:
-                        error_msg = (
-                            f"{str(ve)} Did you mean: {', '.join(suggestion_names[:3])}?"
-                        )
+                        error_msg = f"{str(ve)} Did you mean: {', '.join(suggestion_names[:3])}?"
 
                 duration_ms = int((time.perf_counter() - started) * 1000)
                 tier = _get_current_tier()
@@ -632,8 +654,8 @@ def with_oracle_resilience(
                         error_details={
                             "suggestions": suggestions,
                             "hint": error_msg,
-                        }
-                    )
+                        },
+                    ),
                 )
 
             except FileNotFoundError as fnf:
@@ -657,7 +679,9 @@ def with_oracle_resilience(
                 # Build user-friendly error message
                 error_msg = str(fnf)
                 if suggestions:
-                    suggestion_paths = [s.get("path") for s in suggestions if s.get("path")]
+                    suggestion_paths = [
+                        s.get("path") for s in suggestions if s.get("path")
+                    ]
                     if suggestion_paths:
                         error_msg = f"{str(fnf)} Did you mean: {suggestion_paths[0]}?"
 
@@ -676,13 +700,15 @@ def with_oracle_resilience(
                         error_details={
                             "suggestions": suggestions,
                             "hint": error_msg,
-                        }
-                    )
+                        },
+                    ),
                 )
 
             except Exception as exc:
                 # Pass through other exceptions to tool's normal error handling
-                logger.debug(f"Oracle: Not intercepting {type(exc).__name__} in {tool_id}")
+                logger.debug(
+                    f"Oracle: Not intercepting {type(exc).__name__} in {tool_id}"
+                )
                 raise
 
         return wrapper  # type: ignore
@@ -726,8 +752,7 @@ def _enhance_error_envelope(
 
     # Check if this looks like a symbol not found error
     if "not found" in error_msg.lower() and any(
-        word in error_msg.lower()
-        for word in ["symbol", "function", "class", "method"]
+        word in error_msg.lower() for word in ["symbol", "function", "class", "method"]
     ):
         logger.info(f"Oracle: Post-processing symbol error in {tool_id}")
 
@@ -750,7 +775,9 @@ def _enhance_error_envelope(
                 if s.get("symbol") or s.get("path") or s.get("hint")
             ]
             if suggestion_names:
-                enhanced_msg = f"{error_msg} Did you mean: {', '.join(suggestion_names[:3])}?"
+                enhanced_msg = (
+                    f"{error_msg} Did you mean: {', '.join(suggestion_names[:3])}?"
+                )
 
             # Update error code and details
             enhanced_error = ToolError(
@@ -759,7 +786,7 @@ def _enhance_error_envelope(
                 error_details={
                     "suggestions": suggestions,
                     "hint": enhanced_msg,
-                }
+                },
             )
 
             # Return a new envelope with updated error
@@ -778,6 +805,45 @@ def _enhance_error_envelope(
     return None
 
 
+class GenerateTestsStrategy(RecoveryStrategy):
+    """Recovery strategy for generate_unit_tests tool.
+
+    Combines PathStrategy for file_path and SymbolStrategy for function_name
+    validation in test generation operations.
+    """
+
+    @staticmethod
+    def suggest(error: Exception, context: dict[str, Any]) -> list[dict[str, Any]]:
+        """Detect file path or function name errors and suggest corrections.
+
+        Args:
+            error: The exception that was raised
+            context: Context dict with 'file_path' and 'function_name'
+
+        Returns:
+            Combined suggestions from both path and symbol validation
+        """
+        all_suggestions = []
+
+        # Check file_path first (PathStrategy)
+        if context.get("file_path"):
+            path_suggestions = PathStrategy.suggest(error, context)
+            all_suggestions.extend(path_suggestions)
+
+        # Check function_name (SymbolStrategy)
+        if context.get("function_name"):
+            symbol_context = {
+                "file_path": context.get("file_path"),
+                "code": context.get("code"),
+                "symbol_name": context.get("function_name"),
+            }
+            symbol_suggestions = SymbolStrategy.suggest(error, symbol_context)
+            all_suggestions.extend(symbol_suggestions)
+
+        # Deduplicate and rank
+        return CompositeStrategy._rank_and_dedupe(all_suggestions)
+
+
 __all__ = [
     "RecoveryStrategy",
     "SymbolStrategy",
@@ -786,6 +852,7 @@ __all__ = [
     "NodeIdFormatStrategy",
     "MethodNameFormatStrategy",
     "RenameSymbolStrategy",
+    "GenerateTestsStrategy",
     "CompositeStrategy",
     "with_oracle_resilience",
 ]

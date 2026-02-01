@@ -15,6 +15,12 @@ from code_scalpel.licensing import tier_detector
 
 # pragma: no cover
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
+from code_scalpel.mcp.oracle_middleware import (
+    with_oracle_resilience,
+    SymbolStrategy,
+    PathStrategy,
+    CompositeStrategy,
+)
 from code_scalpel import __version__ as _pkg_version
 from code_scalpel.mcp.protocol import _get_current_tier
 
@@ -84,19 +90,27 @@ async def symbolic_execute(
 
         effective_max_paths: int | None
         if max_paths is None:
-            effective_max_paths = None if configured_max_paths is None else int(configured_max_paths)
+            effective_max_paths = (
+                None if configured_max_paths is None else int(configured_max_paths)
+            )
         else:
             effective_max_paths = int(max_paths)
             if configured_max_paths is not None:
-                effective_max_paths = min(effective_max_paths, int(configured_max_paths))
+                effective_max_paths = min(
+                    effective_max_paths, int(configured_max_paths)
+                )
 
         effective_max_depth: int | None
         if max_depth is None:
-            effective_max_depth = None if configured_max_depth is None else int(configured_max_depth)
+            effective_max_depth = (
+                None if configured_max_depth is None else int(configured_max_depth)
+            )
         else:
             effective_max_depth = int(max_depth)
             if configured_max_depth is not None:
-                effective_max_depth = min(effective_max_depth, int(configured_max_depth))
+                effective_max_depth = min(
+                    effective_max_depth, int(configured_max_depth)
+                )
 
         helper = sym_helpers._symbolic_execute_sync
 
@@ -132,6 +146,7 @@ async def symbolic_execute(
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="generate_unit_tests", strategy=GenerateTestsStrategy)
 async def generate_unit_tests(
     code: str | None = None,
     file_path: str | None = None,

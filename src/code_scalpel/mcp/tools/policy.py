@@ -14,11 +14,15 @@ from code_scalpel.mcp.helpers.policy_helpers import (
 )
 from code_scalpel.mcp.protocol import mcp
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
+from code_scalpel.mcp.oracle_middleware import with_oracle_resilience, PathStrategy
 from code_scalpel import __version__ as _pkg_version
 
 
 @mcp.tool()
-async def validate_paths(paths: list[str], project_root: str | None = None) -> ToolResponseEnvelope:
+@with_oracle_resilience(tool_id="validate_paths", strategy=PathStrategy)
+async def validate_paths(
+    paths: list[str], project_root: str | None = None
+) -> ToolResponseEnvelope:
     """Validate that paths are accessible before running file-based operations.
 
     Checks that provided file paths exist and are accessible within the project,
@@ -63,7 +67,9 @@ async def validate_paths(paths: list[str], project_root: str | None = None) -> T
     try:
         tier = _get_current_tier()
         capabilities = get_tool_capabilities("validate_paths", tier) or {}
-        result = await asyncio.to_thread(_validate_paths_sync, paths, project_root, tier, capabilities)
+        result = await asyncio.to_thread(
+            _validate_paths_sync, paths, project_root, tier, capabilities
+        )
         duration_ms = int((time.perf_counter() - started) * 1000)
         return make_envelope(
             data=result,
@@ -87,6 +93,7 @@ async def validate_paths(paths: list[str], project_root: str | None = None) -> T
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="verify_policy_integrity", strategy=PathStrategy)
 async def verify_policy_integrity(
     policy_dir: str | None = None,
     manifest_source: str = "file",
@@ -162,6 +169,7 @@ async def verify_policy_integrity(
 
 
 @mcp.tool()
+@with_oracle_resilience(tool_id="code_policy_check", strategy=PathStrategy)
 async def code_policy_check(
     paths: list[str],
     rules: list[str] | None = None,
