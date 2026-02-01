@@ -20,6 +20,7 @@ from code_scalpel.mcp.oracle_middleware import (
     SymbolStrategy,
     PathStrategy,
     CompositeStrategy,
+    GenerateTestsStrategy,
 )
 from code_scalpel import __version__ as _pkg_version
 from code_scalpel.mcp.protocol import _get_current_tier
