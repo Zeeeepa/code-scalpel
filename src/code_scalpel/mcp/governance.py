@@ -126,7 +126,9 @@ def _emit_governance_audit_event(policy_dir: Path, event: dict[str, Any]) -> Non
         audit_path = policy_dir / "audit.jsonl"
         payload = dict(event)
         payload.setdefault("ts", time.time())
-        payload.setdefault("iso_utc", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+        payload.setdefault(
+            "iso_utc", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        )
         with audit_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(payload, ensure_ascii=False, sort_keys=True))
             f.write("\n")
@@ -201,7 +203,9 @@ def _is_budgeted_write_tool(tool_id: str) -> bool:
     return tool_id in {"update_symbol", "rename_symbol"}
 
 
-def _diff_added_removed_lines(old_code: str, new_code: str) -> tuple[list[str], list[str]]:
+def _diff_added_removed_lines(
+    old_code: str, new_code: str
+) -> tuple[list[str], list[str]]:
     """Compute added/removed lines for budget accounting.
 
     [20251231_FEATURE] Used by governance budget preflight.
@@ -293,7 +297,9 @@ def _evaluate_change_budget_for_write_tool(
             if not getattr(edits, "token_replacements", None):
                 continue
 
-            new_code = _apply_token_replacements(_tokenize(code), getattr(edits, "token_replacements"))
+            new_code = _apply_token_replacements(
+                _tokenize(code), getattr(edits, "token_replacements")
+            )
             if new_code == code:
                 continue
 
@@ -320,7 +326,9 @@ def _evaluate_change_budget_for_write_tool(
         return True, {"skipped": True, "reason": f"Path resolve failed: {e}"}
 
     budget_config = load_budget_config(str(policy_dir / "budget.yaml"))
-    default_budget = budget_config.get("default", {}) if isinstance(budget_config, dict) else {}
+    default_budget = (
+        budget_config.get("default", {}) if isinstance(budget_config, dict) else {}
+    )
     budget = ChangeBudget(default_budget)
 
     try:
@@ -361,13 +369,19 @@ def _evaluate_change_budget_for_write_tool(
 
                 if target_type == "function":
                     patch_result = patcher.update_function(target_name, str(new_code))
-                    if not patch_result.success and "not found" in (patch_result.error or "").lower():
+                    if (
+                        not patch_result.success
+                        and "not found" in (patch_result.error or "").lower()
+                    ):
                         insert_fn = getattr(patcher, "insert_function", None)
                         if callable(insert_fn):
                             patch_result = insert_fn(str(new_code))
                 elif target_type == "class":
                     patch_result = patcher.update_class(target_name, str(new_code))
-                    if not patch_result.success and "not found" in (patch_result.error or "").lower():
+                    if (
+                        not patch_result.success
+                        and "not found" in (patch_result.error or "").lower()
+                    ):
                         insert_cls = getattr(patcher, "insert_class", None)
                         if callable(insert_cls):
                             patch_result = insert_cls(str(new_code))
@@ -378,7 +392,9 @@ def _evaluate_change_budget_for_write_tool(
                             "reason": "Invalid method target_name",
                         }
                     class_name, method_name = target_name.rsplit(".", 1)
-                    patch_result = patcher.update_method(class_name, method_name, str(new_code))
+                    patch_result = patcher.update_method(
+                        class_name, method_name, str(new_code)
+                    )
                     if (
                         not patch_result.success
                         and "not found" in (patch_result.error or "").lower()
@@ -416,7 +432,8 @@ def _evaluate_change_budget_for_write_tool(
     # If this is a rename operation at Pro/Enterprise, include the cross-file
     # rename edits that the tool would apply (bounded by its configured limits).
     is_rename_op = tool_id == "rename_symbol" or (
-        tool_id == "update_symbol" and str(arguments.get("operation") or "").strip().lower() == "rename"
+        tool_id == "update_symbol"
+        and str(arguments.get("operation") or "").strip().lower() == "rename"
     )
     if is_rename_op and tier in {"pro", "enterprise"}:
         try:
@@ -519,7 +536,11 @@ def _parse_governance_features_env() -> set[str] | None:
 
 def _compute_effective_governance_features(tier: str) -> tuple[set[str], list[str]]:
     requested = _parse_governance_features_env()
-    effective = requested if requested is not None else _default_governance_features_for_tier(tier)
+    effective = (
+        requested
+        if requested is not None
+        else _default_governance_features_for_tier(tier)
+    )
 
     supported = _supported_governance_features_for_tier(tier)
     unsupported = sorted(effective - supported)
@@ -529,7 +550,9 @@ def _compute_effective_governance_features(tier: str) -> tuple[set[str], list[st
     warnings: list[str] = []
     if unsupported and enforcement == "warn":
         for feat in unsupported:
-            warnings.append(f"Governance WARN: feature '{feat}' is unavailable at tier '{tier}' (ignored).")
+            warnings.append(
+                f"Governance WARN: feature '{feat}' is unavailable at tier '{tier}' (ignored)."
+            )
 
     return effective, warnings
 
@@ -595,7 +618,9 @@ def _maybe_enforce_governance_before_tool(
 
     # [20251231_FEATURE] Optional optimization: apply governance preflight only
     # to write-capable tools (keeps Community/Pro read tools low overhead).
-    write_tools_only = _parse_bool_env("SCALPEL_GOVERNANCE_WRITE_TOOLS_ONLY", default=False)
+    write_tools_only = _parse_bool_env(
+        "SCALPEL_GOVERNANCE_WRITE_TOOLS_ONLY", default=False
+    )
 
     server = import_module("code_scalpel.mcp.server")
     policy_dir = server._resolve_policy_dir()
@@ -630,12 +655,16 @@ def _maybe_enforce_governance_before_tool(
         "pro",
         "enterprise",
     }:
-        manifest_source = (os.environ.get("SCALPEL_POLICY_MANIFEST_SOURCE") or "file").strip().lower()
+        manifest_source = (
+            (os.environ.get("SCALPEL_POLICY_MANIFEST_SOURCE") or "file").strip().lower()
+        )
         if manifest_source not in {"file", "git", "env"}:
             manifest_source = "file"
 
         fingerprint = _policy_state_fingerprint(policy_dir)
-        cache_key = f"tier={tier};dir={policy_dir};source={manifest_source};{fingerprint}"
+        cache_key = (
+            f"tier={tier};dir={policy_dir};source={manifest_source};{fingerprint}"
+        )
         cached = _GOVERNANCE_VERIFY_CACHE.get(cache_key)
         if cached is not None:
             verified = cached
@@ -661,9 +690,14 @@ def _maybe_enforce_governance_before_tool(
         )
 
         if not getattr(verified, "success", False):
-            err = getattr(verified, "error", None) or "Policy integrity verification failed"
+            err = (
+                getattr(verified, "error", None)
+                or "Policy integrity verification failed"
+            )
             if enforcement == "warn":
-                warnings.append("Governance WARN: policy integrity check failed; proceeding due to break-glass.")
+                warnings.append(
+                    "Governance WARN: policy integrity check failed; proceeding due to break-glass."
+                )
                 _emit_governance_audit_event(
                     policy_dir,
                     {
@@ -713,7 +747,9 @@ def _maybe_enforce_governance_before_tool(
         )
         if not allowed:
             if enforcement == "warn":
-                warnings.append("Governance WARN: change budget exceeded; proceeding due to break-glass.")
+                warnings.append(
+                    "Governance WARN: change budget exceeded; proceeding due to break-glass."
+                )
                 _emit_governance_audit_event(
                     policy_dir,
                     {
@@ -881,7 +917,9 @@ def _maybe_enforce_governance_before_tool(
 
         if not getattr(decision, "allowed", False):
             if enforcement == "warn":
-                warnings.append("Governance WARN: policy evaluation denied; proceeding due to break-glass.")
+                warnings.append(
+                    "Governance WARN: policy evaluation denied; proceeding due to break-glass."
+                )
                 _emit_governance_audit_event(
                     policy_dir,
                     {

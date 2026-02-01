@@ -133,7 +133,9 @@ class SemanticNeighborFinder:
                 if sig.name == center_name and sig.file_path == center_sig.file_path:
                     continue  # Skip self
 
-                score, rel_types = self._calculate_similarity(center_sig, sig, relationship_types)
+                score, rel_types = self._calculate_similarity(
+                    center_sig, sig, relationship_types
+                )
 
                 if score >= min_similarity and rel_types:
                     node_id = self._make_node_id(sig)
@@ -289,17 +291,25 @@ class SemanticNeighborFinder:
                 scores.append((prefix_sim * 0.3, "prefix_match"))
 
         if "shared_params" in relationship_types:
-            param_sim = self._parameter_similarity(center.parameters, candidate.parameters)
+            param_sim = self._parameter_similarity(
+                center.parameters, candidate.parameters
+            )
             if param_sim > 0.3:
                 scores.append((param_sim * 0.2, "shared_params"))
 
-        if "docstring_similar" in relationship_types and center.docstring and candidate.docstring:
+        if (
+            "docstring_similar" in relationship_types
+            and center.docstring
+            and candidate.docstring
+        ):
             doc_sim = self._text_similarity(center.docstring, candidate.docstring)
             if doc_sim > 0.3:
                 scores.append((doc_sim * 0.2, "docstring_similar"))
 
         if "decorator_similar" in relationship_types:
-            dec_sim = self._set_similarity(set(center.decorators), set(candidate.decorators))
+            dec_sim = self._set_similarity(
+                set(center.decorators), set(candidate.decorators)
+            )
             if dec_sim > 0.5:
                 scores.append((dec_sim * 0.2, "decorator_similar"))
 

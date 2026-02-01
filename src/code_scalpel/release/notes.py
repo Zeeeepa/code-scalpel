@@ -96,7 +96,9 @@ class ReleaseNotesGenerator:
 
         return "".join(lines)
 
-    def _format_commit(self, commit: ConventionalCommit, highlight: bool = False) -> str:
+    def _format_commit(
+        self, commit: ConventionalCommit, highlight: bool = False
+    ) -> str:
         """Format a single commit for release notes.
 
         Args:
@@ -153,7 +155,9 @@ class ChangelogManager:
 
         # Find where to insert (after Unreleased section if present)
         if self.UNRELEASED_HEADER in content:
-            insert_pos = content.find(self.UNRELEASED_HEADER) + len(self.UNRELEASED_HEADER)
+            insert_pos = content.find(self.UNRELEASED_HEADER) + len(
+                self.UNRELEASED_HEADER
+            )
             if not keep_unreleased:
                 # Remove Unreleased section
                 next_version_pos = content.find("## [", insert_pos)

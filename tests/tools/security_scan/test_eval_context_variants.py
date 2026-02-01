@@ -18,4 +18,6 @@ async def test_eval_with_globals_locals_detected():
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert any(v.cwe == "CWE-94" or "code" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-94" or "code" in v.type.lower() for v in result.vulnerabilities
+    )

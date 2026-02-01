@@ -75,7 +75,9 @@ class TestPyPIPublisherVersions:
         """Test getting package name."""
         with tempfile.TemporaryDirectory() as tmpdir:
             pyproject_path = Path(tmpdir) / "pyproject.toml"
-            pyproject_path.write_text("[project]\nname = 'my-package'\nversion = '1.0.0'\n")
+            pyproject_path.write_text(
+                "[project]\nname = 'my-package'\nversion = '1.0.0'\n"
+            )
 
             publisher = PyPIPublisher(
                 project_dir=tmpdir,

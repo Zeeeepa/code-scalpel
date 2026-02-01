@@ -56,7 +56,9 @@ def add(a, b):
 def is_positive(x):
     return x > 0
 """
-        result = await generate_unit_tests(code=code, framework="pytest", data_driven=True)
+        result = await generate_unit_tests(
+            code=code, framework="pytest", data_driven=True
+        )
 
         # May succeed or fail based on tier, but metadata should be present
         assert hasattr(result, "data_driven_enabled")

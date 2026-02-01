@@ -38,7 +38,9 @@ class _Visitor(TreeSitterVisitor[_FakeNode]):
         return node._text
 
     def _get_location(self, node: _FakeNode) -> SourceLocation:
-        return SourceLocation(line=1, column=0, end_line=1, end_column=len(node._text), filename="<mem>")
+        return SourceLocation(
+            line=1, column=0, end_line=1, end_column=len(node._text), filename="<mem>"
+        )
 
     def _get_child_by_field(self, node: _FakeNode, field_name: str):
         return None
@@ -89,7 +91,9 @@ def test_visit_children_and_find_helpers():
     visitor = _Visitor()
     child_a = _FakeNode("alpha", text="a")
     child_b = _FakeNode("beta", text="b")
-    parent = _FakeNode("parent", children=[child_a, child_b], named_children=[child_a, child_b])
+    parent = _FakeNode(
+        "parent", children=[child_a, child_b], named_children=[child_a, child_b]
+    )
 
     assert visitor.visit_children(parent) == []
     assert visitor.find_child_by_type(parent, "beta") is child_b

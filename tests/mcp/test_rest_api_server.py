@@ -40,7 +40,9 @@ def test_analyze_enforces_max_size():
 
 def test_security_missing_code():
     client = _client()
-    resp = client.post("/security", data=json.dumps({}), content_type="application/json")
+    resp = client.post(
+        "/security", data=json.dumps({}), content_type="application/json"
+    )
     assert resp.status_code == 400
     payload = resp.get_json()
     assert payload["success"] is False
@@ -48,7 +50,9 @@ def test_security_missing_code():
 
 def test_symbolic_missing_code():
     client = _client()
-    resp = client.post("/symbolic", data=json.dumps({}), content_type="application/json")
+    resp = client.post(
+        "/symbolic", data=json.dumps({}), content_type="application/json"
+    )
     assert resp.status_code == 400
     payload = resp.get_json()
     assert payload["success"] is False

@@ -55,7 +55,9 @@ class ErrorProneParser:
         self.language = "java"
 
         # Pattern: file:line: [BugPattern] message
-        self.output_pattern = re.compile(r"^(.+):(\d+):\s*(?:error|warning):\s*\[([^\]]+)\]\s*(.+)$")
+        self.output_pattern = re.compile(
+            r"^(.+):(\d+):\s*(?:error|warning):\s*\[([^\]]+)\]\s*(.+)$"
+        )
 
     def parse(self, source_path: str) -> list[ErrorProneIssue]:
         """

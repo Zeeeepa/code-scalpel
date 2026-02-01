@@ -63,7 +63,9 @@ class RubyASTParser:
     def extract_classes(self, ast) -> List[RubyClass]:
         raise NotImplementedError("Phase 2: Class extraction")
 
-    def extract_methods(self, ast, class_context: Optional[str] = None) -> List[RubyMethod]:
+    def extract_methods(
+        self, ast, class_context: Optional[str] = None
+    ) -> List[RubyMethod]:
         raise NotImplementedError("Phase 2: Method extraction")
 
     def extract_modules(self, ast) -> List[RubyModule]:

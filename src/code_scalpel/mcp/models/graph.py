@@ -18,10 +18,16 @@ class CallContextModel(BaseModel):
 
     in_loop: bool = Field(default=False, description="Call is inside a loop")
     in_try_block: bool = Field(default=False, description="Call is inside a try block")
-    in_conditional: bool = Field(default=False, description="Call is inside an if/else block")
-    condition_summary: str | None = Field(default=None, description="Summary of condition, e.g., 'if user.is_admin'")
+    in_conditional: bool = Field(
+        default=False, description="Call is inside an if/else block"
+    )
+    condition_summary: str | None = Field(
+        default=None, description="Summary of condition, e.g., 'if user.is_admin'"
+    )
     in_async: bool = Field(default=False, description="Call is in an async function")
-    in_except_handler: bool = Field(default=False, description="Call is in an except handler")
+    in_except_handler: bool = Field(
+        default=False, description="Call is in an except handler"
+    )
 
 
 class CallNodeModel(BaseModel):
@@ -31,9 +37,13 @@ class CallNodeModel(BaseModel):
     file: str = Field(description="File path (relative) or '<external>'")
     line: int = Field(description="Line number (0 if unknown)")
     end_line: int | None = Field(default=None, description="End line number")
-    is_entry_point: bool = Field(default=False, description="Whether function is an entry point")
+    is_entry_point: bool = Field(
+        default=False, description="Whether function is an entry point"
+    )
     # [20260110_FEATURE] v3.3.0 - source_uri for IDE click-through
-    source_uri: str | None = Field(default=None, description="IDE-friendly URI: file:///path#L42")
+    source_uri: str | None = Field(
+        default=None, description="IDE-friendly URI: file:///path#L42"
+    )
     # [20251225_FEATURE] Enterprise metrics (best-effort)
     in_degree: int | None = Field(default=None, description="Inbound call count")
     out_degree: int | None = Field(default=None, description="Outbound call count")
@@ -57,7 +67,9 @@ class CallEdgeModel(BaseModel):
     )
     call_line: int | None = Field(default=None, description="Line number of the call")
     # [20260110_FEATURE] v3.3.0 - Call context metadata
-    context: CallContextModel | None = Field(default=None, description="Context where call is made")
+    context: CallContextModel | None = Field(
+        default=None, description="Context where call is made"
+    )
 
 
 class CallGraphResultModel(BaseModel):
@@ -65,34 +77,64 @@ class CallGraphResultModel(BaseModel):
 
     success: bool = Field(default=True, description="Whether analysis succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
-    nodes: list[CallNodeModel] = Field(default_factory=list, description="Functions in the graph")
-    edges: list[CallEdgeModel] = Field(default_factory=list, description="Call relationships")
-    entry_point: str | None = Field(default=None, description="Entry point used for filtering")
+    nodes: list[CallNodeModel] = Field(
+        default_factory=list, description="Functions in the graph"
+    )
+    edges: list[CallEdgeModel] = Field(
+        default_factory=list, description="Call relationships"
+    )
+    entry_point: str | None = Field(
+        default=None, description="Entry point used for filtering"
+    )
     depth_limit: int | None = Field(default=None, description="Depth limit used")
     mermaid: str = Field(default="", description="Mermaid diagram representation")
-    circular_imports: list[list[str]] = Field(default_factory=list, description="Detected import cycles")
+    circular_imports: list[list[str]] = Field(
+        default_factory=list, description="Detected import cycles"
+    )
     # [20260110_FEATURE] v3.3.0 - Path query results
     paths: list[list[str]] = Field(
         default_factory=list,
         description="Paths between source and sink (if paths_from/paths_to specified)",
     )
     # [20260110_FEATURE] v3.3.0 - Subgraph focus mode
-    focus_functions: list[str] | None = Field(default=None, description="Functions the subgraph is focused on")
+    focus_functions: list[str] | None = Field(
+        default=None, description="Functions the subgraph is focused on"
+    )
     # [20251225_FEATURE] Neutral truncation metadata (tier limits)
-    total_nodes: int | None = Field(default=None, description="Total nodes before truncation")
-    total_edges: int | None = Field(default=None, description="Total edges before truncation")
-    nodes_truncated: bool | None = Field(default=None, description="Whether nodes were truncated")
-    edges_truncated: bool | None = Field(default=None, description="Whether edges were truncated")
-    truncation_warning: str | None = Field(default=None, description="Neutral truncation note if applied")
+    total_nodes: int | None = Field(
+        default=None, description="Total nodes before truncation"
+    )
+    total_edges: int | None = Field(
+        default=None, description="Total edges before truncation"
+    )
+    nodes_truncated: bool | None = Field(
+        default=None, description="Whether nodes were truncated"
+    )
+    edges_truncated: bool | None = Field(
+        default=None, description="Whether edges were truncated"
+    )
+    truncation_warning: str | None = Field(
+        default=None, description="Neutral truncation note if applied"
+    )
     # [20251225_FEATURE] Enterprise extras (best-effort)
     hot_nodes: list[str] = Field(default_factory=list, description="High-degree nodes")
-    dead_code_candidates: list[str] = Field(default_factory=list, description="Potentially unreferenced nodes")
+    dead_code_candidates: list[str] = Field(
+        default_factory=list, description="Potentially unreferenced nodes"
+    )
     # [20260111_FEATURE] v1.0 validation - Output metadata for transparency
     tier_applied: str = Field(default="community", description="Tier used for analysis")
-    max_depth_applied: int | None = Field(default=None, description="Max depth limit applied (None = unlimited)")
-    max_nodes_applied: int | None = Field(default=None, description="Max nodes limit applied (None = unlimited)")
-    advanced_resolution_enabled: bool = Field(default=False, description="Whether advanced call resolution was enabled")
-    enterprise_metrics_enabled: bool = Field(default=False, description="Whether enterprise metrics were enabled")
+    max_depth_applied: int | None = Field(
+        default=None, description="Max depth limit applied (None = unlimited)"
+    )
+    max_nodes_applied: int | None = Field(
+        default=None, description="Max nodes limit applied (None = unlimited)"
+    )
+    advanced_resolution_enabled: bool = Field(
+        default=False, description="Whether advanced call resolution was enabled"
+    )
+    enterprise_metrics_enabled: bool = Field(
+        default=False, description="Whether enterprise metrics were enabled"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -127,15 +169,23 @@ class GraphNeighborhoodResult(BaseModel):
     k: int = Field(default=0, description="Number of hops used")
 
     # Subgraph
-    nodes: list[NeighborhoodNodeModel] = Field(default_factory=list, description="Nodes in the neighborhood")
-    edges: list[NeighborhoodEdgeModel] = Field(default_factory=list, description="Edges in the neighborhood")
+    nodes: list[NeighborhoodNodeModel] = Field(
+        default_factory=list, description="Nodes in the neighborhood"
+    )
+    edges: list[NeighborhoodEdgeModel] = Field(
+        default_factory=list, description="Edges in the neighborhood"
+    )
     total_nodes: int = Field(default=0, description="Number of nodes in subgraph")
     total_edges: int = Field(default=0, description="Number of edges in subgraph")
 
     # Truncation info
-    max_depth_reached: int = Field(default=0, description="Maximum depth actually reached")
+    max_depth_reached: int = Field(
+        default=0, description="Maximum depth actually reached"
+    )
     truncated: bool = Field(default=False, description="Whether graph was truncated")
-    truncation_warning: str | None = Field(default=None, description="Warning if truncated")
+    truncation_warning: str | None = Field(
+        default=None, description="Warning if truncated"
+    )
 
     # Mermaid diagram
     mermaid: str = Field(default="", description="Mermaid diagram of neighborhood")
@@ -151,7 +201,9 @@ class GraphNeighborhoodResult(BaseModel):
         description="Pro: detected logical relationships (best-effort)",
     )
 
-    query_supported: bool = Field(default=False, description="Enterprise: graph query language supported")
+    query_supported: bool = Field(
+        default=False, description="Enterprise: graph query language supported"
+    )
     traversal_rules_available: bool = Field(
         default=False,
         description="Enterprise: custom traversal rules supported",
@@ -162,7 +214,9 @@ class GraphNeighborhoodResult(BaseModel):
     )
 
     # [20251226_FEATURE] Optional higher-tier metadata
-    hot_nodes: list[str] = Field(default_factory=list, description="High-degree nodes in the returned subgraph")
+    hot_nodes: list[str] = Field(
+        default_factory=list, description="High-degree nodes in the returned subgraph"
+    )
 
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -171,10 +225,16 @@ class ModuleInfo(BaseModel):
     """Information about a Python module/file."""
 
     path: str = Field(description="Relative file path")
-    functions: list[str] = Field(default_factory=list, description="Function names in the module")
-    classes: list[str] = Field(default_factory=list, description="Class names in the module")
+    functions: list[str] = Field(
+        default_factory=list, description="Function names in the module"
+    )
+    classes: list[str] = Field(
+        default_factory=list, description="Class names in the module"
+    )
     imports: list[str] = Field(default_factory=list, description="Import statements")
-    entry_points: list[str] = Field(default_factory=list, description="Detected entry points")
+    entry_points: list[str] = Field(
+        default_factory=list, description="Detected entry points"
+    )
     line_count: int = Field(default=0, description="Number of lines in file")
     complexity_score: int = Field(default=0, description="Cyclomatic complexity score")
 
@@ -184,7 +244,9 @@ class PackageInfo(BaseModel):
 
     name: str = Field(description="Package name")
     path: str = Field(description="Relative path to package")
-    modules: list[str] = Field(default_factory=list, description="Module names in package")
+    modules: list[str] = Field(
+        default_factory=list, description="Module names in package"
+    )
     subpackages: list[str] = Field(default_factory=list, description="Subpackage names")
 
 
@@ -206,12 +268,24 @@ class ProjectMapResult(BaseModel):
     project_root: str = Field(description="Absolute path to project root")
     total_files: int = Field(default=0, description="Total Python files")
     total_lines: int = Field(default=0, description="Total lines of code")
-    languages: dict[str, int] = Field(default_factory=dict, description="Language breakdown by file count")
-    packages: list[PackageInfo] = Field(default_factory=list, description="Detected packages")
-    modules: list[ModuleInfo] = Field(default_factory=list, description="Modules analyzed (max 50 in Mermaid diagram)")
-    entry_points: list[str] = Field(default_factory=list, description="All detected entry points")
-    circular_imports: list[list[str]] = Field(default_factory=list, description="Circular import cycles")
-    complexity_hotspots: list[str] = Field(default_factory=list, description="Files with high complexity")
+    languages: dict[str, int] = Field(
+        default_factory=dict, description="Language breakdown by file count"
+    )
+    packages: list[PackageInfo] = Field(
+        default_factory=list, description="Detected packages"
+    )
+    modules: list[ModuleInfo] = Field(
+        default_factory=list, description="Modules analyzed (max 50 in Mermaid diagram)"
+    )
+    entry_points: list[str] = Field(
+        default_factory=list, description="All detected entry points"
+    )
+    circular_imports: list[list[str]] = Field(
+        default_factory=list, description="Circular import cycles"
+    )
+    complexity_hotspots: list[str] = Field(
+        default_factory=list, description="Files with high complexity"
+    )
     mermaid: str = Field(default="", description="Mermaid diagram of package structure")
 
     # [20260111_FEATURE] Output metadata fields for tier transparency
@@ -356,8 +430,12 @@ class ProjectMapResult(BaseModel):
         description="Compliance/architecture rule violations overlay (Enterprise)",
     )
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    modules_in_diagram: int = Field(default=0, description="Number of modules shown in Mermaid diagram")
-    diagram_truncated: bool = Field(default=False, description="Whether Mermaid diagram was truncated")
+    modules_in_diagram: int = Field(
+        default=0, description="Number of modules shown in Mermaid diagram"
+    )
+    diagram_truncated: bool = Field(
+        default=False, description="Whether Mermaid diagram was truncated"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -366,7 +444,9 @@ class ImportNodeModel(BaseModel):
 
     module: str = Field(description="Module name (e.g., 'os', 'mypackage.utils')")
     import_type: str = Field(description="Import type: 'direct', 'from', or 'star'")
-    names: list[str] = Field(default_factory=list, description="Imported names (for 'from' imports)")
+    names: list[str] = Field(
+        default_factory=list, description="Imported names (for 'from' imports)"
+    )
     alias: str | None = Field(default=None, description="Alias if import uses 'as'")
     line: int = Field(default=0, description="Line number of import")
 
@@ -389,23 +469,33 @@ class ExtractedSymbolModel(BaseModel):
     file: str = Field(description="Source file (relative path)")
     line_start: int = Field(default=0, description="Starting line number")
     line_end: int = Field(default=0, description="Ending line number")
-    dependencies: list[str] = Field(default_factory=list, description="Names of symbols this depends on")
+    dependencies: list[str] = Field(
+        default_factory=list, description="Names of symbols this depends on"
+    )
     # [20251216_FEATURE] v2.5.0 - Confidence decay for deep dependency chains
     depth: int = Field(default=0, description="Depth from original target (0 = target)")
     confidence: float = Field(
         default=1.0,
         description="Confidence score with decay applied (0.0-1.0). Formula: C_base × 0.9^depth",
     )
-    low_confidence: bool = Field(default=False, description="True if confidence is below threshold (0.5)")
+    low_confidence: bool = Field(
+        default=False, description="True if confidence is below threshold (0.5)"
+    )
 
 
 class AliasResolutionModel(BaseModel):
     """Import alias resolution details (Pro tier)."""
 
     alias: str = Field(description="Alias name as used in the importing module")
-    original_module: str = Field(description="Module where the symbol originates (pre-alias)")
-    original_name: str | None = Field(default=None, description="Original symbol name before aliasing")
-    file: str | None = Field(default=None, description="File containing the aliasing import (relative)")
+    original_module: str = Field(
+        description="Module where the symbol originates (pre-alias)"
+    )
+    original_name: str | None = Field(
+        default=None, description="Original symbol name before aliasing"
+    )
+    file: str | None = Field(
+        default=None, description="File containing the aliasing import (relative)"
+    )
     line: int | None = Field(default=None, description="Line number of the import")
 
 
@@ -435,18 +525,28 @@ class ChainedAliasResolutionModel(BaseModel):
         default_factory=list,
         description="Modules traversed while resolving the alias chain",
     )
-    resolved_module: str | None = Field(default=None, description="Module where the symbol ultimately resides")
-    resolved_name: str | None = Field(default=None, description="Original symbol name after resolving aliases")
+    resolved_module: str | None = Field(
+        default=None, description="Module where the symbol ultimately resides"
+    )
+    resolved_name: str | None = Field(
+        default=None, description="Original symbol name after resolving aliases"
+    )
 
 
 class CouplingViolationModel(BaseModel):
     """Coupling metric violation (Enterprise tier)."""
 
-    metric: str = Field(description="Metric name, e.g., fan_in/fan_out/dependency_depth")
+    metric: str = Field(
+        description="Metric name, e.g., fan_in/fan_out/dependency_depth"
+    )
     value: int | float = Field(description="Observed metric value")
     limit: int | float = Field(description="Configured limit for the metric")
-    module: str | None = Field(default=None, description="Module evaluated for coupling")
-    severity: str | None = Field(default=None, description="Severity level for violation")
+    module: str | None = Field(
+        default=None, description="Module evaluated for coupling"
+    )
+    severity: str | None = Field(
+        default=None, description="Severity level for violation"
+    )
     description: str | None = Field(default=None, description="Human-readable summary")
 
 
@@ -460,7 +560,9 @@ class ArchitecturalViolationModel(BaseModel):
     from_layer: str | None = Field(default=None, description="Layer of source module")
     to_layer: str | None = Field(default=None, description="Layer of target module")
     description: str | None = Field(default=None, description="Violation description")
-    recommendation: str | None = Field(default=None, description="Suggested remediation for the violation")
+    recommendation: str | None = Field(
+        default=None, description="Suggested remediation for the violation"
+    )
 
 
 class BoundaryAlertModel(BaseModel):
@@ -481,14 +583,18 @@ class CrossFileDependenciesResult(BaseModel):
 
     # Target symbol info
     target_name: str = Field(default="", description="Name of the analyzed symbol")
-    target_file: str = Field(default="", description="File containing the target symbol")
+    target_file: str = Field(
+        default="", description="File containing the target symbol"
+    )
 
     # Dependency info
     extracted_symbols: list[ExtractedSymbolModel] = Field(
         default_factory=list,
         description="All symbols extracted (target + dependencies)",
     )
-    total_dependencies: int = Field(default=0, description="Number of dependencies resolved")
+    total_dependencies: int = Field(
+        default=0, description="Number of dependencies resolved"
+    )
     unresolved_imports: list[str] = Field(
         default_factory=list, description="External imports that could not be resolved"
     )
@@ -497,11 +603,17 @@ class CrossFileDependenciesResult(BaseModel):
     import_graph: dict[str, list[str]] = Field(
         default_factory=dict, description="Import graph: file -> list of imported files"
     )
-    circular_imports: list[list[str]] = Field(default_factory=list, description="Detected circular import cycles")
+    circular_imports: list[list[str]] = Field(
+        default_factory=list, description="Detected circular import cycles"
+    )
 
     # Combined code for AI consumption
-    combined_code: str = Field(default="", description="All extracted code combined, ready for AI consumption")
-    token_estimate: int = Field(default=0, description="Estimated token count for combined code")
+    combined_code: str = Field(
+        default="", description="All extracted code combined, ready for AI consumption"
+    )
+    token_estimate: int = Field(
+        default=0, description="Estimated token count for combined code"
+    )
 
     # [20251226_FEATURE] Tier-aware metadata
     transitive_depth: int = Field(
@@ -601,14 +713,18 @@ class CrossFileDependenciesResult(BaseModel):
     )
 
     # Mermaid diagram
-    mermaid: str = Field(default="", description="Mermaid diagram of import relationships")
+    mermaid: str = Field(
+        default="", description="Mermaid diagram of import relationships"
+    )
 
     # [20251216_FEATURE] v2.5.0 - Confidence decay tracking
     confidence_decay_factor: float = Field(
         default=0.9,
         description="Decay factor used: C_effective = C_base × decay_factor^depth",
     )
-    low_confidence_count: int = Field(default=0, description="Number of symbols below confidence threshold (0.5)")
+    low_confidence_count: int = Field(
+        default=0, description="Number of symbols below confidence threshold (0.5)"
+    )
     low_confidence_warning: str | None = Field(
         default=None, description="Warning message if low-confidence symbols detected"
     )
@@ -625,7 +741,9 @@ class TaintFlowModel(BaseModel):
     sink_function: str = Field(description="Function where taint reaches sink")
     sink_file: str = Field(description="File containing sink")
     sink_line: int = Field(default=0, description="Line number of sink")
-    flow_path: list[str] = Field(default_factory=list, description="Path: file:function -> file:function")
+    flow_path: list[str] = Field(
+        default_factory=list, description="Path: file:function -> file:function"
+    )
     taint_type: str = Field(description="Type of taint source (e.g., 'request_input')")
 
 
@@ -638,7 +756,9 @@ class CrossFileVulnerabilityModel(BaseModel):
     source_file: str = Field(description="File where taint originates")
     sink_file: str = Field(description="File where vulnerability manifests")
     description: str = Field(description="Human-readable description")
-    flow: TaintFlowModel = Field(description="The taint flow that causes this vulnerability")
+    flow: TaintFlowModel = Field(
+        description="The taint flow that causes this vulnerability"
+    )
 
 
 class CrossFileSecurityResult(BaseModel):
@@ -671,19 +791,29 @@ class CrossFileSecurityResult(BaseModel):
 
     # Summary
     files_analyzed: int = Field(default=0, description="Number of files analyzed")
-    has_vulnerabilities: bool = Field(default=False, description="Whether vulnerabilities were found")
-    vulnerability_count: int = Field(default=0, description="Total vulnerabilities found")
+    has_vulnerabilities: bool = Field(
+        default=False, description="Whether vulnerabilities were found"
+    )
+    vulnerability_count: int = Field(
+        default=0, description="Total vulnerabilities found"
+    )
     risk_level: str = Field(default="low", description="Overall risk level")
 
     # Detailed findings
     vulnerabilities: list[CrossFileVulnerabilityModel] = Field(
         default_factory=list, description="Cross-file vulnerabilities found"
     )
-    taint_flows: list[TaintFlowModel] = Field(default_factory=list, description="All taint flows detected")
+    taint_flows: list[TaintFlowModel] = Field(
+        default_factory=list, description="All taint flows detected"
+    )
 
     # Entry points and sinks
-    taint_sources: list[str] = Field(default_factory=list, description="Functions containing taint sources")
-    dangerous_sinks: list[str] = Field(default_factory=list, description="Functions containing dangerous sinks")
+    taint_sources: list[str] = Field(
+        default_factory=list, description="Functions containing taint sources"
+    )
+    dangerous_sinks: list[str] = Field(
+        default_factory=list, description="Functions containing dangerous sinks"
+    )
 
     # [20251226_FEATURE] Tier-aware optional outputs for Pro/Enterprise
     framework_contexts: list[dict[str, Any]] | None = Field(
@@ -694,7 +824,9 @@ class CrossFileSecurityResult(BaseModel):
         default=None,
         description="Inter-file dependency chains contributing to taint flows",
     )
-    confidence_scores: dict[str, float] | None = Field(default=None, description="Heuristic confidence scores per flow")
+    confidence_scores: dict[str, float] | None = Field(
+        default=None, description="Heuristic confidence scores per flow"
+    )
     global_flows: list[dict[str, Any]] | None = Field(
         default=None,
         description="Global taint flows across service boundaries (Enterprise)",

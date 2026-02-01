@@ -154,7 +154,9 @@ class TestTransportPerformance:
         print(f"\nStdio time: {stdio_elapsed * 1000:.2f}ms")
         print(f"HTTP time: {http_elapsed * 1000:.2f}ms")
         print(f"HTTP/Stdio ratio: {ratio:.2f}x")
-        assert ratio < 2.0, "HTTP transport should not be significantly slower than stdio"
+        assert (
+            ratio < 2.0
+        ), "HTTP transport should not be significantly slower than stdio"
 
 
 # Summary: Performance characteristics

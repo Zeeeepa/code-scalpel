@@ -214,7 +214,9 @@ class JWTLicenseValidator:
                     logger.debug(f"Loaded public key from {pem_files[0].name}")
                     return latest_key
         except Exception as e:
-            logger.warning(f"Failed to load public key from file: {e}, using embedded key")
+            logger.warning(
+                f"Failed to load public key from file: {e}, using embedded key"
+            )
 
         # Fall back to embedded key for backwards compatibility
         return """-----BEGIN PUBLIC KEY-----
@@ -287,7 +289,9 @@ BwIDAQAB
             logger.error("RS256 algorithm requires a public key")
             self.enabled = False
         elif algorithm == JWTAlgorithm.HS256 and not self.secret_key:
-            logger.warning("HS256 algorithm requires a secret key - set CODE_SCALPEL_SECRET_KEY")
+            logger.warning(
+                "HS256 algorithm requires a secret key - set CODE_SCALPEL_SECRET_KEY"
+            )
             self.enabled = False
 
     def _scan_directory_for_license(self, directory: Path) -> Optional[Path]:
@@ -318,7 +322,9 @@ BwIDAQAB
         # Sort by modification time, newest first
         candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
 
-        logger.debug(f"Found candidate licenses in {directory}: {[p.name for p in candidates]}")
+        logger.debug(
+            f"Found candidate licenses in {directory}: {[p.name for p in candidates]}"
+        )
         return candidates[0]
 
     def find_license_file(self) -> Optional[Path]:
@@ -338,17 +344,27 @@ BwIDAQAB
                 return path
             # If user supplied a directory, scan it for license candidates
             if path.exists() and path.is_dir():
-                logger.debug(f"{LICENSE_PATH_ENV_VAR} points to a directory, scanning for license files: {path}")
+                logger.debug(
+                    f"{LICENSE_PATH_ENV_VAR} points to a directory, scanning for license files: {path}"
+                )
                 candidate = self._scan_directory_for_license(path)
                 if candidate:
-                    logger.debug(f"Found license in explicit directory {path}: {candidate}")
+                    logger.debug(
+                        f"Found license in explicit directory {path}: {candidate}"
+                    )
                     return candidate
-                logger.debug(f"No license found in directory provided by {LICENSE_PATH_ENV_VAR}: {path}")
+                logger.debug(
+                    f"No license found in directory provided by {LICENSE_PATH_ENV_VAR}: {path}"
+                )
             else:
-                logger.debug(f"{LICENSE_PATH_ENV_VAR} is set but not a readable file or directory: {path}")
+                logger.debug(
+                    f"{LICENSE_PATH_ENV_VAR} is set but not a readable file or directory: {path}"
+                )
 
         if os.getenv(DISABLE_LICENSE_DISCOVERY_ENV_VAR, "0").strip() == "1":
-            logger.debug(f"{DISABLE_LICENSE_DISCOVERY_ENV_VAR}=1; skipping license discovery")
+            logger.debug(
+                f"{DISABLE_LICENSE_DISCOVERY_ENV_VAR}=1; skipping license discovery"
+            )
             return None
 
         # 1. Check for exact matches in standard locations
@@ -419,9 +435,15 @@ BwIDAQAB
             try:
                 parsed = json.loads(raw_json)
                 if isinstance(parsed, dict):
-                    return {str(k): str(v) for k, v in parsed.items() if isinstance(k, str) and isinstance(v, str)}
+                    return {
+                        str(k): str(v)
+                        for k, v in parsed.items()
+                        if isinstance(k, str) and isinstance(v, str)
+                    }
             except Exception as e:
-                logger.warning(f"Failed to parse {LICENSE_PUBLIC_KEYS_JSON_ENV_VAR}: {e}")
+                logger.warning(
+                    f"Failed to parse {LICENSE_PUBLIC_KEYS_JSON_ENV_VAR}: {e}"
+                )
 
         key_path = os.getenv(LICENSE_PUBLIC_KEYS_PATH_ENV_VAR)
         if key_path:
@@ -429,7 +451,11 @@ BwIDAQAB
                 content = Path(key_path).expanduser().read_text().strip()
                 parsed = json.loads(content)
                 if isinstance(parsed, dict):
-                    return {str(k): str(v) for k, v in parsed.items() if isinstance(k, str) and isinstance(v, str)}
+                    return {
+                        str(k): str(v)
+                        for k, v in parsed.items()
+                        if isinstance(k, str) and isinstance(v, str)
+                    }
             except Exception as e:
                 logger.warning(f"Failed to load keyset from {key_path}: {e}")
 
@@ -495,11 +521,17 @@ BwIDAQAB
 
             # If validating an HS256 dev license, ignore any RS256 CRL that may
             # be present from prior runs/tests or a production environment.
-            if license_algorithm == JWTAlgorithm.HS256.value and algorithm_value != JWTAlgorithm.HS256.value:
+            if (
+                license_algorithm == JWTAlgorithm.HS256.value
+                and algorithm_value != JWTAlgorithm.HS256.value
+            ):
                 return None
 
             # For RS256 production licenses, treat CRL misconfiguration as fatal.
-            if license_algorithm == JWTAlgorithm.RS256.value and algorithm_value != JWTAlgorithm.RS256.value:
+            if (
+                license_algorithm == JWTAlgorithm.RS256.value
+                and algorithm_value != JWTAlgorithm.RS256.value
+            ):
                 return "License revocation list algorithm mismatch"
             if algorithm_value not in {
                 JWTAlgorithm.RS256.value,
@@ -585,7 +617,9 @@ BwIDAQAB
                 JWTAlgorithm.RS256.value,
                 JWTAlgorithm.HS256.value,
             }:
-                return self._create_invalid_license(f"Unsupported token algorithm: {algorithm_value}")
+                return self._create_invalid_license(
+                    f"Unsupported token algorithm: {algorithm_value}"
+                )
 
             # Verify the detected algorithm is supported
             if algorithm_value not in self.supported_algorithms:
@@ -599,7 +633,9 @@ BwIDAQAB
             else:
                 verify_key = self.secret_key
                 if not verify_key:
-                    return self._create_invalid_license("HS256 token requires CODE_SCALPEL_SECRET_KEY")
+                    return self._create_invalid_license(
+                        "HS256 token requires CODE_SCALPEL_SECRET_KEY"
+                    )
 
             # Decode and verify JWT
             claims = jwt.decode(
@@ -680,7 +716,9 @@ BwIDAQAB
                     JWTAlgorithm.RS256.value,
                     JWTAlgorithm.HS256.value,
                 }:
-                    return self._create_invalid_license(f"Unsupported token algorithm: {algorithm_value}")
+                    return self._create_invalid_license(
+                        f"Unsupported token algorithm: {algorithm_value}"
+                    )
 
                 if algorithm_value not in self.supported_algorithms:
                     return self._create_invalid_license(
@@ -692,7 +730,9 @@ BwIDAQAB
                 else:
                     verify_key = self.secret_key
                     if not verify_key:
-                        return self._create_invalid_license("HS256 token requires CODE_SCALPEL_SECRET_KEY")
+                        return self._create_invalid_license(
+                            "HS256 token requires CODE_SCALPEL_SECRET_KEY"
+                        )
 
                 # For expired tokens we still require a valid signature, but we
                 # intentionally skip issuer/audience checks to allow UX/testing
@@ -733,7 +773,9 @@ BwIDAQAB
                     raw_claims=claims,
                 )
             except Exception as e:
-                logger.error(f"Failed to decode expired token with verified signature: {e}")
+                logger.error(
+                    f"Failed to decode expired token with verified signature: {e}"
+                )
                 return self._create_invalid_license("License expired")
 
         except InvalidSignatureError:
@@ -765,7 +807,9 @@ BwIDAQAB
                 is_valid=False,
                 error_message="Invalid signature - license may be tampered",
                 diagnostic_header=(header if isinstance(header, dict) else None),
-                diagnostic_unverified_claims=(claims if isinstance(claims, dict) else None),
+                diagnostic_unverified_claims=(
+                    claims if isinstance(claims, dict) else None
+                ),
             )
 
         except DecodeError as e:
@@ -816,7 +860,9 @@ BwIDAQAB
                 is_valid=False,
                 error_message=f"Invalid token: {e}",
                 diagnostic_header=(header if isinstance(header, dict) else None),
-                diagnostic_unverified_claims=(claims if isinstance(claims, dict) else None),
+                diagnostic_unverified_claims=(
+                    claims if isinstance(claims, dict) else None
+                ),
             )
 
         except Exception as e:
@@ -846,7 +892,9 @@ BwIDAQAB
                 is_valid=False,
                 error_message=f"Validation error: {e}",
                 diagnostic_header=(header if isinstance(header, dict) else None),
-                diagnostic_unverified_claims=(claims if isinstance(claims, dict) else None),
+                diagnostic_unverified_claims=(
+                    claims if isinstance(claims, dict) else None
+                ),
             )
 
     def validate(self) -> JWTLicenseData:
@@ -880,7 +928,9 @@ BwIDAQAB
         # immediately even if the license file does not change.
         try:
             stat = license_file.stat()
-            mtime_ns = int(getattr(stat, "st_mtime_ns", int(stat.st_mtime * 1_000_000_000)))
+            mtime_ns = int(
+                getattr(stat, "st_mtime_ns", int(stat.st_mtime * 1_000_000_000))
+            )
             size = int(getattr(stat, "st_size", -1))
         except Exception:
             mtime_ns = -1
@@ -896,7 +946,9 @@ BwIDAQAB
             try:
                 import hashlib
 
-                crl_inline_sha256 = hashlib.sha256(inline_crl.strip().encode("utf-8")).hexdigest()
+                crl_inline_sha256 = hashlib.sha256(
+                    inline_crl.strip().encode("utf-8")
+                ).hexdigest()
             except Exception:
                 crl_inline_sha256 = ""
         else:
@@ -906,7 +958,9 @@ BwIDAQAB
                     p = Path(env_crl_path).expanduser()
                     crl_path = str(p)
                     st = p.stat()
-                    crl_mtime_ns = int(getattr(st, "st_mtime_ns", int(st.st_mtime * 1_000_000_000)))
+                    crl_mtime_ns = int(
+                        getattr(st, "st_mtime_ns", int(st.st_mtime * 1_000_000_000))
+                    )
                     crl_size = int(getattr(st, "st_size", -1))
                 except Exception:
                     # If CRL is configured but unreadable, we still want to bust cache.
@@ -1046,26 +1100,42 @@ def get_license_info() -> Dict:
                 decision = authorize_token(token)
                 ent = decision.entitlements
 
-                exp_dt = _utcfromtimestamp_naive(int(ent.exp)) if ent is not None and ent.exp else _utcnow_naive()
+                exp_dt = (
+                    _utcfromtimestamp_naive(int(ent.exp))
+                    if ent is not None and ent.exp
+                    else _utcnow_naive()
+                )
                 days_until_exp = (exp_dt - _utcnow_naive()).days
 
                 return {
-                    "tier": str((ent.tier if ent is not None else "community") or "community").strip().lower(),
-                    "customer_id": (str(ent.customer_id or "") if ent is not None else ""),
+                    "tier": str(
+                        (ent.tier if ent is not None else "community") or "community"
+                    )
+                    .strip()
+                    .lower(),
+                    "customer_id": (
+                        str(ent.customer_id or "") if ent is not None else ""
+                    ),
                     "organization": ent.organization if ent is not None else None,
                     "features": sorted(list(ent.features)) if ent is not None else [],
                     "expiration": exp_dt.isoformat(),
                     # Remote verifier does not currently provide iat.
                     "issued_at": "",
                     "seats": ent.seats if ent is not None else None,
-                    "is_valid": bool(decision.allowed and ent is not None and ent.valid),
+                    "is_valid": bool(
+                        decision.allowed and ent is not None and ent.valid
+                    ),
                     "is_expired": (
-                        bool(_utcnow_naive().timestamp() >= float(ent.exp)) if ent is not None and ent.exp else False
+                        bool(_utcnow_naive().timestamp() >= float(ent.exp))
+                        if ent is not None and ent.exp
+                        else False
                     ),
                     # Map offline grace to the closest existing concept.
                     "is_in_grace_period": bool(decision.reason == "offline_grace"),
                     "days_until_expiration": days_until_exp,
-                    "error_message": (ent.error if ent is not None and not decision.allowed else None),
+                    "error_message": (
+                        ent.error if ent is not None and not decision.allowed else None
+                    ),
                 }
     except Exception as exc:
         logger.warning("Remote verifier license info check failed: %s", exc)

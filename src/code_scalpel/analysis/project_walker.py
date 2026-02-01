@@ -140,7 +140,9 @@ class ProjectMap:
 
     def get_files_by_extension(self, extension: str) -> list[FileInfo]:
         """Get all files with a specific extension."""
-        ext_lower = extension.lower() if not extension.startswith(".") else extension.lower()
+        ext_lower = (
+            extension.lower() if not extension.startswith(".") else extension.lower()
+        )
         return [f for f in self.files if f.extension.lower() == ext_lower]
 
 
@@ -301,7 +303,9 @@ class ProjectWalker:
         Yields:
             (root, dirs, files) tuples
         """
-        for root, dirs, files in os.walk(self.root_path, followlinks=self.follow_symlinks):
+        for root, dirs, files in os.walk(
+            self.root_path, followlinks=self.follow_symlinks
+        ):
             root_path = Path(root).resolve()
 
             # Check for cycles

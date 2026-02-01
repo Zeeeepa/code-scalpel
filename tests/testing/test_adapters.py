@@ -194,7 +194,9 @@ class TestAssertCapabilityPresent:
     def test_capability_missing_raises(self):
         """Missing capability raises AssertionError."""
         with pytest.raises(AssertionError, match="not present"):
-            assert_capability_present("analyze_code", "nonexistent_capability", "community")
+            assert_capability_present(
+                "analyze_code", "nonexistent_capability", "community"
+            )
 
 
 class TestAssertToolCount:

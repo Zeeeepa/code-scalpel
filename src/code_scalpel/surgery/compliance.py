@@ -72,7 +72,9 @@ def check_rename_compliance(
     """
     if not GOVERNANCE_AVAILABLE:
         # If governance not available, allow by default (graceful degradation)
-        return ComplianceCheckResult(allowed=True, reason="Governance system not available, allowing by default")
+        return ComplianceCheckResult(
+            allowed=True, reason="Governance system not available, allowing by default"
+        )
 
     try:
         # Initialize governance system
@@ -120,12 +122,16 @@ def check_rename_compliance(
                     "rule": v.rule,
                     "message": v.message,
                     "severity": v.severity,
-                    "source": (v.source.value if hasattr(v.source, "value") else str(v.source)),
+                    "source": (
+                        v.source.value if hasattr(v.source, "value") else str(v.source)
+                    ),
                 }
                 for v in decision.violations
             ]
 
-            return ComplianceCheckResult(allowed=False, reason=decision.reason, violations=violations)
+            return ComplianceCheckResult(
+                allowed=False, reason=decision.reason, violations=violations
+            )
 
     except Exception as e:
         # Fail closed: if governance check fails, deny the operation

@@ -17,7 +17,9 @@ class TestTierTransitions:
     """Test transitions between tiers."""
 
     @pytest.mark.asyncio
-    async def test_community_to_pro_increased_depth(self, community_server, pro_server, simple_two_file_project):
+    async def test_community_to_pro_increased_depth(
+        self, community_server, pro_server, simple_two_file_project
+    ):
         """Pro should support deeper analysis than Community (up to max_depth=5)."""
         community_result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -39,7 +41,9 @@ class TestTierTransitions:
         assert community_result.target_name == pro_result.target_name
 
     @pytest.mark.asyncio
-    async def test_pro_to_enterprise_feature_availability(self, pro_server, enterprise_server, simple_two_file_project):
+    async def test_pro_to_enterprise_feature_availability(
+        self, pro_server, enterprise_server, simple_two_file_project
+    ):
         """Enterprise should have features Pro doesn't."""
         pro_result = await pro_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -63,7 +67,9 @@ class TestFeatureDegradation:
     """Test feature availability changes by tier."""
 
     @pytest.mark.asyncio
-    async def test_community_respects_depth_limit(self, community_server, deep_chain_project):
+    async def test_community_respects_depth_limit(
+        self, community_server, deep_chain_project
+    ):
         """Community should restrict max depth analysis."""
         result = await community_server.get_cross_file_dependencies(
             target_file=deep_chain_project["target_file"],
@@ -77,7 +83,9 @@ class TestFeatureDegradation:
         assert result.transitive_depth <= 1
 
     @pytest.mark.asyncio
-    async def test_pro_no_architectural_rules(self, pro_server, simple_two_file_project):
+    async def test_pro_no_architectural_rules(
+        self, pro_server, simple_two_file_project
+    ):
         """Pro should not have architectural rule features."""
         result = await pro_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -95,7 +103,9 @@ class TestResultFieldAvailability:
     """Test which fields are populated by tier."""
 
     @pytest.mark.asyncio
-    async def test_community_core_fields(self, community_server, simple_two_file_project):
+    async def test_community_core_fields(
+        self, community_server, simple_two_file_project
+    ):
         """Community should have core dependency fields."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -128,7 +138,9 @@ class TestResultFieldAvailability:
         assert hasattr(result, "coupling_score")
 
     @pytest.mark.asyncio
-    async def test_enterprise_governance_fields(self, enterprise_server, simple_two_file_project):
+    async def test_enterprise_governance_fields(
+        self, enterprise_server, simple_two_file_project
+    ):
         """Enterprise should have governance fields."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -148,7 +160,9 @@ class TestConsistentBehavior:
     """Test consistent behavior across calls."""
 
     @pytest.mark.asyncio
-    async def test_community_consistent_results(self, community_server, simple_two_file_project):
+    async def test_community_consistent_results(
+        self, community_server, simple_two_file_project
+    ):
         """Community tier should give consistent results."""
         result1 = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],

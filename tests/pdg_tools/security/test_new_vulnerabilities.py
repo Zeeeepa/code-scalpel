@@ -24,7 +24,12 @@ class TestWeakCryptographyDetection:
         result = analyzer.analyze(code)
         assert result.has_vulnerabilities
         vuln_types = [v.vulnerability_type for v in result.vulnerabilities]
-        assert any(("Weak" in str(vt) or "Crypto" in str(vt) or "WEAK_CRYPTO" in str(vt) for vt in vuln_types))
+        assert any(
+            (
+                "Weak" in str(vt) or "Crypto" in str(vt) or "WEAK_CRYPTO" in str(vt)
+                for vt in vuln_types
+            )
+        )
 
     def test_sha1_with_request_data(self):
         """Detect SHA1 hash of request data."""
@@ -60,7 +65,11 @@ class TestWeakCryptographyDetection:
         code = '\nimport hashlib\nuser_data = input("Enter data: ")\ndigest = hashlib.sha256(user_data.encode()).hexdigest()\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-        weak_crypto_vulns = [v for v in result.vulnerabilities if "WEAK_CRYPTO" in str(v.vulnerability_type)]
+        weak_crypto_vulns = [
+            v
+            for v in result.vulnerabilities
+            if "WEAK_CRYPTO" in str(v.vulnerability_type)
+        ]
         assert len(weak_crypto_vulns) == 0
 
 
@@ -121,7 +130,9 @@ class TestSSRFDetection:
         code = '\nimport requests\nresponse = requests.get("https://api.example.com/status")\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-        ssrf_vulns = [v for v in result.vulnerabilities if "SSRF" in str(v.vulnerability_type)]
+        ssrf_vulns = [
+            v for v in result.vulnerabilities if "SSRF" in str(v.vulnerability_type)
+        ]
         assert len(ssrf_vulns) == 0
 
 

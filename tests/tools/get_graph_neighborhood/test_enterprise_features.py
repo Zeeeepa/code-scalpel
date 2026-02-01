@@ -356,7 +356,9 @@ class TestQueryComplexCombinations:
 
     def test_where_and_order_and_limit(self, complex_query_engine):
         """WHERE + ORDER BY + LIMIT combination works."""
-        result = complex_query_engine.execute("WHERE complexity > 5 ORDER BY complexity DESC LIMIT 2")
+        result = complex_query_engine.execute(
+            "WHERE complexity > 5 ORDER BY complexity DESC LIMIT 2"
+        )
 
         assert result.success is True
         assert len(result.nodes) <= 2

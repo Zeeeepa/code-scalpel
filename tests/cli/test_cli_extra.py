@@ -22,7 +22,9 @@ def test_analyze_file_defaults_language(monkeypatch, tmp_path):
 
     called = {}
 
-    def fake_analyze(code: str, output_format: str, filepath: str, language: str) -> int:
+    def fake_analyze(
+        code: str, output_format: str, filepath: str, language: str
+    ) -> int:
         called.update(
             {
                 "code": code,
@@ -68,9 +70,13 @@ def test_analyze_code_javascript_json(monkeypatch, capsys):
             return DummyResult()
 
     dummy_module = types.SimpleNamespace(SymbolicAnalyzer=DummyAnalyzer)
-    monkeypatch.setitem(sys.modules, "code_scalpel.symbolic_execution_tools", dummy_module)
+    monkeypatch.setitem(
+        sys.modules, "code_scalpel.symbolic_execution_tools", dummy_module
+    )
 
-    exit_code = cli.analyze_code("let x = 1;", output_format="json", source="sample.js", language="javascript")
+    exit_code = cli.analyze_code(
+        "let x = 1;", output_format="json", source="sample.js", language="javascript"
+    )
     out = capsys.readouterr().out
     assert exit_code == 0
     assert '"language": "javascript"' in out
@@ -104,9 +110,13 @@ def test_analyze_code_java_text(monkeypatch, capsys):
             return DummyResult()
 
     dummy_module = types.SimpleNamespace(SymbolicAnalyzer=DummyAnalyzer)
-    monkeypatch.setitem(sys.modules, "code_scalpel.symbolic_execution_tools", dummy_module)
+    monkeypatch.setitem(
+        sys.modules, "code_scalpel.symbolic_execution_tools", dummy_module
+    )
 
-    exit_code = cli.analyze_code("class Demo {}", output_format="text", source="Demo.java", language="java")
+    exit_code = cli.analyze_code(
+        "class Demo {}", output_format="text", source="Demo.java", language="java"
+    )
     captured = capsys.readouterr().out
     assert exit_code == 0
     assert "Code Scalpel Analysis (Java): Demo.java" in captured

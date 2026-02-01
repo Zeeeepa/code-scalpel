@@ -256,14 +256,18 @@ class PythonSemantics(LanguageSemantics):
             return left + right
         elif isinstance(left, SeqRef) or isinstance(right, SeqRef):
             # Mixed string and non-string: Python raises TypeError
-            raise TypeError(f'can only concatenate str (not "{type(right).__name__}") to str')
+            raise TypeError(
+                f'can only concatenate str (not "{type(right).__name__}") to str'
+            )
         else:
             # Concrete values - use Python's native behavior
             return left + right
 
     def binary_sub(self, left: Any, right: Any) -> Any:
         """Python -: Numeric subtraction only."""
-        if isinstance(left, (ArithRef, int, float)) and isinstance(right, (ArithRef, int, float)):
+        if isinstance(left, (ArithRef, int, float)) and isinstance(
+            right, (ArithRef, int, float)
+        ):
             return left - right
         raise TypeError("unsupported operand type(s) for -")
 
@@ -489,9 +493,13 @@ class JavaScriptSemantics(LanguageSemantics):
             left_num = float(left) if isinstance(left, str) else left
             right_num = float(right) if isinstance(right, str) else right
             # [20251220_BUGFIX] Cannot use ArithRef in if conditional - check for concrete types
-            right_is_zero = right_num == 0 if isinstance(right_num, (int, float)) else False
+            right_is_zero = (
+                right_num == 0 if isinstance(right_num, (int, float)) else False
+            )
             if right_is_zero:
-                left_is_positive = left_num >= 0 if isinstance(left_num, (int, float)) else True
+                left_is_positive = (
+                    left_num >= 0 if isinstance(left_num, (int, float)) else True
+                )
                 return float("inf") if left_is_positive else float("-inf")
             return left_num / right_num
         except (ValueError, TypeError):
@@ -521,7 +529,9 @@ class JavaScriptSemantics(LanguageSemantics):
             import math
 
             # [20251220_BUGFIX] math.trunc() needs concrete float, not ArithRef
-            if isinstance(left_num, (int, float)) and isinstance(right_num, (int, float)):
+            if isinstance(left_num, (int, float)) and isinstance(
+                right_num, (int, float)
+            ):
                 return left_num - right_num * math.trunc(left_num / right_num)
             # For symbolic values, fall back to modulo operator
             return left_num % right_num

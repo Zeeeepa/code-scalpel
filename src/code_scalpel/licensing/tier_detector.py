@@ -91,7 +91,9 @@ class TierDetector:
         # [20251225_FEATURE] P4_LOW: Custom tier definitions
         self._custom_tiers: Dict[str, str] = {}  # custom_name -> standard_tier
 
-    def detect(self, force_refresh: bool = False, license_key: Optional[str] = None) -> TierDetectionResult:
+    def detect(
+        self, force_refresh: bool = False, license_key: Optional[str] = None
+    ) -> TierDetectionResult:
         """
         Detect the current tier.
 
@@ -157,7 +159,9 @@ class TierDetector:
         valid_tiers = {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}
 
         if tier_lower in valid_tiers:
-            logger.debug(f"Detected tier '{tier_lower}' from environment variable {self.ENV_VAR}")
+            logger.debug(
+                f"Detected tier '{tier_lower}' from environment variable {self.ENV_VAR}"
+            )
             return TierDetectionResult(
                 tier=tier_lower,
                 source="environment",
@@ -203,11 +207,15 @@ class TierDetector:
                                 custom_tier_name=tier_value,
                             )
                         else:
-                            logger.warning(f"Invalid tier '{tier_value}' in {config_path}, ignoring")
+                            logger.warning(
+                                f"Invalid tier '{tier_value}' in {config_path}, ignoring"
+                            )
                             continue
 
                     if tier_value in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
-                        logger.debug(f"Detected tier '{tier_value}' from config file {config_path}")
+                        logger.debug(
+                            f"Detected tier '{tier_value}' from config file {config_path}"
+                        )
 
                         # Extract additional metadata
                         license_key = config.get("license_key")
@@ -248,7 +256,9 @@ class TierDetector:
         """Check if current tier is ENTERPRISE."""
         return self.get_tier_string() == Tier.ENTERPRISE
 
-    def _detect_from_license_key(self, license_key: str) -> Optional[TierDetectionResult]:
+    def _detect_from_license_key(
+        self, license_key: str
+    ) -> Optional[TierDetectionResult]:
         """
         [20251225_FEATURE] P1_HIGH: Extract tier from license key.
 
@@ -306,7 +316,9 @@ class TierDetector:
 
         return None
 
-    def _validate_and_log_tier(self, result: TierDetectionResult) -> TierDetectionResult:
+    def _validate_and_log_tier(
+        self, result: TierDetectionResult
+    ) -> TierDetectionResult:
         """
         [20251225_FEATURE] P2_MEDIUM: Validate and log tier detection result.
 
@@ -316,7 +328,10 @@ class TierDetector:
         # Validate tier is one of the known tiers
         valid_tiers = {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}
         if result.tier not in valid_tiers:
-            logger.error(f"Invalid tier '{result.tier}' detected from {result.source}. " f"Valid tiers: {valid_tiers}")
+            logger.error(
+                f"Invalid tier '{result.tier}' detected from {result.source}. "
+                f"Valid tiers: {valid_tiers}"
+            )
             # Return default tier on validation failure
             return TierDetectionResult(
                 tier=Tier.COMMUNITY,
@@ -328,7 +343,8 @@ class TierDetector:
 
         # Log tier detection with full context
         log_msg = (
-            f"Tier detected: {result.tier.upper()} " f"(source: {result.source}, confidence: {result.confidence:.2f})"
+            f"Tier detected: {result.tier.upper()} "
+            f"(source: {result.source}, confidence: {result.confidence:.2f})"
         )
         if result.organization:
             log_msg += f" [org: {result.organization}]"
@@ -342,7 +358,8 @@ class TierDetector:
         # Additional validation warnings
         if result.tier in {Tier.PRO, Tier.ENTERPRISE} and not result.license_key:
             logger.warning(
-                f"{result.tier.upper()} tier detected but no license key found. " "License validation may fail."
+                f"{result.tier.upper()} tier detected but no license key found. "
+                "License validation may fail."
             )
 
         if result.tier == Tier.ENTERPRISE and not result.organization:
@@ -390,7 +407,9 @@ class TierDetector:
             hierarchy_config: Dict mapping org_name -> [parent_orgs]
         """
         self._org_hierarchy.update(hierarchy_config)
-        logger.debug(f"Loaded organization hierarchy for {len(hierarchy_config)} organizations")
+        logger.debug(
+            f"Loaded organization hierarchy for {len(hierarchy_config)} organizations"
+        )
 
     def _load_custom_tiers(self, custom_tiers_config: Dict[str, str]) -> None:
         """
@@ -406,7 +425,9 @@ class TierDetector:
             if standard_tier.lower() in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
                 self._custom_tiers[custom_name.lower()] = standard_tier.lower()
             else:
-                logger.warning(f"Invalid standard tier '{standard_tier}' for custom tier '{custom_name}'")
+                logger.warning(
+                    f"Invalid standard tier '{standard_tier}' for custom tier '{custom_name}'"
+                )
 
         logger.debug(f"Loaded {len(self._custom_tiers)} custom tier definitions")
 
@@ -422,7 +443,9 @@ class TierDetector:
             True if successfully registered, False if invalid
         """
         if standard_tier.lower() not in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
-            logger.error(f"Cannot register custom tier: invalid standard tier '{standard_tier}'")
+            logger.error(
+                f"Cannot register custom tier: invalid standard tier '{standard_tier}'"
+            )
             return False
 
         self._custom_tiers[custom_name.lower()] = standard_tier.lower()
@@ -432,7 +455,9 @@ class TierDetector:
         self._cached_result = None
         return True
 
-    def set_organization_tier(self, org_name: str, tier: str, parent_orgs: Optional[List[str]] = None) -> bool:
+    def set_organization_tier(
+        self, org_name: str, tier: str, parent_orgs: Optional[List[str]] = None
+    ) -> bool:
         """
         [20251225_FEATURE] P2_MEDIUM: Assign a tier to an organization.
 

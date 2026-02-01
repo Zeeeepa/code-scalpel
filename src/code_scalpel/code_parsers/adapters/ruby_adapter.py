@@ -26,7 +26,8 @@ class RubyParserAdapter(IParser):
     def __init__(self):
         """Initialize the Ruby parser adapter (stub)."""
         raise NotImplementedError(
-            "RubyParserAdapter not yet implemented. " "See TODO items in this file for implementation roadmap."
+            "RubyParserAdapter not yet implemented. "
+            "See TODO items in this file for implementation roadmap."
         )
 
     def parse(self, code: str) -> ParseResult:

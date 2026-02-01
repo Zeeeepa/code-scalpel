@@ -109,7 +109,9 @@ class PolicyEngine:
     return root, target_file
 
 
-def _write_response_config(out_dir: Path, *, profile: str, source_repo_root: Path) -> None:
+def _write_response_config(
+    out_dir: Path, *, profile: str, source_repo_root: Path
+) -> None:
     cfg_src = source_repo_root / ".code-scalpel" / "response_config.json"
     cfg = json.loads(cfg_src.read_text(encoding="utf-8"))
     cfg.setdefault("global", {})

@@ -33,7 +33,9 @@ class TestResponseModelFieldGatingCommunity:
         ]
 
         for field in pro_fields:
-            assert field not in community_response, f"Community should not expose {field}"
+            assert (
+                field not in community_response
+            ), f"Community should not expose {field}"
 
     async def test_community_excludes_enterprise_fields(self):
         """Community tier response must NOT include Enterprise fields."""
@@ -57,7 +59,9 @@ class TestResponseModelFieldGatingCommunity:
         ]
 
         for field in enterprise_fields:
-            assert field not in community_response, f"Community should not expose {field}"
+            assert (
+                field not in community_response
+            ), f"Community should not expose {field}"
 
     async def test_community_required_fields_present(self):
         """Community tier must have all required fields."""
@@ -261,7 +265,9 @@ class TestResponseModelFieldGatingEnterprise:
         ]
 
         for field in pro_fields:
-            assert field in enterprise_response, f"Enterprise missing Pro field: {field}"
+            assert (
+                field in enterprise_response
+            ), f"Enterprise missing Pro field: {field}"
 
     async def test_enterprise_enterprise_fields_present(self):
         """Enterprise must have Enterprise-specific fields."""

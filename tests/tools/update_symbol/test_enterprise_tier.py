@@ -34,7 +34,9 @@ class TestUpdateSymbolEnterpriseLicenseVerification:
         assert result["success"] is False
         assert "Enterprise tier license" in result["error"]
 
-    async def test_valid_enterprise_license_grants_features(self, mock_enterprise_license):
+    async def test_valid_enterprise_license_grants_features(
+        self, mock_enterprise_license
+    ):
         """Valid Enterprise license grants governance features."""
         assert mock_enterprise_license["tier"] == "enterprise"
         assert "approval_workflow" in mock_enterprise_license["features"]
@@ -348,7 +350,9 @@ class TestUpdateSymbolEnterprisePolicyEnforcement:
 class TestUpdateSymbolEnterpriseReturnModel:
     """Enterprise tier: complete return model."""
 
-    async def test_enterprise_response_has_all_fields(self, assert_result_has_enterprise_fields):
+    async def test_enterprise_response_has_all_fields(
+        self, assert_result_has_enterprise_fields
+    ):
         """Enterprise tier response includes ALL tier fields."""
         result = {
             "success": True,
@@ -382,7 +386,9 @@ class TestUpdateSymbolEnterpriseReturnModel:
 class TestUpdateSymbolEnterpriseMultipleLanguages:
     """Enterprise tier: multi-language support."""
 
-    async def test_enterprise_features_all_languages(self, temp_python_file, temp_js_file):
+    async def test_enterprise_features_all_languages(
+        self, temp_python_file, temp_js_file
+    ):
         """Enterprise tier approval/compliance applies to all supported languages."""
         # Python update
         python_result = {

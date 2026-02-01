@@ -137,7 +137,9 @@ def test_dunder_rename_rejected(project: Path):
 def test_cross_file_relative_and_alias_imports(project: Path):
     pkg = project / "pkg"
     pkg.mkdir()
-    (pkg / "__init__.py").write_text("from .a import old_func\n__all__ = ['old_func']\n")
+    (pkg / "__init__.py").write_text(
+        "from .a import old_func\n__all__ = ['old_func']\n"
+    )
     a = pkg / "a.py"
     a.write_text("def old_func():\n    return 1\n")
     b = project / "b.py"

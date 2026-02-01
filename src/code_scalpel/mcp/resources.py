@@ -65,7 +65,9 @@ async def get_project_dependencies() -> str:
     from code_scalpel.ast_tools.dependency_parser import DependencyParser
 
     server = _server()
-    deps = await _run_in_thread(DependencyParser(str(server.PROJECT_ROOT)).get_dependencies)
+    deps = await _run_in_thread(
+        DependencyParser(str(server.PROJECT_ROOT)).get_dependencies
+    )
     return json.dumps(deps, indent=2)
 
 
@@ -276,9 +278,15 @@ def _extract_code_sync(
     server = _server()
 
     if not file_path and not code:
-        return server._extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
+        return server._extraction_error(
+            target_name, "Must provide either 'file_path' or 'code' argument"
+        )
 
-    extractor = SurgicalExtractor.from_file(file_path) if file_path is not None else SurgicalExtractor(code or "")
+    extractor = (
+        SurgicalExtractor.from_file(file_path)
+        if file_path is not None
+        else SurgicalExtractor(code or "")
+    )
 
     context = None
     if target_type == "class":
@@ -287,7 +295,9 @@ def _extract_code_sync(
             context = extractor.get_class_with_context(target_name)
     elif target_type == "method":
         if "." not in target_name:
-            return server._extraction_error(target_name, "Method targets must use Class.method format")
+            return server._extraction_error(
+                target_name, "Method targets must use Class.method format"
+            )
         class_name, method_name = target_name.split(".", 1)
         target = extractor.get_method(class_name, method_name)
         if include_context:
@@ -303,7 +313,9 @@ def _extract_code_sync(
             context = extractor.get_function_with_context(target_name)
 
     if not target.success:
-        return server._extraction_error(target_name, target.error or "Extraction failed")
+        return server._extraction_error(
+            target_name, target.error or "Extraction failed"
+        )
 
     context_code = context.context_code if context else ""
     context_items = context.context_items if context else (target.dependencies or [])

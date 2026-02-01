@@ -11,7 +11,9 @@ from pathlib import Path
 import pytest
 
 
-def test_auto_init_disabled_creates_nothing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_auto_init_disabled_creates_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     from code_scalpel.mcp import server
 
     monkeypatch.delenv("SCALPEL_AUTO_INIT", raising=False)
@@ -62,7 +64,9 @@ def test_auto_init_full_creates_manifest_and_env(tmp_path: Path) -> None:
     assert (tmp_path / ".env").exists()
 
 
-def test_auto_init_user_target_uses_xdg_config_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_auto_init_user_target_uses_xdg_config_home(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """User target should create policies under XDG config home.
 
     [20251230_TEST] This enables non-IDE MCP clients (Claude Desktop/ChatGPT)

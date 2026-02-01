@@ -856,7 +856,9 @@ else:
         """Test PathResult with UNKNOWN status."""
         from code_scalpel.symbolic_execution_tools.engine import PathResult, PathStatus
 
-        path = PathResult(path_id=1, status=PathStatus.UNKNOWN, constraints=[], variables={})
+        path = PathResult(
+            path_id=1, status=PathStatus.UNKNOWN, constraints=[], variables={}
+        )
 
         assert path.status == PathStatus.UNKNOWN
         assert path.status != PathStatus.FEASIBLE
@@ -1029,7 +1031,11 @@ public class Main {
         """Test engine handles ImportError when cache module not available (lines 189-190)."""
 
         # Save original
-        original_import = __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
+        original_import = (
+            __builtins__.__import__
+            if hasattr(__builtins__, "__import__")
+            else __import__
+        )
 
         def mock_import(name, *args, **kwargs):
             if "cache" in name:
@@ -1308,7 +1314,9 @@ class TestEnginePathCoverage:
 
         # Replace the solver in _process_path
         def mock_process_path_unknown(path_id, state):
-            return PathResult(path_id=path_id, status=PathStatus.UNKNOWN, constraints=[], variables={})
+            return PathResult(
+                path_id=path_id, status=PathStatus.UNKNOWN, constraints=[], variables={}
+            )
 
         engine._process_path = mock_process_path_unknown
 
@@ -1337,7 +1345,9 @@ class TestEnginePathCoverage:
 
         # Create a mock solver that returns UNKNOWN
         mock_solver = MagicMock(spec=ConstraintSolver)
-        mock_solver.solve.return_value = SolverResult(status=SolverStatus.UNKNOWN, model=None)
+        mock_solver.solve.return_value = SolverResult(
+            status=SolverStatus.UNKNOWN, model=None
+        )
         engine._solver = mock_solver
 
         # Create a state with some variables
@@ -1375,7 +1385,9 @@ class TestEnginePathCoverage:
         # Create a mock solver that returns SAT with partial model
         mock_solver = MagicMock(spec=ConstraintSolver)
         # Model only has 'x', not 'y'
-        mock_solver.solve.return_value = SolverResult(status=SolverStatus.SAT, model={"x": 42})
+        mock_solver.solve.return_value = SolverResult(
+            status=SolverStatus.SAT, model={"x": 42}
+        )
         engine._solver = mock_solver
 
         # Create a state with two variables - 'y' won't be in model
@@ -1411,7 +1423,9 @@ class TestEnginePathCoverage:
 
         # Create a mock solver that returns UNSAT
         mock_solver = MagicMock(spec=ConstraintSolver)
-        mock_solver.solve.return_value = SolverResult(status=SolverStatus.UNSAT, model=None)
+        mock_solver.solve.return_value = SolverResult(
+            status=SolverStatus.UNSAT, model=None
+        )
         engine._solver = mock_solver
 
         state = SymbolicState()

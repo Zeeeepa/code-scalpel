@@ -72,9 +72,15 @@ def _write_synthetic_files(root: Path, count: int, seed: int) -> None:
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description="Benchmark CodePolicyChecker.check_files")
-    parser.add_argument("--tier", choices=["community", "pro", "enterprise"], required=True)
-    parser.add_argument("--files", type=int, default=100, help="Number of synthetic files to generate")
+    parser = argparse.ArgumentParser(
+        description="Benchmark CodePolicyChecker.check_files"
+    )
+    parser.add_argument(
+        "--tier", choices=["community", "pro", "enterprise"], required=True
+    )
+    parser.add_argument(
+        "--files", type=int, default=100, help="Number of synthetic files to generate"
+    )
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--seed", type=int, default=1337)
 

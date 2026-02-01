@@ -82,7 +82,9 @@ async def _fetch_actual_tool_count() -> int:
     if not project_root:
         project_root = repo_root / "evidence" / "mcp_tools_docgen"
         project_root.mkdir(parents=True, exist_ok=True)
-        (project_root / "README.txt").write_text("Temporary project root for docs validation.\n", encoding="utf-8")
+        (project_root / "README.txt").write_text(
+            "Temporary project root for docs validation.\n", encoding="utf-8"
+        )
 
     # Set tier to community (no license needed)
     env["CODE_SCALPEL_TIER"] = "community"

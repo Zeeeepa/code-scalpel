@@ -145,7 +145,9 @@ def complex_project(temp_project):
     # src/models/
     models = src / "models"
     models.mkdir()
-    (models / "__init__.py").write_text("from .user import User\nfrom .product import Product")
+    (models / "__init__.py").write_text(
+        "from .user import User\nfrom .product import Product"
+    )
     (models / "user.py").write_text("""
 class User:
     def __init__(self, name):
@@ -224,7 +226,9 @@ class TestBasicImports:
         resolver.build()
 
         main_imports = resolver.imports.get("main", [])
-        from_imports = [imp for imp in main_imports if imp.import_type == ImportType.FROM]
+        from_imports = [
+            imp for imp in main_imports if imp.import_type == ImportType.FROM
+        ]
 
         assert len(from_imports) >= 1
         assert any(imp.name == "helper_func" for imp in from_imports)
@@ -273,7 +277,9 @@ from utils import *
         resolver.build()
 
         test_imports = resolver.imports.get("test", [])
-        wildcards = [imp for imp in test_imports if imp.import_type == ImportType.WILDCARD]
+        wildcards = [
+            imp for imp in test_imports if imp.import_type == ImportType.WILDCARD
+        ]
 
         assert len(wildcards) == 1
         assert wildcards[0].name == "*"

@@ -351,7 +351,9 @@ class TestDockerImageBuilderPush:
 
         with patch("subprocess.run") as mock_run:
             with patch("builtins.print"):
-                result = builder.push_image("docker.io/code-scalpel:1.0.0", dry_run=True)
+                result = builder.push_image(
+                    "docker.io/code-scalpel:1.0.0", dry_run=True
+                )
 
             assert result["push_output"] == ""
             mock_run.assert_not_called()

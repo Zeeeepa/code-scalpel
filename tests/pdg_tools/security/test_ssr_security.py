@@ -114,7 +114,9 @@ def update_user(user_id, name):
         vulnerabilities = detect_ssr_vulnerabilities(tree, framework="nextjs")
 
         # Should not detect vulnerability (has validation)
-        server_action_vulns = [v for v in vulnerabilities if "Server Action" in v.taint_path]
+        server_action_vulns = [
+            v for v in vulnerabilities if "Server Action" in v.taint_path
+        ]
         assert len(server_action_vulns) == 0
 
 
@@ -133,7 +135,9 @@ render_html = dangerouslySetInnerHTML(user_input)
 
         # Should detect DOM XSS vulnerability
         assert result.has_vulnerabilities
-        dom_xss_vulns = [v for v in result.vulnerabilities if "XSS" in v.vulnerability_type]
+        dom_xss_vulns = [
+            v for v in result.vulnerabilities if "XSS" in v.vulnerability_type
+        ]
         assert len(dom_xss_vulns) > 0
 
     def test_dangerous_html_with_safe_data(self):
@@ -147,7 +151,11 @@ render_html = dangerouslySetInnerHTML(safe_html)
 
         # Should not detect vulnerability (hardcoded content)
         # Note: This test validates that we don't flag ALL dangerouslySetInnerHTML usage
-        dangerous_html_vulns = [v for v in result.vulnerabilities if "dangerouslySetInnerHTML" in v.taint_path]
+        dangerous_html_vulns = [
+            v
+            for v in result.vulnerabilities
+            if "dangerouslySetInnerHTML" in v.taint_path
+        ]
         # If taint tracking works, should be 0
         assert len(dangerous_html_vulns) == 0
 
@@ -211,7 +219,11 @@ def loader(request):
         vulnerabilities = detect_ssr_vulnerabilities(tree, framework="remix")
 
         # Should not detect vulnerability (has validation)
-        loader_vulns = [v for v in vulnerabilities if "Remix" in v.taint_path and "loader" in v.taint_path]
+        loader_vulns = [
+            v
+            for v in vulnerabilities
+            if "Remix" in v.taint_path and "loader" in v.taint_path
+        ]
         assert len(loader_vulns) == 0
 
 

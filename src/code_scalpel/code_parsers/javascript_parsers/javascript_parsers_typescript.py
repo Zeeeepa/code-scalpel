@@ -294,14 +294,22 @@ class TypeScriptParser:
         r"(?:export\s+)?interface\s+(\w+)(?:<([^>]+)>)?(?:\s+extends\s+([^{]+))?\s*\{",
         re.MULTILINE,
     )
-    _TYPE_ALIAS_PATTERN = re.compile(r"(?:export\s+)?type\s+(\w+)(?:<([^>]+)>)?\s*=\s*([^;]+);", re.MULTILINE)
-    _ENUM_PATTERN = re.compile(r"(?:export\s+)?(?:const\s+)?enum\s+(\w+)\s*\{([^}]+)\}", re.MULTILINE)
+    _TYPE_ALIAS_PATTERN = re.compile(
+        r"(?:export\s+)?type\s+(\w+)(?:<([^>]+)>)?\s*=\s*([^;]+);", re.MULTILINE
+    )
+    _ENUM_PATTERN = re.compile(
+        r"(?:export\s+)?(?:const\s+)?enum\s+(\w+)\s*\{([^}]+)\}", re.MULTILINE
+    )
     _DECORATOR_PATTERN = re.compile(
         r"@(\w+)(?:\(([^)]*)\))?\s*(?:(?:export\s+)?(?:class|function|get|set|async)|\w+\s*[:(])",
         re.MULTILINE,
     )
-    _NAMESPACE_PATTERN = re.compile(r"(?:export\s+)?(?:declare\s+)?(?:namespace|module)\s+(\w+)\s*\{", re.MULTILINE)
-    _TYPE_GUARD_PATTERN = re.compile(r"(\w+)\s+is\s+(\w+(?:\[\])?(?:<[^>]+>)?)", re.MULTILINE)
+    _NAMESPACE_PATTERN = re.compile(
+        r"(?:export\s+)?(?:declare\s+)?(?:namespace|module)\s+(\w+)\s*\{", re.MULTILINE
+    )
+    _TYPE_GUARD_PATTERN = re.compile(
+        r"(\w+)\s+is\s+(\w+(?:\[\])?(?:<[^>]+>)?)", re.MULTILINE
+    )
     _ANY_USAGE_PATTERN = re.compile(r":\s*any\b|<any>|as\s+any\b", re.MULTILINE)
 
     def __init__(self, tsc_path: Optional[str] = None):
@@ -389,7 +397,9 @@ class TypeScriptParser:
             column = match.start() - code.rfind("\n", 0, match.start()) - 1
 
             # Parse type parameters
-            type_parameters = self._parse_type_parameters(type_params_str) if type_params_str else []
+            type_parameters = (
+                self._parse_type_parameters(type_params_str) if type_params_str else []
+            )
 
             # Parse extends clause
             extends = [e.strip() for e in extends_str.split(",")] if extends_str else []
@@ -426,7 +436,9 @@ class TypeScriptParser:
             line = code[: match.start()].count("\n") + 1
             column = match.start() - code.rfind("\n", 0, match.start()) - 1
 
-            type_parameters = self._parse_type_parameters(type_params_str) if type_params_str else []
+            type_parameters = (
+                self._parse_type_parameters(type_params_str) if type_params_str else []
+            )
             is_exported = "export" in code[max(0, match.start() - 20) : match.start()]
 
             # Determine type kind
@@ -690,7 +702,11 @@ class TypeScriptParser:
             "bigint",
         ):
             return TypeKind.PRIMITIVE
-        if type_value.startswith('"') or type_value.startswith("'") or type_value.isdigit():
+        if (
+            type_value.startswith('"')
+            or type_value.startswith("'")
+            or type_value.isdigit()
+        ):
             return TypeKind.LITERAL
 
         return TypeKind.UNKNOWN
@@ -722,7 +738,9 @@ class TypeScriptParser:
         :return: List of type errors.
         """
         if not self._tsc_path:
-            raise RuntimeError("TypeScript compiler not found. Install with: npm install typescript")
+            raise RuntimeError(
+                "TypeScript compiler not found. Install with: npm install typescript"
+            )
 
         cmd = self._tsc_path.split() if " " in self._tsc_path else [self._tsc_path]
         cmd.extend(["--noEmit", "--pretty", "false"])

@@ -161,8 +161,12 @@ class SpotBugsParser:
                 if method_elem is None:
                     method_elem = bug_instance.find(".//Method")
 
-                class_name = class_elem.get("classname") if class_elem is not None else None
-                method_name = method_elem.get("name") if method_elem is not None else None
+                class_name = (
+                    class_elem.get("classname") if class_elem is not None else None
+                )
+                method_name = (
+                    method_elem.get("name") if method_elem is not None else None
+                )
 
                 # Get message
                 long_message = bug_instance.find("LongMessage")
@@ -204,7 +208,9 @@ class SpotBugsParser:
         content = Path(xml_file).read_text()
         return self.parse_xml(content)
 
-    def get_high_rank_bugs(self, bugs: list[SpotBug], max_rank: int = 9) -> list[SpotBug]:
+    def get_high_rank_bugs(
+        self, bugs: list[SpotBug], max_rank: int = 9
+    ) -> list[SpotBug]:
         """
         Filter for high-rank (scariest) bugs.
 

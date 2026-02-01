@@ -140,7 +140,9 @@ class ConfidenceEngine:
         self.min_threshold = min_threshold
         self.rules = CONFIDENCE_RULES.copy()
 
-    def score_edge(self, edge_type: EdgeType, context: Dict[str, Any]) -> ConfidenceEvidence:
+    def score_edge(
+        self, edge_type: EdgeType, context: Dict[str, Any]
+    ) -> ConfidenceEvidence:
         """
         Calculate confidence score for an edge.
 
@@ -175,7 +177,9 @@ class ConfidenceEngine:
             explanation=explanation,
         )
 
-    def _score_http_call(self, context: Dict[str, Any], adjustments: Dict[str, float]) -> float:
+    def _score_http_call(
+        self, context: Dict[str, Any], adjustments: Dict[str, float]
+    ) -> float:
         """Score HTTP call edges based on route matching."""
         base = 0.8
 
@@ -193,7 +197,9 @@ class ConfidenceEngine:
 
         return base
 
-    def _score_route_match(self, context: Dict[str, Any], adjustments: Dict[str, float]) -> float:
+    def _score_route_match(
+        self, context: Dict[str, Any], adjustments: Dict[str, float]
+    ) -> float:
         """Score route pattern matching."""
         base = 0.8
 
@@ -208,7 +214,9 @@ class ConfidenceEngine:
 
         return base
 
-    def _score_string_match(self, context: Dict[str, Any], adjustments: Dict[str, float]) -> float:
+    def _score_string_match(
+        self, context: Dict[str, Any], adjustments: Dict[str, float]
+    ) -> float:
         """Score string literal matching."""
         base = 0.7
 
@@ -223,7 +231,9 @@ class ConfidenceEngine:
 
         return base
 
-    def _build_explanation(self, edge_type: EdgeType, score: float, adjustments: Dict[str, float]) -> str:
+    def _build_explanation(
+        self, edge_type: EdgeType, score: float, adjustments: Dict[str, float]
+    ) -> str:
         """Build human-readable explanation of confidence score."""
         parts = [f"Base: {edge_type.value}"]
 

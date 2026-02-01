@@ -93,15 +93,24 @@ class LicenseCache:
         self._lock = threading.RLock()
 
         # [20251225_FEATURE] P1_HIGH: Persistent cache to disk
-        self._persistence_path = persistence_path or Path(".code-scalpel/license_cache.json")
-        self._enable_persistence = persistence_path is not None or os.getenv("CODE_SCALPEL_CACHE_PERSIST") == "true"
+        self._persistence_path = persistence_path or Path(
+            ".code-scalpel/license_cache.json"
+        )
+        self._enable_persistence = (
+            persistence_path is not None
+            or os.getenv("CODE_SCALPEL_CACHE_PERSIST") == "true"
+        )
 
         # [20251225_FEATURE] P4_LOW: Cache encryption
         self._encryption_key = encryption_key or os.getenv("CODE_SCALPEL_CACHE_KEY")
 
         # [20251225_FEATURE] P2_MEDIUM: Distributed cache support
-        self._enable_distributed = enable_distributed or os.getenv("CODE_SCALPEL_CACHE_DISTRIBUTED") == "true"
-        self._redis_url = redis_url or os.getenv("CODE_SCALPEL_REDIS_URL", "redis://localhost:6379")
+        self._enable_distributed = (
+            enable_distributed or os.getenv("CODE_SCALPEL_CACHE_DISTRIBUTED") == "true"
+        )
+        self._redis_url = redis_url or os.getenv(
+            "CODE_SCALPEL_REDIS_URL", "redis://localhost:6379"
+        )
         self._redis_client = None
 
         # [20251225_FEATURE] P3_LOW: Cache replication
@@ -256,14 +265,18 @@ class LicenseCache:
 
         with self._lock:
             keys_to_invalidate = [
-                key for key, entry in self._cache.items() if entry.license_key_hash == license_key_hash
+                key
+                for key, entry in self._cache.items()
+                if entry.license_key_hash == license_key_hash
             ]
 
             for key in keys_to_invalidate:
                 self.invalidate(key)
 
             if keys_to_invalidate:
-                logger.info(f"Invalidated {len(keys_to_invalidate)} cache entries for license key change")
+                logger.info(
+                    f"Invalidated {len(keys_to_invalidate)} cache entries for license key change"
+                )
 
             return len(keys_to_invalidate)
 
@@ -288,7 +301,9 @@ class LicenseCache:
             Number of expired entries removed
         """
         with self._lock:
-            expired_keys = [key for key, entry in self._cache.items() if entry.is_expired()]
+            expired_keys = [
+                key for key, entry in self._cache.items() if entry.is_expired()
+            ]
 
             for key in expired_keys:
                 del self._cache[key]
@@ -350,7 +365,9 @@ class LicenseCache:
         with self._lock:
             if replica not in self._replicas:
                 self._replicas.append(replica)
-                logger.info(f"Added cache replica. Total replicas: {len(self._replicas)}")
+                logger.info(
+                    f"Added cache replica. Total replicas: {len(self._replicas)}"
+                )
 
     def remove_replica(self, replica: "LicenseCache") -> bool:
         """
@@ -365,7 +382,9 @@ class LicenseCache:
         with self._lock:
             if replica in self._replicas:
                 self._replicas.remove(replica)
-                logger.info(f"Removed cache replica. Total replicas: {len(self._replicas)}")
+                logger.info(
+                    f"Removed cache replica. Total replicas: {len(self._replicas)}"
+                )
                 return True
             return False
 
@@ -381,7 +400,11 @@ class LicenseCache:
             cache_data = {
                 "version": "1.0",
                 "timestamp": time.time(),
-                "entries": {key: asdict(entry) for key, entry in self._cache.items() if not entry.is_expired()},
+                "entries": {
+                    key: asdict(entry)
+                    for key, entry in self._cache.items()
+                    if not entry.is_expired()
+                },
             }
 
             # Serialize to JSON
@@ -425,7 +448,10 @@ class LicenseCache:
                     self._cache[key] = entry
 
             self._stats["loads"] += 1
-            logger.info(f"Cache loaded from {self._persistence_path}. " f"Loaded {len(self._cache)} entries")
+            logger.info(
+                f"Cache loaded from {self._persistence_path}. "
+                f"Loaded {len(self._cache)} entries"
+            )
 
         except (IOError, OSError, json.JSONDecodeError) as e:
             logger.warning(f"Failed to load cache: {e}")
@@ -444,7 +470,10 @@ class LicenseCache:
         data_bytes = data.encode()
 
         # XOR each byte with key bytes (cycling through key)
-        encrypted = bytes(data_bytes[i] ^ key_bytes[i % len(key_bytes)] for i in range(len(data_bytes)))
+        encrypted = bytes(
+            data_bytes[i] ^ key_bytes[i % len(key_bytes)]
+            for i in range(len(data_bytes))
+        )
 
         # Base64 encode for storage
         return b64encode(encrypted).decode()
@@ -463,7 +492,10 @@ class LicenseCache:
             key_bytes = self._encryption_key.encode()
 
             # XOR to decrypt
-            decrypted = bytes(encrypted_bytes[i] ^ key_bytes[i % len(key_bytes)] for i in range(len(encrypted_bytes)))
+            decrypted = bytes(
+                encrypted_bytes[i] ^ key_bytes[i % len(key_bytes)]
+                for i in range(len(encrypted_bytes))
+            )
 
             return decrypted.decode()
         except Exception as e:
@@ -490,10 +522,15 @@ class LicenseCache:
             logger.info(f"Distributed cache initialized: {self._redis_url}")
 
         except ImportError:
-            logger.warning("redis-py not installed. Distributed cache disabled. " "Install with: pip install redis")
+            logger.warning(
+                "redis-py not installed. Distributed cache disabled. "
+                "Install with: pip install redis"
+            )
             self._enable_distributed = False
         except Exception as e:
-            logger.warning(f"Failed to connect to Redis: {e}. Distributed cache disabled.")
+            logger.warning(
+                f"Failed to connect to Redis: {e}. Distributed cache disabled."
+            )
             self._enable_distributed = False
             self._redis_client = None
 
@@ -545,4 +582,6 @@ class LicenseCache:
             safe_key = hashlib.sha256(key.encode()).hexdigest()
             self._redis_client.delete(f"scalpel:cache:{safe_key}")
         except Exception as e:
-            logger.warning(f"Failed to delete from distributed cache: {e}")  # nosec B608
+            logger.warning(
+                f"Failed to delete from distributed cache: {e}"
+            )  # nosec B608

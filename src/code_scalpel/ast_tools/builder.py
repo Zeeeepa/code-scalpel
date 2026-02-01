@@ -20,7 +20,9 @@ class ASTBuilder:
         self.validation_hooks: list[Callable[[ast.AST], None]] = []
         self.ast_cache: dict[str, ast.AST] = {}
 
-    def build_ast(self, code: str, preprocess: bool = True, validate: bool = True) -> Optional[ast.AST]:
+    def build_ast(
+        self, code: str, preprocess: bool = True, validate: bool = True
+    ) -> Optional[ast.AST]:
         """
         Build an AST from Python code with optional preprocessing and validation.
 
@@ -54,7 +56,9 @@ class ASTBuilder:
             return None
 
     @lru_cache(maxsize=100)
-    def build_ast_from_file(self, filepath: str, preprocess: bool = True, validate: bool = True) -> Optional[ast.AST]:
+    def build_ast_from_file(
+        self, filepath: str, preprocess: bool = True, validate: bool = True
+    ) -> Optional[ast.AST]:
         """
         Build an AST from a Python source file with caching.
 

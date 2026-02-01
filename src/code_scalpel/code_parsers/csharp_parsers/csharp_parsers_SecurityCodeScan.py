@@ -80,11 +80,17 @@ class SecurityCodeScanParser:
     ) -> Dict[VulnerabilityType, List[SecurityVulnerability]]:
         raise NotImplementedError("Phase 2: Vulnerability categorization")
 
-    def map_to_cwe(self, vulns: List[SecurityVulnerability]) -> Dict[str, List[SecurityVulnerability]]:
+    def map_to_cwe(
+        self, vulns: List[SecurityVulnerability]
+    ) -> Dict[str, List[SecurityVulnerability]]:
         raise NotImplementedError("Phase 2: CWE mapping")
 
-    def map_to_owasp(self, vulns: List[SecurityVulnerability]) -> Dict[str, List[SecurityVulnerability]]:
+    def map_to_owasp(
+        self, vulns: List[SecurityVulnerability]
+    ) -> Dict[str, List[SecurityVulnerability]]:
         raise NotImplementedError("Phase 2: OWASP mapping")
 
-    def generate_report(self, vulns: List[SecurityVulnerability], format: str = "json") -> str:
+    def generate_report(
+        self, vulns: List[SecurityVulnerability], format: str = "json"
+    ) -> str:
         raise NotImplementedError("Phase 2: Report generation")

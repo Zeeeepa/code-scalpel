@@ -28,7 +28,9 @@ class TestCommunityTierRealEnforcement:
     """Community tier enforcement with real license validation."""
 
     @pytest.mark.asyncio
-    async def test_community_tier_10_update_limit(self, monkeypatch, community_tier, tmp_path):
+    async def test_community_tier_10_update_limit(
+        self, monkeypatch, community_tier, tmp_path
+    ):
         """Community tier enforces 10 updates per session limit."""
         from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
@@ -60,8 +62,13 @@ class TestCommunityTierRealEnforcement:
 
         # Pro fields should NOT be present (Community doesn't have these)
         # Check response model excludes pro_only_field or imports_adjusted
-        assert not hasattr(result, "imports_adjusted") or result.imports_adjusted is None
-        assert not hasattr(result, "atomic_write_status") or result.atomic_write_status is None
+        assert (
+            not hasattr(result, "imports_adjusted") or result.imports_adjusted is None
+        )
+        assert (
+            not hasattr(result, "atomic_write_status")
+            or result.atomic_write_status is None
+        )
 
 
 class TestProTierRealEnforcement:
@@ -99,7 +106,9 @@ class TestEnterpriseTierRealEnforcement:
     """Enterprise tier enforcement with real license validation."""
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_basic_update(self, monkeypatch, enterprise_tier, tmp_path):
+    async def test_enterprise_tier_basic_update(
+        self, monkeypatch, enterprise_tier, tmp_path
+    ):
         """Enterprise tier basic update succeeds."""
         import code_scalpel.mcp.path_resolver
 
@@ -214,15 +223,22 @@ class TestTierFallbackBehavior:
                 new_code=f"def test_func():\n    '''Update {i}'''\n    pass\n",
             )
             if i < 9:
-                assert result.success is True, f"Update {i + 1} should succeed (Community limit enforcement timing)"
+                assert (
+                    result.success is True
+                ), f"Update {i + 1} should succeed (Community limit enforcement timing)"
             elif i == 9:
                 # 11th update should fail - Community tier has 10-update limit
                 if not result.success:
                     # Expected: Community limit enforced
-                    assert "10" in str(result.error).lower() or "limit" in str(result.error).lower()
+                    assert (
+                        "10" in str(result.error).lower()
+                        or "limit" in str(result.error).lower()
+                    )
                 else:
                     # If it succeeds, we're likely in Pro/Enterprise tier (not invalid fallback)
-                    pytest.skip("License fallback not enforcing Community limits - check tier detection")
+                    pytest.skip(
+                        "License fallback not enforcing Community limits - check tier detection"
+                    )
             else:
                 # Beyond limit should continue to fail
                 assert result.success is False

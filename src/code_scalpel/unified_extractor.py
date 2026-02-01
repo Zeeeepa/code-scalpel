@@ -17,7 +17,8 @@ Migration:
 import warnings
 
 warnings.warn(
-    "code_scalpel.unified_extractor is deprecated. " "Import from code_scalpel.surgery instead.",
+    "code_scalpel.unified_extractor is deprecated. "
+    "Import from code_scalpel.surgery instead.",
     DeprecationWarning,
     stacklevel=2,
 )

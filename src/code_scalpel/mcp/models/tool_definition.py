@@ -112,7 +112,9 @@ class ToolDefinition:
         if include_examples and self.examples:
             examples_section = "\n\nExamples:\n"
             for example_name, example_code in self.examples.items():
-                examples_section += f"\n**{example_name}:**\n```python\n{example_code}\n```\n"
+                examples_section += (
+                    f"\n**{example_name}:**\n```python\n{example_code}\n```\n"
+                )
             doc += examples_section
 
         return doc

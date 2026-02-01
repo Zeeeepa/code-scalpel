@@ -14,7 +14,9 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_generate_unit_tests_community_limits_and_framework(community_tier, monkeypatch):
+async def test_generate_unit_tests_community_limits_and_framework(
+    community_tier, monkeypatch
+):
     from code_scalpel.mcp import server
     import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
     import code_scalpel.mcp.tools.symbolic as symbolic_tools
@@ -51,11 +53,15 @@ async def test_generate_unit_tests_community_limits_and_framework(community_tier
     # [20260121_TEST] Patch at both import sites (symbolic_helpers and tools.symbolic)
     # to ensure patch affects the asyncio.to_thread() call.
     monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
-    monkeypatch.setattr(symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync)
+    monkeypatch.setattr(
+        symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync
+    )
     # community_tier fixture sets up the environment
 
     # Community: pytest only
-    bad = await server.generate_unit_tests(code="def f():\n    return 1\n", framework="unittest")
+    bad = await server.generate_unit_tests(
+        code="def f():\n    return 1\n", framework="unittest"
+    )
     assert bad.success is False
     assert "unsupported framework" in (bad.error or "").lower()
 
@@ -68,14 +74,18 @@ async def test_generate_unit_tests_community_limits_and_framework(community_tier
     assert gated.success is False
     assert "data-driven" in (gated.error or "").lower()
 
-    ok = await server.generate_unit_tests(code="def f():\n    return 1\n", framework="pytest")
+    ok = await server.generate_unit_tests(
+        code="def f():\n    return 1\n", framework="pytest"
+    )
     assert ok.success is True
     assert calls, "sync path should be invoked for allowed request"
     assert calls[-1]["max_test_cases"] == 5
 
 
 @pytest.mark.asyncio
-async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(pro_tier, monkeypatch):
+async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(
+    pro_tier, monkeypatch
+):
     from code_scalpel.mcp import server
     import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
     import code_scalpel.mcp.tools.symbolic as symbolic_tools
@@ -110,7 +120,9 @@ async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(pro_tier,
 
     # [20260121_TEST] Patch at both import sites to ensure patch affects asyncio.to_thread() call.
     monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
-    monkeypatch.setattr(symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync)
+    monkeypatch.setattr(
+        symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync
+    )
     # pro_tier fixture sets up the environment
 
     ok = await server.generate_unit_tests(
@@ -127,7 +139,9 @@ async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(pro_tier,
 
 
 @pytest.mark.asyncio
-async def test_generate_unit_tests_enterprise_allows_bug_repro(enterprise_tier, monkeypatch):
+async def test_generate_unit_tests_enterprise_allows_bug_repro(
+    enterprise_tier, monkeypatch
+):
     from code_scalpel.mcp import server
     import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
     import code_scalpel.mcp.tools.symbolic as symbolic_tools
@@ -156,7 +170,9 @@ async def test_generate_unit_tests_enterprise_allows_bug_repro(enterprise_tier, 
 
     # [20260121_TEST] Patch at both import sites to ensure patch affects asyncio.to_thread() call.
     monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
-    monkeypatch.setattr(symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync)
+    monkeypatch.setattr(
+        symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync
+    )
     # enterprise_tier fixture sets up the environment
 
     ok = await server.generate_unit_tests(
@@ -172,7 +188,9 @@ async def test_generate_unit_tests_enterprise_allows_bug_repro(enterprise_tier, 
 
 
 @pytest.mark.asyncio
-async def test_generate_unit_tests_limits_toml_override(community_tier, monkeypatch, tmp_path):
+async def test_generate_unit_tests_limits_toml_override(
+    community_tier, monkeypatch, tmp_path
+):
     """limits.toml should be the source of truth for numeric limits."""
     from code_scalpel.licensing import clear_cache
     from code_scalpel.mcp import server
@@ -203,7 +221,9 @@ async def test_generate_unit_tests_limits_toml_override(community_tier, monkeypa
 
     # [20260121_TEST] Patch at both import sites to ensure patch affects asyncio.to_thread() call.
     monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
-    monkeypatch.setattr(symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync)
+    monkeypatch.setattr(
+        symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync
+    )
 
     # Force a custom limits file for this test.
     custom = tmp_path / "limits.toml"
@@ -220,7 +240,9 @@ test_frameworks = ["pytest"]
     clear_cache()
     monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
-    ok = await server.generate_unit_tests(code="def f():\n    return 1\n", framework="pytest")
+    ok = await server.generate_unit_tests(
+        code="def f():\n    return 1\n", framework="pytest"
+    )
     assert ok.success is True
     assert calls
     assert calls[-1]["max_test_cases"] == 2

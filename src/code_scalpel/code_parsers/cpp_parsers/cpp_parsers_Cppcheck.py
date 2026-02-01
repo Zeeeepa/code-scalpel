@@ -71,7 +71,9 @@ class CppcheckParser:
         self.config = CppcheckConfig()
         self.issues: List[CppcheckIssue] = []
 
-    def execute_cppcheck(self, paths: List[Path], config: Optional[CppcheckConfig] = None) -> List[CppcheckIssue]:
+    def execute_cppcheck(
+        self, paths: List[Path], config: Optional[CppcheckConfig] = None
+    ) -> List[CppcheckIssue]:
         raise NotImplementedError("Phase 2: Cppcheck execution")
 
     def parse_xml_report(self, report_path: Path) -> List[CppcheckIssue]:
@@ -80,7 +82,9 @@ class CppcheckParser:
     def load_config(self, config_file: Path) -> CppcheckConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_issues(self, issues: List[CppcheckIssue]) -> Dict[IssueCategory, List[CppcheckIssue]]:
+    def categorize_issues(
+        self, issues: List[CppcheckIssue]
+    ) -> Dict[IssueCategory, List[CppcheckIssue]]:
         raise NotImplementedError("Phase 2: Issue categorization")
 
     def detect_memory_issues(self, issues: List[CppcheckIssue]) -> List[CppcheckIssue]:

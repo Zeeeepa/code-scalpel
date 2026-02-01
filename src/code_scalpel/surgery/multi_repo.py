@@ -155,7 +155,9 @@ class MultiRepoCoordinator:
         # Active sessions
         self._sessions: Dict[str, Dict[str, RepoState]] = {}
         self._session_status: Dict[str, SessionStatus] = {}
-        self._session_dependencies: Dict[str, List[str]] = {}  # session_id -> [repo_paths]
+        self._session_dependencies: Dict[str, List[str]] = (
+            {}
+        )  # session_id -> [repo_paths]
 
     def begin_session(self) -> str:
         """
@@ -302,7 +304,9 @@ class MultiRepoCoordinator:
             SessionResult with operation details
         """
         if session_id not in self._sessions:
-            return SessionResult(session_id=session_id, success=False, error="Session not found")
+            return SessionResult(
+                session_id=session_id, success=False, error="Session not found"
+            )
 
         if self._session_status[session_id] != SessionStatus.ACTIVE:
             return SessionResult(
@@ -391,7 +395,9 @@ class MultiRepoCoordinator:
             SessionResult with rollback details
         """
         if session_id not in self._sessions:
-            return SessionResult(session_id=session_id, success=False, error="Session not found")
+            return SessionResult(
+                session_id=session_id, success=False, error="Session not found"
+            )
 
         session = self._sessions[session_id]
         rolled_back_count = 0
@@ -403,7 +409,9 @@ class MultiRepoCoordinator:
 
         self._session_status[session_id] = SessionStatus.ROLLED_BACK
 
-        return SessionResult(session_id=session_id, success=True, repos_affected=rolled_back_count)
+        return SessionResult(
+            session_id=session_id, success=True, repos_affected=rolled_back_count
+        )
 
     def get_session_status(self, session_id: str) -> Optional[SessionStatus]:
         """

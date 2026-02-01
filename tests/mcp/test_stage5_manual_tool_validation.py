@@ -205,7 +205,9 @@ async def test_04_symbolic_execute_community():
 
             result = await session.call_tool(
                 "symbolic_execute",
-                {"code": "def test(x):\n    if x > 0:\n        return True\n    return False\n"},
+                {
+                    "code": "def test(x):\n    if x > 0:\n        return True\n    return False\n"
+                },
             )
 
             assert result.content

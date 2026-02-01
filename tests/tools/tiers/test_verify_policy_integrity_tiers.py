@@ -21,7 +21,9 @@ async def test_verify_policy_integrity_community_basic_only(community_tier):
     from code_scalpel.licensing.features import has_capability
 
     assert has_capability("verify_policy_integrity", "basic_verification", "community")
-    assert not has_capability("verify_policy_integrity", "signature_validation", "community")
+    assert not has_capability(
+        "verify_policy_integrity", "signature_validation", "community"
+    )
     assert not has_capability("verify_policy_integrity", "audit_logging", "community")
 
 
@@ -41,8 +43,12 @@ async def test_verify_policy_integrity_enterprise_full_check(enterprise_tier):
     from code_scalpel.licensing.features import has_capability
 
     assert has_capability("verify_policy_integrity", "basic_verification", "enterprise")
-    assert has_capability("verify_policy_integrity", "signature_validation", "enterprise")
-    assert has_capability("verify_policy_integrity", "full_integrity_check", "enterprise")
+    assert has_capability(
+        "verify_policy_integrity", "signature_validation", "enterprise"
+    )
+    assert has_capability(
+        "verify_policy_integrity", "full_integrity_check", "enterprise"
+    )
     assert has_capability("verify_policy_integrity", "audit_logging", "enterprise")
 
 
@@ -54,7 +60,9 @@ async def test_verify_policy_integrity_community_file_limit(community_tier):
     caps = get_tool_capabilities("verify_policy_integrity", "community")
     limits = caps.get("limits", {})
 
-    assert limits.get("max_policy_files") == 50, "Community should limit to 50 policy files"
+    assert (
+        limits.get("max_policy_files") == 50
+    ), "Community should limit to 50 policy files"
 
 
 @pytest.mark.asyncio
@@ -76,7 +84,9 @@ async def test_verify_policy_integrity_enterprise_unlimited(enterprise_tier):
     caps = get_tool_capabilities("verify_policy_integrity", "enterprise")
     limits = caps.get("limits", {})
 
-    assert limits.get("max_policy_files") is None, "Enterprise should have unlimited policy files"
+    assert (
+        limits.get("max_policy_files") is None
+    ), "Enterprise should have unlimited policy files"
 
 
 @pytest.mark.asyncio
@@ -87,7 +97,9 @@ async def test_verify_policy_integrity_community_no_tamper_detection(community_t
     caps = get_tool_capabilities("verify_policy_integrity", "community")
     limits = caps.get("limits", {})
 
-    assert limits.get("tamper_detection") is False, "Community should not have tamper detection"
+    assert (
+        limits.get("tamper_detection") is False
+    ), "Community should not have tamper detection"
 
 
 @pytest.mark.asyncio
@@ -109,4 +121,6 @@ async def test_verify_policy_integrity_enterprise_tamper_detection(enterprise_ti
     caps = get_tool_capabilities("verify_policy_integrity", "enterprise")
     limits = caps.get("limits", {})
 
-    assert limits.get("tamper_detection") is True, "Enterprise should have tamper detection"
+    assert (
+        limits.get("tamper_detection") is True
+    ), "Enterprise should have tamper detection"

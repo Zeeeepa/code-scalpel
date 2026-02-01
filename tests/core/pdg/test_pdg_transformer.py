@@ -69,7 +69,9 @@ class TestPDGTransformer:
         transformer = PDGTransformer(simple_pdg)
 
         # Run full optimization
-        result = transformer.optimize_pdg(optimize_dead_code=True, optimize_constants=True, optimize_loops=False)
+        result = transformer.optimize_pdg(
+            optimize_dead_code=True, optimize_constants=True, optimize_loops=False
+        )
 
         assert result.success
         assert result.metrics["dead_code_removed"] > 0
@@ -78,7 +80,9 @@ class TestPDGTransformer:
     def test_transform_dispatch(self, simple_pdg):
         transformer = PDGTransformer(simple_pdg)
 
-        result = transformer.transform(TransformationType.OPTIMIZE, optimize_dead_code=True)
+        result = transformer.transform(
+            TransformationType.OPTIMIZE, optimize_dead_code=True
+        )
         assert result.success
         assert len(transformer.history) == 1
         assert transformer.history[0][0] == TransformationType.OPTIMIZE
@@ -149,7 +153,9 @@ class TestPDGTransformer:
 
     def test_replace_node(self, simple_pdg):
         transformer = PDGTransformer(simple_pdg)
-        result = transformer.replace_node("1", "1_new", {"type": "assign", "value": "6"})
+        result = transformer.replace_node(
+            "1", "1_new", {"type": "assign", "value": "6"}
+        )
         assert result.success
         assert "1" not in transformer.pdg.nodes
         assert "1_new" in transformer.pdg.nodes
@@ -159,7 +165,9 @@ class TestPDGTransformer:
     def test_extract_method(self, simple_pdg):
         transformer = PDGTransformer(simple_pdg)
         # Extract nodes 1 and 2
-        result = transformer.refactor_pdg("extract_method", nodes=["1", "2"], method_name="extracted_func")
+        result = transformer.refactor_pdg(
+            "extract_method", nodes=["1", "2"], method_name="extracted_func"
+        )
         assert result.success
         assert "method_extracted_func" in transformer.pdg.nodes
         assert "1" not in transformer.pdg.nodes
@@ -172,7 +180,9 @@ class TestPDGTransformer:
         transformer = PDGTransformer(simple_pdg)
 
         # Create a function node and a call node
-        transformer.pdg.add_node("func_node", type="function", body_nodes=["body1", "body2"])
+        transformer.pdg.add_node(
+            "func_node", type="function", body_nodes=["body1", "body2"]
+        )
         transformer.pdg.add_node("body1", type="stmt")
         transformer.pdg.add_node("body2", type="stmt")
         transformer.pdg.add_node("call_node", type="call", function="func_node")
@@ -188,7 +198,9 @@ class TestPDGTransformer:
         transformer = PDGTransformer(simple_pdg)
         # Move node 2 to be after node 3 (conceptually)
         # new_predecessors=["3"], new_successors=[]
-        result = transformer.refactor_pdg("move_node", node="2", new_predecessors=["3"], new_successors=[])
+        result = transformer.refactor_pdg(
+            "move_node", node="2", new_predecessors=["3"], new_successors=[]
+        )
         assert result.success
         assert transformer.pdg.has_edge("3", "2")
         assert not transformer.pdg.has_edge("1", "2")  # Old edge removed
@@ -197,16 +209,24 @@ class TestPDGTransformer:
         transformer = PDGTransformer(simple_pdg)
 
         # Create a loop structure
-        transformer.pdg.add_node("loop_head", type="while", body_nodes=["invariant_node", "variant_node"])
-        transformer.pdg.add_node("invariant_node", type="assign", value="5", has_side_effects=False)
-        transformer.pdg.add_node("variant_node", type="assign", value="i + 1", has_side_effects=False)
+        transformer.pdg.add_node(
+            "loop_head", type="while", body_nodes=["invariant_node", "variant_node"]
+        )
+        transformer.pdg.add_node(
+            "invariant_node", type="assign", value="5", has_side_effects=False
+        )
+        transformer.pdg.add_node(
+            "variant_node", type="assign", value="i + 1", has_side_effects=False
+        )
 
         # Add dependency from loop_head to variant_node (simulating loop variable dependency)
         transformer.pdg.add_edge("loop_head", "variant_node", type="data_dependency")
 
         # invariant_node has no dependency on loop_head
 
-        result = transformer.optimize_pdg(optimize_dead_code=False, optimize_constants=False, optimize_loops=True)
+        result = transformer.optimize_pdg(
+            optimize_dead_code=False, optimize_constants=False, optimize_loops=True
+        )
 
         assert result.success
         assert "invariant_node_hoisted" in transformer.pdg.nodes

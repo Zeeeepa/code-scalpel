@@ -203,7 +203,9 @@ class TestTypeEvaporationLanguageSupport:
 class TestToolLanguageMatrix:
     """Comprehensive language support matrix tests."""
 
-    def test_language_support_matches_documentation(self, tool, language, expected_support):
+    def test_language_support_matches_documentation(
+        self, tool, language, expected_support
+    ):
         """Tool language support should match documented level."""
         # full: complete support
         # basic: basic functionality

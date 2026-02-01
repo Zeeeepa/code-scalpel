@@ -120,7 +120,11 @@ class CheckstyleParser:
                         CheckstyleViolation(
                             file=filename,
                             line=int(error.get("line", 0)),
-                            column=(int(error.get("column", 0)) if error.get("column") else None),
+                            column=(
+                                int(error.get("column", 0))
+                                if error.get("column")
+                                else None
+                            ),
                             severity=error.get("severity", "warning"),
                             message=error.get("message", ""),
                             source=error.get("source", ""),

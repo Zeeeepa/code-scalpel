@@ -95,9 +95,7 @@ class TestSecurityAnalyzerPerfectCoverage:
         """
         from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = (
-            "\na = 1\nb = 2\n# BinOp argument to sanitizer, but a and b are NOT tainted\nresult = html.escape(a + b)\n"
-        )
+        code = "\na = 1\nb = 2\n# BinOp argument to sanitizer, but a and b are NOT tainted\nresult = html.escape(a + b)\n"
         analyzer = SecurityAnalyzer()
         vulnerabilities = analyzer.analyze(code)
         assert vulnerabilities is not None
@@ -110,7 +108,9 @@ class TestSecurityAnalyzerPerfectCoverage:
         """
         from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = "\n# Call sanitizer with no arguments (edge case)\nresult = html.escape()\n"
+        code = (
+            "\n# Call sanitizer with no arguments (edge case)\nresult = html.escape()\n"
+        )
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -137,7 +137,9 @@ class TestSecurityAnalyzerPerfectCoverage:
         """
         from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = "\nuser_input = input()\nresult = a.b.c.d.e.f.g.h.i.j.method(user_input)\n"
+        code = (
+            "\nuser_input = input()\nresult = a.b.c.d.e.f.g.h.i.j.method(user_input)\n"
+        )
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -177,9 +179,7 @@ class TestSecurityAnalyzerPerfectCoverage:
         """
         from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = (
-            '\nuser_input = input()\n# String literal method - base is ast.Constant\nresult = "{}".format(user_input)\n'
-        )
+        code = '\nuser_input = input()\n# String literal method - base is ast.Constant\nresult = "{}".format(user_input)\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None

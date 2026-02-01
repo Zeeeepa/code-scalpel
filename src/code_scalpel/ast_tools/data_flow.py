@@ -204,7 +204,9 @@ class DataFlowAnalyzer:
         """
         return {}
 
-    def _extract_definitions(self, node: ast.FunctionDef) -> Dict[str, List[Definition]]:
+    def _extract_definitions(
+        self, node: ast.FunctionDef
+    ) -> Dict[str, List[Definition]]:
         """Extract all variable definitions."""
         # Implementation placeholder
         return defaultdict(list)

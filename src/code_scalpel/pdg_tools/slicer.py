@@ -133,12 +133,16 @@ class ProgramSlicer:
             nodes=nodes,
             edges=edges,
             variables=variables,
-            line_range=((min(line_numbers), max(line_numbers)) if line_numbers else (0, 0)),
+            line_range=(
+                (min(line_numbers), max(line_numbers)) if line_numbers else (0, 0)
+            ),
             size=len(nodes),
             complexity=self._calculate_slice_complexity(sliced_pdg),
         )
 
-    def compute_chop(self, source_criteria: SlicingCriteria, target_criteria: SlicingCriteria) -> nx.DiGraph:
+    def compute_chop(
+        self, source_criteria: SlicingCriteria, target_criteria: SlicingCriteria
+    ) -> nx.DiGraph:
         """
         Compute a program chop between source and target criteria.
 
@@ -170,24 +174,36 @@ class ProgramSlicer:
 
     def _extract_data_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
         """Extract data dependency component from a slice."""
-        edges_to_keep = [(u, v) for u, v, d in sliced_pdg.edges(data=True) if d.get("type") == "data_dependency"]
+        edges_to_keep = [
+            (u, v)
+            for u, v, d in sliced_pdg.edges(data=True)
+            if d.get("type") == "data_dependency"
+        ]
         subgraph = sliced_pdg.edge_subgraph(edges_to_keep)
         return nx.DiGraph(subgraph)
 
     def _extract_control_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
         """Extract control dependency component from a slice."""
-        edges_to_keep = [(u, v) for u, v, d in sliced_pdg.edges(data=True) if d.get("type") == "control_dependency"]
+        edges_to_keep = [
+            (u, v)
+            for u, v, d in sliced_pdg.edges(data=True)
+            if d.get("type") == "control_dependency"
+        ]
         subgraph = sliced_pdg.edge_subgraph(edges_to_keep)
         return nx.DiGraph(subgraph)
 
     def _extract_core_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
         """Extract core component (nodes with multiple dependencies)."""
-        core_nodes = {node for node in sliced_pdg.nodes() if sliced_pdg.in_degree(node) > 1}
+        core_nodes = {
+            node for node in sliced_pdg.nodes() if sliced_pdg.in_degree(node) > 1
+        }
         return self._induce_subgraph(core_nodes)
 
     def _extract_auxiliary_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
         """Extract auxiliary component (leaf nodes)."""
-        auxiliary_nodes = {node for node in sliced_pdg.nodes() if sliced_pdg.out_degree(node) == 0}
+        auxiliary_nodes = {
+            node for node in sliced_pdg.nodes() if sliced_pdg.out_degree(node) == 0
+        }
         return self._induce_subgraph(auxiliary_nodes)
 
     def _compute_backward_slice(self, criteria: SlicingCriteria) -> nx.DiGraph:
@@ -259,7 +275,9 @@ class ProgramSlicer:
 
         return self._induce_subgraph(sliced_nodes)
 
-    def _compute_composite_slice(self, criteria: SlicingCriteria, slice_type: SliceType) -> nx.DiGraph:
+    def _compute_composite_slice(
+        self, criteria: SlicingCriteria, slice_type: SliceType
+    ) -> nx.DiGraph:
         """Compute union or intersection of multiple slices."""
         node_sets = []
 
@@ -316,7 +334,11 @@ class ProgramSlicer:
 
     def _get_direct_data_dependencies(self, node: str) -> set[str]:
         """Get only direct data dependencies (no transitive closure)."""
-        return {pred for pred, _, data in self.pdg.in_edges(node, data=True) if data.get("type") == "data_dependency"}
+        return {
+            pred
+            for pred, _, data in self.pdg.in_edges(node, data=True)
+            if data.get("type") == "data_dependency"
+        }
 
     def _calculate_slice_complexity(self, sliced_pdg: nx.DiGraph) -> int:
         """Calculate complexity of a slice."""
@@ -333,7 +355,9 @@ class ProgramSlicer:
         subgraph = self.pdg.subgraph(nodes)
         return nx.DiGraph(subgraph)
 
-    def _make_cache_key(self, criteria: SlicingCriteria, slice_type: SliceType) -> tuple:
+    def _make_cache_key(
+        self, criteria: SlicingCriteria, slice_type: SliceType
+    ) -> tuple:
         """Create a cache key for the given criteria and slice type."""
         return (
             frozenset(criteria.nodes),
@@ -358,4 +382,6 @@ def compute_slice(
     slicer = ProgramSlicer(pdg)
     if criteria is None:
         criteria = SlicingCriteria(nodes={node}, variables=set())
-    return slicer.compute_slice(criteria, SliceType.BACKWARD if backward else SliceType.FORWARD)
+    return slicer.compute_slice(
+        criteria, SliceType.BACKWARD if backward else SliceType.FORWARD
+    )

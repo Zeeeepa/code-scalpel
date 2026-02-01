@@ -15,7 +15,9 @@ if streamable_http_client is None:
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="[20260117_TEST] MCP HTTP integration test requires running MCP server, skipped")
+@pytest.mark.skip(
+    reason="[20260117_TEST] MCP HTTP integration test requires running MCP server, skipped"
+)
 async def test_mcp_http_connection():
     """Test connection to the running MCP server via HTTP SSE."""
     # Code Scalpel uses FastMCP:

@@ -51,11 +51,18 @@ def clear_tier_cache():
 # Paths to test license files (relative to project root)
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 # [20260106_TEST] Prefer signed fixture licenses that validate against vault-prod-2026-01
-PRO_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_190345.jwt"
-ENTERPRISE_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt"
+PRO_LICENSE_PATH = (
+    PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_190345.jwt"
+)
+ENTERPRISE_LICENSE_PATH = (
+    PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt"
+)
 
 # Fallback to archive if tests/licenses doesn't have valid ones
-ARCHIVE_PRO_LICENSE = PROJECT_ROOT / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
+ARCHIVE_PRO_LICENSE = (
+    PROJECT_ROOT
+    / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
+)
 
 
 def _find_valid_license(tier: str) -> Path | None:
@@ -68,13 +75,15 @@ def _find_valid_license(tier: str) -> Path | None:
     if tier == "pro":
         candidates = [
             PRO_LICENSE_PATH,
-            PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
+            PROJECT_ROOT
+            / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
             ARCHIVE_PRO_LICENSE,
         ]
     elif tier == "enterprise":
         candidates = [
             ENTERPRISE_LICENSE_PATH,
-            PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
+            PROJECT_ROOT
+            / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
         ]
     else:
         return None
@@ -110,7 +119,10 @@ def pro_tier(monkeypatch):
     if license_path is None:
         # Mock _get_current_tier to return "pro" when no license
         from code_scalpel.mcp.protocol import _get_current_tier
-        monkeypatch.setattr("code_scalpel.mcp.protocol._get_current_tier", lambda: "pro")
+
+        monkeypatch.setattr(
+            "code_scalpel.mcp.protocol._get_current_tier", lambda: "pro"
+        )
     try:
         yield {
             "tier": "pro",
@@ -135,7 +147,10 @@ def enterprise_tier(monkeypatch):
     if license_path is None:
         # Mock _get_current_tier to return "enterprise" when no license
         from code_scalpel.mcp.protocol import _get_current_tier
-        monkeypatch.setattr("code_scalpel.mcp.protocol._get_current_tier", lambda: "enterprise")
+
+        monkeypatch.setattr(
+            "code_scalpel.mcp.protocol._get_current_tier", lambda: "enterprise"
+        )
     try:
         yield {
             "tier": "enterprise",
@@ -144,6 +159,7 @@ def enterprise_tier(monkeypatch):
         }
     finally:
         clear_tier_caches()
+
 
 @pytest.fixture
 def community_tier():

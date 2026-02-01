@@ -142,7 +142,8 @@ class SymbolicState:
             existing = self._variables[name]
             if existing.sort() != sort:
                 raise ValueError(
-                    f"Variable '{name}' already exists with sort {existing.sort()}, " f"cannot create with sort {sort}"
+                    f"Variable '{name}' already exists with sort {existing.sort()}, "
+                    f"cannot create with sort {sort}"
                 )
             return existing
 
@@ -157,7 +158,10 @@ class SymbolicState:
             # [20251226_FEATURE] v3.2.9 Pro tier - Float constraint support
             expr = Real(name)
         else:
-            raise ValueError(f"Unsupported sort: {sort}. " "Supported: IntSort, BoolSort, StringSort, RealSort.")
+            raise ValueError(
+                f"Unsupported sort: {sort}. "
+                "Supported: IntSort, BoolSort, StringSort, RealSort."
+            )
 
         self._variables[name] = expr
         return expr
@@ -356,7 +360,11 @@ class SymbolicState:
     def __repr__(self) -> str:
         """String representation for debugging."""
         var_str = ", ".join(f"{k}: {v.sort()}" for k, v in self._variables.items())
-        return f"SymbolicState(depth={self._depth}, " f"vars=[{var_str}], " f"constraints={len(self._constraints)})"
+        return (
+            f"SymbolicState(depth={self._depth}, "
+            f"vars=[{var_str}], "
+            f"constraints={len(self._constraints)})"
+        )
 
     def summary(self) -> Dict:
         """
@@ -367,7 +375,9 @@ class SymbolicState:
         """
         return {
             "depth": self._depth,
-            "variables": {name: str(expr.sort()) for name, expr in self._variables.items()},
+            "variables": {
+                name: str(expr.sort()) for name, expr in self._variables.items()
+            },
             "constraint_count": len(self._constraints),
             "is_feasible": self.is_feasible(),
         }

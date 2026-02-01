@@ -106,7 +106,10 @@ class SanitizerDetector:
 
             elif isinstance(node, ast.FunctionDef):
                 # Check if function name suggests validation/sanitization
-                if any(keyword in node.name.lower() for keyword in ["validate", "sanitize", "clean", "escape"]):
+                if any(
+                    keyword in node.name.lower()
+                    for keyword in ["validate", "sanitize", "clean", "escape"]
+                ):
                     sanitizers.append(
                         SanitizerMatch(
                             function_name=node.name,
@@ -197,7 +200,9 @@ class SanitizerDetector:
             return ".".join(reversed(parts))
         return None
 
-    def analyze_sanitizer_coverage(self, code: str, vulnerabilities: list[dict[str, Any]]) -> dict[str, Any]:
+    def analyze_sanitizer_coverage(
+        self, code: str, vulnerabilities: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """
         Analyze how well sanitizers cover detected vulnerabilities.
 
@@ -242,7 +247,9 @@ class SanitizerDetector:
                             covered += 1
                             break
 
-        coverage_pct = (covered / len(vulnerabilities) * 100.0) if vulnerabilities else 0.0
+        coverage_pct = (
+            (covered / len(vulnerabilities) * 100.0) if vulnerabilities else 0.0
+        )
 
         return {
             "coverage_percentage": coverage_pct,

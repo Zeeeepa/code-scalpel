@@ -105,9 +105,7 @@ class TestMoreBranches1:
         """Cover comparison in symbolic."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        code = (
-            "\ndef compare(a, b):\n    if a == b:\n        return 0\n    elif a > b:\n        return 1\n    return -1\n"
-        )
+        code = "\ndef compare(a, b):\n    if a == b:\n        return 0\n    elif a > b:\n        return 1\n    return -1\n"
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None

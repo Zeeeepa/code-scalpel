@@ -60,4 +60,6 @@ class TestBasicExecution:
         required_fields = ["path", "language", "status"]
         for file_result in result.files_analyzed:
             for field in required_fields:
-                assert hasattr(file_result, field), f"FileAnalysisResult missing required field: {field}"
+                assert hasattr(
+                    file_result, field
+                ), f"FileAnalysisResult missing required field: {field}"

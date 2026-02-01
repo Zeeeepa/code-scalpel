@@ -17,7 +17,8 @@ Migration:
 import warnings
 
 warnings.warn(
-    "code_scalpel.code_analyzer is deprecated. " "Import from code_scalpel.analysis instead.",
+    "code_scalpel.code_analyzer is deprecated. "
+    "Import from code_scalpel.analysis instead.",
     DeprecationWarning,
     stacklevel=2,
 )

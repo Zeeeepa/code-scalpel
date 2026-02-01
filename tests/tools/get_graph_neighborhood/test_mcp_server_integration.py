@@ -94,7 +94,10 @@ class TestAsyncConcurrentHandling:
 
         # Fire 5 concurrent requests for the same node
         tasks = [
-            get_graph_neighborhood(center_node_id="python::main::function::center", k=1, max_nodes=20) for _ in range(5)
+            get_graph_neighborhood(
+                center_node_id="python::main::function::center", k=1, max_nodes=20
+            )
+            for _ in range(5)
         ]
 
         results = await asyncio.gather(*tasks)
@@ -136,7 +139,9 @@ class TestAsyncConcurrentHandling:
 
         # Mock different tier contexts
         async def call_with_tier(tier_name):
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value=tier_name):
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value=tier_name
+            ):
                 return await get_graph_neighborhood(
                     center_node_id="python::main::function::center",
                     k=2 if tier_name == "pro" else 1,
@@ -159,11 +164,15 @@ class TestAsyncConcurrentHandling:
         from code_scalpel.mcp.server import get_graph_neighborhood
 
         # First request: invalid (nonexistent node)
-        result1 = await get_graph_neighborhood(center_node_id="python::fake::function::fake", k=1)
+        result1 = await get_graph_neighborhood(
+            center_node_id="python::fake::function::fake", k=1
+        )
         assert not result1.success
 
         # Second request: valid (should work despite previous error)
-        result2 = await get_graph_neighborhood(center_node_id="python::main::function::center", k=1, max_nodes=20)
+        result2 = await get_graph_neighborhood(
+            center_node_id="python::main::function::center", k=1, max_nodes=20
+        )
         # May or may not succeed depending on if graph exists, but shouldn't crash
         assert hasattr(result2, "success")
 
@@ -257,7 +266,9 @@ class TestResponseStructure:
         # [20260104_TEST] Response model validation
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        result = await get_graph_neighborhood(center_node_id="python::main::function::center", k=1, max_nodes=20)
+        result = await get_graph_neighborhood(
+            center_node_id="python::main::function::center", k=1, max_nodes=20
+        )
 
         assert hasattr(result, "success")
         assert isinstance(result.success, bool)
@@ -268,7 +279,9 @@ class TestResponseStructure:
         # [20260104_TEST] Error field presence on failure
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        result = await get_graph_neighborhood(center_node_id="python::nonexistent::function::fake", k=1)
+        result = await get_graph_neighborhood(
+            center_node_id="python::nonexistent::function::fake", k=1
+        )
 
         if not result.success:
             assert hasattr(result, "error")
@@ -281,7 +294,9 @@ class TestResponseStructure:
         # [20260104_TEST] Nodes field type validation
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        result = await get_graph_neighborhood(center_node_id="python::main::function::center", k=1, max_nodes=20)
+        result = await get_graph_neighborhood(
+            center_node_id="python::main::function::center", k=1, max_nodes=20
+        )
 
         if result.success:
             assert hasattr(result, "nodes")
@@ -293,7 +308,9 @@ class TestResponseStructure:
         # [20260104_TEST] Edges field type validation
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        result = await get_graph_neighborhood(center_node_id="python::main::function::center", k=1, max_nodes=20)
+        result = await get_graph_neighborhood(
+            center_node_id="python::main::function::center", k=1, max_nodes=20
+        )
 
         if result.success:
             assert hasattr(result, "edges")
@@ -305,7 +322,9 @@ class TestResponseStructure:
         # [20260104_TEST] Truncated flag type
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        result = await get_graph_neighborhood(center_node_id="python::main::function::center", k=1, max_nodes=20)
+        result = await get_graph_neighborhood(
+            center_node_id="python::main::function::center", k=1, max_nodes=20
+        )
 
         if result.success:
             assert hasattr(result, "truncated")
@@ -317,7 +336,9 @@ class TestResponseStructure:
         # [20260104_TEST] Mermaid field type validation
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        result = await get_graph_neighborhood(center_node_id="python::main::function::center", k=1, max_nodes=20)
+        result = await get_graph_neighborhood(
+            center_node_id="python::main::function::center", k=1, max_nodes=20
+        )
 
         if result.success and result.mermaid:
             assert isinstance(result.mermaid, str)
@@ -348,11 +369,15 @@ class TestErrorMessages:
         # [20260104_TEST] Error message actionability
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        result = await get_graph_neighborhood(center_node_id="python::main::function::center", k=0, max_nodes=20)
+        result = await get_graph_neighborhood(
+            center_node_id="python::main::function::center", k=0, max_nodes=20
+        )
 
         assert not result.success
         # Should suggest valid values
-        assert any(word in result.error.lower() for word in ["must", "should", "least", "at"])
+        assert any(
+            word in result.error.lower() for word in ["must", "should", "least", "at"]
+        )
 
     @pytest.mark.asyncio
     async def test_error_message_not_empty(self):
@@ -360,7 +385,9 @@ class TestErrorMessages:
         # [20260104_TEST] Error message presence
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        result = await get_graph_neighborhood(center_node_id="python::nonexistent::function::fake", k=1)
+        result = await get_graph_neighborhood(
+            center_node_id="python::nonexistent::function::fake", k=1
+        )
 
         if not result.success:
             assert result.error
@@ -376,12 +403,19 @@ class TestToolCapabilityGating:
         # [20260104_TEST] Tier capability gating validation
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-            result = await get_graph_neighborhood(center_node_id="python::main::function::center", k=1, max_nodes=20)
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
+            result = await get_graph_neighborhood(
+                center_node_id="python::main::function::center", k=1, max_nodes=20
+            )
 
         if result.success:
             # Community shouldn't have semantic neighbors
-            assert not hasattr(result, "semantic_neighbors") or not result.semantic_neighbors
+            assert (
+                not hasattr(result, "semantic_neighbors")
+                or not result.semantic_neighbors
+            )
 
     @pytest.mark.asyncio
     async def test_enterprise_features_absent_in_pro(self):
@@ -390,7 +424,9 @@ class TestToolCapabilityGating:
         from code_scalpel.mcp.server import get_graph_neighborhood
 
         with patch("code_scalpel.mcp.server._get_current_tier", return_value="pro"):
-            result = await get_graph_neighborhood(center_node_id="python::main::function::center", k=2, max_nodes=200)
+            result = await get_graph_neighborhood(
+                center_node_id="python::main::function::center", k=2, max_nodes=200
+            )
 
         if result.success:
             # Pro shouldn't have query language results

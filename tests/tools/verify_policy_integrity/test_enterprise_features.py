@@ -60,7 +60,9 @@ def test_enterprise_full_integrity_check_includes_audit_logging(
     assert enterprise_result.success is True
     assert enterprise_result.tier == "enterprise"
     assert enterprise_result.signature_validated is True
-    assert enterprise_result.audit_log_entry is not None, "Enterprise tier MUST have audit logging"
+    assert (
+        enterprise_result.audit_log_entry is not None
+    ), "Enterprise tier MUST have audit logging"
 
     # Validate audit log structure
     audit = enterprise_result.audit_log_entry
@@ -131,7 +133,8 @@ def test_batch_verification_performance_with_many_files(
     # Note: Actual performance depends on hardware, but should be <5s per roadmap
     # We use a generous 10s limit for CI environments
     assert elapsed_time < 10.0, (
-        f"Batch verification took {elapsed_time:.2f}s, " f"expected <10s (roadmap target: <5s for 200 files)"
+        f"Batch verification took {elapsed_time:.2f}s, "
+        f"expected <10s (roadmap target: <5s for 200 files)"
     )
 
     print(f"\n✅ Batch verification of 200 files completed in {elapsed_time:.3f}s")

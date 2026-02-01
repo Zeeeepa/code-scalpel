@@ -18,10 +18,16 @@ class SecurityResult(BaseModel):
     has_vulnerabilities: bool = Field(description="Whether vulnerabilities were found")
     vulnerability_count: int = Field(description="Number of vulnerabilities")
     risk_level: str = Field(description="Overall risk level")
-    vulnerabilities: list[VulnerabilityInfo] = Field(default_factory=list, description="List of vulnerabilities")
-    taint_sources: list[str] = Field(default_factory=list, description="Identified taint sources")
+    vulnerabilities: list[VulnerabilityInfo] = Field(
+        default_factory=list, description="List of vulnerabilities"
+    )
+    taint_sources: list[str] = Field(
+        default_factory=list, description="Identified taint sources"
+    )
     # [20251226_FEATURE] Tier-aware optional security outputs for Pro/Enterprise
-    sanitizer_paths: list[str] | None = Field(default=None, description="Detected sanitizer usages (Pro/Enterprise)")
+    sanitizer_paths: list[str] | None = Field(
+        default=None, description="Detected sanitizer usages (Pro/Enterprise)"
+    )
     confidence_scores: dict[str, float] | None = Field(
         default=None, description="Heuristic confidence scores per finding"
     )
@@ -63,16 +69,26 @@ class TypeEvaporationResultModel(BaseModel):
 
     success: bool = Field(description="Whether analysis succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
-    frontend_vulnerabilities: int = Field(default=0, description="Number of frontend vulnerabilities")
-    backend_vulnerabilities: int = Field(default=0, description="Number of backend vulnerabilities")
+    frontend_vulnerabilities: int = Field(
+        default=0, description="Number of frontend vulnerabilities"
+    )
+    backend_vulnerabilities: int = Field(
+        default=0, description="Number of backend vulnerabilities"
+    )
     cross_file_issues: int = Field(default=0, description="Number of cross-file issues")
-    matched_endpoints: list[str] = Field(default_factory=list, description="Correlated API endpoints")
-    vulnerabilities: list[VulnerabilityInfo] = Field(default_factory=list, description="All vulnerabilities")
+    matched_endpoints: list[str] = Field(
+        default_factory=list, description="Correlated API endpoints"
+    )
+    vulnerabilities: list[VulnerabilityInfo] = Field(
+        default_factory=list, description="All vulnerabilities"
+    )
     summary: str = Field(default="", description="Analysis summary")
     error: str | None = Field(default=None, description="Error message if failed")
 
     # Pro tier fields
-    implicit_any_count: int = Field(default=0, description="[Pro] Count of implicit any detections")
+    implicit_any_count: int = Field(
+        default=0, description="[Pro] Count of implicit any detections"
+    )
     network_boundaries: list[dict[str, Any]] = Field(
         default_factory=list, description="[Pro] Detected network call boundaries"
     )
@@ -90,7 +106,9 @@ class TypeEvaporationResultModel(BaseModel):
     generated_schemas: list[dict[str, Any]] = Field(
         default_factory=list, description="[Enterprise] Generated Zod schemas"
     )
-    validation_code: str | None = Field(default=None, description="[Enterprise] Generated validation code")
+    validation_code: str | None = Field(
+        default=None, description="[Enterprise] Generated validation code"
+    )
     schema_coverage: float | None = Field(
         default=None, description="[Enterprise] Coverage ratio of validated endpoints"
     )
@@ -128,15 +146,29 @@ class DependencyVulnerability(BaseModel):
     id: str = Field(description="OSV vulnerability ID")
     summary: str | None = Field(default=None, description="Short summary of the issue")
     details: str | None = Field(default=None, description="Detailed description")
-    severity: str = Field(default="UNKNOWN", description="Severity (CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN)")
-    affected_versions: list[str] = Field(default_factory=list, description="Versions affected by this vulnerability")
-    fixed_versions: list[str] = Field(default_factory=list, description="Versions that fix this vulnerability")
-    references: list[str] = Field(default_factory=list, description="URLs with more information")
-    aliases: list[str] = Field(default_factory=list, description="Other IDs (e.g. CVE-2023-1234)")
+    severity: str = Field(
+        default="UNKNOWN", description="Severity (CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN)"
+    )
+    affected_versions: list[str] = Field(
+        default_factory=list, description="Versions affected by this vulnerability"
+    )
+    fixed_versions: list[str] = Field(
+        default_factory=list, description="Versions that fix this vulnerability"
+    )
+    references: list[str] = Field(
+        default_factory=list, description="URLs with more information"
+    )
+    aliases: list[str] = Field(
+        default_factory=list, description="Other IDs (e.g. CVE-2023-1234)"
+    )
     # Legacy/compat fields used by helpers
     package: str | None = Field(default=None, description="Package name")
-    vulnerable_version: str | None = Field(default=None, description="Version found vulnerable in the project")
-    fixed_version: str | None = Field(default=None, description="First version that fixes this vulnerability")
+    vulnerable_version: str | None = Field(
+        default=None, description="Version found vulnerable in the project"
+    )
+    fixed_version: str | None = Field(
+        default=None, description="First version that fixes this vulnerability"
+    )
 
 
 class DependencyInfo(BaseModel):
@@ -155,20 +187,40 @@ class DependencyInfo(BaseModel):
         default_factory=list, description="Vulnerabilities affecting this dependency"
     )
     # [20251231_FEATURE] v3.3.1 - Pro tier enrichments
-    risk_score: float | None = Field(default=None, description="Calculated risk score (0.0-10.0)")
-    is_reachable: bool | None = Field(default=None, description="Whether dependency is imported in code (Pro tier)")
-    is_imported: bool | None = Field(default=None, description="Whether dependency is imported in the codebase")
-    transitive_depth: int | None = Field(default=None, description="Dependency depth (0=direct, >0=transitive)")
+    risk_score: float | None = Field(
+        default=None, description="Calculated risk score (0.0-10.0)"
+    )
+    is_reachable: bool | None = Field(
+        default=None, description="Whether dependency is imported in code (Pro tier)"
+    )
+    is_imported: bool | None = Field(
+        default=None, description="Whether dependency is imported in the codebase"
+    )
+    transitive_depth: int | None = Field(
+        default=None, description="Dependency depth (0=direct, >0=transitive)"
+    )
     # [20251231_FEATURE] v3.3.1 - Enterprise enrichments
-    license: str | None = Field(default=None, description="License identifier (Enterprise tier)")
-    license_compliant: bool | None = Field(default=None, description="Whether license is compliant with policy")
-    typosquatting_risk: bool | None = Field(default=None, description="Whether typosquatting risk was detected")
-    supply_chain_risk_score: float | None = Field(default=None, description="Supply chain risk score (0.0-1.0)")
+    license: str | None = Field(
+        default=None, description="License identifier (Enterprise tier)"
+    )
+    license_compliant: bool | None = Field(
+        default=None, description="Whether license is compliant with policy"
+    )
+    typosquatting_risk: bool | None = Field(
+        default=None, description="Whether typosquatting risk was detected"
+    )
+    supply_chain_risk_score: float | None = Field(
+        default=None, description="Supply chain risk score (0.0-1.0)"
+    )
     supply_chain_risk_factors: list[str] | None = Field(
         default=None, description="Factors contributing to supply chain risk"
     )
-    compliance_status: str | None = Field(default=None, description="Compliance status (compliant, warning, violation)")
-    remediation_suggestion: str | None = Field(default=None, description="Suggested fix (e.g. 'upgrade to 2.1.0')")
+    compliance_status: str | None = Field(
+        default=None, description="Compliance status (compliant, warning, violation)"
+    )
+    remediation_suggestion: str | None = Field(
+        default=None, description="Suggested fix (e.g. 'upgrade to 2.1.0')"
+    )
 
 
 class DependencyScanResult(BaseModel):
@@ -179,11 +231,21 @@ class DependencyScanResult(BaseModel):
     [20251229_FEATURE] v3.3.1 - Added Pro/Enterprise tier fields.
     """
 
-    scanned_files: list[str] = Field(default_factory=list, description="List of dependency files scanned")
-    total_dependencies: int = Field(default=0, description="Total number of dependencies found")
-    vulnerable_count: int = Field(default=0, description="Number of dependencies with vulnerabilities")
-    total_vulnerabilities: int = Field(default=0, description="Total number of vulnerabilities found")
-    severity_summary: dict[str, int] = Field(default_factory=dict, description="Count of vulnerabilities by severity")
+    scanned_files: list[str] = Field(
+        default_factory=list, description="List of dependency files scanned"
+    )
+    total_dependencies: int = Field(
+        default=0, description="Total number of dependencies found"
+    )
+    vulnerable_count: int = Field(
+        default=0, description="Number of dependencies with vulnerabilities"
+    )
+    total_vulnerabilities: int = Field(
+        default=0, description="Total number of vulnerabilities found"
+    )
+    severity_summary: dict[str, int] = Field(
+        default_factory=dict, description="Count of vulnerabilities by severity"
+    )
     dependencies: list[DependencyInfo] = Field(
         default_factory=list,
         description="All scanned dependencies with their vulnerabilities",
@@ -201,7 +263,9 @@ class DependencyScanResult(BaseModel):
         description="Non-fatal errors/warnings encountered during scan (e.g. tier truncation warnings)",
     )
     # Legacy/compat fields for helper parity
-    success: bool = Field(default=True, description="Whether the scan completed successfully")
+    success: bool = Field(
+        default=True, description="Whether the scan completed successfully"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -210,13 +274,21 @@ class VulnerabilityFindingModel(BaseModel):
 
     id: str = Field(description="OSV vulnerability ID (e.g., GHSA-xxxx-xxxx-xxxx)")
     cve_id: str | None = Field(default=None, description="CVE ID if available")
-    severity: str = Field(default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN")
+    severity: str = Field(
+        default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN"
+    )
     package_name: str = Field(description="Name of the vulnerable package")
     package_version: str = Field(description="Version of the vulnerable package")
     ecosystem: str = Field(description="Package ecosystem (npm, Maven, PyPI)")
-    summary: str = Field(default="", description="Brief description of the vulnerability")
-    fixed_versions: list[str] = Field(default_factory=list, description="Versions that fix this vulnerability")
-    source_file: str = Field(default="", description="Dependency file where package was found")
+    summary: str = Field(
+        default="", description="Brief description of the vulnerability"
+    )
+    fixed_versions: list[str] = Field(
+        default_factory=list, description="Versions that fix this vulnerability"
+    )
+    source_file: str = Field(
+        default="", description="Dependency file where package was found"
+    )
 
 
 class DependencyScanResultModel(BaseModel):
@@ -225,14 +297,22 @@ class DependencyScanResultModel(BaseModel):
     success: bool = Field(description="Whether the scan completed successfully")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     error: str | None = Field(default=None, description="Error message if failed")
-    dependencies_scanned: int = Field(default=0, description="Number of dependencies checked")
-    vulnerabilities_found: int = Field(default=0, description="Number of vulnerabilities found")
+    dependencies_scanned: int = Field(
+        default=0, description="Number of dependencies checked"
+    )
+    vulnerabilities_found: int = Field(
+        default=0, description="Number of vulnerabilities found"
+    )
     critical_count: int = Field(default=0, description="Number of CRITICAL severity")
     high_count: int = Field(default=0, description="Number of HIGH severity")
     medium_count: int = Field(default=0, description="Number of MEDIUM severity")
     low_count: int = Field(default=0, description="Number of LOW severity")
-    findings: list[VulnerabilityFindingModel] = Field(default_factory=list, description="Detailed findings")
-    errors: list[str] = Field(default_factory=list, description="Errors encountered during scan")
+    findings: list[VulnerabilityFindingModel] = Field(
+        default_factory=list, description="Detailed findings"
+    )
+    errors: list[str] = Field(
+        default_factory=list, description="Errors encountered during scan"
+    )
     summary: str = Field(default="", description="Human-readable summary")
 
 

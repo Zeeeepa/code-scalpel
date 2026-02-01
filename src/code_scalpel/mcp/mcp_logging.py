@@ -133,7 +133,9 @@ class MCPAnalytics:
         """
         self._invocations.append(invocation)
 
-    def get_tool_usage_stats(self, time_range: Optional[str] = None) -> ToolUsageStatsDict:
+    def get_tool_usage_stats(
+        self, time_range: Optional[str] = None
+    ) -> ToolUsageStatsDict:
         """Get usage statistics for MCP tools.
 
         Args:
@@ -164,10 +166,14 @@ class MCPAnalytics:
         success_rate = successful / len(self._invocations)
 
         # Calculate average duration
-        avg_duration = sum(inv.duration_ms for inv in self._invocations) / len(self._invocations)
+        avg_duration = sum(inv.duration_ms for inv in self._invocations) / len(
+            self._invocations
+        )
 
         # Calculate tokens saved
-        tokens_saved = sum(inv.metrics.get("tokens_saved", 0) for inv in self._invocations)
+        tokens_saved = sum(
+            inv.metrics.get("tokens_saved", 0) for inv in self._invocations
+        )
 
         return {
             "total_invocations": len(self._invocations),
@@ -187,7 +193,9 @@ class MCPAnalytics:
         Returns:
             Dictionary with tool-specific statistics
         """
-        tool_invocations = [inv for inv in self._invocations if inv.tool_name == tool_name]
+        tool_invocations = [
+            inv for inv in self._invocations if inv.tool_name == tool_name
+        ]
 
         if not tool_invocations:
             return {
@@ -199,7 +207,9 @@ class MCPAnalytics:
 
         successful = sum(1 for inv in tool_invocations if inv.success)
         success_rate = successful / len(tool_invocations)
-        avg_duration = sum(inv.duration_ms for inv in tool_invocations) / len(tool_invocations)
+        avg_duration = sum(inv.duration_ms for inv in tool_invocations) / len(
+            tool_invocations
+        )
 
         return {
             "tool_name": tool_name,
@@ -261,7 +271,9 @@ def get_analytics() -> MCPAnalytics:
     return _analytics
 
 
-def log_tool_invocation(tool_name: str, params: Optional[Dict[str, Any]] = None, **kwargs) -> None:
+def log_tool_invocation(
+    tool_name: str, params: Optional[Dict[str, Any]] = None, **kwargs
+) -> None:
     """[20251216_FEATURE] v2.2.0 - Log MCP tool invocation start."""
     safe_params = _sanitize_params(params or {})
 

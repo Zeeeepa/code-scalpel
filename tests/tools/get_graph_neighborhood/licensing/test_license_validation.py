@@ -78,9 +78,13 @@ def use_pro_tier(monkeypatch):
 @pytest.fixture
 def use_enterprise_tier(monkeypatch):
     """Use real Enterprise tier license from tests/licenses/."""
-    enterprise_licenses = list(LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt"))
+    enterprise_licenses = list(
+        LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt")
+    )
     # Filter out broken licenses
-    enterprise_licenses = [lic for lic in enterprise_licenses if "broken" not in lic.name]
+    enterprise_licenses = [
+        lic for lic in enterprise_licenses if "broken" not in lic.name
+    ]
     assert enterprise_licenses, f"No valid Enterprise license found in {LICENSE_DIR}"
 
     license_path = enterprise_licenses[0]
@@ -97,7 +101,9 @@ class TestValidLicenseDetection:
     def test_no_license_defaults_to_community(self, use_community_tier):
         """No license file should default to Community tier (k=1, nodes=20)."""
         tier = _get_current_tier()
-        assert tier == "community", f"Expected community tier without license, got {tier}"
+        assert (
+            tier == "community"
+        ), f"Expected community tier without license, got {tier}"
 
         # Verify Community tier capabilities
         caps = get_tool_capabilities("get_graph_neighborhood", "community")
@@ -117,7 +123,9 @@ class TestValidLicenseDetection:
     def test_valid_enterprise_license_detected(self, use_enterprise_tier):
         """Valid Enterprise license should be detected and allow unlimited k and nodes."""
         tier = _get_current_tier()
-        assert tier == "enterprise", f"Expected enterprise tier from license, got {tier}"
+        assert (
+            tier == "enterprise"
+        ), f"Expected enterprise tier from license, got {tier}"
 
         # Verify Enterprise tier capabilities
         caps = get_tool_capabilities("get_graph_neighborhood", "enterprise")
@@ -131,7 +139,9 @@ class TestValidLicenseDetection:
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         tier = _get_current_tier()
-        assert tier == "community", f"Missing license should fall back to community, got {tier}"
+        assert (
+            tier == "community"
+        ), f"Missing license should fall back to community, got {tier}"
 
     def test_malformed_jwt_falls_back_to_community(self, monkeypatch, tmp_path):
         """Malformed JWT string should fall back to Community tier."""
@@ -142,7 +152,9 @@ class TestValidLicenseDetection:
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         tier = _get_current_tier()
-        assert tier == "community", f"Malformed JWT should fall back to community, got {tier}"
+        assert (
+            tier == "community"
+        ), f"Malformed JWT should fall back to community, got {tier}"
 
 
 class TestLicenseEnvironmentVariables:
@@ -160,14 +172,18 @@ class TestLicenseEnvironmentVariables:
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         tier = _get_current_tier()
-        assert tier == "community", f"Empty LICENSE_PATH should fall back to community, got {tier}"
+        assert (
+            tier == "community"
+        ), f"Empty LICENSE_PATH should fall back to community, got {tier}"
 
 
 class TestTierLimitEnforcement:
     """Test that tier limits are enforced based on actual license validation."""
 
     @pytest.mark.asyncio
-    async def test_community_k_clamped_to_1(self, use_community_tier, sample_call_graph):
+    async def test_community_k_clamped_to_1(
+        self, use_community_tier, sample_call_graph
+    ):
         """Community tier should clamp k to 1."""
         result = sample_call_graph.get_neighborhood(
             "python::main::function::center", k=10, max_nodes=50  # Request k=10
@@ -205,4 +221,6 @@ class TestTierLimitEnforcement:
         # Enterprise has no k limit (None means unlimited)
         assert caps["limits"]["max_k"] is None or caps["limits"]["max_k"] >= 100
         # Enterprise has very high or unlimited node limit
-        assert caps["limits"]["max_nodes"] is None or caps["limits"]["max_nodes"] >= 1000
+        assert (
+            caps["limits"]["max_nodes"] is None or caps["limits"]["max_nodes"] >= 1000
+        )

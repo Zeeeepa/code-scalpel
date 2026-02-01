@@ -182,7 +182,9 @@ class PathConstraintEngine:
             # Determine effective max depth
             effective_max_depth = max_search_depth
             if constraints.max_length is not None:
-                effective_max_depth = min(effective_max_depth, constraints.max_length + 1)
+                effective_max_depth = min(
+                    effective_max_depth, constraints.max_length + 1
+                )
 
             # Find all paths
             all_paths = self._find_all_paths(start, end, effective_max_depth)
@@ -238,7 +240,9 @@ class PathConstraintEngine:
         paths: List[Tuple[List[str], List[Dict[str, Any]]]] = []
 
         # DFS stack: (current_node, path, edges)
-        stack: List[Tuple[str, List[str], List[Dict[str, Any]]]] = [(start, [start], [])]
+        stack: List[Tuple[str, List[str], List[Dict[str, Any]]]] = [
+            (start, [start], [])
+        ]
 
         while stack:
             current, path, edges = stack.pop()
@@ -359,10 +363,14 @@ class PathConstraintEngine:
                 violated.append(custom.name)
 
         # Calculate score
-        score = self._calculate_path_score(path_length, avg_confidence, total_weight, len(satisfied), len(violated))
+        score = self._calculate_path_score(
+            path_length, avg_confidence, total_weight, len(satisfied), len(violated)
+        )
 
         # Build node list with full data
-        path_nodes = [self._nodes.get(node_id, {"id": node_id}) for node_id in path_node_ids]
+        path_nodes = [
+            self._nodes.get(node_id, {"id": node_id}) for node_id in path_node_ids
+        ]
 
         return ConstrainedPath(
             nodes=path_nodes,
@@ -441,7 +449,12 @@ class PathConstraintEngine:
         constraint_score = satisfied_count / max(satisfied_count + violated_count, 1)
 
         # Combine scores
-        return 0.3 * length_score + 0.3 * confidence_score + 0.2 * weight_score + 0.2 * constraint_score
+        return (
+            0.3 * length_score
+            + 0.3 * confidence_score
+            + 0.2 * weight_score
+            + 0.2 * constraint_score
+        )
 
     def _get_constraint_names(self, constraints: ConstraintSet) -> List[str]:
         """Get list of constraint names being applied."""

@@ -135,7 +135,9 @@ class TestProTierDocumentationCoverage:
 
         # Good code has docstrings
         if result.doc_coverage is not None:
-            assert result.doc_coverage > 0, "Well-documented code should have >0% coverage"
+            assert (
+                result.doc_coverage > 0
+            ), "Well-documented code should have >0% coverage"
 
     def test_undocumented_code_has_low_coverage(self, temp_python_project):
         """Undocumented code should have low coverage."""
@@ -150,7 +152,9 @@ class TestProTierDocumentationCoverage:
 
         # Undocumented code should have lower coverage
         if result.doc_coverage is not None:
-            assert result.doc_coverage < 100, "Undocumented code should have <100% coverage"
+            assert (
+                result.doc_coverage < 100
+            ), "Undocumented code should have <100% coverage"
 
 
 class TestProTierMaintainabilityIndex:
@@ -201,7 +205,9 @@ class TestProTierMaintainabilityIndex:
 
         # Good code should be more maintainable
         if result.maintainability_index is not None:
-            assert result.maintainability_index > 50, "Well-written code should have maintainability > 50"
+            assert (
+                result.maintainability_index > 50
+            ), "Well-written code should have maintainability > 50"
 
     def test_smelly_code_has_lower_maintainability(self, temp_python_project):
         """Code with smells should have lower maintainability."""
@@ -285,7 +291,9 @@ class TestProTierNoEnterpriseFeatures:
         )
 
         # Pro tier should not have owners
-        assert not result.owners or result.owners == [], "Pro tier should not return owners (Enterprise only)"
+        assert (
+            not result.owners or result.owners == []
+        ), "Pro tier should not return owners (Enterprise only)"
 
     def test_technical_debt_empty_for_pro(self, temp_python_project):
         """Pro tier should NOT include technical_debt_score (Enterprise feature)."""
@@ -299,7 +307,9 @@ class TestProTierNoEnterpriseFeatures:
         )
 
         # Pro tier should not have technical_debt_score
-        assert result.technical_debt_score is None, "Pro tier should not return technical_debt_score (Enterprise only)"
+        assert (
+            result.technical_debt_score is None
+        ), "Pro tier should not return technical_debt_score (Enterprise only)"
 
 
 class TestProTierIncludesAllCommunityFeatures:

@@ -74,7 +74,9 @@ def _default_server_command(repo_root: Path) -> str:
     return sys.executable
 
 
-def _make_enterprise_test_project(base_dir: Path, bulk_files: int = 5) -> tuple[Path, dict[str, Path]]:
+def _make_enterprise_test_project(
+    base_dir: Path, bulk_files: int = 5
+) -> tuple[Path, dict[str, Path]]:
     """Create a small project for MCP tool smoke tests.
 
     We keep this intentionally small to reduce runtime while still ensuring:
@@ -176,7 +178,9 @@ def no_types(x, y):
     }
 
 
-async def _call(session: ClientSession, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+async def _call(
+    session: ClientSession, tool: str, args: dict[str, Any]
+) -> dict[str, Any]:
     res = await session.call_tool(tool, args)
     return res.model_dump()
 
@@ -216,16 +220,22 @@ async def main() -> int:
     env.setdefault("SCALPEL_MANIFEST_SECRET", "enterprise-test-secret")
 
     if not env.get("CODE_SCALPEL_LICENSE_PATH"):
-        print("FAIL: CODE_SCALPEL_LICENSE_PATH is not set; cannot validate Enterprise tier")
+        print(
+            "FAIL: CODE_SCALPEL_LICENSE_PATH is not set; cannot validate Enterprise tier"
+        )
         return 1
 
-    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(repo_root)
+    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(
+        repo_root
+    )
     if server_cmd.endswith("code-scalpel"):
         server_args = ["mcp", "--root", str(project_root)]
     else:
         server_args = ["-m", "code_scalpel.mcp.server", "--root", str(project_root)]
 
-    params = StdioServerParameters(command=server_cmd, args=server_args, env=env, cwd=run_dir)
+    params = StdioServerParameters(
+        command=server_cmd, args=server_args, env=env, cwd=run_dir
+    )
 
     checks: list[ToolCheck] = []
 
@@ -250,7 +260,9 @@ async def main() -> int:
             else:
                 checks.append(ToolCheck("list_tools", True, "22 tools"))
 
-            py_snippet = "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            py_snippet = (
+                "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            )
 
             smoke: list[tuple[str, dict[str, Any]]] = [
                 ("analyze_code", {"code": py_snippet, "language": "python"}),
@@ -443,7 +455,12 @@ async def main() -> int:
                 reports = data.get("compliance_reports")
                 score = float(data.get("compliance_score") or 0.0)
 
-                ok = (data.get("tier") == "enterprise") and bool(pdf) and bool(reports) and score > 0.0
+                ok = (
+                    (data.get("tier") == "enterprise")
+                    and bool(pdf)
+                    and bool(reports)
+                    and score > 0.0
+                )
                 checks.append(
                     ToolCheck(
                         "enterprise_code_policy_compliance_pdf",
@@ -452,7 +469,9 @@ async def main() -> int:
                     )
                 )
             except Exception as e:
-                checks.append(ToolCheck("enterprise_code_policy_compliance_pdf", False, str(e)))
+                checks.append(
+                    ToolCheck("enterprise_code_policy_compliance_pdf", False, str(e))
+                )
 
             # Enterprise feature: graph query language must be supported
             try:
@@ -481,7 +500,9 @@ async def main() -> int:
                     )
                 )
             except Exception as e:
-                checks.append(ToolCheck("enterprise_graph_query_language", False, str(e)))
+                checks.append(
+                    ToolCheck("enterprise_graph_query_language", False, str(e))
+                )
 
             # Enterprise feature: verify_policy_integrity should validate signature + emit audit log entry
             try:
@@ -507,7 +528,11 @@ async def main() -> int:
                     )
                 )
             except Exception as e:
-                checks.append(ToolCheck("enterprise_verify_policy_integrity_crypto", False, str(e)))
+                checks.append(
+                    ToolCheck(
+                        "enterprise_verify_policy_integrity_crypto", False, str(e)
+                    )
+                )
 
     width = max(len(c.name) for c in checks) if checks else 10
     failed = [c for c in checks if not c.ok]

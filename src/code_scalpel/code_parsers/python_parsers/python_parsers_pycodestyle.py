@@ -339,10 +339,15 @@ class PycodestyleReport:
             "total_violations": self.violation_count,
             "errors": self.error_count,
             "warnings": self.warning_count,
-            "by_category": {cat.value: len(violations) for cat, violations in self.violations_by_category.items()},
+            "by_category": {
+                cat.value: len(violations)
+                for cat, violations in self.violations_by_category.items()
+            },
             "top_violations": [
                 {"code": code, "count": len(violations)}
-                for code, violations in sorted(self.violations_by_code.items(), key=lambda x: -len(x[1]))[:5]
+                for code, violations in sorted(
+                    self.violations_by_code.items(), key=lambda x: -len(x[1])
+                )[:5]
             ],
         }
 
@@ -523,7 +528,11 @@ class PycodestyleParser:
                 message = match.group(5)
 
                 # Determine severity
-                severity = StyleSeverity.WARNING if code.startswith("W") else StyleSeverity.ERROR
+                severity = (
+                    StyleSeverity.WARNING
+                    if code.startswith("W")
+                    else StyleSeverity.ERROR
+                )
 
                 # Get category
                 category = get_category_for_code(code)
@@ -563,7 +572,9 @@ def format_pycodestyle_report(report: PycodestyleReport) -> str:
 
     if report.violations_by_category:
         lines.append("By category:")
-        for category, violations in sorted(report.violations_by_category.items(), key=lambda x: -len(x[1])):
+        for category, violations in sorted(
+            report.violations_by_category.items(), key=lambda x: -len(x[1])
+        ):
             lines.append(f"  {category.value}: {len(violations)}")
 
     lines.append("")

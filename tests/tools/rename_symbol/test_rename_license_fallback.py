@@ -114,7 +114,9 @@ class TestRenameSymbolWithMissingLicense:
 
         # Create patcher and rename
         patcher = UnifiedPatcher.from_file(str(main_file))
-        result = patcher.rename_symbol(target_type="function", target_name="old_function", new_name="new_function")
+        result = patcher.rename_symbol(
+            target_type="function", target_name="old_function", new_name="new_function"
+        )
 
         # Should succeed (definition rename is community-tier)
         assert result.success is True
@@ -133,7 +135,9 @@ class TestRenameSymbolWithMissingLicense:
 
         # Create patcher and rename
         patcher = UnifiedPatcher.from_file(str(main_file))
-        result = patcher.rename_symbol(target_type="class", target_name="OldClass", new_name="NewClass")
+        result = patcher.rename_symbol(
+            target_type="class", target_name="OldClass", new_name="NewClass"
+        )
 
         # Should succeed (definition rename is community-tier)
         assert result.success is True

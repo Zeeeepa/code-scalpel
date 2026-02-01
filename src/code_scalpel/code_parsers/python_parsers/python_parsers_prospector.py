@@ -314,7 +314,10 @@ class ProspectorProfileLoader:
             ValueError: If YAML parsing fails or yaml not installed.
         """
         if not HAS_YAML or yaml is None:
-            raise ValueError("PyYAML is required for loading Prospector profiles. " "Install with: pip install pyyaml")
+            raise ValueError(
+                "PyYAML is required for loading Prospector profiles. "
+                "Install with: pip install pyyaml"
+            )
 
         path = Path(path)
         if not path.exists():
@@ -344,7 +347,9 @@ class ProspectorProfileLoader:
         """
         if name not in BUILTIN_PROFILES:
             available = ", ".join(BUILTIN_PROFILES.keys())
-            raise ValueError(f"Unknown built-in profile: {name}. " f"Available: {available}")
+            raise ValueError(
+                f"Unknown built-in profile: {name}. " f"Available: {available}"
+            )
 
         return cls._from_dict(BUILTIN_PROFILES[name], name)
 
@@ -376,7 +381,9 @@ class ProspectorProfileLoader:
 
         if "ignore-patterns" in data:
             patterns = data["ignore-patterns"]
-            profile.ignore_patterns = patterns if isinstance(patterns, list) else [patterns]
+            profile.ignore_patterns = (
+                patterns if isinstance(patterns, list) else [patterns]
+            )
 
         # Parse inherits
         if "inherits" in data:
@@ -532,7 +539,10 @@ class ProspectorMessage:
 
     def format(self) -> str:
         """Format the message for display."""
-        return f"{self.location.location_string}: " f"[{self.source}] {self.code}: {self.message}"
+        return (
+            f"{self.location.location_string}: "
+            f"[{self.source}] {self.code}: {self.message}"
+        )
 
 
 @dataclass
@@ -593,7 +603,13 @@ class ProspectorReport:
     @property
     def error_count(self) -> int:
         """Count of error-level messages."""
-        return len([m for m in self.messages if m.severity in (MessageSeverity.ERROR, MessageSeverity.FATAL)])
+        return len(
+            [
+                m
+                for m in self.messages
+                if m.severity in (MessageSeverity.ERROR, MessageSeverity.FATAL)
+            ]
+        )
 
     @property
     def warning_count(self) -> int:
@@ -607,8 +623,12 @@ class ProspectorReport:
             "total_messages": self.message_count,
             "errors": self.error_count,
             "warnings": self.warning_count,
-            "by_tool": {tool: len(msgs) for tool, msgs in self.messages_by_tool.items()},
-            "by_severity": {sev.value: len(msgs) for sev, msgs in self.messages_by_severity.items()},
+            "by_tool": {
+                tool: len(msgs) for tool, msgs in self.messages_by_tool.items()
+            },
+            "by_severity": {
+                sev.value: len(msgs) for sev, msgs in self.messages_by_severity.items()
+            },
             "tools_run": self.summary.tools_run,
             "time_taken": self.summary.time_taken,
         }
@@ -647,7 +667,9 @@ class ProspectorReport:
                 if dup_key in seen:
                     existing = seen[dup_key]
                     # Keep the higher severity message
-                    if self._severity_rank(msg.severity) > self._severity_rank(existing.severity):
+                    if self._severity_rank(msg.severity) > self._severity_rank(
+                        existing.severity
+                    ):
                         seen[dup_key] = msg
                 else:
                     seen[dup_key] = msg
@@ -1006,7 +1028,9 @@ def format_prospector_report(report: ProspectorReport) -> str:
 
     if report.messages_by_severity:
         lines.append("By severity:")
-        for severity, messages in sorted(report.messages_by_severity.items(), key=lambda x: -len(x[1])):
+        for severity, messages in sorted(
+            report.messages_by_severity.items(), key=lambda x: -len(x[1])
+        ):
             lines.append(f"  {severity.value}: {len(messages)}")
 
     lines.append("")

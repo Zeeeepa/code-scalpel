@@ -149,7 +149,9 @@ class LogicalRelationshipDetector:
 
             # Find test relationships
             if "test_for" in relationship_types or "tested_by" in relationship_types:
-                test_rels = self._find_test_relationships(center_ctx, contexts, relationship_types)
+                test_rels = self._find_test_relationships(
+                    center_ctx, contexts, relationship_types
+                )
                 relationships.extend(test_rels)
 
             # Find sibling relationships
@@ -159,7 +161,9 @@ class LogicalRelationshipDetector:
 
             # Find helper relationships
             if "helper_of" in relationship_types or "uses_helper" in relationship_types:
-                helper_rels = self._find_helper_relationships(center_ctx, contexts, relationship_types)
+                helper_rels = self._find_helper_relationships(
+                    center_ctx, contexts, relationship_types
+                )
                 relationships.extend(helper_rels)
 
             # Find same-class relationships
@@ -212,7 +216,9 @@ class LogicalRelationshipDetector:
 
             try:
                 rel_path = str(py_file.relative_to(self.root))
-                is_test_file = any(re.search(pattern, rel_path) for pattern in self.TEST_FILE_PATTERNS)
+                is_test_file = any(
+                    re.search(pattern, rel_path) for pattern in self.TEST_FILE_PATTERNS
+                )
 
                 code = py_file.read_text(encoding="utf-8", errors="ignore")
                 tree = ast.parse(code)
@@ -222,7 +228,9 @@ class LogicalRelationshipDetector:
                 if module.endswith(".py"):
                     module = module[:-3]
 
-                self._extract_functions_from_tree(tree, contexts, rel_path, module, is_test_file, None)
+                self._extract_functions_from_tree(
+                    tree, contexts, rel_path, module, is_test_file, None
+                )
 
             except (SyntaxError, UnicodeDecodeError):
                 continue
@@ -243,9 +251,13 @@ class LogicalRelationshipDetector:
         for node in ast.iter_child_nodes(tree):
             if isinstance(node, ast.ClassDef):
                 # Recurse into class
-                self._extract_functions_from_tree(node, contexts, file_path, module, is_test_file, node.name)
+                self._extract_functions_from_tree(
+                    node, contexts, file_path, module, is_test_file, node.name
+                )
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                ctx = self._make_function_context(node, file_path, module, is_test_file, class_name)
+                ctx = self._make_function_context(
+                    node, file_path, module, is_test_file, class_name
+                )
                 key = f"{file_path}:{ctx.name}:{ctx.line}"
                 contexts[key] = ctx
 
@@ -270,7 +282,9 @@ class LogicalRelationshipDetector:
                     decorators.append(dec.id)
 
         # Check patterns
-        is_test = is_test_file or any(re.match(pattern, name) for pattern in self.TEST_FUNCTION_PATTERNS)
+        is_test = is_test_file or any(
+            re.match(pattern, name) for pattern in self.TEST_FUNCTION_PATTERNS
+        )
         is_private = name.startswith("_") and not name.startswith("__")
         is_dunder = name.startswith("__") and name.endswith("__")
 
@@ -383,7 +397,11 @@ class LogicalRelationshipDetector:
         if center.is_private and "uses_helper" in relationship_types:
             # This is a helper - find public functions in same module
             for ctx in contexts.values():
-                if ctx.file_path == center.file_path and not ctx.is_private and not ctx.is_dunder:
+                if (
+                    ctx.file_path == center.file_path
+                    and not ctx.is_private
+                    and not ctx.is_dunder
+                ):
                     relationships.append(
                         LogicalRelationship(
                             source_node=self._make_node_id(center),

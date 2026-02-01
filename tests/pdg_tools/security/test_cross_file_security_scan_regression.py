@@ -78,4 +78,6 @@ def run_query(user_supplied: str) -> str:
     assert any(v.cwe_id == "CWE-89" for v in result.vulnerabilities)
 
     # The safe route should not be flagged as vulnerable.
-    assert all(flow.source_function != "search_route_safe" for flow in result.taint_flows)
+    assert all(
+        flow.source_function != "search_route_safe" for flow in result.taint_flows
+    )

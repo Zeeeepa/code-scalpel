@@ -137,7 +137,9 @@ def _configure_logging(transport: str = "stdio"):
 
     # Always log to stderr to avoid corrupting stdio transport
     handler = logging.StreamHandler(sys.stderr)
-    handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
 
     # [20260116_BUGFIX] Use SCALPEL_MCP_OUTPUT with string levels (DEBUG, INFO, ALERT, WARNING)
     # Restores original behavior from archive/server.py
@@ -230,7 +232,9 @@ def _get_current_tier() -> str:
     global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
 
     requested = _requested_tier_from_env()
-    disable_license_discovery = os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
+    disable_license_discovery = (
+        os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
+    )
 
     # When discovery is disabled and no explicit license path is provided, clamp to
     # Community to avoid silently elevating tier just via env vars.
@@ -305,7 +309,11 @@ def auto_init_if_enabled(
     if not enabled:
         return None
 
-    selected_target = (target or os.environ.get("SCALPEL_AUTO_INIT_TARGET") or "project").strip().lower()
+    selected_target = (
+        (target or os.environ.get("SCALPEL_AUTO_INIT_TARGET") or "project")
+        .strip()
+        .lower()
+    )
     if selected_target not in {"project", "user"}:
         selected_target = "project"
 
@@ -320,7 +328,9 @@ def auto_init_if_enabled(
             "target": selected_target,
         }
 
-    selected_mode = (mode or os.environ.get("SCALPEL_AUTO_INIT_MODE") or "").strip().lower()
+    selected_mode = (
+        (mode or os.environ.get("SCALPEL_AUTO_INIT_MODE") or "").strip().lower()
+    )
     if not selected_mode:
         # Default: don't create secrets unless Pro/Enterprise.
         selected_mode = "full" if tier in {"pro", "enterprise"} else "templates_only"
@@ -615,15 +625,27 @@ class SecurityResult(BaseModel):
     has_vulnerabilities: bool = Field(description="Whether vulnerabilities were found")
     vulnerability_count: int = Field(description="Number of vulnerabilities")
     risk_level: str = Field(description="Overall risk level")
-    vulnerabilities: list[VulnerabilityInfo] = Field(default_factory=list, description="List of vulnerabilities")
-    taint_sources: list[str] = Field(default_factory=list, description="Identified taint sources")
+    vulnerabilities: list[VulnerabilityInfo] = Field(
+        default_factory=list, description="List of vulnerabilities"
+    )
+    taint_sources: list[str] = Field(
+        default_factory=list, description="Identified taint sources"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 # [20251216_FEATURE] Unified sink detection result model
@@ -636,8 +658,12 @@ class UnifiedDetectedSink(BaseModel):
     line: int = Field(default=0, description="Line number of sink occurrence")
     column: int = Field(default=0, description="Column offset of sink occurrence")
     code_snippet: str = Field(default="", description="Snippet around the sink")
-    vulnerability_type: str | None = Field(default=None, description="Vulnerability category key")
-    owasp_category: str | None = Field(default=None, description="Mapped OWASP Top 10 category")
+    vulnerability_type: str | None = Field(
+        default=None, description="Vulnerability category key"
+    )
+    owasp_category: str | None = Field(
+        default=None, description="Mapped OWASP Top 10 category"
+    )
 
 
 class UnifiedSinkResult(BaseModel):
@@ -647,15 +673,27 @@ class UnifiedSinkResult(BaseModel):
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     language: str = Field(description="Language analyzed")
     sink_count: int = Field(description="Number of sinks detected")
-    sinks: list[UnifiedDetectedSink] = Field(default_factory=list, description="Detected sinks meeting threshold")
-    coverage_summary: dict[str, Any] = Field(default_factory=dict, description="Summary of sink pattern coverage")
+    sinks: list[UnifiedDetectedSink] = Field(
+        default_factory=list, description="Detected sinks meeting threshold"
+    )
+    coverage_summary: dict[str, Any] = Field(
+        default_factory=dict, description="Summary of sink pattern coverage"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 class PathCondition(BaseModel):
@@ -671,7 +709,9 @@ class ExecutionPath(BaseModel):
     path_id: int = Field(description="Unique path identifier")
     conditions: list[str] = Field(description="Conditions along the path")
     final_state: dict[str, Any] = Field(description="Variable values at path end")
-    reproduction_input: dict[str, Any] | None = Field(default=None, description="Input values that trigger this path")
+    reproduction_input: dict[str, Any] | None = Field(
+        default=None, description="Input values that trigger this path"
+    )
     is_reachable: bool = Field(description="Whether path is reachable")
 
 
@@ -681,16 +721,30 @@ class SymbolicResult(BaseModel):
     success: bool = Field(description="Whether analysis succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     paths_explored: int = Field(description="Number of execution paths explored")
-    paths: list[ExecutionPath] = Field(default_factory=list, description="Discovered execution paths")
-    symbolic_variables: list[str] = Field(default_factory=list, description="Variables treated symbolically")
-    constraints: list[str] = Field(default_factory=list, description="Discovered constraints")
+    paths: list[ExecutionPath] = Field(
+        default_factory=list, description="Discovered execution paths"
+    )
+    symbolic_variables: list[str] = Field(
+        default_factory=list, description="Variables treated symbolically"
+    )
+    constraints: list[str] = Field(
+        default_factory=list, description="Discovered constraints"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 class GeneratedTestCase(BaseModel):
@@ -700,7 +754,9 @@ class GeneratedTestCase(BaseModel):
     function_name: str = Field(description="Function being tested")
     inputs: dict[str, Any] = Field(description="Input values for this test")
     description: str = Field(description="Human-readable description")
-    path_conditions: list[str] = Field(default_factory=list, description="Conditions that define this path")
+    path_conditions: list[str] = Field(
+        default_factory=list, description="Conditions that define this path"
+    )
 
 
 class TestGenerationResult(BaseModel):
@@ -710,20 +766,34 @@ class TestGenerationResult(BaseModel):
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     function_name: str = Field(description="Function tests were generated for")
     test_count: int = Field(description="Number of test cases generated")
-    test_cases: list[GeneratedTestCase] = Field(default_factory=list, description="Generated test cases")
+    test_cases: list[GeneratedTestCase] = Field(
+        default_factory=list, description="Generated test cases"
+    )
     # [20260120_BUGFIX] Align metadata fields with core model for tier transparency and truncation
-    total_test_cases: int = Field(default=0, description="Total test cases before truncation")
+    total_test_cases: int = Field(
+        default=0, description="Total test cases before truncation"
+    )
     truncated: bool = Field(default=False, description="Whether results were truncated")
-    truncation_warning: str | None = Field(default=None, description="Neutral warning when truncation occurs")
+    truncation_warning: str | None = Field(
+        default=None, description="Neutral warning when truncation occurs"
+    )
     pytest_code: str = Field(default="", description="Generated pytest code")
     unittest_code: str = Field(default="", description="Generated unittest code")
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
     # [20260120_BUGFIX] Output metadata (mirrors mcp.models.core.TestGenerationResult)
     tier_applied: str = Field(
         default="community",
@@ -765,16 +835,28 @@ class RefactorSimulationResult(BaseModel):
     is_safe: bool = Field(description="Whether the refactor is safe to apply")
     status: str = Field(description="Status: safe, unsafe, warning, or error")
     reason: str | None = Field(default=None, description="Reason if not safe")
-    security_issues: list[RefactorSecurityIssue] = Field(default_factory=list, description="Security issues found")
-    structural_changes: dict[str, Any] = Field(default_factory=dict, description="Functions/classes added/removed")
+    security_issues: list[RefactorSecurityIssue] = Field(
+        default_factory=list, description="Security issues found"
+    )
+    structural_changes: dict[str, Any] = Field(
+        default_factory=dict, description="Functions/classes added/removed"
+    )
     warnings: list[str] = Field(default_factory=list, description="Warnings")
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 class CrawlFunctionInfo(BaseModel):
@@ -790,7 +872,9 @@ class CrawlClassInfo(BaseModel):
 
     name: str = Field(description="Class name")
     lineno: int = Field(description="Line number")
-    methods: list[CrawlFunctionInfo] = Field(default_factory=list, description="Methods in the class")
+    methods: list[CrawlFunctionInfo] = Field(
+        default_factory=list, description="Methods in the class"
+    )
     bases: list[str] = Field(default_factory=list, description="Base classes")
 
 
@@ -800,10 +884,16 @@ class CrawlFileResult(BaseModel):
     path: str = Field(description="Relative path to the file")
     status: str = Field(description="success or error")
     lines_of_code: int = Field(default=0, description="Lines of code")
-    functions: list[CrawlFunctionInfo] = Field(default_factory=list, description="Top-level functions")
-    classes: list[CrawlClassInfo] = Field(default_factory=list, description="Classes found")
+    functions: list[CrawlFunctionInfo] = Field(
+        default_factory=list, description="Top-level functions"
+    )
+    classes: list[CrawlClassInfo] = Field(
+        default_factory=list, description="Classes found"
+    )
     imports: list[str] = Field(default_factory=list, description="Import statements")
-    complexity_warnings: list[CrawlFunctionInfo] = Field(default_factory=list, description="High-complexity functions")
+    complexity_warnings: list[CrawlFunctionInfo] = Field(
+        default_factory=list, description="High-complexity functions"
+    )
     error: str | None = Field(default=None, description="Error if failed")
 
 
@@ -837,8 +927,12 @@ class ProjectCrawlResult(BaseModel):
     root_path: str = Field(description="Project root path")
     timestamp: str = Field(description="When the crawl was performed")
     summary: CrawlSummary = Field(description="Summary statistics")
-    files: list[CrawlFileResult] = Field(default_factory=list, description="Analyzed files")
-    errors: list[CrawlFileResult] = Field(default_factory=list, description="Files with errors")
+    files: list[CrawlFileResult] = Field(
+        default_factory=list, description="Analyzed files"
+    )
+    errors: list[CrawlFileResult] = Field(
+        default_factory=list, description="Files with errors"
+    )
     markdown_report: str = Field(default="", description="Markdown report")
     error: str | None = Field(default=None, description="Error if failed")
     # [20260106_FEATURE] v1.0 pre-release - Output transparency metadata
@@ -854,7 +948,9 @@ class ProjectCrawlResult(BaseModel):
         default=None, description="Max files limit that was applied (None = unlimited)"
     )
     # Tier-gated fields (best-effort, optional)
-    language_breakdown: dict[str, int] | None = Field(default=None, description="Counts of files per detected language")
+    language_breakdown: dict[str, int] | None = Field(
+        default=None, description="Counts of files per detected language"
+    )
     cache_hits: int | None = Field(
         default=None,
         description="Number of files reused from cache (Pro/Enterprise incremental)",
@@ -865,7 +961,9 @@ class ProjectCrawlResult(BaseModel):
     framework_hints: list[str] | None = Field(
         default=None, description="Detected frameworks/entrypoints in discovery mode"
     )
-    entrypoints: list[str] | None = Field(default=None, description="Detected entrypoint file paths")
+    entrypoints: list[str] | None = Field(
+        default=None, description="Detected entrypoint file paths"
+    )
 
 
 class SurgicalExtractionResult(BaseModel):
@@ -878,8 +976,12 @@ class SurgicalExtractionResult(BaseModel):
     node_type: str = Field(description="Type: function, class, or method")
     line_start: int = Field(default=0, description="Starting line number")
     line_end: int = Field(default=0, description="Ending line number")
-    dependencies: list[str] = Field(default_factory=list, description="Names of dependencies")
-    imports_needed: list[str] = Field(default_factory=list, description="Required import statements")
+    dependencies: list[str] = Field(
+        default_factory=list, description="Names of dependencies"
+    )
+    imports_needed: list[str] = Field(
+        default_factory=list, description="Required import statements"
+    )
     token_estimate: int = Field(default=0, description="Estimated token count")
     error: str | None = Field(default=None, description="Error if failed")
 
@@ -893,7 +995,9 @@ class ContextualExtractionResult(BaseModel):
     target_code: str = Field(description="Target element source code")
     context_code: str = Field(description="Combined dependency source code")
     full_code: str = Field(description="Complete code block for LLM consumption")
-    context_items: list[str] = Field(default_factory=list, description="Names of included dependencies")
+    context_items: list[str] = Field(
+        default_factory=list, description="Names of included dependencies"
+    )
     total_lines: int = Field(default=0, description="Total lines in extraction")
     # v1.3.0: Line number information
     line_start: int = Field(default=0, description="Starting line number of target")
@@ -902,10 +1006,18 @@ class ContextualExtractionResult(BaseModel):
     error: str | None = Field(default=None, description="Error if failed")
 
     # [20251216_FEATURE] v2.0.2 - JSX/TSX extraction metadata
-    jsx_normalized: bool = Field(default=False, description="Whether JSX syntax was normalized")
-    is_server_component: bool = Field(default=False, description="Next.js Server Component (async)")
-    is_server_action: bool = Field(default=False, description="Next.js Server Action ('use server')")
-    component_type: str | None = Field(default=None, description="React component type: 'functional', 'class', or None")
+    jsx_normalized: bool = Field(
+        default=False, description="Whether JSX syntax was normalized"
+    )
+    is_server_component: bool = Field(
+        default=False, description="Next.js Server Component (async)"
+    )
+    is_server_action: bool = Field(
+        default=False, description="Next.js Server Action ('use server')"
+    )
+    component_type: str | None = Field(
+        default=None, description="React component type: 'functional', 'class', or None"
+    )
 
 
 class PatchResultModel(BaseModel):
@@ -923,10 +1035,18 @@ class PatchResultModel(BaseModel):
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 # [20251212_FEATURE] v1.4.0 - New MCP tool models for enhanced AI context
@@ -942,23 +1062,45 @@ class FileContextResult(BaseModel):
     file_path: str = Field(description="Path to the analyzed file")
     language: str = Field(default="python", description="Detected language")
     line_count: int = Field(description="Total lines in file")
-    functions: list[FunctionInfo | str] = Field(default_factory=list, description="Function names or detailed info")
-    classes: list[ClassInfo | str] = Field(default_factory=list, description="Class names or detailed info")
-    imports: list[str] = Field(default_factory=list, description="Import statements (max 20)")
-    exports: list[str] = Field(default_factory=list, description="Exported symbols (__all__)")
-    complexity_score: int = Field(default=0, description="Overall cyclomatic complexity")
-    has_security_issues: bool = Field(default=False, description="Whether file has security issues")
+    functions: list[FunctionInfo | str] = Field(
+        default_factory=list, description="Function names or detailed info"
+    )
+    classes: list[ClassInfo | str] = Field(
+        default_factory=list, description="Class names or detailed info"
+    )
+    imports: list[str] = Field(
+        default_factory=list, description="Import statements (max 20)"
+    )
+    exports: list[str] = Field(
+        default_factory=list, description="Exported symbols (__all__)"
+    )
+    complexity_score: int = Field(
+        default=0, description="Overall cyclomatic complexity"
+    )
+    has_security_issues: bool = Field(
+        default=False, description="Whether file has security issues"
+    )
     summary: str = Field(default="", description="Brief description of file purpose")
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    imports_truncated: bool = Field(default=False, description="Whether imports list was truncated")
+    imports_truncated: bool = Field(
+        default=False, description="Whether imports list was truncated"
+    )
     total_imports: int = Field(default=0, description="Total imports before truncation")
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 class SymbolReference(BaseModel):
@@ -968,7 +1110,9 @@ class SymbolReference(BaseModel):
     line: int = Field(description="Line number of the reference")
     column: int = Field(default=0, description="Column number")
     context: str = Field(description="Code snippet showing usage context")
-    is_definition: bool = Field(default=False, description="Whether this is the definition")
+    is_definition: bool = Field(
+        default=False, description="Whether this is the definition"
+    )
 
 
 class SymbolReferencesResult(BaseModel):
@@ -977,20 +1121,40 @@ class SymbolReferencesResult(BaseModel):
     success: bool = Field(description="Whether search succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     symbol_name: str = Field(description="Name of the searched symbol")
-    definition_file: str | None = Field(default=None, description="File where symbol is defined")
-    definition_line: int | None = Field(default=None, description="Line where symbol is defined")
-    references: list[SymbolReference] = Field(default_factory=list, description="References found (max 100)")
-    total_references: int = Field(default=0, description="Total reference count before truncation")
+    definition_file: str | None = Field(
+        default=None, description="File where symbol is defined"
+    )
+    definition_line: int | None = Field(
+        default=None, description="Line where symbol is defined"
+    )
+    references: list[SymbolReference] = Field(
+        default_factory=list, description="References found (max 100)"
+    )
+    total_references: int = Field(
+        default=0, description="Total reference count before truncation"
+    )
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    references_truncated: bool = Field(default=False, description="Whether references list was truncated")
-    truncation_warning: str | None = Field(default=None, description="Warning if results truncated")
+    references_truncated: bool = Field(
+        default=False, description="Whether references list was truncated"
+    )
+    truncation_warning: str | None = Field(
+        default=None, description="Warning if results truncated"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 # ============================================================================
@@ -1159,7 +1323,9 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
 # [20260116_REFACTOR] @mcp.tool() analyze_code moved to tools/analyze.py
 
 
-def _security_scan_sync(code: Optional[str] = None, file_path: Optional[str] = None) -> SecurityResult:
+def _security_scan_sync(
+    code: Optional[str] = None, file_path: Optional[str] = None
+) -> SecurityResult:
     """
     Synchronous implementation of security_scan.
 
@@ -1244,7 +1410,9 @@ def _security_scan_sync(code: Optional[str] = None, file_path: Optional[str] = N
             if isinstance(cached, dict):
                 # Reconstruct VulnerabilityInfo objects
                 if "vulnerabilities" in cached:
-                    cached["vulnerabilities"] = [VulnerabilityInfo(**v) for v in cached["vulnerabilities"]]
+                    cached["vulnerabilities"] = [
+                        VulnerabilityInfo(**v) for v in cached["vulnerabilities"]
+                    ]
                 return SecurityResult(**cached)
             return cached
 
@@ -1256,7 +1424,9 @@ def _security_scan_sync(code: Optional[str] = None, file_path: Optional[str] = N
         if detected_language != "python":
             # [20251220_PERF] v3.0.5 - Use singleton detector to avoid rebuilding patterns
             detector = _get_sink_detector()
-            detected_sinks = detector.detect_sinks(code, detected_language, min_confidence=0.7)
+            detected_sinks = detector.detect_sinks(
+                code, detected_language, min_confidence=0.7
+            )
 
             for sink in detected_sinks:
                 vulnerabilities.append(
@@ -1303,7 +1473,11 @@ def _security_scan_sync(code: Optional[str] = None, file_path: Optional[str] = N
             for vuln in result.get("vulnerabilities", []):
                 # Extract line number from sink_location tuple (line, col)
                 sink_loc = vuln.get("sink_location")
-                line_number = sink_loc[0] if sink_loc and isinstance(sink_loc, (list, tuple)) else None
+                line_number = (
+                    sink_loc[0]
+                    if sink_loc and isinstance(sink_loc, (list, tuple))
+                    else None
+                )
 
                 vulnerabilities.append(
                     VulnerabilityInfo(
@@ -1408,7 +1582,9 @@ def _sink_coverage_summary(detector: UnifiedSinkDetector) -> dict[str, Any]:
     }
 
 
-def _unified_sink_detect_sync(code: str, language: str, min_confidence: float) -> UnifiedSinkResult:
+def _unified_sink_detect_sync(
+    code: str, language: str, min_confidence: float
+) -> UnifiedSinkResult:
     """Synchronous unified sink detection wrapper."""
 
     lang = (language or "").lower()
@@ -1482,19 +1658,35 @@ class TypeEvaporationResultModel(BaseModel):
 
     success: bool = Field(description="Whether analysis succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
-    frontend_vulnerabilities: int = Field(default=0, description="Number of frontend vulnerabilities")
-    backend_vulnerabilities: int = Field(default=0, description="Number of backend vulnerabilities")
+    frontend_vulnerabilities: int = Field(
+        default=0, description="Number of frontend vulnerabilities"
+    )
+    backend_vulnerabilities: int = Field(
+        default=0, description="Number of backend vulnerabilities"
+    )
     cross_file_issues: int = Field(default=0, description="Number of cross-file issues")
-    matched_endpoints: list[str] = Field(default_factory=list, description="Correlated API endpoints")
-    vulnerabilities: list[VulnerabilityInfo] = Field(default_factory=list, description="All vulnerabilities")
+    matched_endpoints: list[str] = Field(
+        default_factory=list, description="Correlated API endpoints"
+    )
+    vulnerabilities: list[VulnerabilityInfo] = Field(
+        default_factory=list, description="All vulnerabilities"
+    )
     summary: str = Field(default="", description="Analysis summary")
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 def _type_evaporation_scan_sync(
@@ -1513,7 +1705,9 @@ def _type_evaporation_scan_sync(
             analyze_type_evaporation_cross_file,
         )
 
-        result = analyze_type_evaporation_cross_file(frontend_code, backend_code, frontend_file, backend_file)
+        result = analyze_type_evaporation_cross_file(
+            frontend_code, backend_code, frontend_file, backend_file
+        )
 
         all_vulns: list[VulnerabilityInfo] = []
 
@@ -1596,11 +1790,17 @@ class DependencyVulnerability(BaseModel):
     """
 
     id: str = Field(description="Vulnerability ID (OSV, CVE, or GHSA)")
-    summary: str = Field(default="", description="Brief description of the vulnerability")
-    severity: str = Field(default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN")
+    summary: str = Field(
+        default="", description="Brief description of the vulnerability"
+    )
+    severity: str = Field(
+        default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN"
+    )
     package: str = Field(description="Name of the vulnerable package")
     vulnerable_version: str = Field(description="Version that is vulnerable")
-    fixed_version: str | None = Field(default=None, description="First version that fixes this vulnerability")
+    fixed_version: str | None = Field(
+        default=None, description="First version that fixes this vulnerability"
+    )
 
 
 class DependencyInfo(BaseModel):
@@ -1628,14 +1828,30 @@ class DependencyScanResult(BaseModel):
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
-    total_dependencies: int = Field(default=0, description="Number of dependencies found")
-    vulnerable_count: int = Field(default=0, description="Number of dependencies with vulnerabilities")
-    total_vulnerabilities: int = Field(default=0, description="Total number of vulnerabilities found")
-    severity_summary: dict[str, int] = Field(default_factory=dict, description="Count of vulnerabilities by severity")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
+    total_dependencies: int = Field(
+        default=0, description="Number of dependencies found"
+    )
+    vulnerable_count: int = Field(
+        default=0, description="Number of dependencies with vulnerabilities"
+    )
+    total_vulnerabilities: int = Field(
+        default=0, description="Total number of vulnerabilities found"
+    )
+    severity_summary: dict[str, int] = Field(
+        default_factory=dict, description="Count of vulnerabilities by severity"
+    )
     dependencies: list[DependencyInfo] = Field(
         default_factory=list,
         description="All scanned dependencies with their vulnerabilities",
@@ -1647,13 +1863,21 @@ class VulnerabilityFindingModel(BaseModel):
 
     id: str = Field(description="OSV vulnerability ID (e.g., GHSA-xxxx-xxxx-xxxx)")
     cve_id: str | None = Field(default=None, description="CVE ID if available")
-    severity: str = Field(default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN")
+    severity: str = Field(
+        default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN"
+    )
     package_name: str = Field(description="Name of the vulnerable package")
     package_version: str = Field(description="Version of the vulnerable package")
     ecosystem: str = Field(description="Package ecosystem (npm, Maven, PyPI)")
-    summary: str = Field(default="", description="Brief description of the vulnerability")
-    fixed_versions: list[str] = Field(default_factory=list, description="Versions that fix this vulnerability")
-    source_file: str = Field(default="", description="Dependency file where package was found")
+    summary: str = Field(
+        default="", description="Brief description of the vulnerability"
+    )
+    fixed_versions: list[str] = Field(
+        default_factory=list, description="Versions that fix this vulnerability"
+    )
+    source_file: str = Field(
+        default="", description="Dependency file where package was found"
+    )
 
 
 class DependencyScanResultModel(BaseModel):
@@ -1664,18 +1888,34 @@ class DependencyScanResultModel(BaseModel):
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
-    dependencies_scanned: int = Field(default=0, description="Number of dependencies checked")
-    vulnerabilities_found: int = Field(default=0, description="Number of vulnerabilities found")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
+    dependencies_scanned: int = Field(
+        default=0, description="Number of dependencies checked"
+    )
+    vulnerabilities_found: int = Field(
+        default=0, description="Number of vulnerabilities found"
+    )
     critical_count: int = Field(default=0, description="Number of CRITICAL severity")
     high_count: int = Field(default=0, description="Number of HIGH severity")
     medium_count: int = Field(default=0, description="Number of MEDIUM severity")
     low_count: int = Field(default=0, description="Number of LOW severity")
-    findings: list[VulnerabilityFindingModel] = Field(default_factory=list, description="Detailed findings")
-    errors: list[str] = Field(default_factory=list, description="Errors encountered during scan")
+    findings: list[VulnerabilityFindingModel] = Field(
+        default_factory=list, description="Detailed findings"
+    )
+    errors: list[str] = Field(
+        default_factory=list, description="Errors encountered during scan"
+    )
     summary: str = Field(default="", description="Human-readable summary")
 
 
@@ -1808,7 +2048,11 @@ def _scan_dependencies_sync(
                 DependencyInfo(
                     name=dep.name,
                     version=dep.version,
-                    ecosystem=(dep.ecosystem.value if hasattr(dep.ecosystem, "value") else str(dep.ecosystem)),
+                    ecosystem=(
+                        dep.ecosystem.value
+                        if hasattr(dep.ecosystem, "value")
+                        else str(dep.ecosystem)
+                    ),
                     vulnerabilities=dep_vulns,
                 )
             )
@@ -1882,7 +2126,9 @@ def _extract_severity(vuln: dict[str, Any]) -> str:
     if "ecosystem_specific" in vuln:
         eco_severity = vuln["ecosystem_specific"].get("severity", "")
         if eco_severity.upper() in ("CRITICAL", "HIGH", "MEDIUM", "MODERATE", "LOW"):
-            return "MEDIUM" if eco_severity.upper() == "MODERATE" else eco_severity.upper()
+            return (
+                "MEDIUM" if eco_severity.upper() == "MODERATE" else eco_severity.upper()
+            )
 
     return "UNKNOWN"
 
@@ -1898,7 +2144,9 @@ def _extract_fixed_version(vuln: dict[str, Any], package_name: str) -> str | Non
     return None
 
 
-def _scan_dependencies_sync_legacy(path: str, timeout: float = 30.0) -> DependencyScanResultModel:
+def _scan_dependencies_sync_legacy(
+    path: str, timeout: float = 30.0
+) -> DependencyScanResultModel:
     """
     Synchronous implementation of dependency vulnerability scanning.
 
@@ -2110,7 +2358,9 @@ def _symbolic_execute_sync(code: str, max_paths: int = 10) -> SymbolicResult:
 
         # If symbolic execution didn't find variables or constraints,
         # supplement with AST-based analysis
-        symbolic_vars = list(result.all_variables.keys()) if result.all_variables else []
+        symbolic_vars = (
+            list(result.all_variables.keys()) if result.all_variables else []
+        )
         constraints_list = list(set(all_constraints))
 
         if not symbolic_vars or not constraints_list:
@@ -2139,10 +2389,14 @@ def _symbolic_execute_sync(code: str, max_paths: int = 10) -> SymbolicResult:
 
     except ImportError as e:
         # Fallback to basic path analysis - SymbolicAnalyzer not available
-        logger.warning(f"Symbolic execution not available (ImportError: {e}), using basic analysis")
+        logger.warning(
+            f"Symbolic execution not available (ImportError: {e}), using basic analysis"
+        )
         basic_result = _basic_symbolic_analysis(code)
         # Indicate fallback in error field without marking as failure
-        basic_result.error = f"[FALLBACK] Symbolic engine not available, using AST analysis: {e}"
+        basic_result.error = (
+            f"[FALLBACK] Symbolic engine not available, using AST analysis: {e}"
+        )
         return basic_result
     except Exception as e:
         # If symbolic execution fails (e.g., unsupported AST nodes like f-strings),
@@ -2675,7 +2929,9 @@ async def _extract_polyglot(
     from code_scalpel.mcp.path_resolver import resolve_path
 
     if file_path is None and code is None:
-        return _extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
+        return _extraction_error(
+            target_name, "Must provide either 'file_path' or 'code' argument"
+        )
 
     try:
         # Create extractor from file or code
@@ -2732,7 +2988,9 @@ def _create_extractor(
     from code_scalpel.mcp.path_resolver import resolve_path
 
     if file_path is None and code is None:
-        return None, _extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
+        return None, _extraction_error(
+            target_name, "Must provide either 'file_path' or 'code' argument"
+        )
 
     if file_path is not None:
         try:
@@ -2750,13 +3008,17 @@ def _create_extractor(
             assert code is not None
             return SurgicalExtractor(code), None
         except (SyntaxError, ValueError) as e:
-            return None, _extraction_error(target_name, f"Syntax error in code: {str(e)}")
+            return None, _extraction_error(
+                target_name, f"Syntax error in code: {str(e)}"
+            )
 
 
 def _extract_method(extractor: "SurgicalExtractor", target_name: str):
     """Extract a method, handling the ClassName.method_name parsing."""
     if "." not in target_name:
-        return None, _extraction_error(target_name, "Method name must be 'ClassName.method_name' format")
+        return None, _extraction_error(
+            target_name, "Method name must be 'ClassName.method_name' format"
+        )
     class_name, method_name = target_name.rsplit(".", 1)
     return extractor.get_method(class_name, method_name), None
 
@@ -2797,7 +3059,9 @@ def _perform_extraction(
     if target_type == "function":
         if include_context:
             return (
-                extractor.get_function_with_context(target_name, max_depth=context_depth),
+                extractor.get_function_with_context(
+                    target_name, max_depth=context_depth
+                ),
                 None,
                 None,
             )
@@ -2842,13 +3106,17 @@ def _process_cross_file_context(cross_file_result) -> tuple[str, list[str]]:
 
     # Add unresolved imports as a comment
     if cross_file_result.unresolved_imports:
-        unresolved_comment = "# Unresolved imports: " + ", ".join(cross_file_result.unresolved_imports)
+        unresolved_comment = "# Unresolved imports: " + ", ".join(
+            cross_file_result.unresolved_imports
+        )
         context_code = unresolved_comment + "\n\n" + context_code
 
     return context_code, external_names
 
 
-def _build_full_code(imports_needed: list[str], context_code: str, target_code: str) -> str:
+def _build_full_code(
+    imports_needed: list[str], context_code: str, target_code: str
+) -> str:
     """Build the combined full_code for LLM consumption."""
     parts = []
     if imports_needed:
@@ -2870,9 +3138,15 @@ def _extract_code_sync(
     from code_scalpel.surgical_extractor import SurgicalExtractor
 
     if not file_path and not code:
-        return _extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
+        return _extraction_error(
+            target_name, "Must provide either 'file_path' or 'code' argument"
+        )
 
-    extractor = SurgicalExtractor.from_file(file_path) if file_path is not None else SurgicalExtractor(code or "")
+    extractor = (
+        SurgicalExtractor.from_file(file_path)
+        if file_path is not None
+        else SurgicalExtractor(code or "")
+    )
 
     context = None
     if target_type == "class":
@@ -2881,7 +3155,9 @@ def _extract_code_sync(
             context = extractor.get_class_with_context(target_name)
     elif target_type == "method":
         if "." not in target_name:
-            return _extraction_error(target_name, "Method targets must use Class.method format")
+            return _extraction_error(
+                target_name, "Method targets must use Class.method format"
+            )
         class_name, method_name = target_name.split(".", 1)
         target = extractor.get_method(class_name, method_name)
         if include_context:
@@ -3059,7 +3335,9 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
                     if isinstance(target, ast.Name) and target.id == "__all__":
                         if isinstance(node.value, ast.List | ast.Tuple):
                             for elt in node.value.elts:
-                                if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                                if isinstance(elt, ast.Constant) and isinstance(
+                                    elt.value, str
+                                ):
                                     exports.append(elt.value)
 
         # Quick security check
@@ -3134,7 +3412,9 @@ def _count_complexity_node(node: ast.AST) -> int:
 # [20260116_REFACTOR] @mcp.tool() get_file_context moved to tools/*.py
 
 
-def _get_symbol_references_sync(symbol_name: str, project_root: str | None = None) -> SymbolReferencesResult:
+def _get_symbol_references_sync(
+    symbol_name: str, project_root: str | None = None
+) -> SymbolReferencesResult:
     """
     Synchronous implementation of get_symbol_references.
 
@@ -3161,7 +3441,9 @@ def _get_symbol_references_sync(symbol_name: str, project_root: str | None = Non
         for py_file in root.rglob("*.py"):
             # Skip common non-source directories
             if any(
-                part.startswith(".") or part in ("__pycache__", "node_modules", "venv", ".venv", "dist", "build")
+                part.startswith(".")
+                or part
+                in ("__pycache__", "node_modules", "venv", ".venv", "dist", "build")
                 for part in py_file.parts
             ):
                 continue
@@ -3190,7 +3472,9 @@ def _get_symbol_references_sync(symbol_name: str, project_root: str | None = Non
                     matched = False
 
                     # Check definitions (FunctionDef, AsyncFunctionDef, ClassDef)
-                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                    if isinstance(
+                        node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+                    ):
                         if node.name == symbol_name:
                             matched = True
                             is_def = True
@@ -3203,7 +3487,9 @@ def _get_symbol_references_sync(symbol_name: str, project_root: str | None = Non
                         func = node.func
                         if isinstance(func, ast.Name) and func.id == symbol_name:
                             matched = True
-                        elif isinstance(func, ast.Attribute) and func.attr == symbol_name:
+                        elif (
+                            isinstance(func, ast.Attribute) and func.attr == symbol_name
+                        ):
                             matched = True
 
                     # Check name references (but avoid duplicating Call nodes)
@@ -3212,7 +3498,9 @@ def _get_symbol_references_sync(symbol_name: str, project_root: str | None = Non
 
                     if matched:
                         seen.add(loc_key)
-                        context = lines[node_line - 1] if 0 < node_line <= len(lines) else ""
+                        context = (
+                            lines[node_line - 1] if 0 < node_line <= len(lines) else ""
+                        )
                         references.append(
                             SymbolReference(
                                 file=rel_path,
@@ -3314,7 +3602,11 @@ def _get_call_graph_sync(
         depth = max_depth_limit
 
     # [20260120_FEATURE] Check for advanced resolution capability
-    advanced_resolution = "advanced_call_graph" in capabilities.get("capabilities", set()) if capabilities else False
+    advanced_resolution = (
+        "advanced_call_graph" in capabilities.get("capabilities", set())
+        if capabilities
+        else False
+    )
 
     try:
         builder = CallGraphBuilder(root_path)
@@ -3397,15 +3689,23 @@ class GraphNeighborhoodResult(BaseModel):
     k: int = Field(default=0, description="Number of hops used")
 
     # Subgraph
-    nodes: list[NeighborhoodNodeModel] = Field(default_factory=list, description="Nodes in the neighborhood")
-    edges: list[NeighborhoodEdgeModel] = Field(default_factory=list, description="Edges in the neighborhood")
+    nodes: list[NeighborhoodNodeModel] = Field(
+        default_factory=list, description="Nodes in the neighborhood"
+    )
+    edges: list[NeighborhoodEdgeModel] = Field(
+        default_factory=list, description="Edges in the neighborhood"
+    )
     total_nodes: int = Field(default=0, description="Number of nodes in subgraph")
     total_edges: int = Field(default=0, description="Number of edges in subgraph")
 
     # Truncation info
-    max_depth_reached: int = Field(default=0, description="Maximum depth actually reached")
+    max_depth_reached: int = Field(
+        default=0, description="Maximum depth actually reached"
+    )
     truncated: bool = Field(default=False, description="Whether graph was truncated")
-    truncation_warning: str | None = Field(default=None, description="Warning if truncated")
+    truncation_warning: str | None = Field(
+        default=None, description="Warning if truncated"
+    )
 
     # Mermaid diagram
     mermaid: str = Field(default="", description="Mermaid diagram of neighborhood")
@@ -3413,10 +3713,18 @@ class GraphNeighborhoodResult(BaseModel):
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 def _generate_neighborhood_mermaid(
@@ -3498,7 +3806,9 @@ def _normalize_graph_center_node_id(center_node_id: str) -> str:
     return raw
 
 
-def _fast_validate_python_function_node_exists(root_path: Path, center_node_id: str) -> tuple[bool, str | None]:
+def _fast_validate_python_function_node_exists(
+    root_path: Path, center_node_id: str
+) -> tuple[bool, str | None]:
     """Best-effort fast validation for python::<module>::function::<name>.
 
     This avoids building the full call graph when the node ID points to a module
@@ -3542,7 +3852,10 @@ def _fast_validate_python_function_node_exists(root_path: Path, center_node_id: 
         code = candidate.read_text(encoding="utf-8")
         tree = ast.parse(code)
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
+            if (
+                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and node.name == name
+            ):
                 return True, None
         return False, f"Center node function '{name}' not found in {candidate}"
     except Exception:
@@ -3554,10 +3867,16 @@ class ModuleInfo(BaseModel):
     """Information about a Python module/file."""
 
     path: str = Field(description="Relative file path")
-    functions: list[str] = Field(default_factory=list, description="Function names in the module")
-    classes: list[str] = Field(default_factory=list, description="Class names in the module")
+    functions: list[str] = Field(
+        default_factory=list, description="Function names in the module"
+    )
+    classes: list[str] = Field(
+        default_factory=list, description="Class names in the module"
+    )
     imports: list[str] = Field(default_factory=list, description="Import statements")
-    entry_points: list[str] = Field(default_factory=list, description="Detected entry points")
+    entry_points: list[str] = Field(
+        default_factory=list, description="Detected entry points"
+    )
     line_count: int = Field(default=0, description="Number of lines in file")
     complexity_score: int = Field(default=0, description="Cyclomatic complexity score")
 
@@ -3567,7 +3886,9 @@ class PackageInfo(BaseModel):
 
     name: str = Field(description="Package name")
     path: str = Field(description="Relative path to package")
-    modules: list[str] = Field(default_factory=list, description="Module names in package")
+    modules: list[str] = Field(
+        default_factory=list, description="Module names in package"
+    )
     subpackages: list[str] = Field(default_factory=list, description="Subpackage names")
 
 
@@ -3579,16 +3900,32 @@ class ProjectMapResult(BaseModel):
     project_root: str = Field(description="Absolute path to project root")
     total_files: int = Field(default=0, description="Total Python files")
     total_lines: int = Field(default=0, description="Total lines of code")
-    languages: dict[str, int] = Field(default_factory=dict, description="Language breakdown by file count")
-    packages: list[PackageInfo] = Field(default_factory=list, description="Detected packages")
-    modules: list[ModuleInfo] = Field(default_factory=list, description="Modules analyzed (max 50 in Mermaid diagram)")
-    entry_points: list[str] = Field(default_factory=list, description="All detected entry points")
-    circular_imports: list[list[str]] = Field(default_factory=list, description="Circular import cycles")
-    complexity_hotspots: list[str] = Field(default_factory=list, description="Files with high complexity")
+    languages: dict[str, int] = Field(
+        default_factory=dict, description="Language breakdown by file count"
+    )
+    packages: list[PackageInfo] = Field(
+        default_factory=list, description="Detected packages"
+    )
+    modules: list[ModuleInfo] = Field(
+        default_factory=list, description="Modules analyzed (max 50 in Mermaid diagram)"
+    )
+    entry_points: list[str] = Field(
+        default_factory=list, description="All detected entry points"
+    )
+    circular_imports: list[list[str]] = Field(
+        default_factory=list, description="Circular import cycles"
+    )
+    complexity_hotspots: list[str] = Field(
+        default_factory=list, description="Files with high complexity"
+    )
     mermaid: str = Field(default="", description="Mermaid diagram of package structure")
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    modules_in_diagram: int = Field(default=0, description="Number of modules shown in Mermaid diagram")
-    diagram_truncated: bool = Field(default=False, description="Whether Mermaid diagram was truncated")
+    modules_in_diagram: int = Field(
+        default=0, description="Number of modules shown in Mermaid diagram"
+    )
+    diagram_truncated: bool = Field(
+        default=False, description="Whether Mermaid diagram was truncated"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20260120_FEATURE] v1.0 pre-release - Output transparency metadata
@@ -3603,14 +3940,26 @@ class ProjectMapResult(BaseModel):
         default=None,
         description="Max modules limit that was applied (None = unlimited)",
     )
-    pro_features_enabled: bool = Field(default=False, description="Whether Pro features are enabled")
-    enterprise_features_enabled: bool = Field(default=False, description="Whether enterprise features are enabled")
+    pro_features_enabled: bool = Field(
+        default=False, description="Whether Pro features are enabled"
+    )
+    enterprise_features_enabled: bool = Field(
+        default=False, description="Whether enterprise features are enabled"
+    )
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 def _get_project_map_sync(
@@ -3760,7 +4109,9 @@ def _get_project_map_sync(
                 if include_complexity:
                     complexity = calculate_complexity(tree)
                     if complexity >= complexity_threshold:
-                        complexity_hotspots.append(f"{rel_path} (complexity: {complexity})")
+                        complexity_hotspots.append(
+                            f"{rel_path} (complexity: {complexity})"
+                        )
 
                 all_entry_points.extend(entry_points)
 
@@ -3803,7 +4154,10 @@ def _get_project_map_sync(
         pkg_list = list(packages.values())
         for pkg in pkg_list:
             for other_pkg in pkg_list:
-                if other_pkg.path.startswith(pkg.path + "/") and other_pkg.name not in pkg.subpackages:
+                if (
+                    other_pkg.path.startswith(pkg.path + "/")
+                    and other_pkg.name not in pkg.subpackages
+                ):
                     pkg.subpackages.append(other_pkg.name)
 
         # Check for circular imports
@@ -3828,7 +4182,11 @@ def _get_project_map_sync(
         ]:
             len(list(root_path.rglob(f"*{ext}")))
             # Exclude common ignored dirs
-            actual_count = sum(1 for f in root_path.rglob(f"*{ext}") if not any(p in exclude_patterns for p in f.parts))
+            actual_count = sum(
+                1
+                for f in root_path.rglob(f"*{ext}")
+                if not any(p in exclude_patterns for p in f.parts)
+            )
             if actual_count > 0:
                 languages[lang] = languages.get(lang, 0) + actual_count
 
@@ -3840,7 +4198,9 @@ def _get_project_map_sync(
             mod_id = f"M{i}"
             label = mod.path.replace("/", "_").replace(".", "_")
             if mod.entry_points:
-                mermaid_lines.append(f'        {mod_id}[["{label}"]]')  # Stadium for entry
+                mermaid_lines.append(
+                    f'        {mod_id}[["{label}"]]'
+                )  # Stadium for entry
             else:
                 mermaid_lines.append(f'        {mod_id}["{label}"]')
         mermaid_lines.append("    end")
@@ -3878,7 +4238,9 @@ class ImportNodeModel(BaseModel):
 
     module: str = Field(description="Module name (e.g., 'os', 'mypackage.utils')")
     import_type: str = Field(description="Import type: 'direct', 'from', or 'star'")
-    names: list[str] = Field(default_factory=list, description="Imported names (for 'from' imports)")
+    names: list[str] = Field(
+        default_factory=list, description="Imported names (for 'from' imports)"
+    )
     alias: str | None = Field(default=None, description="Alias if import uses 'as'")
     line: int = Field(default=0, description="Line number of import")
 
@@ -3901,14 +4263,18 @@ class ExtractedSymbolModel(BaseModel):
     file: str = Field(description="Source file (relative path)")
     line_start: int = Field(default=0, description="Starting line number")
     line_end: int = Field(default=0, description="Ending line number")
-    dependencies: list[str] = Field(default_factory=list, description="Names of symbols this depends on")
+    dependencies: list[str] = Field(
+        default_factory=list, description="Names of symbols this depends on"
+    )
     # [20251216_FEATURE] v2.5.0 - Confidence decay for deep dependency chains
     depth: int = Field(default=0, description="Depth from original target (0 = target)")
     confidence: float = Field(
         default=1.0,
         description="Confidence score with decay applied (0.0-1.0). Formula: C_base × 0.9^depth",
     )
-    low_confidence: bool = Field(default=False, description="True if confidence is below threshold (0.5)")
+    low_confidence: bool = Field(
+        default=False, description="True if confidence is below threshold (0.5)"
+    )
 
 
 class CrossFileDependenciesResult(BaseModel):
@@ -3919,14 +4285,18 @@ class CrossFileDependenciesResult(BaseModel):
 
     # Target symbol info
     target_name: str = Field(default="", description="Name of the analyzed symbol")
-    target_file: str = Field(default="", description="File containing the target symbol")
+    target_file: str = Field(
+        default="", description="File containing the target symbol"
+    )
 
     # Dependency info
     extracted_symbols: list[ExtractedSymbolModel] = Field(
         default_factory=list,
         description="All symbols extracted (target + dependencies)",
     )
-    total_dependencies: int = Field(default=0, description="Number of dependencies resolved")
+    total_dependencies: int = Field(
+        default=0, description="Number of dependencies resolved"
+    )
     unresolved_imports: list[str] = Field(
         default_factory=list, description="External imports that could not be resolved"
     )
@@ -3935,21 +4305,31 @@ class CrossFileDependenciesResult(BaseModel):
     import_graph: dict[str, list[str]] = Field(
         default_factory=dict, description="Import graph: file -> list of imported files"
     )
-    circular_imports: list[list[str]] = Field(default_factory=list, description="Detected circular import cycles")
+    circular_imports: list[list[str]] = Field(
+        default_factory=list, description="Detected circular import cycles"
+    )
 
     # Combined code for AI consumption
-    combined_code: str = Field(default="", description="All extracted code combined, ready for AI consumption")
-    token_estimate: int = Field(default=0, description="Estimated token count for combined code")
+    combined_code: str = Field(
+        default="", description="All extracted code combined, ready for AI consumption"
+    )
+    token_estimate: int = Field(
+        default=0, description="Estimated token count for combined code"
+    )
 
     # Mermaid diagram
-    mermaid: str = Field(default="", description="Mermaid diagram of import relationships")
+    mermaid: str = Field(
+        default="", description="Mermaid diagram of import relationships"
+    )
 
     # [20251216_FEATURE] v2.5.0 - Confidence decay tracking
     confidence_decay_factor: float = Field(
         default=0.9,
         description="Decay factor used: C_effective = C_base × decay_factor^depth",
     )
-    low_confidence_count: int = Field(default=0, description="Number of symbols below confidence threshold (0.5)")
+    low_confidence_count: int = Field(
+        default=0, description="Number of symbols below confidence threshold (0.5)"
+    )
     low_confidence_warning: str | None = Field(
         default=None, description="Warning message if low-confidence symbols detected"
     )
@@ -3957,10 +4337,18 @@ class CrossFileDependenciesResult(BaseModel):
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
 
 
 def _get_cross_file_dependencies_sync(
@@ -4031,7 +4419,9 @@ def _get_cross_file_dependencies_sync(
                 return future.result(timeout=timeout_seconds)
             except FuturesTimeoutError:
                 future.cancel()
-                raise TimeoutError(f"Operation timed out after {timeout_seconds} seconds")
+                raise TimeoutError(
+                    f"Operation timed out after {timeout_seconds} seconds"
+                )
             finally:
                 # Do not wait for a potentially hung worker thread.
                 executor.shutdown(wait=False, cancel_futures=True)
@@ -4088,7 +4478,11 @@ def _get_cross_file_dependencies_sync(
         LOW_CONFIDENCE_THRESHOLD = 0.5
 
         for sym in all_symbols:
-            rel_file = str(Path(sym.file).relative_to(root_path)) if Path(sym.file).is_absolute() else sym.file
+            rel_file = (
+                str(Path(sym.file).relative_to(root_path))
+                if Path(sym.file).is_absolute()
+                else sym.file
+            )
             # [20251216_FEATURE] v2.5.0 - Include depth and confidence in symbol model
             extracted_symbols.append(
                 ExtractedSymbolModel(
@@ -4114,7 +4508,9 @@ def _get_cross_file_dependencies_sync(
             combined_code = extraction_result.combined_code
 
         # Get unresolved imports from extraction result
-        unresolved_imports = extraction_result.module_imports  # These are imports that couldn't be resolved
+        unresolved_imports = (
+            extraction_result.module_imports
+        )  # These are imports that couldn't be resolved
 
         # Build import graph dict (file -> list of imported files)
         # Use the extractor's resolver (avoid double-building) and keep this focused.
@@ -4160,10 +4556,16 @@ def _get_cross_file_dependencies_sync(
 
         # Detect circular imports using get_circular_imports()
         circular_import_objs = resolver.get_circular_imports()
-        circular_import_lists = [ci.cycle for ci in circular_import_objs]  # CircularImport uses 'cycle'
+        circular_import_lists = [
+            ci.cycle for ci in circular_import_objs
+        ]  # CircularImport uses 'cycle'
 
         # Make target file relative (used by diagram + returned fields)
-        target_rel = str(target_path.relative_to(root_path)) if target_path.is_absolute() else target_file
+        target_rel = (
+            str(target_path.relative_to(root_path))
+            if target_path.is_absolute()
+            else target_file
+        )
 
         # Generate Mermaid diagram
         mermaid = ""
@@ -4181,7 +4583,11 @@ def _get_cross_file_dependencies_sync(
             seen_nodes: set[str] = set()
             edges_out: list[tuple[str, str]] = []
 
-            while queue and len(seen_nodes) < max_mermaid_nodes and len(edges_out) < max_mermaid_edges:
+            while (
+                queue
+                and len(seen_nodes) < max_mermaid_nodes
+                and len(edges_out) < max_mermaid_edges
+            ):
                 cur, depth = queue.popleft()
                 if cur in seen_nodes:
                     continue
@@ -4210,8 +4616,13 @@ def _get_cross_file_dependencies_sync(
                     lines.append(f"    {node_ids[a]} --> {node_ids[b]}")
 
             # Truncation hint
-            if len(seen_nodes) >= max_mermaid_nodes or len(edges_out) >= max_mermaid_edges:
-                lines.append(f"    %% Diagram truncated (nodes<={max_mermaid_nodes}, edges<={max_mermaid_edges})")
+            if (
+                len(seen_nodes) >= max_mermaid_nodes
+                or len(edges_out) >= max_mermaid_edges
+            ):
+                lines.append(
+                    f"    %% Diagram truncated (nodes<={max_mermaid_nodes}, edges<={max_mermaid_edges})"
+                )
 
             mermaid = "\n".join(lines)
 
@@ -4221,7 +4632,9 @@ def _get_cross_file_dependencies_sync(
         # [20251216_FEATURE] v2.5.0 - Build low confidence warning if needed
         low_confidence_warning = None
         if extraction_result.low_confidence_count > 0:
-            low_conf_names = [s.name for s in extraction_result.get_low_confidence_symbols()[:5]]
+            low_conf_names = [
+                s.name for s in extraction_result.get_low_confidence_symbols()[:5]
+            ]
             low_confidence_warning = (
                 f"⚠️ {extraction_result.low_confidence_count} symbol(s) have low confidence "
                 f"(below 0.5): {', '.join(low_conf_names)}"
@@ -4262,7 +4675,9 @@ class TaintFlowModel(BaseModel):
     sink_function: str = Field(description="Function where taint reaches sink")
     sink_file: str = Field(description="File containing sink")
     sink_line: int = Field(default=0, description="Line number of sink")
-    flow_path: list[str] = Field(default_factory=list, description="Path: file:function -> file:function")
+    flow_path: list[str] = Field(
+        default_factory=list, description="Path: file:function -> file:function"
+    )
     taint_type: str = Field(description="Type of taint source (e.g., 'request_input')")
 
 
@@ -4275,7 +4690,9 @@ class CrossFileVulnerabilityModel(BaseModel):
     source_file: str = Field(description="File where taint originates")
     sink_file: str = Field(description="File where vulnerability manifests")
     description: str = Field(description="Human-readable description")
-    flow: TaintFlowModel = Field(description="The taint flow that causes this vulnerability")
+    flow: TaintFlowModel = Field(
+        description="The taint flow that causes this vulnerability"
+    )
 
 
 class CrossFileSecurityResult(BaseModel):
@@ -4286,19 +4703,29 @@ class CrossFileSecurityResult(BaseModel):
 
     # Summary
     files_analyzed: int = Field(default=0, description="Number of files analyzed")
-    has_vulnerabilities: bool = Field(default=False, description="Whether vulnerabilities were found")
-    vulnerability_count: int = Field(default=0, description="Total vulnerabilities found")
+    has_vulnerabilities: bool = Field(
+        default=False, description="Whether vulnerabilities were found"
+    )
+    vulnerability_count: int = Field(
+        default=0, description="Total vulnerabilities found"
+    )
     risk_level: str = Field(default="low", description="Overall risk level")
 
     # Detailed findings
     vulnerabilities: list[CrossFileVulnerabilityModel] = Field(
         default_factory=list, description="Cross-file vulnerabilities found"
     )
-    taint_flows: list[TaintFlowModel] = Field(default_factory=list, description="All taint flows detected")
+    taint_flows: list[TaintFlowModel] = Field(
+        default_factory=list, description="All taint flows detected"
+    )
 
     # Entry points and sinks
-    taint_sources: list[str] = Field(default_factory=list, description="Functions containing taint sources")
-    dangerous_sinks: list[str] = Field(default_factory=list, description="Functions containing dangerous sinks")
+    taint_sources: list[str] = Field(
+        default_factory=list, description="Functions containing taint sources"
+    )
+    dangerous_sinks: list[str] = Field(
+        default_factory=list, description="Functions containing dangerous sinks"
+    )
 
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -4317,17 +4744,29 @@ class CrossFileSecurityResult(BaseModel):
     framework_aware_enabled: bool = Field(
         default=False, description="Whether framework-aware analysis is enabled (Pro)"
     )
-    enterprise_features_enabled: bool = Field(default=False, description="Whether enterprise features are enabled")
+    enterprise_features_enabled: bool = Field(
+        default=False, description="Whether enterprise features are enabled"
+    )
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
     framework_contexts: Optional[dict[str, Any]] = Field(
         default=None, description="Framework-specific analysis context (Enterprise)"
     )
-    dependency_chains: Optional[list[str]] = Field(default=None, description="Full dependency chains (Enterprise)")
+    dependency_chains: Optional[list[str]] = Field(
+        default=None, description="Full dependency chains (Enterprise)"
+    )
     confidence_scores: Optional[dict[str, float]] = Field(
         default=None, description="Confidence scores for findings (Enterprise)"
     )
@@ -4349,7 +4788,9 @@ def _cross_file_security_scan_sync(
     max_depth: int,
     include_diagram: bool,
     timeout_seconds: float | None = 120.0,  # [20251220_PERF] Default 2 minute timeout
-    max_modules: int | None = 500,  # [20251220_PERF] Default module limit for large projects
+    max_modules: (
+        int | None
+    ) = 500,  # [20251220_PERF] Default module limit for large projects
     tier: str = "community",
     capabilities: dict[str, Any] | None = None,
     confidence_threshold: float = 0.7,
@@ -4376,7 +4817,9 @@ def _cross_file_security_scan_sync(
     if max_depth_limit is not None:
         max_depth = min(max_depth, max_depth_limit)
     if max_modules_limit is not None:
-        max_modules = min(max_modules, max_modules_limit) if max_modules else max_modules_limit
+        max_modules = (
+            min(max_modules, max_modules_limit) if max_modules else max_modules_limit
+        )
 
     try:
         tracker = CrossFileTaintTracker(root_path)
@@ -4417,9 +4860,13 @@ def _cross_file_security_scan_sync(
                 sink_function=vuln.flow.sink_function,
                 sink_file=sink_file,
                 sink_line=vuln.flow.sink_line,
-                flow_path=[f"{get_file_for_module(m)}:{f}" for m, f, _ in vuln.flow.flow_path],
+                flow_path=[
+                    f"{get_file_for_module(m)}:{f}" for m, f, _ in vuln.flow.flow_path
+                ],
                 taint_type=str(
-                    vuln.flow.sink_type.name if hasattr(vuln.flow.sink_type, "name") else vuln.flow.sink_type
+                    vuln.flow.sink_type.name
+                    if hasattr(vuln.flow.sink_type, "name")
+                    else vuln.flow.sink_type
                 ),
             )
             vulnerabilities.append(
@@ -4449,8 +4896,14 @@ def _cross_file_security_scan_sync(
                     sink_function=flow.sink_function,
                     sink_file=sink_file,
                     sink_line=flow.sink_line,
-                    flow_path=[f"{get_file_for_module(m)}:{f}" for m, f, _ in flow.flow_path],
-                    taint_type=str(flow.sink_type.name if hasattr(flow.sink_type, "name") else flow.sink_type),
+                    flow_path=[
+                        f"{get_file_for_module(m)}:{f}" for m, f, _ in flow.flow_path
+                    ],
+                    taint_type=str(
+                        flow.sink_type.name
+                        if hasattr(flow.sink_type, "name")
+                        else flow.sink_type
+                    ),
                 )
             )
 
@@ -4502,7 +4955,11 @@ def _cross_file_security_scan_sync(
             max_depth_applied=max_depth if max_depth else None,
             max_modules_applied=max_modules,
             framework_aware_enabled=(
-                bool(capabilities and "framework_aware_taint" in capabilities.get("capabilities", set()))
+                bool(
+                    capabilities
+                    and "framework_aware_taint"
+                    in capabilities.get("capabilities", set())
+                )
                 if capabilities
                 else False
             ),
@@ -4524,18 +4981,38 @@ class PathValidationResult(BaseModel):
     error: str | None = Field(default=None, description="Error message if failed")
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
-    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
-    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
-    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
-    accessible: list[str] = Field(default_factory=list, description="Paths that were successfully resolved")
-    inaccessible: list[str] = Field(default_factory=list, description="Paths that could not be resolved")
-    suggestions: list[str] = Field(default_factory=list, description="Suggestions for resolving inaccessible paths")
-    workspace_roots: list[str] = Field(default_factory=list, description="Detected workspace root directories")
-    is_docker: bool = Field(default=False, description="Whether running in Docker container")
+    semantic_summary: Optional[str] = Field(
+        default=None, description="AI-generated semantic summary (Pro)"
+    )
+    related_imports: List[str] = Field(
+        default_factory=list, description="Related imports from other files (Pro)"
+    )
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII was redacted (Enterprise)"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether access control was applied (Enterprise)"
+    )
+    accessible: list[str] = Field(
+        default_factory=list, description="Paths that were successfully resolved"
+    )
+    inaccessible: list[str] = Field(
+        default_factory=list, description="Paths that could not be resolved"
+    )
+    suggestions: list[str] = Field(
+        default_factory=list, description="Suggestions for resolving inaccessible paths"
+    )
+    workspace_roots: list[str] = Field(
+        default_factory=list, description="Detected workspace root directories"
+    )
+    is_docker: bool = Field(
+        default=False, description="Whether running in Docker container"
+    )
 
 
-def _validate_paths_sync(paths: list[str], project_root: str | None) -> PathValidationResult:
+def _validate_paths_sync(
+    paths: list[str], project_root: str | None
+) -> PathValidationResult:
     """Synchronous implementation of validate_paths."""
     from code_scalpel.mcp.path_resolver import PathResolver
 
@@ -4545,10 +5022,16 @@ def _validate_paths_sync(paths: list[str], project_root: str | None) -> PathVali
     suggestions = []
     if inaccessible:
         if resolver.is_docker:
-            suggestions.append("Running in Docker: Mount your project with -v /path/to/project:/workspace")
-            suggestions.append("Example: docker run -v $(pwd):/workspace code-scalpel:latest")
+            suggestions.append(
+                "Running in Docker: Mount your project with -v /path/to/project:/workspace"
+            )
+            suggestions.append(
+                "Example: docker run -v $(pwd):/workspace code-scalpel:latest"
+            )
         else:
-            suggestions.append("Ensure files exist and use absolute paths or place in workspace roots:")
+            suggestions.append(
+                "Ensure files exist and use absolute paths or place in workspace roots:"
+            )
             for root in resolver.workspace_roots[:3]:
                 suggestions.append(f"  - {root}")
         suggestions.append("Set WORKSPACE_ROOT env variable to specify custom root")
@@ -4652,7 +5135,9 @@ def run_server(
     # remain authoritative and paid tiers fail closed without a valid license.
     # CLI/env can request a tier, but it will be clamped by the license.
     validator = JWTLicenseValidator()
-    requested_tier = tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
+    requested_tier = (
+        tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
+    )
     effective_tier, startup_warning = compute_effective_tier_for_startup(
         requested_tier=requested_tier,
         validator=validator,
@@ -4769,7 +5254,9 @@ def run_server(
         except Exception:
             import traceback
 
-            print("ERROR: Exception while running MCP (HTTP transport):", file=sys.stderr)
+            print(
+                "ERROR: Exception while running MCP (HTTP transport):", file=sys.stderr
+            )
             traceback.print_exc(file=sys.stderr)
             raise
     else:
@@ -4789,14 +5276,18 @@ def run_server(
                         "ssl_keyfile",
                     ):
                         try:
-                            _debug_print(f"DEBUG: mcp.settings.{attr} = {getattr(settings, attr, None)}")
+                            _debug_print(
+                                f"DEBUG: mcp.settings.{attr} = {getattr(settings, attr, None)}"
+                            )
                         except Exception:
                             pass
             except Exception:
                 pass
 
             try:
-                _debug_print(f"DEBUG: sys.stdin.isatty={sys.stdin.isatty()} sys.stdout.isatty={sys.stdout.isatty()}")
+                _debug_print(
+                    f"DEBUG: sys.stdin.isatty={sys.stdin.isatty()} sys.stdout.isatty={sys.stdout.isatty()}"
+                )
             except Exception:
                 pass
 
@@ -4805,7 +5296,9 @@ def run_server(
         except Exception:
             import traceback
 
-            print("ERROR: Exception while running MCP (stdio transport):", file=sys.stderr)
+            print(
+                "ERROR: Exception while running MCP (stdio transport):", file=sys.stderr
+            )
             traceback.print_exc(file=sys.stderr)
             raise
 
@@ -4895,7 +5388,9 @@ def _register_http_health_endpoint(
             else:
                 protocol = "http"
 
-            logger.info(f"Health endpoint available at {protocol}://{host}:{health_port}/health")
+            logger.info(
+                f"Health endpoint available at {protocol}://{host}:{health_port}/health"
+            )
             server.serve_forever()
         except Exception as e:
             logger.warning(f"Could not start health server: {e}")

@@ -456,7 +456,9 @@ function main() {
 main();
 """)
 
-        result = await get_call_graph(project_root=str(tmp_path), include_circular_import_check=False)
+        result = await get_call_graph(
+            project_root=str(tmp_path), include_circular_import_check=False
+        )
         assert result.error is None
         assert "graph TD" in result.mermaid
 
@@ -490,7 +492,9 @@ function main(): number {
 main();
 """)
 
-        result = await get_call_graph(project_root=str(tmp_path), include_circular_import_check=False)
+        result = await get_call_graph(
+            project_root=str(tmp_path), include_circular_import_check=False
+        )
 
         assert result.error is None
         assert "graph TD" in result.mermaid

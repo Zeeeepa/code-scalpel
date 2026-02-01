@@ -58,11 +58,15 @@ async def main() -> int:
     tests: list[tuple[str, callable[[], object]]] = [
         (
             "analyze_code",
-            lambda: mcp_server.analyze_code(code="def foo():\n    return 1\n", language="python"),
+            lambda: mcp_server.analyze_code(
+                code="def foo():\n    return 1\n", language="python"
+            ),
         ),
         (
             "unified_sink_detect",
-            lambda: mcp_server.unified_sink_detect(code="eval(user_input)", language="python"),
+            lambda: mcp_server.unified_sink_detect(
+                code="eval(user_input)", language="python"
+            ),
         ),
         (
             "type_evaporation_scan",
@@ -85,7 +89,9 @@ async def main() -> int:
         ),
         (
             "security_scan",
-            lambda: mcp_server.security_scan(code="import os\nos.system('ls')\n", file_path=None),
+            lambda: mcp_server.security_scan(
+                code="import os\nos.system('ls')\n", file_path=None
+            ),
         ),
         (
             "symbolic_execute",
@@ -138,15 +144,21 @@ async def main() -> int:
         ),
         (
             "get_file_context",
-            lambda: mcp_server.get_file_context(file_path=str(tiny_root / "pkg" / "a.py")),
+            lambda: mcp_server.get_file_context(
+                file_path=str(tiny_root / "pkg" / "a.py")
+            ),
         ),
         (
             "get_symbol_references",
-            lambda: mcp_server.get_symbol_references(symbol_name="PolicyEngine", project_root=str(tiny_root)),
+            lambda: mcp_server.get_symbol_references(
+                symbol_name="PolicyEngine", project_root=str(tiny_root)
+            ),
         ),
         (
             "get_call_graph",
-            lambda: mcp_server.get_call_graph(project_root=str(tiny_root), entry_point=None, depth=5),
+            lambda: mcp_server.get_call_graph(
+                project_root=str(tiny_root), entry_point=None, depth=5
+            ),
         ),
         (
             "get_graph_neighborhood",
@@ -159,7 +171,9 @@ async def main() -> int:
         ),
         (
             "get_project_map",
-            lambda: mcp_server.get_project_map(project_root=str(tiny_root), include_complexity=False),
+            lambda: mcp_server.get_project_map(
+                project_root=str(tiny_root), include_complexity=False
+            ),
         ),
         (
             "get_cross_file_dependencies",
@@ -185,7 +199,9 @@ async def main() -> int:
         ),
         (
             "validate_paths",
-            lambda: mcp_server.validate_paths(paths=["pkg/a.py", "pkg/b.py"], project_root=str(tiny_root)),
+            lambda: mcp_server.validate_paths(
+                paths=["pkg/a.py", "pkg/b.py"], project_root=str(tiny_root)
+            ),
         ),
         (
             "verify_policy_integrity",

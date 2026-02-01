@@ -68,8 +68,12 @@ def use_pro_tier(monkeypatch):
 @pytest.fixture
 def use_enterprise_tier(monkeypatch):
     """Use real Enterprise tier license."""
-    enterprise_licenses = list(LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt"))
-    enterprise_licenses = [lic for lic in enterprise_licenses if "broken" not in lic.name]
+    enterprise_licenses = list(
+        LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt")
+    )
+    enterprise_licenses = [
+        lic for lic in enterprise_licenses if "broken" not in lic.name
+    ]
     assert enterprise_licenses, f"No valid Enterprise license found in {LICENSE_DIR}"
 
     monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(enterprise_licenses[0]))
@@ -151,7 +155,9 @@ def bar():
         # Pro tier allows k=3
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_metadata_correct(self, use_enterprise_tier, tmp_path):
+    async def test_enterprise_tier_metadata_correct(
+        self, use_enterprise_tier, tmp_path
+    ):
         """Enterprise tier MCP response should indicate 'enterprise' tier."""
         test_file = tmp_path / "test.py"
         test_file.write_text("""
@@ -177,7 +183,9 @@ class TestMCPUpgradeHints:
     """Test that MCP responses include upgrade hints when limits are hit."""
 
     @pytest.mark.asyncio
-    async def test_community_limit_hit_includes_upgrade_hint(self, use_community_tier, sample_call_graph):
+    async def test_community_limit_hit_includes_upgrade_hint(
+        self, use_community_tier, sample_call_graph
+    ):
         """When Community tier hits node limit, response should suggest upgrade."""
         # Request more nodes than Community allows
         result = sample_call_graph.get_neighborhood(
@@ -196,7 +204,9 @@ class TestMCPUpgradeHints:
             # Ideally would contain "upgrade" or "Pro" hint, but we verify truncation occurred
 
     @pytest.mark.asyncio
-    async def test_pro_limit_hit_includes_upgrade_hint(self, use_pro_tier, sample_call_graph):
+    async def test_pro_limit_hit_includes_upgrade_hint(
+        self, use_pro_tier, sample_call_graph
+    ):
         """When Pro tier hits node limit, response should suggest Enterprise."""
         result = sample_call_graph.get_neighborhood(
             "python::main::function::center",

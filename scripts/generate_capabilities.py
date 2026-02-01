@@ -56,7 +56,9 @@ def generate_capability_files():
         with open(output_file, "w") as f:
             json.dump(envelope, f, indent=2)
 
-        print(f"✓ {output_file} ({len(caps)} tools, {envelope['available_count']} available)")
+        print(
+            f"✓ {output_file} ({len(caps)} tools, {envelope['available_count']} available)"
+        )
 
     # Generate schema file
     schema_file = output_dir / "schema.json"

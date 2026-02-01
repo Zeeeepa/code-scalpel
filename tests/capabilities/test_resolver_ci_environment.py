@@ -24,7 +24,9 @@ class TestResolverLimitsFileOverride:
         assert capabilities is not None
         assert len(capabilities) == 22
 
-    def test_resolver_respects_limits_file_override(self, clear_capabilities_cache, tmp_path):
+    def test_resolver_respects_limits_file_override(
+        self, clear_capabilities_cache, tmp_path
+    ):
         """Resolver should use CODE_SCALPEL_LIMITS_FILE override."""
         # Create a minimal custom limits file
         custom_limits = tmp_path / "custom_limits.toml"

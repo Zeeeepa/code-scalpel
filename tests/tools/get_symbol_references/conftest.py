@@ -19,7 +19,9 @@ import pytest
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 TEST_LICENSES_DIR = PROJECT_ROOT / "tests" / "licenses"
 PRO_LICENSE = TEST_LICENSES_DIR / "code_scalpel_license_pro_20260101_190345.jwt"
-ENTERPRISE_LICENSE = TEST_LICENSES_DIR / "code_scalpel_license_enterprise_20260101_190754.jwt"
+ENTERPRISE_LICENSE = (
+    TEST_LICENSES_DIR / "code_scalpel_license_enterprise_20260101_190754.jwt"
+)
 # Non-existent path to force Community tier (no valid license found)
 NO_LICENSE = PROJECT_ROOT / "tests" / "licenses" / "nonexistent_license.jwt"
 

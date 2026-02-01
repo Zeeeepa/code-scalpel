@@ -65,7 +65,9 @@ def load_response_config() -> Dict[str, Any]:
         Dictionary with response field filtering configuration.
     """
     if not RESPONSE_CONFIG_PATH.exists():
-        raise FileNotFoundError(f"response_config.json not found at {RESPONSE_CONFIG_PATH}")
+        raise FileNotFoundError(
+            f"response_config.json not found at {RESPONSE_CONFIG_PATH}"
+        )
 
     with open(RESPONSE_CONFIG_PATH, "r") as f:
         return json.load(f)
@@ -142,7 +144,9 @@ def verify_limits_toml_consistency() -> list[str]:
 
     # Verify each tool has entries for at least one tier
     for tool in tools:
-        has_any_tier = any(tool in limits.get(tier, {}) for tier in ["community", "pro", "enterprise"])
+        has_any_tier = any(
+            tool in limits.get(tier, {}) for tier in ["community", "pro", "enterprise"]
+        )
         if not has_any_tier:
             issues.append(f"Tool '{tool}' has no tier definitions")
 

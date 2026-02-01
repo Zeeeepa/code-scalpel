@@ -72,7 +72,10 @@ class TestEnhancedMetadata:
         result = extractor.get_function("calculate_tax")
 
         assert result.success
-        assert "def calculate_tax(amount: float, rate: float = 0.1) -> float:" in result.signature
+        assert (
+            "def calculate_tax(amount: float, rate: float = 0.1) -> float:"
+            in result.signature
+        )
 
     def test_extract_decorators(self):
         """Test decorator extraction."""

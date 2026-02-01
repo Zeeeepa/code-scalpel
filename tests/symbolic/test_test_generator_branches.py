@@ -16,9 +16,13 @@ def test_invalid_framework_raises():
 
 def test_detect_main_function_non_python():
     gen = TestGenerator()
-    js_name = gen._detect_main_function("function run() { return 1; }", language="javascript")
+    js_name = gen._detect_main_function(
+        "function run() { return 1; }", language="javascript"
+    )
     assert js_name == "run"
-    java_name = gen._detect_main_function("public int calc() { return 1; }", language="java")
+    java_name = gen._detect_main_function(
+        "public int calc() { return 1; }", language="java"
+    )
     assert java_name == "calc"
 
 

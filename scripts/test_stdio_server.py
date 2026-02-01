@@ -153,7 +153,9 @@ async def send_request(proc: subprocess.Popen, tool_name: str, args: dict) -> di
         response = json.loads(response_line)
         return response
     except json.JSONDecodeError as e:
-        raise RuntimeError(f"Invalid JSON response for {tool_name}: {response_line.decode()}") from e
+        raise RuntimeError(
+            f"Invalid JSON response for {tool_name}: {response_line.decode()}"
+        ) from e
 
 
 async def test_all_tools():
@@ -239,7 +241,9 @@ async def test_all_tools():
                             "result_type": type(result).__name__,
                         }
                     else:
-                        print(f"⚠️  (Responded but missing expected fields: {test_config['expected_fields']})")
+                        print(
+                            f"⚠️  (Responded but missing expected fields: {test_config['expected_fields']})"
+                        )
                         results["passed"] += 1  # Still count as passed if it responded
                         results["details"][tool_name] = {
                             "status": "ok_partial",

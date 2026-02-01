@@ -430,7 +430,9 @@ class CodeQualityReport:
 
     files_analyzed: int = 0
     total_lines: LineMetrics = field(default_factory=LineMetrics)
-    maintainability: MaintainabilityMetrics = field(default_factory=MaintainabilityMetrics)
+    maintainability: MaintainabilityMetrics = field(
+        default_factory=MaintainabilityMetrics
+    )
     functions: list[FunctionQualityInfo] = field(default_factory=list)
     classes: list[ClassQualityInfo] = field(default_factory=list)
     smells: list[CodeSmell] = field(default_factory=list)
@@ -462,7 +464,11 @@ class CodeQualityReport:
     @property
     def complex_functions(self) -> list[FunctionQualityInfo]:
         """Get functions that exceed complexity thresholds."""
-        return [f for f in self.functions if f.complexity.cyclomatic > self.thresholds.max_cyclomatic_complexity]
+        return [
+            f
+            for f in self.functions
+            if f.complexity.cyclomatic > self.thresholds.max_cyclomatic_complexity
+        ]
 
     def get_summary(self) -> dict[str, Any]:
         """Get a summary of the report."""
@@ -475,9 +481,14 @@ class CodeQualityReport:
             "functions_analyzed": len(self.functions),
             "classes_analyzed": len(self.classes),
             "smell_count": self.smell_count,
-            "by_severity": {sev.value: len(smells) for sev, smells in self.smells_by_severity.items()},
+            "by_severity": {
+                sev.value: len(smells)
+                for sev, smells in self.smells_by_severity.items()
+            },
             "complex_functions": len(self.complex_functions),
-            "technical_debt_hours": (self.technical_debt.total_hours if self.technical_debt else 0),
+            "technical_debt_hours": (
+                self.technical_debt.total_hours if self.technical_debt else 0
+            ),
         }
 
 
@@ -619,7 +630,9 @@ class PythonCodeQualityAnalyzer:
 
                 # Count lines for this function
                 if node.end_lineno and node.lineno:
-                    func_source = "\n".join(source_lines[node.lineno - 1 : node.end_lineno])
+                    func_source = "\n".join(
+                        source_lines[node.lineno - 1 : node.end_lineno]
+                    )
                     func_lines = self._count_lines(func_source)
                 else:
                     func_lines = LineMetrics()
@@ -672,18 +685,26 @@ class PythonCodeQualityAnalyzer:
             if isinstance(node, ast.ClassDef):
                 # Count methods
                 method_count = sum(
-                    1 for child in node.body if isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef)
+                    1
+                    for child in node.body
+                    if isinstance(child, ast.FunctionDef | ast.AsyncFunctionDef)
                 )
 
                 # Count attributes (assignments in class body)
-                attribute_count = sum(1 for child in node.body if isinstance(child, ast.AnnAssign | ast.Assign))
+                attribute_count = sum(
+                    1
+                    for child in node.body
+                    if isinstance(child, ast.AnnAssign | ast.Assign)
+                )
 
                 # Count base classes
                 base_count = len(node.bases)
 
                 # Calculate lines
                 if node.end_lineno and node.lineno:
-                    class_source = "\n".join(source_lines[node.lineno - 1 : node.end_lineno])
+                    class_source = "\n".join(
+                        source_lines[node.lineno - 1 : node.end_lineno]
+                    )
                     class_lines = self._count_lines(class_source)
                 else:
                     class_lines = LineMetrics()
@@ -751,7 +772,8 @@ class PythonCodeQualityAnalyzer:
             if func.complexity.cyclomatic > thresholds.max_cyclomatic_complexity:
                 severity = (
                     SmellSeverity.CRITICAL
-                    if func.complexity.cyclomatic > thresholds.max_cyclomatic_complexity * 2
+                    if func.complexity.cyclomatic
+                    > thresholds.max_cyclomatic_complexity * 2
                     else SmellSeverity.MAJOR
                 )
                 report.smells.append(
@@ -921,7 +943,9 @@ class PythonCodeQualityAnalyzer:
 
         # Calculate average cyclomatic complexity
         if report.functions:
-            avg_complexity = sum(f.complexity.cyclomatic for f in report.functions) / len(report.functions)
+            avg_complexity = sum(
+                f.complexity.cyclomatic for f in report.functions
+            ) / len(report.functions)
         else:
             avg_complexity = 1.0
 
@@ -936,7 +960,12 @@ class PythonCodeQualityAnalyzer:
         import math
 
         # Calculate raw MI
-        raw_mi = 171 - 5.2 * math.log(avg_volume + 1) - 0.23 * avg_complexity - 16.2 * math.log(loc)
+        raw_mi = (
+            171
+            - 5.2 * math.log(avg_volume + 1)
+            - 0.23 * avg_complexity
+            - 16.2 * math.log(loc)
+        )
 
         # Normalize to 0-100 scale
         mi = max(0.0, min(100.0, raw_mi * 100 / 171))
@@ -958,10 +987,15 @@ class PythonCodeQualityAnalyzer:
             lines=report.total_lines,
             average_complexity=avg_complexity,
             average_function_length=(
-                sum(f.lines.total_lines for f in report.functions) / len(report.functions) if report.functions else 0.0
+                sum(f.lines.total_lines for f in report.functions)
+                / len(report.functions)
+                if report.functions
+                else 0.0
             ),
             average_class_size=(
-                sum(c.lines.total_lines for c in report.classes) / len(report.classes) if report.classes else 0.0
+                sum(c.lines.total_lines for c in report.classes) / len(report.classes)
+                if report.classes
+                else 0.0
             ),
         )
 
@@ -1117,7 +1151,9 @@ class PythonCodeQualityAnalyzer:
 
         return metrics
 
-    def _is_method(self, node: ast.FunctionDef | ast.AsyncFunctionDef, tree: ast.AST) -> bool:
+    def _is_method(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef, tree: ast.AST
+    ) -> bool:
         """Check if a function is a method (defined inside a class)."""
         for parent in ast.walk(tree):
             if isinstance(parent, ast.ClassDef):

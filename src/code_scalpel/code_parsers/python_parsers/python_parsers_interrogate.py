@@ -314,7 +314,9 @@ class InterrogateReport:
     """Results from Interrogate documentation coverage analysis."""
 
     file_path: str | None = None
-    coverage: DocumentationCoverage = field(default_factory=lambda: DocumentationCoverage(0, 0))
+    coverage: DocumentationCoverage = field(
+        default_factory=lambda: DocumentationCoverage(0, 0)
+    )
     items: list[DocumentedItem] = field(default_factory=list)
     error: str | None = None
     interrogate_version: str | None = None
@@ -382,7 +384,9 @@ class InterrogateParser:
             InterrogateReport with coverage analysis
 
         """
-        raise NotImplementedError("InterrogateParser.analyze_file() not yet implemented")
+        raise NotImplementedError(
+            "InterrogateParser.analyze_file() not yet implemented"
+        )
 
     def analyze_code(self, code: str, filename: str = "<string>") -> InterrogateReport:
         """
@@ -396,7 +400,9 @@ class InterrogateParser:
             InterrogateReport with coverage analysis
 
         """
-        raise NotImplementedError("InterrogateParser.analyze_code() not yet implemented")
+        raise NotImplementedError(
+            "InterrogateParser.analyze_code() not yet implemented"
+        )
 
     def get_coverage_percentage(self, report: InterrogateReport) -> float:
         """

@@ -81,7 +81,9 @@ class TestSpecificAdapterFixtures:
         assert enterprise_adapter.get_tier() == "enterprise"
         assert len(enterprise_adapter.get_available_tools()) == 10
 
-    def test_each_adapter_is_independent(self, community_adapter, pro_adapter, enterprise_adapter):
+    def test_each_adapter_is_independent(
+        self, community_adapter, pro_adapter, enterprise_adapter
+    ):
         """Each adapter fixture should be a separate instance."""
         assert community_adapter is not pro_adapter
         assert pro_adapter is not enterprise_adapter
@@ -102,7 +104,10 @@ class TestAllAdaptersFixture:
 
     def test_all_adapters_correct_tool_counts(self, all_adapters: list[TierAdapter]):
         """Each adapter should have correct tool count."""
-        tier_to_count = {adapter.get_tier(): len(adapter.get_available_tools()) for adapter in all_adapters}
+        tier_to_count = {
+            adapter.get_tier(): len(adapter.get_available_tools())
+            for adapter in all_adapters
+        }
         assert tier_to_count["community"] == 22
         assert tier_to_count["pro"] == 19
         assert tier_to_count["enterprise"] == 10
@@ -117,7 +122,9 @@ class TestLicensePathFixtures:
 
     def test_enterprise_license_path_is_path_or_none(self, enterprise_license_path):
         """Enterprise license path should be Path or None."""
-        assert enterprise_license_path is None or isinstance(enterprise_license_path, Path)
+        assert enterprise_license_path is None or isinstance(
+            enterprise_license_path, Path
+        )
 
     @pytest.mark.skipif(
         os.environ.get("TEST_WITH_LICENSES") != "true",
@@ -257,7 +264,9 @@ class TestTierAwareParametrization:
 class TestFixtureIntegration:
     """Test integration of multiple fixtures."""
 
-    def test_multiple_adapters_independently_available(self, community_adapter, pro_adapter, enterprise_adapter):
+    def test_multiple_adapters_independently_available(
+        self, community_adapter, pro_adapter, enterprise_adapter
+    ):
         """Multiple adapter fixtures should work independently."""
         # All should have analyze_code
         community_adapter.assert_tool_available("analyze_code")
@@ -269,13 +278,17 @@ class TestFixtureIntegration:
         pro_adapter.assert_tool_available("get_file_context")
         enterprise_adapter.assert_tool_unavailable("get_file_context")
 
-    def test_clear_all_caches_with_adapters(self, clear_all_caches, community_adapter, pro_adapter):
+    def test_clear_all_caches_with_adapters(
+        self, clear_all_caches, community_adapter, pro_adapter
+    ):
         """clear_all_caches fixture should work with adapters."""
         # Adapters should be correctly initialized after cache clear
         assert community_adapter.get_tier() == "community"
         assert pro_adapter.get_tier() == "pro"
 
-    def test_all_fixtures_together(self, clear_all_caches, tier_adapter, community_adapter, all_adapters):
+    def test_all_fixtures_together(
+        self, clear_all_caches, tier_adapter, community_adapter, all_adapters
+    ):
         """All fixtures should work together."""
         # tier_adapter should be one of the adapters
         tier = tier_adapter.get_tier()

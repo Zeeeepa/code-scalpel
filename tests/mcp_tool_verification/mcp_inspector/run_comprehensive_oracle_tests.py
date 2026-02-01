@@ -27,6 +27,7 @@ sys.path.insert(0, str(project_root))
 @dataclass
 class TestResult:
     """Result of a single test case."""
+
     category: str
     test_name: str
     tool_name: str
@@ -49,6 +50,7 @@ class ComprehensiveOracleTestClient:
         """Initialize the MCP tools module."""
         try:
             from code_scalpel.mcp import tools as mcp_tools
+
             self.tools_module = mcp_tools
             print("✅ Initialized MCP tools module\n")
         except ImportError as e:
@@ -74,12 +76,15 @@ class ComprehensiveOracleTestClient:
 
         if module_name == "extraction":
             from code_scalpel.mcp.tools import extraction
+
             module = extraction
         elif module_name == "context":
             from code_scalpel.mcp.tools import context
+
             module = context
         elif module_name == "graph":
             from code_scalpel.mcp.tools import graph
+
             module = graph
         else:
             raise ValueError(f"Unknown module: {module_name}")
@@ -90,7 +95,9 @@ class ComprehensiveOracleTestClient:
 
         return func
 
-    def validate_oracle_response(self, response: Dict[str, Any]) -> tuple[bool, List[str]]:
+    def validate_oracle_response(
+        self, response: Dict[str, Any]
+    ) -> tuple[bool, List[str]]:
         """Validate oracle response structure."""
         errors = []
 
@@ -127,13 +134,15 @@ class ComprehensiveOracleTestClient:
 
         return len(errors) == 0, errors
 
-    async def run_test(self, category: str, test_name: str, tool_name: str, arguments: Dict[str, Any]) -> TestResult:
+    async def run_test(
+        self, category: str, test_name: str, tool_name: str, arguments: Dict[str, Any]
+    ) -> TestResult:
         """Run a single test."""
         result = TestResult(
             category=category,
             test_name=test_name,
             tool_name=tool_name,
-            test_input=arguments
+            test_input=arguments,
         )
 
         try:
@@ -146,7 +155,9 @@ class ComprehensiveOracleTestClient:
             elif isinstance(response, dict):
                 response_dict = response
             else:
-                response_dict = response.__dict__ if hasattr(response, "__dict__") else {}
+                response_dict = (
+                    response.__dict__ if hasattr(response, "__dict__") else {}
+                )
 
             result.raw_response = response_dict
 
@@ -156,15 +167,21 @@ class ComprehensiveOracleTestClient:
 
             # Extract oracle info
             error = response_dict.get("error", {})
-            result.error_code = error.get("error_code") if isinstance(error, dict) else None
+            result.error_code = (
+                error.get("error_code") if isinstance(error, dict) else None
+            )
 
-            error_details = error.get("error_details", {}) if isinstance(error, dict) else {}
+            error_details = (
+                error.get("error_details", {}) if isinstance(error, dict) else {}
+            )
             suggestions = error_details.get("suggestions", [])
             result.suggestion_count = len(suggestions)
 
             if suggestions:
                 top = suggestions[0]
-                result.top_suggestion = top.get("symbol") or top.get("path") or top.get("hint")
+                result.top_suggestion = (
+                    top.get("symbol") or top.get("path") or top.get("hint")
+                )
 
             result.passed = is_valid and len(errors) == 0
 
@@ -192,8 +209,8 @@ class ComprehensiveOracleTestClient:
                 "args": {
                     "file_path": "tests/mcp_tool_verification/mcp_inspector/test_code.py",
                     "target_type": "function",
-                    "target_name": "proces_data"  # typo
-                }
+                    "target_name": "proces_data",  # typo
+                },
             },
             {
                 "name": "Function Typo - Rename",
@@ -202,16 +219,16 @@ class ComprehensiveOracleTestClient:
                     "file_path": "tests/mcp_tool_verification/mcp_inspector/test_code.py",
                     "target_type": "function",
                     "target_name": "proces_data",  # typo
-                    "new_name": "process_input"
-                }
+                    "new_name": "process_input",
+                },
             },
             {
                 "name": "Function Typo - Get References",
                 "tool": "get_symbol_references",
                 "args": {
                     "symbol_name": "proces_data",  # typo
-                    "project_root": "tests/mcp_tool_verification/mcp_inspector"
-                }
+                    "project_root": "tests/mcp_tool_verification/mcp_inspector",
+                },
             },
             {
                 "name": "Entry Point Typo - Call Graph",
@@ -219,13 +236,15 @@ class ComprehensiveOracleTestClient:
                 "args": {
                     "project_root": "tests/mcp_tool_verification/mcp_inspector",
                     "entry_point": "proces_data",  # typo
-                    "depth": 2
-                }
+                    "depth": 2,
+                },
             },
         ]
 
         for test in symbol_tests:
-            await self.run_test("SymbolStrategy", test["name"], test["tool"], test["args"])
+            await self.run_test(
+                "SymbolStrategy", test["name"], test["tool"], test["args"]
+            )
 
         # ===== CATEGORY 2: PATH STRATEGIES =====
         print("\n📋 CATEGORY 2: PATH RESOLUTION STRATEGIES")
@@ -238,28 +257,30 @@ class ComprehensiveOracleTestClient:
                 "args": {
                     "file_path": "tests/mcp_tool_verification/mcp_inspector/nonexistent_file.py",  # wrong
                     "target_type": "function",
-                    "target_name": "some_function"
-                }
+                    "target_name": "some_function",
+                },
             },
             {
                 "name": "Missing File - Get Context",
                 "tool": "get_file_context",
                 "args": {
                     "file_path": "tests/mcp_tool_verification/mcp_inspector/nonexistent_file.py"  # wrong
-                }
+                },
             },
             {
                 "name": "Wrong Directory Path - Crawl",
                 "tool": "crawl_project",
                 "args": {
                     "root_path": "tests/mcp_tool_verification/wrong_dir_path/",  # wrong path
-                    "complexity_threshold": 10
-                }
+                    "complexity_threshold": 10,
+                },
             },
         ]
 
         for test in path_tests:
-            await self.run_test("PathStrategy", test["name"], test["tool"], test["args"])
+            await self.run_test(
+                "PathStrategy", test["name"], test["tool"], test["args"]
+            )
 
         # ===== CATEGORY 3: SAFETY STRATEGIES =====
         print("\n📋 CATEGORY 3: SAFETY/COLLISION STRATEGIES")
@@ -273,13 +294,15 @@ class ComprehensiveOracleTestClient:
                     "file_path": "tests/mcp_tool_verification/mcp_inspector/test_code.py",
                     "target_type": "function",
                     "target_name": "process_data",
-                    "new_name": "process_item"  # already exists
-                }
+                    "new_name": "process_item",  # already exists
+                },
             },
         ]
 
         for test in safety_tests:
-            await self.run_test("SafetyStrategy", test["name"], test["tool"], test["args"])
+            await self.run_test(
+                "SafetyStrategy", test["name"], test["tool"], test["args"]
+            )
 
         # Print summary
         self.print_summary()
@@ -323,7 +346,9 @@ class ComprehensiveOracleTestClient:
         passed = sum(1 for r in self.results if r.passed)
 
         print("\n" + "=" * 80)
-        print(f"OVERALL RESULTS: {passed}/{total} tests passed ({(passed/total*100):.1f}%)")
+        print(
+            f"OVERALL RESULTS: {passed}/{total} tests passed ({(passed/total*100):.1f}%)"
+        )
         print("=" * 80)
 
         # Generate detailed report
@@ -354,20 +379,24 @@ class ComprehensiveOracleTestClient:
         for category in sorted(categories.keys()):
             tests = categories[category]
             passed = sum(1 for t in tests if t.passed)
-            lines.extend([
-                f"### {category}",
-                f"**{passed}/{len(tests)} passed**",
-                "",
-            ])
+            lines.extend(
+                [
+                    f"### {category}",
+                    f"**{passed}/{len(tests)} passed**",
+                    "",
+                ]
+            )
 
             for result in tests:
                 status = "✅ PASS" if result.passed else "❌ FAIL"
-                lines.extend([
-                    f"**{result.test_name}** - {status}",
-                    f"- Tool: {result.tool_name}",
-                    f"- Error Code: {result.error_code}",
-                    f"- Suggestions: {result.suggestion_count}",
-                ])
+                lines.extend(
+                    [
+                        f"**{result.test_name}** - {status}",
+                        f"- Tool: {result.tool_name}",
+                        f"- Error Code: {result.error_code}",
+                        f"- Suggestions: {result.suggestion_count}",
+                    ]
+                )
                 if result.top_suggestion:
                     lines.append(f"- Top: {result.top_suggestion}")
                 if result.errors:
@@ -393,6 +422,7 @@ async def main():
     except Exception as e:
         print(f"\n❌ Fatal Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

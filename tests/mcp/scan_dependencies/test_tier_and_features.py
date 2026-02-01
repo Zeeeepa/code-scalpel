@@ -156,7 +156,9 @@ async def test_community_enforces_max_50_dependencies(tmp_path: Path):
         break
 
 
-async def test_pro_unlimited_dependencies(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_pro_unlimited_dependencies(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     project = tmp_path / "proj"
     project.mkdir(parents=True, exist_ok=True)
     _make_requirements(project, 150)
@@ -194,7 +196,9 @@ async def test_pro_unlimited_dependencies(tmp_path: Path, hs256_test_secret, wri
         break
 
 
-async def test_enterprise_unlimited_and_compliance_report(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_enterprise_unlimited_and_compliance_report(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     project = tmp_path / "proj"
     project.mkdir(parents=True, exist_ok=True)
     # Include a likely non-existent package to trigger non-compliant license
@@ -240,7 +244,9 @@ async def test_enterprise_unlimited_and_compliance_report(tmp_path: Path, hs256_
         break
 
 
-async def test_reachability_analysis_pro_sets_is_imported(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_reachability_analysis_pro_sets_is_imported(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     project = tmp_path / "proj"
     project.mkdir(parents=True, exist_ok=True)
     # Create simple Python file importing requests
@@ -275,11 +281,15 @@ async def test_reachability_analysis_pro_sets_is_imported(tmp_path: Path, hs256_
         env_json = _tool_json(payload)
         data = env_json.get("data") or env_json
         deps = data.get("dependencies") or []
-        assert any(d.get("is_imported") is True for d in deps if d.get("name") == "requests")
+        assert any(
+            d.get("is_imported") is True for d in deps if d.get("name") == "requests"
+        )
         break
 
 
-async def test_pro_omits_enterprise_fields(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_pro_omits_enterprise_fields(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Pro tier should not expose Enterprise-only fields like compliance_report or policy_violations."""
     project = tmp_path / "pro_no_ent"
     project.mkdir(parents=True, exist_ok=True)
@@ -371,7 +381,9 @@ async def test_community_truncation_warning(tmp_path: Path):
         break
 
 
-async def test_pro_typosquatting_detection(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_pro_typosquatting_detection(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Pro tier detects typosquatting risk for packages similar to popular packages."""
     project = tmp_path / "proj"
     project.mkdir(parents=True, exist_ok=True)
@@ -417,7 +429,9 @@ async def test_pro_typosquatting_detection(tmp_path: Path, hs256_test_secret, wr
         break
 
 
-async def test_pro_supply_chain_risk_scoring(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_pro_supply_chain_risk_scoring(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Pro tier calculates supply-chain risk scores for dependencies."""
     project = tmp_path / "proj"
     project.mkdir(parents=True, exist_ok=True)
@@ -504,7 +518,9 @@ async def test_enterprise_policy_violations_for_typosquatting(
         # assert env_json["tier"] == "enterprise"
         assert data.get("success") is True
         policy_violations = data.get("policy_violations") or []
-        assert len(policy_violations) > 0, f"Expected policy violations, got: {policy_violations}"
+        assert (
+            len(policy_violations) > 0
+        ), f"Expected policy violations, got: {policy_violations}"
         assert policy_violations[0]["type"] in [
             "typosquatting",
             "license",
@@ -513,7 +529,9 @@ async def test_enterprise_policy_violations_for_typosquatting(
         break
 
 
-async def test_enterprise_unlimited_dependencies(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_enterprise_unlimited_dependencies(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Enterprise tier scans 100 dependencies without truncation."""
     project = tmp_path / "proj"
     project.mkdir(parents=True, exist_ok=True)
@@ -556,7 +574,9 @@ async def test_enterprise_unlimited_dependencies(tmp_path: Path, hs256_test_secr
         break
 
 
-async def test_multi_format_maven(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_multi_format_maven(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Pro tier detects Maven ecosystem from pom.xml."""
     project = tmp_path / "maven_proj"
     project.mkdir(parents=True, exist_ok=True)
@@ -626,7 +646,9 @@ async def test_multi_format_maven(tmp_path: Path, hs256_test_secret, write_hs256
         break
 
 
-async def test_multi_format_gradle(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_multi_format_gradle(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Pro tier detects build.gradle and parses Maven ecosystem from it."""
     project = tmp_path / "gradle_proj"
     project.mkdir(parents=True, exist_ok=True)
@@ -689,7 +711,9 @@ dependencies {
         break
 
 
-async def test_monorepo_aggregation(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_monorepo_aggregation(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Pro tier scans multiple manifest file formats in the same directory."""
     project = tmp_path / "monorepo"
     project.mkdir(parents=True, exist_ok=True)
@@ -749,11 +773,15 @@ async def test_monorepo_aggregation(tmp_path: Path, hs256_test_secret, write_hs2
         assert data.get("success") is True
         # Verify aggregation: requirements.txt(5) + pom.xml(1) = at least 6 dependencies
         total_deps = data.get("total_dependencies") or 0
-        assert total_deps >= 6, f"Expected at least 6 aggregated dependencies from both files, got {total_deps}"
+        assert (
+            total_deps >= 6
+        ), f"Expected at least 6 aggregated dependencies from both files, got {total_deps}"
         # Verify both ecosystems are present
         deps = data.get("dependencies") or []
         ecosystems = {d.get("ecosystem") for d in deps}
-        assert "PyPI" in ecosystems or "Maven" in ecosystems, f"Expected PyPI or Maven, got {ecosystems}"
+        assert (
+            "PyPI" in ecosystems or "Maven" in ecosystems
+        ), f"Expected PyPI or Maven, got {ecosystems}"
         break
 
 
@@ -821,7 +849,9 @@ async def test_community_suppresses_enterprise_fields(tmp_path: Path):
 
         # Verify compliance_report is not present at Community
         compliance_report = data.get("compliance_report")
-        assert compliance_report is None, f"Community tier should not have compliance_report, got: {compliance_report}"
+        assert (
+            compliance_report is None
+        ), f"Community tier should not have compliance_report, got: {compliance_report}"
         break
 
 
@@ -880,7 +910,9 @@ async def test_unsupported_file_format_graceful_handling(tmp_path: Path):
         break
 
 
-async def test_expired_license_fallback_to_community(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_expired_license_fallback_to_community(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Expired Pro license falls back to Community tier with limit enforcement."""
     project = tmp_path / "expired_lic"
     project.mkdir(parents=True, exist_ok=True)
@@ -927,7 +959,9 @@ async def test_expired_license_fallback_to_community(tmp_path: Path, hs256_test_
 ## Community fallback occurs when no tier is requested and no license is present (covered above).
 
 
-async def test_pro_license_compliance_flags_gpl(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_pro_license_compliance_flags_gpl(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """
     Test that Pro tier license_compliance capability:
     1. Fetches license info from PyPI/npm registries
@@ -984,7 +1018,9 @@ async def test_pro_license_compliance_flags_gpl(tmp_path: Path, hs256_test_secre
         assert len(deps) >= 2
 
         # Find mysql-connector-python (GPL-2.0 - copyleft)
-        gpl_dep = next((d for d in deps if "mysql-connector" in d.get("name", "").lower()), None)
+        gpl_dep = next(
+            (d for d in deps if "mysql-connector" in d.get("name", "").lower()), None
+        )
         if gpl_dep:
             # Should have license fields at Pro tier
             assert "license" in gpl_dep or "license_compliant" in gpl_dep
@@ -1063,7 +1099,9 @@ async def test_community_output_metadata_fields(tmp_path: Path):
         break
 
 
-async def test_pro_output_metadata_fields(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_pro_output_metadata_fields(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Pro tier should report tier_applied, unlimited dependencies, and pro features.
 
     [20260111_TEST] v3.3.2 - Validates output metadata fields for Pro tier.
@@ -1110,7 +1148,9 @@ async def test_pro_output_metadata_fields(tmp_path: Path, hs256_test_secret, wri
         # Note: Pydantic with exclude_none=True omits None values from JSON output,
         # so absent field means unlimited (None). Present field with None also means unlimited.
         max_deps = data.get("max_dependencies_applied")
-        assert max_deps is None, f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
+        assert (
+            max_deps is None
+        ), f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
 
         # pro_features_enabled should list Pro features
         # assert (
@@ -1141,7 +1181,9 @@ async def test_pro_output_metadata_fields(tmp_path: Path, hs256_test_secret, wri
         break
 
 
-async def test_enterprise_output_metadata_fields(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+async def test_enterprise_output_metadata_fields(
+    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
+):
     """Enterprise tier should report tier_applied, unlimited dependencies, and all features.
 
     [20260111_TEST] v3.3.2 - Validates output metadata fields for Enterprise tier.
@@ -1188,7 +1230,9 @@ async def test_enterprise_output_metadata_fields(tmp_path: Path, hs256_test_secr
         # Note: Pydantic with exclude_none=True omits None values from JSON output,
         # so absent field means unlimited (None). Present field with None also means unlimited.
         max_deps = data.get("max_dependencies_applied")
-        assert max_deps is None, f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
+        assert (
+            max_deps is None
+        ), f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
 
         # pro_features_enabled should list Pro features (Enterprise includes all Pro features)
         # assert (

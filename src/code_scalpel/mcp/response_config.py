@@ -102,13 +102,17 @@ class ResponseConfig:
                     self._last_mtime = config_path.stat().st_mtime
                     return config
             except Exception as e:
-                logger.warning(f"Failed to load response config from {config_path}: {e}")
+                logger.warning(
+                    f"Failed to load response config from {config_path}: {e}"
+                )
 
         # Search common locations
         search_paths = [
             Path.cwd() / ".code-scalpel" / "response_config.json",
             Path.home() / ".config" / "code-scalpel" / "response_config.json",
-            Path(__file__).parent.parent.parent / ".code-scalpel" / "response_config.json",
+            Path(__file__).parent.parent.parent
+            / ".code-scalpel"
+            / "response_config.json",
         ]
 
         for path in search_paths:
@@ -156,7 +160,9 @@ class ResponseConfig:
     def get_profile(self, tool_name: Optional[str] = None) -> str:
         """Get the profile to use for a tool."""
         if tool_name and tool_name in self.config.get("tool_overrides", {}):
-            return self.config["tool_overrides"][tool_name].get("profile", self.config["global"]["profile"])
+            return self.config["tool_overrides"][tool_name].get(
+                "profile", self.config["global"]["profile"]
+            )
         return self.config["global"]["profile"]
 
     def get_envelope_fields(self, tool_name: Optional[str] = None) -> Set[str]:
@@ -165,7 +171,9 @@ class ResponseConfig:
         profile_config = self.config["profiles"].get(profile, {})
         return set(profile_config.get("envelope", {}).get("include", []))
 
-    def get_exclusions(self, tool_name: Optional[str] = None, tier: Optional[str] = None) -> Set[str]:
+    def get_exclusions(
+        self, tool_name: Optional[str] = None, tier: Optional[str] = None
+    ) -> Set[str]:
         """Get fields to exclude from response."""
         exclusions = set()
 
@@ -287,9 +295,17 @@ class ResponseConfig:
                 # Still apply null/empty filtering to error fields
                 if self.should_exclude_null_values() and value is None:
                     continue
-                if self.should_exclude_empty_arrays() and isinstance(value, list) and len(value) == 0:
+                if (
+                    self.should_exclude_empty_arrays()
+                    and isinstance(value, list)
+                    and len(value) == 0
+                ):
                     continue
-                if self.should_exclude_empty_objects() and isinstance(value, dict) and len(value) == 0:
+                if (
+                    self.should_exclude_empty_objects()
+                    and isinstance(value, dict)
+                    and len(value) == 0
+                ):
                     continue
                 filtered[key] = value
                 continue
@@ -303,11 +319,19 @@ class ResponseConfig:
                 continue
 
             # Skip empty arrays
-            if self.should_exclude_empty_arrays() and isinstance(value, list) and len(value) == 0:
+            if (
+                self.should_exclude_empty_arrays()
+                and isinstance(value, list)
+                and len(value) == 0
+            ):
                 continue
 
             # Skip empty objects
-            if self.should_exclude_empty_objects() and isinstance(value, dict) and len(value) == 0:
+            if (
+                self.should_exclude_empty_objects()
+                and isinstance(value, dict)
+                and len(value) == 0
+            ):
                 continue
 
             # Skip null values

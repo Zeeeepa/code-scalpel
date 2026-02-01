@@ -100,7 +100,9 @@ class TamperResistance:
             )
 
             # Fail CLOSED - deny all operations
-            raise TamperDetectedError("Policy file integrity check failed. All operations denied.")
+            raise TamperDetectedError(
+                "Policy file integrity check failed. All operations denied."
+            )
 
         return True
 
@@ -163,7 +165,9 @@ class TamperResistance:
                     },
                 )
 
-                raise PolicyModificationError(f"Agent attempted to modify protected policy file: {file_path}")
+                raise PolicyModificationError(
+                    f"Agent attempted to modify protected policy file: {file_path}"
+                )
 
         return True
 
@@ -192,7 +196,9 @@ class TamperResistance:
         challenge = self._generate_challenge()
 
         # Wait for human response (with timeout)
-        response = self._wait_for_human_response(challenge=challenge, timeout_seconds=timeout_seconds)
+        response = self._wait_for_human_response(
+            challenge=challenge, timeout_seconds=timeout_seconds
+        )
 
         if not response:
             self.audit_log.record_event(
@@ -227,7 +233,9 @@ class TamperResistance:
                 severity="HIGH",
                 details={"operation": operation.type, "override_id": override_id},
             )
-            return OverrideDecision(approved=False, reason="Override code cannot be reused")
+            return OverrideDecision(
+                approved=False, reason="Override code cannot be reused"
+            )
 
         # Mark override as used
         self._used_override_ids.add(override_id)
@@ -263,7 +271,9 @@ class TamperResistance:
         """
         return secrets.token_hex(16)
 
-    def _wait_for_human_response(self, challenge: str, timeout_seconds: int) -> Optional[HumanResponse]:
+    def _wait_for_human_response(
+        self, challenge: str, timeout_seconds: int
+    ) -> Optional[HumanResponse]:
         """
         Wait for human response to override challenge.
 
@@ -331,7 +341,9 @@ class TamperResistance:
         secret = os.environ.get("SCALPEL_TOTP_SECRET", "default-totp-secret")
 
         # Generate expected code
-        expected_code = hmac.new(secret.encode(), challenge.encode(), hashlib.sha256).hexdigest()[:8]
+        expected_code = hmac.new(
+            secret.encode(), challenge.encode(), hashlib.sha256
+        ).hexdigest()[:8]
 
         return code == expected_code
 

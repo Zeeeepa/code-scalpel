@@ -241,7 +241,9 @@ class MypyError:
         return "\n".join(parts)
 
     @classmethod
-    def from_line(cls, line: str, *, context_line: str | None = None) -> MypyError | None:
+    def from_line(
+        cls, line: str, *, context_line: str | None = None
+    ) -> MypyError | None:
         """
         Parse a mypy output line.
 
@@ -359,7 +361,9 @@ class RevealedType:
         return self.revealed_type
 
     @classmethod
-    def from_note(cls, error: MypyError, *, narrowing_context: list[str] | None = None) -> RevealedType | None:
+    def from_note(
+        cls, error: MypyError, *, narrowing_context: list[str] | None = None
+    ) -> RevealedType | None:
         """
         Parse a reveal_type note from mypy output.
 
@@ -500,7 +504,9 @@ class MypyConfig:
     def _from_pyproject(cls, path: Path) -> MypyConfig:
         """Load configuration from pyproject.toml."""
         if tomllib is None:
-            raise ImportError("tomllib (Python 3.11+) or tomli is required for TOML parsing")
+            raise ImportError(
+                "tomllib (Python 3.11+) or tomli is required for TOML parsing"
+            )
 
         with open(path, "rb") as f:
             data = tomllib.load(f)
@@ -533,23 +539,41 @@ class MypyConfig:
         if "strict" in s:
             config.strict = s.getboolean("strict", fallback=config.strict)
         if "strict_optional" in s:
-            config.strict_optional = s.getboolean("strict_optional", fallback=config.strict_optional)
+            config.strict_optional = s.getboolean(
+                "strict_optional", fallback=config.strict_optional
+            )
         if "warn_return_any" in s:
-            config.warn_return_any = s.getboolean("warn_return_any", fallback=config.warn_return_any)
+            config.warn_return_any = s.getboolean(
+                "warn_return_any", fallback=config.warn_return_any
+            )
         if "warn_unused_configs" in s:
-            config.warn_unused_configs = s.getboolean("warn_unused_configs", fallback=config.warn_unused_configs)
+            config.warn_unused_configs = s.getboolean(
+                "warn_unused_configs", fallback=config.warn_unused_configs
+            )
         if "warn_redundant_casts" in s:
-            config.warn_redundant_casts = s.getboolean("warn_redundant_casts", fallback=config.warn_redundant_casts)
+            config.warn_redundant_casts = s.getboolean(
+                "warn_redundant_casts", fallback=config.warn_redundant_casts
+            )
         if "warn_unused_ignores" in s:
-            config.warn_unused_ignores = s.getboolean("warn_unused_ignores", fallback=config.warn_unused_ignores)
+            config.warn_unused_ignores = s.getboolean(
+                "warn_unused_ignores", fallback=config.warn_unused_ignores
+            )
         if "warn_unreachable" in s:
-            config.warn_unreachable = s.getboolean("warn_unreachable", fallback=config.warn_unreachable)
+            config.warn_unreachable = s.getboolean(
+                "warn_unreachable", fallback=config.warn_unreachable
+            )
         if "show_error_codes" in s:
-            config.show_error_codes = s.getboolean("show_error_codes", fallback=config.show_error_codes)
+            config.show_error_codes = s.getboolean(
+                "show_error_codes", fallback=config.show_error_codes
+            )
         if "show_error_context" in s:
-            config.show_error_context = s.getboolean("show_error_context", fallback=config.show_error_context)
+            config.show_error_context = s.getboolean(
+                "show_error_context", fallback=config.show_error_context
+            )
         if "show_column_numbers" in s:
-            config.show_column_numbers = s.getboolean("show_column_numbers", fallback=config.show_column_numbers)
+            config.show_column_numbers = s.getboolean(
+                "show_column_numbers", fallback=config.show_column_numbers
+            )
         if "ignore_missing_imports" in s:
             config.ignore_missing_imports = s.getboolean(
                 "ignore_missing_imports", fallback=config.ignore_missing_imports
@@ -609,7 +633,9 @@ class MypyConfig:
                     if isinstance(modules, str):
                         modules = [modules]
                     for module in modules:
-                        config.per_module_config[module] = {k: v for k, v in override.items() if k != "module"}
+                        config.per_module_config[module] = {
+                            k: v for k, v in override.items() if k != "module"
+                        }
 
         return config
 
@@ -768,10 +794,16 @@ class MypyReport:
             "files_analyzed": self.files_analyzed,
             "revealed_types": len(self.revealed_types),
             "coverage": {
-                "function_coverage": (self.coverage.function_coverage if self.coverage else None),
-                "overall_coverage": (self.coverage.overall_coverage if self.coverage else None),
+                "function_coverage": (
+                    self.coverage.function_coverage if self.coverage else None
+                ),
+                "overall_coverage": (
+                    self.coverage.overall_coverage if self.coverage else None
+                ),
             },
-            "by_category": {cat.name: len(errors) for cat, errors in self.errors_by_category.items()},
+            "by_category": {
+                cat.name: len(errors) for cat, errors in self.errors_by_category.items()
+            },
         }
 
 
@@ -921,7 +953,9 @@ class MypyParser:
                 report.errors.append(current_error)
 
             # Success if no errors (notes are OK)
-            report.success = all(e.severity != MypySeverity.ERROR for e in report.errors)
+            report.success = all(
+                e.severity != MypySeverity.ERROR for e in report.errors
+            )
             report.files_analyzed = len(set(e.file for e in report.errors)) or 1
 
             if result.stderr:
@@ -996,7 +1030,10 @@ class MypyParser:
                     error = MypyError.from_dict(data)
 
                     # Check if it's a revealed type note
-                    if error.severity == MypySeverity.NOTE and "Revealed type" in error.message:
+                    if (
+                        error.severity == MypySeverity.NOTE
+                        and "Revealed type" in error.message
+                    ):
                         revealed = RevealedType.from_note(error)
                         if revealed:
                             report.revealed_types.append(revealed)
@@ -1010,13 +1047,17 @@ class MypyParser:
                         report.errors.append(error)
 
             # Success if no errors
-            report.success = all(e.severity != MypySeverity.ERROR for e in report.errors)
+            report.success = all(
+                e.severity != MypySeverity.ERROR for e in report.errors
+            )
             report.files_analyzed = len(set(e.file for e in report.errors)) or 1
 
             if result.stderr:
                 # Check for unsupported --output=json flag
                 if "unrecognized arguments: --output=json" in result.stderr:
-                    report.parse_errors.append("mypy JSON output not supported; falling back to text parsing")
+                    report.parse_errors.append(
+                        "mypy JSON output not supported; falling back to text parsing"
+                    )
                     return self.analyze(target, config=config)
                 report.parse_errors.append(result.stderr.strip())
 
@@ -1128,7 +1169,9 @@ class MypyParser:
                     current_error = error
                 else:
                     # Context line (source code shown with --show-error-context)
-                    if current_error and (line.startswith("    ") or line.startswith("\t")):
+                    if current_error and (
+                        line.startswith("    ") or line.startswith("\t")
+                    ):
                         context_buffer.append(line)
 
                 i += 1
@@ -1139,7 +1182,9 @@ class MypyParser:
                     current_error.context = "\n".join(context_buffer)
                 report.errors.append(current_error)
 
-            report.success = all(e.severity != MypySeverity.ERROR for e in report.errors)
+            report.success = all(
+                e.severity != MypySeverity.ERROR for e in report.errors
+            )
             report.files_analyzed = len(set(e.file for e in report.errors)) or 1
 
             if result.stderr:

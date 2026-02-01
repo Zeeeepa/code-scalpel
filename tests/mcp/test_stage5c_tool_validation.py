@@ -60,7 +60,9 @@ def process():
     return calculate(1, 2)
 """
         # Should work: Extract single function without dependencies
-        result = extract_code(code=code, target_type="function", target_name="calculate")
+        result = extract_code(
+            code=code, target_type="function", target_name="calculate"
+        )
         assert result.target_code.strip().startswith("def calculate")
         assert "def process" not in result.target_code
 
@@ -171,7 +173,9 @@ def process(user_input):
             with open(test_file, "w") as f:
                 f.write("def my_function():\n    pass\n\nresult = my_function()\n")
 
-            result = await server.get_symbol_references("my_function", project_root=tmpdir)
+            result = await server.get_symbol_references(
+                "my_function", project_root=tmpdir
+            )
 
             assert result.success is True
             assert result.symbol_name == "my_function"

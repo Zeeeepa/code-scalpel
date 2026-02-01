@@ -27,7 +27,9 @@ class TestParameterClamping:
         limits = caps.get("limits", {})
 
         # Community tier should not allow cross-file deps (depth=0)
-        assert limits.get("max_depth") == 0, "Community extract_code should have max_depth=0 (no cross-file deps)"
+        assert (
+            limits.get("max_depth") == 0
+        ), "Community extract_code should have max_depth=0 (no cross-file deps)"
 
     def test_extract_code_depth_clamping_pro(self, pro_tier):
         """extract_code should allow depth=1 in Pro tier."""
@@ -47,7 +49,9 @@ class TestParameterClamping:
         limits = caps.get("limits", {})
 
         # Enterprise allows full cross-file dependency resolution
-        assert limits.get("max_depth") is None, "Enterprise extract_code should have unlimited depth"
+        assert (
+            limits.get("max_depth") is None
+        ), "Enterprise extract_code should have unlimited depth"
 
     def test_get_call_graph_depth_clamping_community(self, community_tier):
         """get_call_graph should clamp depth to 3 in Community tier."""
@@ -74,7 +78,9 @@ class TestParameterClamping:
         caps = get_tool_capabilities("get_call_graph", "enterprise")
         limits = caps.get("limits", {})
 
-        assert limits.get("max_depth") is None, "Enterprise: max_depth should be unlimited"
+        assert (
+            limits.get("max_depth") is None
+        ), "Enterprise: max_depth should be unlimited"
 
 
 class TestResponseMetadata:
@@ -99,11 +105,15 @@ class TestLimitBoundaryValues:
 
         # If community has a limit, pro should have a higher one or None
         if community is not None and pro is not None:
-            assert pro >= community, f"Tool '{tool}': pro max_files ({pro}) should be >= community ({community})"
+            assert (
+                pro >= community
+            ), f"Tool '{tool}': pro max_files ({pro}) should be >= community ({community})"
 
         # If pro has a limit, enterprise should have higher or None
         if pro is not None and enterprise is not None:
-            assert enterprise >= pro, f"Tool '{tool}': enterprise max_files should be >= pro"
+            assert (
+                enterprise >= pro
+            ), f"Tool '{tool}': enterprise max_files should be >= pro"
 
 
 class TestOmissionAsUnlimited:
@@ -119,7 +129,9 @@ class TestOmissionAsUnlimited:
 
         # max_depth should be None (unlimited) or very high number
         max_depth = limits.get("max_depth")
-        assert max_depth is None, "Enterprise extract_code should have unlimited depth (None value)"
+        assert (
+            max_depth is None
+        ), "Enterprise extract_code should have unlimited depth (None value)"
 
 
 class TestGracefulFallback:
@@ -131,14 +143,18 @@ class TestGracefulFallback:
 
         # Even if a limit isn't explicitly set, tool should work
         caps = get_tool_capabilities("analyze_code", "community")
-        assert "limits" in caps, "Tool should have limits dict even if partially defined"
+        assert (
+            "limits" in caps
+        ), "Tool should have limits dict even if partially defined"
 
 
 @pytest.mark.slow
 class TestLargeScaleLimitEnforcement:
     """Test limits with large inputs."""
 
-    def test_crawl_project_respects_community_file_limit(self, community_tier, tmp_path):
+    def test_crawl_project_respects_community_file_limit(
+        self, community_tier, tmp_path
+    ):
         """crawl_project should not analyze more than 100 files in Community tier."""
         # Create 150 test files
         test_dir = tmp_path / "test_project"

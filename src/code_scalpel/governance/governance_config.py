@@ -192,7 +192,9 @@ class GovernanceConfigLoader:
         if not profile:
             return None
         # Keep profile string safe and predictable.
-        profile_norm = "".join(ch for ch in profile.lower() if ch.isalnum() or ch in {"-", "_"})
+        profile_norm = "".join(
+            ch for ch in profile.lower() if ch.isalnum() or ch in {"-", "_"}
+        )
         if not profile_norm:
             return None
         candidate = Path.cwd() / ".code-scalpel" / f"config.{profile_norm}.json"
@@ -228,7 +230,10 @@ class GovernanceConfigLoader:
             logger.info(f"Loading governance config from {self.config_path}")
             config_data = self._load_and_validate()
         else:
-            logger.warning(f"No governance configuration found at {self.config_path}, " "using defaults")
+            logger.warning(
+                f"No governance configuration found at {self.config_path}, "
+                "using defaults"
+            )
             config_data = self._get_defaults()
 
         # Apply environment variable overrides
@@ -391,6 +396,8 @@ class GovernanceConfigLoader:
         return GovernanceConfig(
             change_budgeting=ChangeBudgetingConfig(**gov.get("change_budgeting", {})),
             blast_radius=BlastRadiusConfig(**gov.get("blast_radius", {})),
-            autonomy_constraints=AutonomyConstraintsConfig(**gov.get("autonomy_constraints", {})),
+            autonomy_constraints=AutonomyConstraintsConfig(
+                **gov.get("autonomy_constraints", {})
+            ),
             audit=AuditConfig(**gov.get("audit", {})),
         )

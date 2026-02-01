@@ -18,7 +18,9 @@ class TestCommunityTierFeatures:
         """Community tier should support pytest."""
         from code_scalpel.mcp.server import _generate_tests_sync
 
-        result = _generate_tests_sync(code="def add(a, b): return a + b", framework="pytest")
+        result = _generate_tests_sync(
+            code="def add(a, b): return a + b", framework="pytest"
+        )
 
         assert result.success is True
 
@@ -56,7 +58,9 @@ class TestProTierFeatures:
         """Pro tier should support unittest."""
         from code_scalpel.mcp.server import _generate_tests_sync
 
-        result = _generate_tests_sync(code="def add(a, b): return a + b", framework="unittest")
+        result = _generate_tests_sync(
+            code="def add(a, b): return a + b", framework="unittest"
+        )
 
         assert result.success is True
 
@@ -154,7 +158,9 @@ class TestEdgeCases:
         """Should handle trivial functions."""
         from code_scalpel.mcp.server import _generate_tests_sync
 
-        result = _generate_tests_sync(code="def identity(x): return x", framework="pytest")
+        result = _generate_tests_sync(
+            code="def identity(x): return x", framework="pytest"
+        )
 
         assert result.success is True
         assert result.test_count >= 1

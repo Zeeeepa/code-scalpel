@@ -159,7 +159,9 @@ class ContractBreachDetector:
         """
         self.graph = graph
 
-    def detect_breaches(self, changed_node_id: str, min_confidence: float = 0.8) -> list[ContractBreach]:
+    def detect_breaches(
+        self, changed_node_id: str, min_confidence: float = 0.8
+    ) -> list[ContractBreach]:
         """
         Detect contract breaches when a node changes.
 
@@ -188,14 +190,18 @@ class ContractBreachDetector:
                 continue
 
             # Check for staleness
-            breach = self._check_staleness(server_node=changed_node_id, client_node=edge.from_id, edge=edge)
+            breach = self._check_staleness(
+                server_node=changed_node_id, client_node=edge.from_id, edge=edge
+            )
 
             if breach:
                 breaches.append(breach)
 
         return breaches
 
-    def _check_staleness(self, server_node: str, client_node: str, edge: Edge) -> Optional[ContractBreach]:
+    def _check_staleness(
+        self, server_node: str, client_node: str, edge: Edge
+    ) -> Optional[ContractBreach]:
         """
         Check if client is using outdated contract.
 
@@ -229,7 +235,9 @@ class ContractBreachDetector:
 
         return None
 
-    def _detect_field_breach(self, server: Node, client: Node, edge: Edge) -> Optional[ContractBreach]:
+    def _detect_field_breach(
+        self, server: Node, client: Node, edge: Edge
+    ) -> Optional[ContractBreach]:
         """
         Detect Java POJO field rename breaking TS interface.
 
@@ -256,7 +264,9 @@ class ContractBreachDetector:
 
         return None
 
-    def _detect_endpoint_breach(self, server: Node, client: Node, edge: Edge) -> Optional[ContractBreach]:
+    def _detect_endpoint_breach(
+        self, server: Node, client: Node, edge: Edge
+    ) -> Optional[ContractBreach]:
         """
         Detect REST endpoint path change breaking frontend.
 
@@ -280,7 +290,9 @@ class ContractBreachDetector:
 
         return None
 
-    def _detect_format_breach(self, server: Node, client: Node, edge: Edge) -> Optional[ContractBreach]:
+    def _detect_format_breach(
+        self, server: Node, client: Node, edge: Edge
+    ) -> Optional[ContractBreach]:
         """
         Detect response format change breaking client.
 
@@ -312,7 +324,9 @@ class ContractBreachDetector:
 
 
 # [20251216_FEATURE] Convenience function for quick breach detection
-def detect_breaches(graph: UnifiedGraph, changed_node_id: str, min_confidence: float = 0.8) -> list[ContractBreach]:
+def detect_breaches(
+    graph: UnifiedGraph, changed_node_id: str, min_confidence: float = 0.8
+) -> list[ContractBreach]:
     """
     Detect contract breaches for a changed node.
 

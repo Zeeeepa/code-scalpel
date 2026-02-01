@@ -197,7 +197,12 @@ class ResponseFormatter:
                 filtered[key] = ResponseFormatter.filter_data(value, profile)
             elif isinstance(value, list):
                 filtered[key] = [
-                    (ResponseFormatter.filter_data(item, profile) if isinstance(item, dict) else item) for item in value
+                    (
+                        ResponseFormatter.filter_data(item, profile)
+                        if isinstance(item, dict)
+                        else item
+                    )
+                    for item in value
                 ]
             else:
                 filtered[key] = value
@@ -226,7 +231,9 @@ class ResponseFormatter:
             if tool_argument_profile in PROFILES:
                 logger.debug(f"Using profile from argument: {tool_argument_profile}")
                 return PROFILES[tool_argument_profile]
-            logger.warning(f"Unknown profile '{tool_argument_profile}', using config default")
+            logger.warning(
+                f"Unknown profile '{tool_argument_profile}', using config default"
+            )
 
         # Check config
         config = get_response_config()
@@ -297,7 +304,9 @@ class ResponseFormatter:
         envelope_fields_to_keep.update(profile.include_envelope_fields)
 
         # Filter envelope to keep only specified fields
-        filtered_envelope = {k: v for k, v in envelope_dict.items() if k in envelope_fields_to_keep}
+        filtered_envelope = {
+            k: v for k, v in envelope_dict.items() if k in envelope_fields_to_keep
+        }
 
         # Filter the data field using standard data filtering
         if "data" in filtered_envelope and filtered_envelope["data"]:

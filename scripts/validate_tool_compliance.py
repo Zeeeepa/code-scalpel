@@ -96,7 +96,9 @@ class ToolComplianceChecker:
             self.logger.error(f"Failed to parse {file_path}: {e}")
             return None
 
-    def find_decorated_functions(self, tree: ast.Module) -> List[Tuple[str, ast.FunctionDef]]:
+    def find_decorated_functions(
+        self, tree: ast.Module
+    ) -> List[Tuple[str, ast.FunctionDef]]:
         """Find functions decorated with @mcp.tool()."""
         functions = []
         for node in ast.walk(tree):
@@ -111,41 +113,60 @@ class ToolComplianceChecker:
         """Check if decorator is @mcp.tool()."""
         if isinstance(decorator, ast.Call):
             if isinstance(decorator.func, ast.Attribute):
-                if isinstance(decorator.func.value, ast.Name) and decorator.func.value.id == "mcp":
+                if (
+                    isinstance(decorator.func.value, ast.Name)
+                    and decorator.func.value.id == "mcp"
+                ):
                     if decorator.func.attr == "tool":
                         return True
         return False
 
-    def check_criteria(self, tool_name: str, func_node: ast.FunctionDef, tool_file: Path) -> Dict[str, Any]:
+    def check_criteria(
+        self, tool_name: str, func_node: ast.FunctionDef, tool_file: Path
+    ) -> Dict[str, Any]:
         """Check all compliance criteria for a tool."""
         criteria = {}
 
         # 1. has_mcp_tool_decorator
-        criteria["has_mcp_tool_decorator"] = any(self._is_mcp_tool_decorator(d) for d in func_node.decorator_list)
+        criteria["has_mcp_tool_decorator"] = any(
+            self._is_mcp_tool_decorator(d) for d in func_node.decorator_list
+        )
 
         # 2. is_async_function
         criteria["is_async_function"] = isinstance(func_node, ast.AsyncFunctionDef)
 
         # 3. calls_asyncio_to_thread
-        has_asyncio_to_thread, has_direct_await = self._calls_asyncio_to_thread(func_node)
+        has_asyncio_to_thread, has_direct_await = self._calls_asyncio_to_thread(
+            func_node
+        )
         criteria["calls_asyncio_to_thread"] = has_asyncio_to_thread or has_direct_await
 
         # 4. imports_helper_correctly
-        criteria["imports_helper_correctly"] = self._imports_helper_correctly(func_node, tool_name)
+        criteria["imports_helper_correctly"] = self._imports_helper_correctly(
+            func_node, tool_name
+        )
 
         # 5. helper_file_exists
         helper_file = self._get_helper_file_path(tool_name)
-        criteria["helper_file_exists"] = helper_file is not None and helper_file.exists()
+        criteria["helper_file_exists"] = (
+            helper_file is not None and helper_file.exists()
+        )
 
         # 6. helper_function_exists
         helper_func_name = self._get_helper_func_name(tool_name)
         criteria["helper_function_exists"] = (
-            self._helper_function_exists(helper_file, helper_func_name) if helper_file else False
+            self._helper_function_exists(helper_file, helper_func_name)
+            if helper_file
+            else False
         )
 
         # 7. helper_is_sync
         if has_asyncio_to_thread:
-            criteria["helper_is_sync"] = self._helper_is_sync(helper_file, helper_func_name) if helper_file else False
+            criteria["helper_is_sync"] = (
+                self._helper_is_sync(helper_file, helper_func_name)
+                if helper_file
+                else False
+            )
         elif has_direct_await:
             criteria["helper_is_sync"] = True
         else:
@@ -183,7 +204,10 @@ class ToolComplianceChecker:
         for node in ast.walk(func_node):
             if isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Attribute):
-                    if isinstance(node.func.value, ast.Name) and node.func.value.id == "asyncio":
+                    if (
+                        isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == "asyncio"
+                    ):
                         if node.func.attr == "to_thread":
                             has_asyncio_to_thread = True
 
@@ -198,7 +222,9 @@ class ToolComplianceChecker:
 
         return has_asyncio_to_thread, has_direct_await
 
-    def _imports_helper_correctly(self, func_node: ast.FunctionDef, tool_name: str) -> bool:
+    def _imports_helper_correctly(
+        self, func_node: ast.FunctionDef, tool_name: str
+    ) -> bool:
         """Check if imports helper function correctly."""
         f"from code_scalpel.mcp.helpers.{self._get_category(tool_name)}_helpers import _{tool_name}_sync"
         # Simplified: check if any import contains the helper
@@ -276,7 +302,10 @@ class ToolComplianceChecker:
         if not tree:
             return False
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func_name:
+            if (
+                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and node.name == func_name
+            ):
                 return True
         return False
 
@@ -341,7 +370,11 @@ class ToolComplianceChecker:
                 result = {
                     "tool_id": tool_name,
                     "module": str(tool_file.relative_to(self.repo_root)),
-                    "first_failure_line": (func_node.lineno if any(not v for v in criteria.values()) else None),
+                    "first_failure_line": (
+                        func_node.lineno
+                        if any(not v for v in criteria.values())
+                        else None
+                    ),
                     "status": "PASS" if all(criteria.values()) else "FAIL",
                     **criteria,
                 }
@@ -379,7 +412,9 @@ class ToolComplianceChecker:
         table += "|" + "|".join("---" for _ in headers) + "|\n"
 
         for result in results:
-            row = [result["tool_id"], result["module"], result["status"]] + [str(result[c]) for c in CRITERIA_NAMES]
+            row = [result["tool_id"], result["module"], result["status"]] + [
+                str(result[c]) for c in CRITERIA_NAMES
+            ]
             table += "| " + " | ".join(row) + " |\n"
 
         return table
@@ -389,8 +424,12 @@ def main():
     parser = argparse.ArgumentParser(description="Validate tool compliance")
     parser.add_argument("--root", required=True, type=Path, help="Repository root")
     parser.add_argument("--out-csv", type=Path, help="Output CSV file")
-    parser.add_argument("--format", choices=["csv", "md", "json"], default="csv", help="Output format")
-    parser.add_argument("--strict", action="store_true", help="Treat warnings as failures")
+    parser.add_argument(
+        "--format", choices=["csv", "md", "json"], default="csv", help="Output format"
+    )
+    parser.add_argument(
+        "--strict", action="store_true", help="Treat warnings as failures"
+    )
     parser.add_argument("--verbose", action="store_true", help="Verbose logging")
 
     args = parser.parse_args()

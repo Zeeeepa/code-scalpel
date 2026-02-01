@@ -48,7 +48,8 @@ class ScopedSymbol:
 
     def __repr__(self) -> str:
         return (
-            f"ScopedSymbol({self.name}, type={self.symbol_type}, " f"scope={self.scope}, exported={self.is_exported})"
+            f"ScopedSymbol({self.name}, type={self.symbol_type}, "
+            f"scope={self.scope}, exported={self.is_exported})"
         )
 
 
@@ -214,7 +215,9 @@ class SymbolExtractor:
                     symbol_type="import",
                     line_number=None,
                 )
-                for match in re.findall(r"^(?:from|import)\s+([\w.]+)", content, re.MULTILINE)
+                for match in re.findall(
+                    r"^(?:from|import)\s+([\w.]+)", content, re.MULTILINE
+                )
             ]
             symbols_dict["functions"] = [
                 ScopedSymbol(
@@ -323,7 +326,9 @@ class SymbolExtractor:
         return symbols_dict
 
     @staticmethod
-    def extract_symbols(content: str, language: Language) -> dict[str, list[ScopedSymbol]]:
+    def extract_symbols(
+        content: str, language: Language
+    ) -> dict[str, list[ScopedSymbol]]:
         """Extract symbols from code in the given language.
 
         Args:
@@ -388,7 +393,9 @@ class SemanticValidator:
             cache_key = str(id(source_context))
 
         if cache_key not in self.symbol_cache:
-            symbols = SymbolExtractor.extract_symbols(source_context.content, source_context.language)
+            symbols = SymbolExtractor.extract_symbols(
+                source_context.content, source_context.language
+            )
             self.symbol_cache[cache_key] = symbols
         else:
             symbols = self.symbol_cache[cache_key]
@@ -429,7 +436,10 @@ class SemanticValidator:
         )
 
         # Build error message with suggestions (NO AUTO-FIXING)
-        error_msg = f"Symbol '{symbol_name}' not found in " f"{'file' if source_context.file_path else 'memory'}"
+        error_msg = (
+            f"Symbol '{symbol_name}' not found in "
+            f"{'file' if source_context.file_path else 'memory'}"
+        )
 
         suggestion_names = []
         if suggestions:
@@ -458,7 +468,9 @@ class SemanticValidator:
             cache_key = str(id(source_context))
 
         if cache_key not in self.symbol_cache:
-            symbols = SymbolExtractor.extract_symbols(source_context.content, source_context.language)
+            symbols = SymbolExtractor.extract_symbols(
+                source_context.content, source_context.language
+            )
             self.symbol_cache[cache_key] = symbols
         else:
             symbols = self.symbol_cache[cache_key]
@@ -488,7 +500,10 @@ class SemanticValidator:
             top_k=3,
         )
 
-        error_msg = f"Import '{import_name}' not found in " f"{'file' if source_context.file_path else 'memory'}"
+        error_msg = (
+            f"Import '{import_name}' not found in "
+            f"{'file' if source_context.file_path else 'memory'}"
+        )
         suggestion_names = []
         if suggestions:
             suggestion_names = [s.name for s in suggestions]
@@ -520,10 +535,14 @@ class StructuralValidator:
         try:
             ast.parse(source_context.content)
         except SyntaxError as e:
-            raise ValidationError(f"Python syntax error at line {e.lineno}: {e.msg}") from e
+            raise ValidationError(
+                f"Python syntax error at line {e.lineno}: {e.msg}"
+            ) from e
 
     @staticmethod
-    def validate_file_size(source_context: SourceContext, max_bytes: int = 10_000_000) -> None:
+    def validate_file_size(
+        source_context: SourceContext, max_bytes: int = 10_000_000
+    ) -> None:
         """Ensure source file is within size limits.
 
         Args:
@@ -536,7 +555,9 @@ class StructuralValidator:
         if source_context.file_size_bytes > max_bytes:
             size_mb = source_context.file_size_bytes / (1024 * 1024)
             max_mb = max_bytes / (1024 * 1024)
-            raise ValidationError(f"File size {size_mb:.1f}MB exceeds limit of {max_mb:.1f}MB")
+            raise ValidationError(
+                f"File size {size_mb:.1f}MB exceeds limit of {max_mb:.1f}MB"
+            )
 
 
 # Global singleton validators

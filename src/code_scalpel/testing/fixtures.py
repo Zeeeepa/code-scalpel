@@ -123,7 +123,9 @@ def with_pro_license(clear_all_caches, pro_license_path) -> Generator[str, None,
 
 
 @pytest.fixture
-def with_enterprise_license(clear_all_caches, enterprise_license_path) -> Generator[str, None, None]:
+def with_enterprise_license(
+    clear_all_caches, enterprise_license_path
+) -> Generator[str, None, None]:
     """Context manager fixture that temporarily sets Enterprise license.
 
     Automatically:

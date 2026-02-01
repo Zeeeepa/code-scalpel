@@ -46,7 +46,9 @@ def core():
         if result.nodes:
             max_depth = max((n.depth for n in result.nodes), default=0)
             # Community k=1 means max depth should be 1
-            assert max_depth <= 1, f"Community limited k should keep max depth ≤ 1, got {max_depth}"
+            assert (
+                max_depth <= 1
+            ), f"Community limited k should keep max depth ≤ 1, got {max_depth}"
 
     @pytest.mark.asyncio
     async def test_community_nodes_limit_enforced(self, tmp_path, community_tier):
@@ -73,7 +75,9 @@ def func_c(): pass
 
         # Should truncate to 20 nodes max for Community
         if result.nodes is not None:
-            assert len(result.nodes) <= 20, f"Community max_nodes is 20, got {len(result.nodes)}"
+            assert (
+                len(result.nodes) <= 20
+            ), f"Community max_nodes is 20, got {len(result.nodes)}"
 
     @pytest.mark.asyncio
     async def test_community_lacks_semantic_neighbors(self, tmp_path, community_tier):
@@ -97,7 +101,9 @@ def func_c(): pass
                     assert "semantic_neighbors" not in node.metadata
 
     @pytest.mark.asyncio
-    async def test_community_lacks_logical_relationships(self, tmp_path, community_tier):
+    async def test_community_lacks_logical_relationships(
+        self, tmp_path, community_tier
+    ):
         """Community tier should lack logical_relationship_detection capability."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def func(): pass")
@@ -141,7 +147,9 @@ def helper():
         assert "classDef center" in result.mermaid
 
     @pytest.mark.asyncio
-    async def test_community_basic_neighborhood_capability(self, tmp_path, community_tier):
+    async def test_community_basic_neighborhood_capability(
+        self, tmp_path, community_tier
+    ):
         """Community tier should have basic_neighborhood capability."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def func(): pass")
@@ -220,7 +228,9 @@ def func_a(): pass
 
         # Pro allows up to 100 nodes
         if result.nodes is not None:
-            assert len(result.nodes) <= 100, f"Pro max_nodes is 100, got {len(result.nodes)}"
+            assert (
+                len(result.nodes) <= 100
+            ), f"Pro max_nodes is 100, got {len(result.nodes)}"
 
     @pytest.mark.asyncio
     async def test_pro_has_advanced_neighborhood_capability(self, tmp_path, pro_tier):
@@ -343,7 +353,9 @@ def d10(): pass
         if result.nodes:
             max_depth = max((n.depth for n in result.nodes), default=0)
             # Enterprise should reach all depths up to available
-            assert max_depth >= 5, f"Enterprise should support deep k, got max_depth {max_depth}"
+            assert (
+                max_depth >= 5
+            ), f"Enterprise should support deep k, got max_depth {max_depth}"
 
     @pytest.mark.asyncio
     async def test_enterprise_unlimited_nodes(self, tmp_path, enterprise_tier):
@@ -391,7 +403,9 @@ def func_d(): pass
         assert result.nodes is not None
 
     @pytest.mark.asyncio
-    async def test_enterprise_has_graph_query_language_capability(self, tmp_path, enterprise_tier):
+    async def test_enterprise_has_graph_query_language_capability(
+        self, tmp_path, enterprise_tier
+    ):
         """Enterprise tier should have graph_query_language capability."""
         main_file = tmp_path / "main.py"
         main_file.write_text("""
@@ -417,7 +431,9 @@ def process_user():
         assert result.success is True
 
     @pytest.mark.asyncio
-    async def test_enterprise_has_custom_traversal_rules(self, tmp_path, enterprise_tier):
+    async def test_enterprise_has_custom_traversal_rules(
+        self, tmp_path, enterprise_tier
+    ):
         """Enterprise tier should have custom_traversal_rules capability."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def func(): pass")
@@ -433,7 +449,9 @@ def process_user():
         assert result.success is True
 
     @pytest.mark.asyncio
-    async def test_enterprise_has_path_constraint_queries(self, tmp_path, enterprise_tier):
+    async def test_enterprise_has_path_constraint_queries(
+        self, tmp_path, enterprise_tier
+    ):
         """Enterprise tier should have path_constraint_queries capability."""
         main_file = tmp_path / "main.py"
         main_file.write_text("""
@@ -524,7 +542,9 @@ def d5(): pass
         if result_community.nodes and result_pro.nodes:
             comm_depth = max((n.depth for n in result_community.nodes), default=0)
             pro_depth = max((n.depth for n in result_pro.nodes), default=0)
-            assert pro_depth >= comm_depth, "Pro should have deeper nodes than Community"
+            assert (
+                pro_depth >= comm_depth
+            ), "Pro should have deeper nodes than Community"
 
     @pytest.mark.asyncio
     async def test_community_truncation_at_20_nodes(self, tmp_path, community_tier):
@@ -559,7 +579,9 @@ class TestCapabilityGating:
     """Test that capabilities are properly gated by tier."""
 
     @pytest.mark.asyncio
-    async def test_community_lacks_semantic_neighbors_explicitly(self, tmp_path, community_tier):
+    async def test_community_lacks_semantic_neighbors_explicitly(
+        self, tmp_path, community_tier
+    ):
         """Verify Community output does NOT contain semantic neighbor metadata."""
         main_file = tmp_path / "main.py"
         main_file.write_text("""
@@ -585,7 +607,9 @@ def compute():
                     assert "semantic_similarity" not in node.metadata
 
     @pytest.mark.asyncio
-    async def test_community_lacks_logical_relationships_explicitly(self, tmp_path, community_tier):
+    async def test_community_lacks_logical_relationships_explicitly(
+        self, tmp_path, community_tier
+    ):
         """Verify Community does NOT include LOGICAL_RELATED edge types."""
         main_file = tmp_path / "main.py"
         main_file.write_text("""
@@ -607,7 +631,9 @@ def verify():
         if result.edges:
             for edge in result.edges:
                 # Community should not have logical relationships
-                assert edge.edge_type != "logical_related", "Community should not have logical_related edges"
+                assert (
+                    edge.edge_type != "logical_related"
+                ), "Community should not have logical_related edges"
 
     @pytest.mark.asyncio
     async def test_pro_lacks_graph_query_language(self, tmp_path, pro_tier):
@@ -627,7 +653,9 @@ def verify():
         # Query language is Enterprise-only feature
 
     @pytest.mark.asyncio
-    async def test_pro_lacks_custom_traversal_rules_and_path_constraints(self, tmp_path, pro_tier):
+    async def test_pro_lacks_custom_traversal_rules_and_path_constraints(
+        self, tmp_path, pro_tier
+    ):
         """Verify Pro tier does not have custom_traversal_rules and path_constraint_queries."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def func(): pass")
@@ -709,7 +737,9 @@ def high_conf():
         # Edges should be filtered by confidence
         if result.edges:
             for edge in result.edges:
-                assert edge.confidence >= 0.5, f"Edge confidence {edge.confidence} below threshold"
+                assert (
+                    edge.confidence >= 0.5
+                ), f"Edge confidence {edge.confidence} below threshold"
 
 
 class TestMermaidGeneration:

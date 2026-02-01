@@ -270,4 +270,6 @@ class TestExplanationBuilding:
         evidence = engine.score_edge(EdgeType.HTTP_CALL, context)
 
         # Should mention adjustments
-        assert "Adjustments" in evidence.explanation or "exact_route_match" in str(evidence.adjustments)
+        assert "Adjustments" in evidence.explanation or "exact_route_match" in str(
+            evidence.adjustments
+        )

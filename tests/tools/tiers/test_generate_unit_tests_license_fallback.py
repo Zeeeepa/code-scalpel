@@ -185,7 +185,9 @@ async def test_pro_feature_rejected_without_valid_license(community_tier, monkey
 
 
 @pytest.mark.asyncio
-async def test_enterprise_feature_rejected_without_valid_license(community_tier, monkeypatch):
+async def test_enterprise_feature_rejected_without_valid_license(
+    community_tier, monkeypatch
+):
     """Enterprise tier features (crash_log) should be rejected without valid license."""
     from code_scalpel.mcp import server
 
@@ -205,7 +207,9 @@ async def test_enterprise_feature_rejected_without_valid_license(community_tier,
 
 
 @pytest.mark.asyncio
-async def test_license_fallback_preserves_community_features(community_tier, monkeypatch):
+async def test_license_fallback_preserves_community_features(
+    community_tier, monkeypatch
+):
     """License fallback should preserve all Community features."""
     from code_scalpel.mcp import server
 

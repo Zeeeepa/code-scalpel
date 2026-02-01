@@ -111,7 +111,9 @@ class PDGVisualizer:
         # Render the visualization
         dot.render(output_file, format=format.value, view=view, cleanup=True)
 
-    def create_interactive_html(self, pdg: nx.DiGraph, output_file: str, include_details: bool = True) -> None:
+    def create_interactive_html(
+        self, pdg: nx.DiGraph, output_file: str, include_details: bool = True
+    ) -> None:
         """Create an interactive HTML visualization using d3.js."""
         # Convert PDG to D3 compatible format
         graph_data = self._convert_to_d3_format(pdg)
@@ -123,7 +125,9 @@ class PDGVisualizer:
         with open(output_file, "w") as f:
             f.write(html_content)
 
-    def highlight_subgraph(self, nodes: set[str], color: str = "#ff0000", temporary: bool = True) -> None:
+    def highlight_subgraph(
+        self, nodes: set[str], color: str = "#ff0000", temporary: bool = True
+    ) -> None:
         """Highlight a subgraph of nodes."""
         if temporary:
             self._temp_highlights = nodes
@@ -208,9 +212,17 @@ class PDGVisualizer:
 
             # Add relevant attributes based on node type
             if "condition" in attrs:
-                label_parts.append(self._wrap_text(f"Condition: {attrs['condition']}", self.config.label_wrapping))
+                label_parts.append(
+                    self._wrap_text(
+                        f"Condition: {attrs['condition']}", self.config.label_wrapping
+                    )
+                )
             elif "value" in attrs:
-                label_parts.append(self._wrap_text(f"Value: {attrs['value']}", self.config.label_wrapping))
+                label_parts.append(
+                    self._wrap_text(
+                        f"Value: {attrs['value']}", self.config.label_wrapping
+                    )
+                )
 
             # Add line numbers if available
             if "lineno" in attrs:
@@ -304,7 +316,9 @@ class PDGVisualizer:
             ],
         }
 
-    def _generate_interactive_html(self, graph_data: dict, include_details: bool) -> str:
+    def _generate_interactive_html(
+        self, graph_data: dict, include_details: bool
+    ) -> str:
         """Generate HTML content for interactive visualization."""
         return f"""
         <!DOCTYPE html>
@@ -341,7 +355,9 @@ class PDGVisualizer:
         </html>
         """
 
-    def _generate_comparison_html(self, pdg1: nx.DiGraph, pdg2: nx.DiGraph, highlight_differences: bool) -> str:
+    def _generate_comparison_html(
+        self, pdg1: nx.DiGraph, pdg2: nx.DiGraph, highlight_differences: bool
+    ) -> str:
         """Generate HTML for comparison visualization."""
         graph1_data = self._convert_to_d3_format(pdg1)
         graph2_data = self._convert_to_d3_format(pdg2)
@@ -529,7 +545,9 @@ class PDGVisualizer:
         }
         """
 
-    def _highlight_graph_differences(self, graph1_data: dict, graph2_data: dict) -> None:
+    def _highlight_graph_differences(
+        self, graph1_data: dict, graph2_data: dict
+    ) -> None:
         """Highlight differences between two graphs."""
         nodes1 = {n["id"] for n in graph1_data["nodes"]}
         nodes2 = {n["id"] for n in graph2_data["nodes"]}

@@ -140,7 +140,9 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        assert any(s.source_type == InputSourceType.ELEMENT_VALUE for s in result.input_sources)
+        assert any(
+            s.source_type == InputSourceType.ELEMENT_VALUE for s in result.input_sources
+        )
 
     def test_event_target_value(self):
         """Detect event.target.value patterns."""
@@ -157,7 +159,11 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        event_sources = [s for s in result.input_sources if s.source_type == InputSourceType.EVENT_TARGET]
+        event_sources = [
+            s
+            for s in result.input_sources
+            if s.source_type == InputSourceType.EVENT_TARGET
+        ]
         assert len(event_sources) >= 2
 
     def test_location_search(self):
@@ -170,7 +176,11 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        url_sources = [s for s in result.input_sources if s.source_type == InputSourceType.URL_PARAM]
+        url_sources = [
+            s
+            for s in result.input_sources
+            if s.source_type == InputSourceType.URL_PARAM
+        ]
         assert len(url_sources) >= 1
 
     def test_location_hash(self):
@@ -184,7 +194,9 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        assert any(s.source_type == InputSourceType.URL_HASH for s in result.input_sources)
+        assert any(
+            s.source_type == InputSourceType.URL_HASH for s in result.input_sources
+        )
 
     def test_local_storage(self):
         """Detect localStorage access."""
@@ -198,7 +210,8 @@ class TestVanillaInputDetection:
         storage_sources = [
             s
             for s in result.input_sources
-            if s.source_type in (InputSourceType.LOCAL_STORAGE, InputSourceType.SESSION_STORAGE)
+            if s.source_type
+            in (InputSourceType.LOCAL_STORAGE, InputSourceType.SESSION_STORAGE)
         ]
         assert len(storage_sources) >= 2
 
@@ -213,7 +226,9 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        assert any(s.source_type == InputSourceType.POST_MESSAGE for s in result.input_sources)
+        assert any(
+            s.source_type == InputSourceType.POST_MESSAGE for s in result.input_sources
+        )
 
     def test_file_input(self):
         """Detect file input access."""
@@ -227,7 +242,9 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        assert any(s.source_type == InputSourceType.FILE_INPUT for s in result.input_sources)
+        assert any(
+            s.source_type == InputSourceType.FILE_INPUT for s in result.input_sources
+        )
 
 
 # =============================================================================
@@ -258,7 +275,9 @@ class TestReactInputDetection:
         result = tracker.analyze_file(source, "SearchBox.tsx")
 
         assert result.framework == FrontendFramework.REACT
-        assert any(s.source_type == InputSourceType.REACT_STATE for s in result.input_sources)
+        assert any(
+            s.source_type == InputSourceType.REACT_STATE for s in result.input_sources
+        )
 
     def test_use_ref(self):
         """Detect useRef for DOM access."""
@@ -279,7 +298,11 @@ class TestReactInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Form.tsx")
 
-        ref_sources = [s for s in result.input_sources if s.source_type == InputSourceType.REACT_REF]
+        ref_sources = [
+            s
+            for s in result.input_sources
+            if s.source_type == InputSourceType.REACT_REF
+        ]
         assert len(ref_sources) >= 1
 
     def test_on_change_handler(self):
@@ -299,7 +322,11 @@ class TestReactInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Input.tsx")
 
-        form_sources = [s for s in result.input_sources if s.source_type == InputSourceType.REACT_FORM]
+        form_sources = [
+            s
+            for s in result.input_sources
+            if s.source_type == InputSourceType.REACT_FORM
+        ]
         assert len(form_sources) >= 2
 
     def test_controlled_input(self):
@@ -342,7 +369,9 @@ class TestReactInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "LoginForm.tsx")
 
-        assert any(s.source_type == InputSourceType.REACT_FORM for s in result.input_sources)
+        assert any(
+            s.source_type == InputSourceType.REACT_FORM for s in result.input_sources
+        )
 
 
 # =============================================================================
@@ -368,7 +397,11 @@ class TestVueInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Search.vue")
 
-        v_model_sources = [s for s in result.input_sources if s.source_type == InputSourceType.VUE_V_MODEL]
+        v_model_sources = [
+            s
+            for s in result.input_sources
+            if s.source_type == InputSourceType.VUE_V_MODEL
+        ]
         assert len(v_model_sources) >= 2
 
     def test_vue_ref(self):
@@ -387,7 +420,9 @@ class TestVueInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Form.vue")
 
-        ref_sources = [s for s in result.input_sources if s.source_type == InputSourceType.VUE_REF]
+        ref_sources = [
+            s for s in result.input_sources if s.source_type == InputSourceType.VUE_REF
+        ]
         assert len(ref_sources) >= 2
 
     def test_vue_event_handlers(self):
@@ -434,7 +469,11 @@ class TestAngularInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "app.component.ts")
 
-        ng_model_sources = [s for s in result.input_sources if s.source_type == InputSourceType.ANGULAR_NG_MODEL]
+        ng_model_sources = [
+            s
+            for s in result.input_sources
+            if s.source_type == InputSourceType.ANGULAR_NG_MODEL
+        ]
         assert len(ng_model_sources) >= 2
 
     def test_reactive_forms(self):
@@ -464,7 +503,11 @@ class TestAngularInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "login.component.ts")
 
-        form_sources = [s for s in result.input_sources if s.source_type == InputSourceType.ANGULAR_FORM]
+        form_sources = [
+            s
+            for s in result.input_sources
+            if s.source_type == InputSourceType.ANGULAR_FORM
+        ]
         assert len(form_sources) >= 3
 
     def test_input_decorator(self):
@@ -481,7 +524,11 @@ class TestAngularInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "child.component.ts")
 
-        input_sources = [s for s in result.input_sources if s.source_type == InputSourceType.ANGULAR_INPUT]
+        input_sources = [
+            s
+            for s in result.input_sources
+            if s.source_type == InputSourceType.ANGULAR_INPUT
+        ]
         assert len(input_sources) >= 2
 
     def test_template_events(self):
@@ -526,7 +573,8 @@ class TestDangerousSinkDetection:
         html_sinks = [
             s
             for s in result.dangerous_sinks
-            if s.sink_type in (DangerousSinkType.INNER_HTML, DangerousSinkType.DOM_MANIPULATION)
+            if s.sink_type
+            in (DangerousSinkType.INNER_HTML, DangerousSinkType.DOM_MANIPULATION)
         ]
         assert len(html_sinks) >= 3
 
@@ -539,7 +587,11 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        write_sinks = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.DOCUMENT_WRITE]
+        write_sinks = [
+            s
+            for s in result.dangerous_sinks
+            if s.sink_type == DangerousSinkType.DOCUMENT_WRITE
+        ]
         assert len(write_sinks) >= 2
 
     def test_react_dangerously_set_inner_html(self):
@@ -560,7 +612,11 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "RawHtml.tsx")
 
-        dangerous_sinks = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.DANGEROUSLY_SET]
+        dangerous_sinks = [
+            s
+            for s in result.dangerous_sinks
+            if s.sink_type == DangerousSinkType.DANGEROUSLY_SET
+        ]
         assert len(dangerous_sinks) >= 2
 
     def test_vue_v_html(self):
@@ -577,7 +633,9 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Content.vue")
 
-        v_html_sinks = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.V_HTML]
+        v_html_sinks = [
+            s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.V_HTML
+        ]
         assert len(v_html_sinks) >= 2
 
     def test_angular_inner_html_binding(self):
@@ -595,7 +653,10 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "raw.component.ts")
 
-        assert any(s.sink_type == DangerousSinkType.INNER_HTML_BINDING for s in result.dangerous_sinks)
+        assert any(
+            s.sink_type == DangerousSinkType.INNER_HTML_BINDING
+            for s in result.dangerous_sinks
+        )
 
     def test_eval(self):
         """Detect eval and Function constructor."""
@@ -608,7 +669,9 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        eval_sinks = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.EVAL]
+        eval_sinks = [
+            s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.EVAL
+        ]
         assert len(eval_sinks) >= 4
 
     def test_location_redirect(self):
@@ -623,7 +686,9 @@ class TestDangerousSinkDetection:
         result = tracker.analyze_file(source, "redirect.js")
 
         redirect_sinks = [
-            s for s in result.dangerous_sinks if s.sink_type in (DangerousSinkType.LOCATION, DangerousSinkType.OPEN)
+            s
+            for s in result.dangerous_sinks
+            if s.sink_type in (DangerousSinkType.LOCATION, DangerousSinkType.OPEN)
         ]
         assert len(redirect_sinks) >= 4
 
@@ -647,7 +712,9 @@ class TestDataFlowAnalysis:
         result = tracker.analyze_file(source, "script.js")
 
         assert len(result.data_flows) >= 1
-        assert any(f.sink.sink_type == DangerousSinkType.INNER_HTML for f in result.data_flows)
+        assert any(
+            f.sink.sink_type == DangerousSinkType.INNER_HTML for f in result.data_flows
+        )
 
     def test_react_state_to_dangerous_html(self):
         """Detect React state flowing to dangerouslySetInnerHTML."""
@@ -673,7 +740,9 @@ class TestDataFlowAnalysis:
 
         # Should detect flow from state to dangerous sink
         dangerous = result.dangerous_flows
-        assert any(f.sink.sink_type == DangerousSinkType.DANGEROUSLY_SET for f in dangerous)
+        assert any(
+            f.sink.sink_type == DangerousSinkType.DANGEROUSLY_SET for f in dangerous
+        )
 
     def test_url_param_to_inner_html(self):
         """Detect URL parameter flowing to innerHTML."""
@@ -701,8 +770,12 @@ class TestDataFlowAnalysis:
         result = tracker.analyze_file(source, "message.js")
 
         # Verify we detect both the post message source and eval sink
-        assert any(s.source_type == InputSourceType.POST_MESSAGE for s in result.input_sources)
-        assert any(s.sink_type == DangerousSinkType.EVAL for s in result.dangerous_sinks)
+        assert any(
+            s.source_type == InputSourceType.POST_MESSAGE for s in result.input_sources
+        )
+        assert any(
+            s.sink_type == DangerousSinkType.EVAL for s in result.dangerous_sinks
+        )
 
 
 # =============================================================================
@@ -741,7 +814,11 @@ class TestSanitizationDetection:
         result = tracker.analyze_file(source, "script.js")
 
         # textContent should not be flagged as dangerous sink
-        dangerous_html = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.INNER_HTML]
+        dangerous_html = [
+            s
+            for s in result.dangerous_sinks
+            if s.sink_type == DangerousSinkType.INNER_HTML
+        ]
         assert len(dangerous_html) == 0
 
     def test_encode_uri_component(self):
@@ -816,7 +893,10 @@ class TestSecurityFindings:
 
         for finding in findings:
             if finding["type"] == "FRONTEND_XSS_RISK":
-                assert "DOMPurify" in finding["recommendation"] or "sanitize" in finding["recommendation"].lower()
+                assert (
+                    "DOMPurify" in finding["recommendation"]
+                    or "sanitize" in finding["recommendation"].lower()
+                )
 
 
 # =============================================================================
@@ -917,8 +997,12 @@ class TestIntegration:
         result = tracker.analyze_file(source, "Search.vue", "vue")
 
         assert result.framework == FrontendFramework.VUE
-        assert any(s.source_type == InputSourceType.VUE_V_MODEL for s in result.input_sources)
-        assert any(s.sink_type == DangerousSinkType.V_HTML for s in result.dangerous_sinks)
+        assert any(
+            s.source_type == InputSourceType.VUE_V_MODEL for s in result.input_sources
+        )
+        assert any(
+            s.sink_type == DangerousSinkType.V_HTML for s in result.dangerous_sinks
+        )
 
     def test_angular_reactive_form(self):
         """Test Angular Reactive Forms analysis."""
@@ -967,7 +1051,9 @@ class TestIntegration:
         result = tracker.analyze_file(source, "contact.component.ts", "angular")
 
         assert result.framework == FrontendFramework.ANGULAR
-        assert any(s.source_type == InputSourceType.ANGULAR_FORM for s in result.input_sources)
+        assert any(
+            s.source_type == InputSourceType.ANGULAR_FORM for s in result.input_sources
+        )
 
     def test_summary_output(self):
         """Test summary generation."""

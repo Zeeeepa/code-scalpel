@@ -237,7 +237,9 @@ class ChangelogGenerator:
         """
         return self.format_changelog(ChangelogFormat.MARKDOWN)
 
-    def format_changelog(self, format_type: ChangelogFormat = ChangelogFormat.MARKDOWN) -> str:
+    def format_changelog(
+        self, format_type: ChangelogFormat = ChangelogFormat.MARKDOWN
+    ) -> str:
         """Format changelog in specified format.
 
         Args:
@@ -336,7 +338,9 @@ class ChangelogGenerator:
         Returns:
             Breaking change details if found
         """
-        match = re.search(r"BREAKING[\s-]CHANGE[:\s]+(.+?)(?:\n|$)", message, re.IGNORECASE)
+        match = re.search(
+            r"BREAKING[\s-]CHANGE[:\s]+(.+?)(?:\n|$)", message, re.IGNORECASE
+        )
         return match.group(1) if match else None
 
     def _get_or_create_section(self, version: str, date: datetime) -> ChangelogSection:
@@ -370,10 +374,14 @@ class ChangelogGenerator:
                 if change_type in entries_by_type:
                     lines.append(f"\n### {change_type.value}\n")
                     for entry in entries_by_type[change_type]:
-                        issue_link = f" ([#{entry.issue_number}])" if entry.issue_number else ""
+                        issue_link = (
+                            f" ([#{entry.issue_number}])" if entry.issue_number else ""
+                        )
                         lines.append(f"- {entry.message}{issue_link}\n")
                         if entry.breaking_details:
-                            lines.append(f"  - **Breaking:** {entry.breaking_details}\n")
+                            lines.append(
+                                f"  - **Breaking:** {entry.breaking_details}\n"
+                            )
 
         return "".join(lines)
 
@@ -387,7 +395,9 @@ class ChangelogGenerator:
         for section in self.sections:
             lines.append("<div class='section'>\n")
             lines.append(f"<h2>{section.title}</h2>\n")
-            lines.append(f"<p class='date'>Released: {section.date.strftime('%Y-%m-%d')}</p>\n")
+            lines.append(
+                f"<p class='date'>Released: {section.date.strftime('%Y-%m-%d')}</p>\n"
+            )
 
             entries_by_type = section.entries_by_type()
             for change_type in ChangeType:
@@ -403,7 +413,9 @@ class ChangelogGenerator:
                         )
                         lines.append(f"<li>{entry.message}{issue_link}")
                         if entry.breaking_details:
-                            lines.append(f"<br><strong>Breaking:</strong> {entry.breaking_details}")
+                            lines.append(
+                                f"<br><strong>Breaking:</strong> {entry.breaking_details}"
+                            )
                         lines.append("</li>\n")
                     lines.append("</ul>\n")
                     lines.append("</div>\n")

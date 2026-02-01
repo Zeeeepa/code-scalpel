@@ -67,7 +67,9 @@ class CoverityParser:
         self.config = CoverityConfig()
         self.defects: List[CoverityDefect] = []
 
-    def execute_coverity(self, paths: List[Path], config: Optional[CoverityConfig] = None) -> List[CoverityDefect]:
+    def execute_coverity(
+        self, paths: List[Path], config: Optional[CoverityConfig] = None
+    ) -> List[CoverityDefect]:
         raise NotImplementedError("Phase 2: Coverity execution")
 
     def parse_coverity_json(self, json_data: Dict[str, Any]) -> List[CoverityDefect]:
@@ -76,16 +78,22 @@ class CoverityParser:
     def load_config(self, config_file: Path) -> CoverityConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_defects(self, defects: List[CoverityDefect]) -> Dict[DefectType, List[CoverityDefect]]:
+    def categorize_defects(
+        self, defects: List[CoverityDefect]
+    ) -> Dict[DefectType, List[CoverityDefect]]:
         raise NotImplementedError("Phase 2: Defect categorization")
 
     def analyze_security_risks(self, defects: List[CoverityDefect]) -> Dict[str, Any]:
         raise NotImplementedError("Phase 2: Security analysis")
 
-    def map_to_cwe(self, defects: List[CoverityDefect]) -> Dict[str, List[CoverityDefect]]:
+    def map_to_cwe(
+        self, defects: List[CoverityDefect]
+    ) -> Dict[str, List[CoverityDefect]]:
         raise NotImplementedError("Phase 2: CWE mapping")
 
-    def generate_report(self, defects: List[CoverityDefect], format: str = "json") -> str:
+    def generate_report(
+        self, defects: List[CoverityDefect], format: str = "json"
+    ) -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
     def track_defect_trends(self, historical_data: List[Dict]) -> Dict[str, Any]:

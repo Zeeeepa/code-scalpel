@@ -99,7 +99,9 @@ class PDGAnalyzer:
             "redundant_computations": self._find_redundant_computations(),
         }
 
-    def compute_program_slice(self, criterion: str, direction: str = "backward") -> nx.DiGraph:
+    def compute_program_slice(
+        self, criterion: str, direction: str = "backward"
+    ) -> nx.DiGraph:
         """Compute a program slice based on a slicing criterion."""
         visited = set()
         slice_graph = nx.DiGraph()
@@ -189,8 +191,12 @@ class PDGAnalyzer:
                     # Check if taint is sanitized along the path
                     for path in paths:
                         if not self._is_path_sanitized(path):
-                            source_type = self.pdg.nodes[source].get("taint_type") or "unknown"
-                            sink_type = self.pdg.nodes[sink].get("sink_type") or "unknown"
+                            source_type = (
+                                self.pdg.nodes[source].get("taint_type") or "unknown"
+                            )
+                            sink_type = (
+                                self.pdg.nodes[sink].get("sink_type") or "unknown"
+                            )
                             vulnerabilities.append(
                                 SecurityVulnerability(
                                     type=f"{source_type}_to_{sink_type}",
@@ -198,7 +204,9 @@ class PDGAnalyzer:
                                     sink=sink,
                                     path=path,
                                     severity="high",
-                                    description=self._generate_vulnerability_description(source_type, sink_type),
+                                    description=self._generate_vulnerability_description(
+                                        source_type, sink_type
+                                    ),
                                 )
                             )
 
@@ -217,7 +225,9 @@ class PDGAnalyzer:
                         {
                             "node": candidate,
                             "loop": loop,
-                            "savings": self._estimate_optimization_savings(candidate, loop),
+                            "savings": self._estimate_optimization_savings(
+                                candidate, loop
+                            ),
                         }
                     )
 
@@ -232,7 +242,9 @@ class PDGAnalyzer:
                     ranges[var] = self._compute_value_range(var, node)
         return ranges
 
-    def _compute_value_range(self, var: str, node: str) -> tuple[Optional[int], Optional[int]]:
+    def _compute_value_range(
+        self, var: str, node: str
+    ) -> tuple[Optional[int], Optional[int]]:
         """Compute possible value range for a variable at a given node."""
         constraints = []
 
@@ -240,7 +252,9 @@ class PDGAnalyzer:
         for pred, _, data in self.pdg.in_edges(node, data=True):
             if data["type"] == DependencyType.CONTROL.value:
                 if "condition" in self.pdg.nodes[pred]:
-                    constraint = self._parse_condition_constraint(self.pdg.nodes[pred]["condition"], var)
+                    constraint = self._parse_condition_constraint(
+                        self.pdg.nodes[pred]["condition"], var
+                    )
                     if constraint:
                         constraints.append(constraint)
 
@@ -262,7 +276,10 @@ class PDGAnalyzer:
             if (
                 "type" in data
                 and data["type"] == "call"
-                and any(func in str(data.get("call_target", "")) for func in dangerous_functions)
+                and any(
+                    func in str(data.get("call_target", ""))
+                    for func in dangerous_functions
+                )
             ):
                 sources.add(node)
                 self.pdg.nodes[node]["taint_type"] = "user_input"
@@ -285,7 +302,10 @@ class PDGAnalyzer:
             if (
                 "type" in data
                 and data["type"] == "call"
-                and any(func in str(data.get("call_target", "")) for func in sensitive_functions)
+                and any(
+                    func in str(data.get("call_target", ""))
+                    for func in sensitive_functions
+                )
             ):
                 sinks.add(node)
                 sink_type = self._determine_sink_type(data.get("call_target", ""))
@@ -321,7 +341,10 @@ class PDGAnalyzer:
             if (
                 "type" in data
                 and data["type"] == "call"
-                and any(func in str(data.get("call_target", "")) for func in sanitizer_functions)
+                and any(
+                    func in str(data.get("call_target", ""))
+                    for func in sanitizer_functions
+                )
             ):
                 return True
         return False
@@ -368,7 +391,11 @@ class PDGAnalyzer:
                 if result is not None:
                     # Find other nodes computing the same result
                     for other_node, other_data in self.pdg.nodes(data=True):
-                        if other_node != node and "type" in other_data and other_data["type"] == "computation":
+                        if (
+                            other_node != node
+                            and "type" in other_data
+                            and other_data["type"] == "computation"
+                        ):
                             other_result = get_computation_result(other_node)
                             if result == other_result:
                                 redundant.append(
@@ -539,7 +566,9 @@ class PDGAnalyzer:
 
         return None
 
-    def _solve_constraints(self, constraints: list) -> tuple[Optional[int], Optional[int]]:
+    def _solve_constraints(
+        self, constraints: list
+    ) -> tuple[Optional[int], Optional[int]]:
         """Solve constraints to determine value range."""
         return (None, None)  # Stub implementation
 

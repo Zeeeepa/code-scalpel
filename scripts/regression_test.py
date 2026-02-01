@@ -87,7 +87,9 @@ def get_user(user_id):
 """
 
     scan_result = asyncio.run(security_scan(code=vuln_code))
-    assert scan_result.vulnerability_count > 0, "Security scan failed to detect SQL injection"
+    assert (
+        scan_result.vulnerability_count > 0
+    ), "Security scan failed to detect SQL injection"
     print("✓ Python security scan works")
 
 

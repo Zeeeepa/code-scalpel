@@ -38,7 +38,10 @@ class TestOracleWritePerfectCodeWithWrongInputs:
 
         assert isinstance(response, ToolResponseEnvelope)
         assert response.error is not None
-        assert "not found" in response.error.error.lower() or "nonexistent" in response.error.error.lower()
+        assert (
+            "not found" in response.error.error.lower()
+            or "nonexistent" in response.error.error.lower()
+        )
         assert response.tool_id == "write_perfect_code"
 
     @pytest.mark.asyncio
@@ -79,7 +82,9 @@ class AuthManager:
             temp_path = f.name
 
         try:
-            with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
+            with patch(
+                "code_scalpel.mcp.protocol._get_current_tier", return_value="pro"
+            ):
                 response = await write_perfect_code(
                     file_path=temp_path,
                     instruction="Add token refresh and security improvements",
@@ -260,7 +265,9 @@ class Calculator:
             temp_path = f.name
 
         try:
-            response = await extract_code(target_type="method", target_name="Calculator.add", file_path=temp_path)
+            response = await extract_code(
+                target_type="method", target_name="Calculator.add", file_path=temp_path
+            )
 
             assert isinstance(response, ToolResponseEnvelope)
             # Check if we got a valid response
@@ -346,7 +353,9 @@ class TestOracleFeedbackMessages:
 
         Oracle principle: Never just say 'error', explain what went wrong
         """
-        response = await write_perfect_code(file_path="/nonexistent/path.py", instruction="test")
+        response = await write_perfect_code(
+            file_path="/nonexistent/path.py", instruction="test"
+        )
 
         assert response.error is not None
         # Error should have meaningful message
@@ -364,8 +373,12 @@ class TestOracleFeedbackMessages:
             temp_path = f.name
 
         try:
-            with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
-                response = await write_perfect_code(file_path=temp_path, instruction="add docstring")
+            with patch(
+                "code_scalpel.mcp.protocol._get_current_tier", return_value="pro"
+            ):
+                response = await write_perfect_code(
+                    file_path=temp_path, instruction="add docstring"
+                )
 
             if response.error is None:
                 assert response.data is not None
@@ -391,8 +404,12 @@ class TestOracleConsistencyAcrossTools:
             temp_path = f.name
 
         try:
-            with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
-                resp1 = await write_perfect_code(file_path=temp_path, instruction="test")
+            with patch(
+                "code_scalpel.mcp.protocol._get_current_tier", return_value="pro"
+            ):
+                resp1 = await write_perfect_code(
+                    file_path=temp_path, instruction="test"
+                )
             assert isinstance(resp1, ToolResponseEnvelope)
 
             # analyze_code
@@ -400,7 +417,9 @@ class TestOracleConsistencyAcrossTools:
             assert isinstance(resp2, ToolResponseEnvelope)
 
             # extract_code
-            resp3 = await extract_code(target_type="function", target_name="test", file_path=temp_path)
+            resp3 = await extract_code(
+                target_type="function", target_name="test", file_path=temp_path
+            )
             assert isinstance(resp3, ToolResponseEnvelope)
         finally:
             Path(temp_path).unlink()
@@ -416,14 +435,22 @@ class TestOracleConsistencyAcrossTools:
             temp_path = f.name
 
         try:
-            with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
-                resp1 = await write_perfect_code(file_path=temp_path, instruction="test")
+            with patch(
+                "code_scalpel.mcp.protocol._get_current_tier", return_value="pro"
+            ):
+                resp1 = await write_perfect_code(
+                    file_path=temp_path, instruction="test"
+                )
                 resp2 = await analyze_code(code="def test(): pass")
 
             # Verify that both responses contain tier information somewhere
             # Tier may be on envelope or in data payload depending on response config
-            resp1_tier = resp1.tier or (resp1.data.get("tier_applied") if isinstance(resp1.data, dict) else None)
-            resp2_tier = resp2.tier or (resp2.data.get("tier_applied") if isinstance(resp2.data, dict) else None)
+            resp1_tier = resp1.tier or (
+                resp1.data.get("tier_applied") if isinstance(resp1.data, dict) else None
+            )
+            resp2_tier = resp2.tier or (
+                resp2.data.get("tier_applied") if isinstance(resp2.data, dict) else None
+            )
 
             # Both should have a tier applied (either pro from patch or community default)
             assert resp1_tier in ("pro", "community")

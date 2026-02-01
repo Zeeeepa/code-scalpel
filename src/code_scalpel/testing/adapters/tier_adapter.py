@@ -37,7 +37,9 @@ class TierAdapter:
             ValueError: If tier is invalid
         """
         if tier not in ("community", "pro", "enterprise"):
-            raise ValueError(f"Invalid tier '{tier}'. Must be 'community', 'pro', or 'enterprise'")
+            raise ValueError(
+                f"Invalid tier '{tier}'. Must be 'community', 'pro', or 'enterprise'"
+            )
         self.tier: Tier = tier
         self._original_license_path: Optional[str] = None
 
@@ -52,7 +54,11 @@ class TierAdapter:
             Set of tool IDs that are available
         """
         capabilities = get_all_capabilities(self.tier)
-        return {tool_id for tool_id, cap in capabilities.items() if cap.get("available", False)}
+        return {
+            tool_id
+            for tool_id, cap in capabilities.items()
+            if cap.get("available", False)
+        }
 
     def get_unavailable_tools(self) -> set[str]:
         """Get set of tools locked in this tier.
@@ -61,7 +67,11 @@ class TierAdapter:
             Set of tool IDs that are unavailable/locked
         """
         capabilities = get_all_capabilities(self.tier)
-        return {tool_id for tool_id, cap in capabilities.items() if not cap.get("available", False)}
+        return {
+            tool_id
+            for tool_id, cap in capabilities.items()
+            if not cap.get("available", False)
+        }
 
     def tool_available(self, tool_id: str) -> bool:
         """Check if a tool is available in this tier.
@@ -117,7 +127,10 @@ class TierAdapter:
         """
         if not self.tool_available(tool_id):
             locked_by = "community" if self.tier != "community" else "licensing"
-            raise AssertionError(f"Tool '{tool_id}' is not available in {self.tier} tier " f"(locked for {locked_by})")
+            raise AssertionError(
+                f"Tool '{tool_id}' is not available in {self.tier} tier "
+                f"(locked for {locked_by})"
+            )
 
     def assert_tool_unavailable(self, tool_id: str) -> None:
         """Assert that a tool is locked in this tier.
@@ -129,7 +142,10 @@ class TierAdapter:
             AssertionError: If tool is available
         """
         if self.tool_available(tool_id):
-            raise AssertionError(f"Tool '{tool_id}' is available in {self.tier} tier " f"(expected it to be locked)")
+            raise AssertionError(
+                f"Tool '{tool_id}' is available in {self.tier} tier "
+                f"(expected it to be locked)"
+            )
 
     def assert_capability_present(self, tool_id: str, capability: str) -> None:
         """Assert that a capability is present for a tool.
@@ -144,10 +160,13 @@ class TierAdapter:
         caps = self.get_tool_capabilities(tool_id)
         if capability not in caps:
             raise AssertionError(
-                f"Capability '{capability}' not present for tool '{tool_id}' " f"in {self.tier} tier. Available: {caps}"
+                f"Capability '{capability}' not present for tool '{tool_id}' "
+                f"in {self.tier} tier. Available: {caps}"
             )
 
-    def assert_limit_value(self, tool_id: str, limit_name: str, expected_value: int | float) -> None:
+    def assert_limit_value(
+        self, tool_id: str, limit_name: str, expected_value: int | float
+    ) -> None:
         """Assert that a limit has a specific value.
 
         Args:

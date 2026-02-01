@@ -157,7 +157,10 @@ class TestMCPToolVerification:
         assert len(sinks) >= 1
         # Should detect path traversal or SQL injection
         sink_types = [str(s.sink_type) for s in sinks]
-        assert any("path" in t.lower() or "sql" in t.lower() or "file" in t.lower() for t in sink_types)
+        assert any(
+            "path" in t.lower() or "sql" in t.lower() or "file" in t.lower()
+            for t in sink_types
+        )
 
     def test_unified_sink_confidence_scores(self):
         """Test that unified_sink_detect returns confidence scores (v2.2.0 feature)."""
@@ -186,7 +189,10 @@ class TestMCPToolVerification:
         for sink in sinks:
             # vulnerability_type should be set for high-confidence detections
             if sink.confidence >= 0.7:
-                assert sink.vulnerability_type is not None and sink.vulnerability_type != ""
+                assert (
+                    sink.vulnerability_type is not None
+                    and sink.vulnerability_type != ""
+                )
             # Or we can get OWASP category from sink type name
             sink_name = sink.vulnerability_type or str(sink.sink_type.name).lower()
             assert sink_name != ""
@@ -405,7 +411,9 @@ def abs_value(x):
 
         # Valid request → result has expected structure
         simulator = RefactorSimulator()
-        result = simulator.simulate(original_code="def foo(): pass", new_code="def foo(): return 1")
+        result = simulator.simulate(
+            original_code="def foo(): pass", new_code="def foo(): return 1"
+        )
 
         # Result should have standard fields (no hallucinated fields)
         result_dict = result.to_dict()
@@ -418,7 +426,9 @@ def abs_value(x):
         # The MCP server would convert this to JSON-RPC error with:
         # {"jsonrpc": "2.0", "error": {"code": -32602, "message": "..."}, "id": <request_id>}
         with pytest.raises(ValueError, match="Must provide"):
-            simulator.simulate(original_code="def bar(): pass")  # Missing new_code/patch
+            simulator.simulate(
+                original_code="def bar(): pass"
+            )  # Missing new_code/patch
 
     def test_simulate_refactor_recovers_after_invalid_request(self):
         """Simulator should continue working after invalid request errors."""
@@ -429,7 +439,9 @@ def abs_value(x):
         with pytest.raises(ValueError):
             simulator.simulate(original_code="def foo(): pass")
 
-        result = simulator.simulate(original_code="def foo(): pass", new_code="def foo(): return 1")
+        result = simulator.simulate(
+            original_code="def foo(): pass", new_code="def foo(): return 1"
+        )
 
         assert result.status.value in ("safe", "warning")
         assert result.is_safe in (True, False)
@@ -475,7 +487,9 @@ def abs_value(x):
 
         assert all(r.status.value in ("safe", "warning") for r in results)
 
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason="Requires Python 3.8+ for simulator support")
+    @pytest.mark.skipif(
+        sys.version_info < (3, 8), reason="Requires Python 3.8+ for simulator support"
+    )
     def test_simulate_refactor_python_version_smoke(self):
         """Smoke test for current Python version compatibility."""
         from code_scalpel.generators.refactor_simulator import RefactorSimulator
@@ -583,7 +597,9 @@ def greet(name)
 """
             error_msg = "SyntaxError: expected ':' (line 2)"
 
-            analysis = engine.analyze_error(error_output=error_msg, language="python", source_code=broken_code)
+            analysis = engine.analyze_error(
+                error_output=error_msg, language="python", source_code=broken_code
+            )
 
             assert analysis is not None
             # The analyzer should return an ErrorAnalysis object
@@ -603,7 +619,9 @@ def calculate():
 """
             error_msg = "NameError: name 'valeu' is not defined"
 
-            analysis = engine.analyze_error(error_output=error_msg, language="python", source_code=code)
+            analysis = engine.analyze_error(
+                error_output=error_msg, language="python", source_code=code
+            )
 
             assert analysis is not None
             # The analyzer should return an ErrorAnalysis object
@@ -697,7 +715,10 @@ def double(x: int) -> int:
         # Test unittest framework
         unittest_gen = TestGenerator(framework="unittest")
         unittest_result = unittest_gen.generate(code, function_name="double")
-        assert "class Test" in unittest_result.unittest_code or "def test_" in unittest_result.unittest_code
+        assert (
+            "class Test" in unittest_result.unittest_code
+            or "def test_" in unittest_result.unittest_code
+        )
 
     # ========== Project Map (v1.5.0+) ==========
 

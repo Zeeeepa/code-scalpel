@@ -117,7 +117,11 @@ class MetricsTracker:
         if metric_type:
             result = [m for m in result if m.type == metric_type]
         if tag_filter:
-            result = [m for m in result if all(m.tags.get(k) == v for k, v in tag_filter.items())]
+            result = [
+                m
+                for m in result
+                if all(m.tags.get(k) == v for k, v in tag_filter.items())
+            ]
         return result
 
     def calculate_statistics(self, metric_type: Optional[MetricType] = None) -> dict:

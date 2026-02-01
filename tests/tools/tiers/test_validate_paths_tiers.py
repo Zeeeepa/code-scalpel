@@ -62,7 +62,9 @@ async def test_validate_paths_community_core_features(community_tier):
     ]
 
     for cap in expected_capabilities:
-        assert has_capability("validate_paths", cap, "community"), f"Community should have {cap}"
+        assert has_capability(
+            "validate_paths", cap, "community"
+        ), f"Community should have {cap}"
 
 
 @pytest.mark.asyncio
@@ -94,11 +96,15 @@ async def test_validate_paths_enterprise_security(enterprise_tier):
     ]
 
     for feature in security_features:
-        assert has_capability("validate_paths", feature, "enterprise"), f"Enterprise should have {feature}"
+        assert has_capability(
+            "validate_paths", feature, "enterprise"
+        ), f"Enterprise should have {feature}"
 
 
 @pytest.mark.asyncio
-async def test_validate_paths_docker_detection_all_tiers(community_tier, pro_tier, enterprise_tier):
+async def test_validate_paths_docker_detection_all_tiers(
+    community_tier, pro_tier, enterprise_tier
+):
     """Docker environment detection available in all tiers."""
     from code_scalpel.licensing.features import has_capability
 

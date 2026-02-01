@@ -221,7 +221,9 @@ def abs_val(x):
         }
 
         generator = TestGenerator()
-        result = generator.generate_from_symbolic_result(symbolic_result, code, "abs_val")
+        result = generator.generate_from_symbolic_result(
+            symbolic_result, code, "abs_val"
+        )
 
         assert result.function_name == "abs_val"
         assert len(result.test_cases) == 2
@@ -347,7 +349,9 @@ def test_to_python_value_coercions_and_defaults():
             self.denominator = den
 
         def as_fraction(self):
-            return SimpleNamespace(numerator=self.numerator, denominator=self.denominator)
+            return SimpleNamespace(
+                numerator=self.numerator, denominator=self.denominator
+            )
 
     assert generator._to_python_value(FakeInt(3), expected_type="str") == "value_3"
     assert generator._to_python_value(FakeReal(1, 2), expected_type="float") == 0.5

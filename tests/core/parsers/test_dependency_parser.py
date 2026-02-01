@@ -602,7 +602,9 @@ class TestCoverageGaps:
             with patch("builtins.open", side_effect=PermissionError("denied")):
                 with patch(
                     "os.path.exists",
-                    side_effect=lambda p: (True if "requirements" in p else original_exists(p)),
+                    side_effect=lambda p: (
+                        True if "requirements" in p else original_exists(p)
+                    ),
                 ):
                     result = parser._parse_python_deps()
                     # Should not crash, just return empty or partial

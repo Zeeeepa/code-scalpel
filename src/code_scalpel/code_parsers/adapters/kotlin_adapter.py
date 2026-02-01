@@ -26,7 +26,8 @@ class KotlinParserAdapter(IParser):
     def __init__(self):
         """Initialize the Kotlin parser adapter (stub)."""
         raise NotImplementedError(
-            "KotlinParserAdapter not yet implemented. " "See TODO items in this file for implementation roadmap."
+            "KotlinParserAdapter not yet implemented. "
+            "See TODO items in this file for implementation roadmap."
         )
 
     def parse(self, code: str) -> ParseResult:

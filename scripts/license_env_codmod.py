@@ -115,7 +115,9 @@ def render_replacement(lines: List[str], start: int, end: int) -> Tuple[str, int
 
 def main(argv: Optional[List[str]] = None):
     p = argparse.ArgumentParser()
-    p.add_argument("--apply", action="store_true", help="Actually modify files (dangerous)")
+    p.add_argument(
+        "--apply", action="store_true", help="Actually modify files (dangerous)"
+    )
     args = p.parse_args(argv)
 
     files = sorted(TESTS.rglob("*.py"))
@@ -136,7 +138,9 @@ def main(argv: Optional[List[str]] = None):
         return
 
     total_blocks = sum(len(v) for v in changes.values())
-    print(f"Found {total_blocks} candidate blocks across {len(changes)} files. Dry-run suggestions:")
+    print(
+        f"Found {total_blocks} candidate blocks across {len(changes)} files. Dry-run suggestions:"
+    )
     for path, reps in sorted(changes.items()):
         print("\nFile:", path)
         for s, e, rep in reps:
@@ -144,7 +148,9 @@ def main(argv: Optional[List[str]] = None):
             print("    ", rep)
 
     if args.apply:
-        print("\n--apply requested but modifying files via codemod is discouraged without manual review.")
+        print(
+            "\n--apply requested but modifying files via codemod is discouraged without manual review."
+        )
 
 
 if __name__ == "__main__":

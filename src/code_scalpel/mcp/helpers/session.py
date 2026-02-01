@@ -119,7 +119,9 @@ class SessionManager:
                     "user_id": entry.get("user_id"),
                 }
                 audit_log.record_event(
-                    event_type=entry.get("tool") or entry.get("operation") or "audit_event",
+                    event_type=entry.get("tool")
+                    or entry.get("operation")
+                    or "audit_event",
                     severity=severity,
                     details=details,
                 )

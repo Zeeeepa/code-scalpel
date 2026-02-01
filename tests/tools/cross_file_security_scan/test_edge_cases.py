@@ -240,7 +240,9 @@ def execute_query(user_id):
     def test_mermaid_contains_module_info(self, temp_project):
         """[20260103_TEST] Mermaid diagram includes module information."""
         (temp_project / "module_a.py").write_text("def func_a(): pass")
-        (temp_project / "module_b.py").write_text("from module_a import func_a\ndef func_b(): return func_a()")
+        (temp_project / "module_b.py").write_text(
+            "from module_a import func_a\ndef func_b(): return func_a()"
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         tracker.analyze()

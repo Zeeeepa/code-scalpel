@@ -76,8 +76,12 @@ class TestTierDetectionFromLicense:
 
     def test_enterprise_tier_detected_from_license(self, monkeypatch):
         """Enterprise license should be detected from JWT 'tier' claim."""
-        enterprise_licenses = list(LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt"))
-        enterprise_licenses = [lic for lic in enterprise_licenses if "broken" not in lic.name]
+        enterprise_licenses = list(
+            LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt")
+        )
+        enterprise_licenses = [
+            lic for lic in enterprise_licenses if "broken" not in lic.name
+        ]
 
         if not enterprise_licenses:
             pytest.skip("No valid Enterprise license found")
@@ -86,15 +90,21 @@ class TestTierDetectionFromLicense:
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         tier = _get_current_tier()
-        assert tier == "enterprise", f"Expected enterprise tier from license, got {tier}"
+        assert (
+            tier == "enterprise"
+        ), f"Expected enterprise tier from license, got {tier}"
 
     def test_community_tier_when_no_license(self, monkeypatch, tmp_path):
         """No license should default to Community tier."""
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
-        monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(tmp_path / "nonexistent.jwt"))
+        monkeypatch.setenv(
+            "CODE_SCALPEL_LICENSE_PATH", str(tmp_path / "nonexistent.jwt")
+        )
 
         tier = _get_current_tier()
-        assert tier == "community", f"Expected community tier without license, got {tier}"
+        assert (
+            tier == "community"
+        ), f"Expected community tier without license, got {tier}"
 
 
 class TestTierNormalization:
@@ -140,7 +150,9 @@ class TestEnvironmentVariablePrecedence:
         # No LICENSE_PATH set
 
         tier = _get_current_tier()
-        assert tier == "community", f"Expected community tier when discovery disabled and no path set, got {tier}"
+        assert (
+            tier == "community"
+        ), f"Expected community tier when discovery disabled and no path set, got {tier}"
 
 
 class TestLicenseClaimValidation:
@@ -159,19 +171,25 @@ class TestLicenseClaimValidation:
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         tier = _get_current_tier()
-        assert tier == "community", f"License with missing claims should fall back to community, got {tier}"
+        assert (
+            tier == "community"
+        ), f"License with missing claims should fall back to community, got {tier}"
 
     def test_license_must_have_valid_signature(self, monkeypatch, tmp_path):
         """License with invalid signature should be rejected."""
         fake_jwt = tmp_path / "fake.jwt"
         # Create a JWT-like string with invalid signature
-        fake_jwt.write_text("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWVyIjoicHJvIn0.invalid_signature")
+        fake_jwt.write_text(
+            "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWVyIjoicHJvIn0.invalid_signature"
+        )
 
         monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(fake_jwt))
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         tier = _get_current_tier()
-        assert tier == "community", f"License with invalid signature should fall back to community, got {tier}"
+        assert (
+            tier == "community"
+        ), f"License with invalid signature should fall back to community, got {tier}"
 
 
 class TestCrossToolConsistency:
@@ -193,7 +211,9 @@ class TestCrossToolConsistency:
         tier2 = _get_current_tier()
         tier3 = _get_current_tier()
 
-        assert tier1 == tier2 == tier3 == "pro", f"Tier should be consistent across calls: {tier1}, {tier2}, {tier3}"
+        assert (
+            tier1 == tier2 == tier3 == "pro"
+        ), f"Tier should be consistent across calls: {tier1}, {tier2}, {tier3}"
 
     def test_tier_changes_when_license_changed(self, monkeypatch):
         """Tier should update when license environment variable changes."""
@@ -222,4 +242,6 @@ class TestCrossToolConsistency:
         monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", "/nonexistent/path.jwt")
 
         tier2 = _get_current_tier()
-        assert tier2 == "community", f"Tier should change to community when license removed, got {tier2}"
+        assert (
+            tier2 == "community"
+        ), f"Tier should change to community when license removed, got {tier2}"

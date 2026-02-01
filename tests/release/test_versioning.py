@@ -220,7 +220,9 @@ class TestSemanticVersioner:
     def test_breaking_change_footer(self):
         """Breaking change via footer."""
         versioner = SemanticVersioner("1.2.3")
-        commits = ["refactor: Change authentication\n\nBREAKING CHANGE: Old endpoints removed"]
+        commits = [
+            "refactor: Change authentication\n\nBREAKING CHANGE: Old endpoints removed"
+        ]
 
         bump = versioner.analyze_commits(commits)
         assert bump.new_version == "2.0.0"

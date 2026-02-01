@@ -26,7 +26,9 @@ async def test_javascript_dom_xss_via_file_path(tmp_path):
 
     assert result.success is True
     assert result.vulnerability_count >= 1
-    assert any(v.cwe == "CWE-79" or "xss" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-79" or "xss" in v.type.lower() for v in result.vulnerabilities
+    )
 
 
 # [20260107_TEST] TypeScript language support tests
@@ -49,7 +51,9 @@ async def test_typescript_dom_xss(tmp_path):
 
     assert result.success is True
     assert result.vulnerability_count >= 1
-    assert any(v.cwe == "CWE-79" or "xss" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-79" or "xss" in v.type.lower() for v in result.vulnerabilities
+    )
 
 
 @pytest.mark.skip(
@@ -72,7 +76,9 @@ async def test_typescript_sql_injection(tmp_path):
 
     assert result.success is True
     assert result.vulnerability_count >= 1
-    assert any(v.cwe == "CWE-89" or "sql" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-89" or "sql" in v.type.lower() for v in result.vulnerabilities
+    )
 
 
 @pytest.mark.skip(
@@ -95,7 +101,9 @@ async def test_typescript_command_injection(tmp_path):
 
     assert result.success is True
     assert result.vulnerability_count >= 1
-    assert any(v.cwe == "CWE-78" or "command" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-78" or "command" in v.type.lower() for v in result.vulnerabilities
+    )
 
 
 # [20260107_TEST] Java language support tests
@@ -117,10 +125,14 @@ async def test_java_sql_injection_spring(tmp_path):
 
     assert result.success is True
     assert result.vulnerability_count >= 1
-    assert any(v.cwe == "CWE-89" or "sql" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-89" or "sql" in v.type.lower() for v in result.vulnerabilities
+    )
 
 
-@pytest.mark.skip(reason="Java JNDI injection patterns not yet implemented - requires Java-specific semantic analysis")
+@pytest.mark.skip(
+    reason="Java JNDI injection patterns not yet implemented - requires Java-specific semantic analysis"
+)
 async def test_java_jndi_injection(tmp_path):
     """Java JNDI injection detection (Log4Shell variant)."""
     java_code = textwrap.dedent("""
@@ -141,7 +153,9 @@ async def test_java_jndi_injection(tmp_path):
     assert result.vulnerability_count >= 1
 
 
-@pytest.mark.skip(reason="JSP XSS patterns not yet supported - requires JSP/servlet parser")
+@pytest.mark.skip(
+    reason="JSP XSS patterns not yet supported - requires JSP/servlet parser"
+)
 async def test_java_xss_jsp(tmp_path):
     """Java JSP XSS detection."""
     java_code = textwrap.dedent("""
@@ -159,4 +173,6 @@ async def test_java_xss_jsp(tmp_path):
 
     assert result.success is True
     assert result.vulnerability_count >= 1
-    assert any(v.cwe == "CWE-79" or "xss" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-79" or "xss" in v.type.lower() for v in result.vulnerabilities
+    )

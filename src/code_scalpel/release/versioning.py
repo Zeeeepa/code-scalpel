@@ -45,7 +45,9 @@ class ConventionalCommit:
 
         # Pattern: type(scope)!: description or type!: description
         # or: type(scope): description or type: description
-        pattern = r"^(feat|fix|docs|style|refactor|perf|test|chore|ci)(\(.+?\))?(!)?:\s*(.+)$"
+        pattern = (
+            r"^(feat|fix|docs|style|refactor|perf|test|chore|ci)(\(.+?\))?(!)?:\s*(.+)$"
+        )
         match = re.match(pattern, subject)
 
         if not match:
@@ -63,7 +65,11 @@ class ConventionalCommit:
         footer = None
         if len(lines) > 2:
             body = "\n".join(lines[1:-1]).strip() if len(lines) > 2 else None
-            footer = lines[-1] if lines[-1].startswith(("BREAKING CHANGE:", "Closes #")) else None
+            footer = (
+                lines[-1]
+                if lines[-1].startswith(("BREAKING CHANGE:", "Closes #"))
+                else None
+            )
 
         # Check for BREAKING CHANGE footer
         if footer and footer.startswith("BREAKING CHANGE:"):
@@ -193,7 +199,9 @@ class SemanticVersioner:
             current=self.current_version,
         )
 
-    def classify_commits(self, commits: list[str]) -> dict[str, list[ConventionalCommit]]:
+    def classify_commits(
+        self, commits: list[str]
+    ) -> dict[str, list[ConventionalCommit]]:
         """Classify commits by type.
 
         Args:

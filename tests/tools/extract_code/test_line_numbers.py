@@ -13,7 +13,9 @@ import os
 import sys
 import tempfile
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src"))
+)
 
 from code_scalpel.surgery.unified_extractor import UnifiedExtractor
 
@@ -49,9 +51,15 @@ def third_function():  # Line 8
 
                 # second_function is at line 5-6 (1-indexed)
                 # Depending on implementation, might include blank lines
-                assert result.start_line >= 5, f"start_line {result.start_line} should be >= 5"
-                assert result.end_line >= 6, f"end_line {result.end_line} should be >= 6"
-                assert result.start_line <= result.end_line, "start_line should be <= end_line"
+                assert (
+                    result.start_line >= 5
+                ), f"start_line {result.start_line} should be >= 5"
+                assert (
+                    result.end_line >= 6
+                ), f"end_line {result.end_line} should be >= 6"
+                assert (
+                    result.start_line <= result.end_line
+                ), "start_line should be <= end_line"
             finally:
                 os.unlink(f.name)
 
@@ -82,9 +90,15 @@ class SecondClass:  # Line 8
                 assert result.success, f"Extraction failed: {result.error}"
 
                 # SecondClass starts at line 8, ends at line 13
-                assert result.start_line >= 8, f"start_line {result.start_line} should be >= 8"
-                assert result.end_line >= 13, f"end_line {result.end_line} should be >= 13"
-                assert result.start_line <= result.end_line, "start_line should be <= end_line"
+                assert (
+                    result.start_line >= 8
+                ), f"start_line {result.start_line} should be >= 8"
+                assert (
+                    result.end_line >= 13
+                ), f"end_line {result.end_line} should be >= 13"
+                assert (
+                    result.start_line <= result.end_line
+                ), "start_line should be <= end_line"
             finally:
                 os.unlink(f.name)
 
@@ -109,8 +123,12 @@ def decorated_function():  # Line 5
 
                 # Decorator should be included, so start_line should be <= 4
                 # Function ends at line 6
-                assert result.start_line <= 5, f"start_line {result.start_line} should include decorator at line 4"
-                assert result.end_line >= 6, f"end_line {result.end_line} should be >= 6"
+                assert (
+                    result.start_line <= 5
+                ), f"start_line {result.start_line} should include decorator at line 4"
+                assert (
+                    result.end_line >= 6
+                ), f"end_line {result.end_line} should be >= 6"
             finally:
                 os.unlink(f.name)
 
@@ -138,9 +156,15 @@ def decorated_function():  # Line 5
                 assert result.success, f"Extraction failed: {result.error}"
 
                 # subtract method is at lines 5-7
-                assert result.start_line >= 5, f"start_line {result.start_line} should be >= 5"
-                assert result.end_line >= 7, f"end_line {result.end_line} should be >= 7"
-                assert result.start_line <= result.end_line, "start_line should be <= end_line"
+                assert (
+                    result.start_line >= 5
+                ), f"start_line {result.start_line} should be >= 5"
+                assert (
+                    result.end_line >= 7
+                ), f"end_line {result.end_line} should be >= 7"
+                assert (
+                    result.start_line <= result.end_line
+                ), "start_line should be <= end_line"
             finally:
                 os.unlink(f.name)
 
@@ -169,9 +193,15 @@ def complex_function(
                 assert result.success, f"Extraction failed: {result.error}"
 
                 # Function starts at line 4, ends at line 11
-                assert result.start_line >= 4, f"start_line {result.start_line} should be >= 4"
-                assert result.end_line >= 11, f"end_line {result.end_line} should be >= 11"
-                assert result.start_line <= result.end_line, "start_line should be <= end_line"
+                assert (
+                    result.start_line >= 4
+                ), f"start_line {result.start_line} should be >= 4"
+                assert (
+                    result.end_line >= 11
+                ), f"end_line {result.end_line} should be >= 11"
+                assert (
+                    result.start_line <= result.end_line
+                ), "start_line should be <= end_line"
             finally:
                 os.unlink(f.name)
 
@@ -201,8 +231,12 @@ def func_c():  # Line 7
                 assert result_a.success and result_b.success and result_c.success
 
                 # Verify they don't overlap incorrectly
-                assert result_a.end_line < result_b.start_line, "func_a should end before func_b starts"
-                assert result_b.end_line < result_c.start_line, "func_b should end before func_c starts"
+                assert (
+                    result_a.end_line < result_b.start_line
+                ), "func_a should end before func_b starts"
+                assert (
+                    result_b.end_line < result_c.start_line
+                ), "func_b should end before func_c starts"
 
                 # Verify ordering
                 assert (
@@ -232,9 +266,15 @@ def other():  # Line 6
                 assert result.success, f"Extraction failed: {result.error}"
 
                 # outer function includes nested inner, lines 1-4
-                assert result.start_line >= 1, f"start_line {result.start_line} should be >= 1"
-                assert result.end_line >= 4, f"end_line {result.end_line} should be >= 4"
-                assert result.start_line <= result.end_line, "start_line should be <= end_line"
+                assert (
+                    result.start_line >= 1
+                ), f"start_line {result.start_line} should be >= 1"
+                assert (
+                    result.end_line >= 4
+                ), f"end_line {result.end_line} should be >= 4"
+                assert (
+                    result.start_line <= result.end_line
+                ), "start_line should be <= end_line"
             finally:
                 os.unlink(f.name)
 
@@ -256,8 +296,12 @@ class TestLineNumberEdgeCases:
                 result = extractor.extract("function", "first_line_function")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert result.start_line == 1, f"start_line should be 1, got {result.start_line}"
-                assert result.end_line >= 2, f"end_line should be >= 2, got {result.end_line}"
+                assert (
+                    result.start_line == 1
+                ), f"start_line should be 1, got {result.start_line}"
+                assert (
+                    result.end_line >= 2
+                ), f"end_line should be >= 2, got {result.end_line}"
             finally:
                 os.unlink(f.name)
 
@@ -280,8 +324,12 @@ def another(): pass
                 assert result.success, f"Extraction failed: {result.error}"
 
                 # Single line function at line 3
-                assert result.start_line >= 3, f"start_line {result.start_line} should be >= 3"
-                assert result.end_line >= 3, f"end_line {result.end_line} should be >= 3"
+                assert (
+                    result.start_line >= 3
+                ), f"start_line {result.start_line} should be >= 3"
+                assert (
+                    result.end_line >= 3
+                ), f"end_line {result.end_line} should be >= 3"
                 # For single-line functions, start and end might be the same
             finally:
                 os.unlink(f.name)
@@ -307,7 +355,11 @@ def another(): pass
                 assert result.success, f"Extraction failed: {result.error}"
 
                 # Function spans lines 1-7, including blank lines
-                assert result.start_line >= 1, f"start_line {result.start_line} should be >= 1"
-                assert result.end_line >= 7, f"end_line {result.end_line} should be >= 7"
+                assert (
+                    result.start_line >= 1
+                ), f"start_line {result.start_line} should be >= 1"
+                assert (
+                    result.end_line >= 7
+                ), f"end_line {result.end_line} should be >= 7"
             finally:
                 os.unlink(f.name)

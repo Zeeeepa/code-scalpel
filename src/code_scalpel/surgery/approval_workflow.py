@@ -238,7 +238,9 @@ class ApprovalWorkflow:
 
         return response.status
 
-    def approve(self, approval_id: str, approver: str, comment: Optional[str] = None) -> bool:
+    def approve(
+        self, approval_id: str, approver: str, comment: Optional[str] = None
+    ) -> bool:
         """
         Manually approve a request (for internal/testing use).
 
@@ -276,7 +278,9 @@ class ApprovalWorkflow:
 
         return True
 
-    def reject(self, approval_id: str, rejector: str, reason: Optional[str] = None) -> bool:
+    def reject(
+        self, approval_id: str, rejector: str, reason: Optional[str] = None
+    ) -> bool:
         """
         Manually reject a request (for internal/testing use).
 

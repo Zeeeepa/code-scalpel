@@ -234,7 +234,9 @@ class UniversalGraph:
         """Get all edges targeting a node."""
         return [edge for edge in self.edges if edge.to_id == node_id]
 
-    def get_dependencies(self, node_id: str, min_confidence: float = 0.8) -> Dict[str, Any]:
+    def get_dependencies(
+        self, node_id: str, min_confidence: float = 0.8
+    ) -> Dict[str, Any]:
         """
         Get dependencies with confidence filtering.
 
@@ -325,7 +327,10 @@ class UniversalGraph:
                 neighbor_id = edge.to_id if edge.from_id == current_id else edge.from_id
 
                 # Check if already visited at equal or shorter distance
-                if neighbor_id in visited_nodes and visited_nodes[neighbor_id] <= depth + 1:
+                if (
+                    neighbor_id in visited_nodes
+                    and visited_nodes[neighbor_id] <= depth + 1
+                ):
                     # Still add edge if both nodes are in our set
                     if edge not in collected_edges:
                         collected_edges.append(edge)
@@ -367,7 +372,11 @@ class UniversalGraph:
             total_edges=len(subgraph.edges),
             max_depth_reached=max(visited_nodes.values()) if visited_nodes else 0,
             truncated=truncated,
-            truncation_warning=(f"Graph truncated at {max_nodes} nodes due to max_nodes limit." if truncated else None),
+            truncation_warning=(
+                f"Graph truncated at {max_nodes} nodes due to max_nodes limit."
+                if truncated
+                else None
+            ),
             node_depths=visited_nodes,
         )
 

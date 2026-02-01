@@ -9,7 +9,9 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_community_tier_output_metadata(make_project, patch_tier, patch_capabilities):
+async def test_community_tier_output_metadata(
+    make_project, patch_tier, patch_capabilities
+):
     """[20260111_TEST] Community tier should populate output metadata with limits."""
     import code_scalpel.mcp.tools.context as server
 
@@ -98,7 +100,9 @@ result = target()
 
 
 @pytest.mark.asyncio
-async def test_enterprise_tier_output_metadata(make_project, patch_tier, patch_capabilities):
+async def test_enterprise_tier_output_metadata(
+    make_project, patch_tier, patch_capabilities
+):
     """[20260111_TEST] Enterprise tier should show all features enabled."""
     import code_scalpel.mcp.tools.context as server
 

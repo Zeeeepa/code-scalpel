@@ -325,7 +325,9 @@ class PolyglotExtractor:
         # Other languages use IR-based extraction
         return self._extract_from_ir(target_type, target_name)
 
-    def _extract_python(self, target_type: str, target_name: str) -> PolyglotExtractionResult:
+    def _extract_python(
+        self, target_type: str, target_name: str
+    ) -> PolyglotExtractionResult:
         """Extract from Python code using existing SurgicalExtractor."""
         try:
             if target_type == "function":
@@ -374,7 +376,9 @@ class PolyglotExtractor:
                 target_name=target_name,
             )
 
-    def _extract_from_ir(self, target_type: str, target_name: str) -> PolyglotExtractionResult:
+    def _extract_from_ir(
+        self, target_type: str, target_name: str
+    ) -> PolyglotExtractionResult:
         """
         Extract from IR (for JS/TS/Java).
 
@@ -413,7 +417,10 @@ class PolyglotExtractor:
                     class_name, method_name = target_name.split(".", 1)
                     if actual_node.name == class_name:
                         for member in actual_node.body:
-                            if isinstance(member, IRFunctionDef) and member.name == method_name:
+                            if (
+                                isinstance(member, IRFunctionDef)
+                                and member.name == method_name
+                            ):
                                 target_node = member
                                 break
 

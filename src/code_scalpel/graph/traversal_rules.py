@@ -93,7 +93,8 @@ class TraversalRuleEngine:
         },
         "skip_private": {
             "type": RuleType.FILTER,
-            "condition": lambda e: "::_" in e.get("to_id", "") and "::__" not in e.get("to_id", ""),
+            "condition": lambda e: "::_" in e.get("to_id", "")
+            and "::__" not in e.get("to_id", ""),
             "description": "Skip edges to private functions",
         },
         "complexity_weight": {
@@ -287,7 +288,9 @@ class TraversalRuleEngine:
                 error=str(e),
             )
 
-    def _get_active_rules(self, active_rules: Optional[Set[str]]) -> List[TraversalRule]:
+    def _get_active_rules(
+        self, active_rules: Optional[Set[str]]
+    ) -> List[TraversalRule]:
         """Get list of active rules sorted by priority."""
         rules = []
         for rule in self._rules.values():
@@ -503,7 +506,9 @@ class TraversalRuleEngine:
         paths: List[TraversalPath] = []
 
         # DFS for path finding
-        stack: List[Tuple[str, List[str], List[Dict[str, Any]], float]] = [(start_id, [start_id], [], 0.0)]
+        stack: List[Tuple[str, List[str], List[Dict[str, Any]], float]] = [
+            (start_id, [start_id], [], 0.0)
+        ]
 
         while stack:
             current_id, path, edges, weight = stack.pop()

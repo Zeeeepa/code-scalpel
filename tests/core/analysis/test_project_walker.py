@@ -441,7 +441,9 @@ class TestProjectContext:
 
             important_files = context.get_important_files(min_score=0.7)
             assert len(important_files) > 0
-            assert all(context.get_file_importance(f.path) >= 0.7 for f in important_files)
+            assert all(
+                context.get_file_importance(f.path) >= 0.7 for f in important_files
+            )
 
     def test_context_directories_by_type(self, temp_project):
         """Test filtering directories by type."""

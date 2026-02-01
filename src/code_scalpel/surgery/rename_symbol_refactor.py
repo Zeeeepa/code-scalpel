@@ -75,15 +75,21 @@ class CrossFileRenameResult:
     backup_paths: dict[str, str | None]
     warnings: list[str]
     error: str | None = None
-    audit_entry: Optional[AuditEntry] = None  # [20260108_FEATURE] Enterprise audit trail
+    audit_entry: Optional[AuditEntry] = (
+        None  # [20260108_FEATURE] Enterprise audit trail
+    )
 
 
-def iter_python_files(project_root: Path, *, max_files: int | None = None) -> Iterable[Path]:
+def iter_python_files(
+    project_root: Path, *, max_files: int | None = None
+) -> Iterable[Path]:
     """Yield Python files under project_root, skipping common virtualenv/build dirs."""
     count = 0
     for root, dirnames, filenames in os.walk(project_root):
         # Mutate dirnames in-place to prune walk
-        dirnames[:] = [d for d in dirnames if d not in _SKIP_DIR_NAMES and not d.startswith(".")]
+        dirnames[:] = [
+            d for d in dirnames if d not in _SKIP_DIR_NAMES and not d.startswith(".")
+        ]
 
         for name in filenames:
             if not name.endswith(".py"):
@@ -132,7 +138,9 @@ def _write_text_atomic(path: Path, new_text: str, *, create_backup: bool) -> str
         shutil.copy2(path, backup_path)
 
     dir_path = str(path.parent)
-    with tempfile.NamedTemporaryFile(mode="w", dir=dir_path, delete=False, suffix=".tmp", encoding="utf-8") as f:
+    with tempfile.NamedTemporaryFile(
+        mode="w", dir=dir_path, delete=False, suffix=".tmp", encoding="utf-8"
+    ) as f:
         f.write(new_text)
         tmp_path = f.name
 
@@ -191,9 +199,15 @@ def _collect_import_context(
 
                 if target_type in {"function", "class"} and alias.name == old_short:
                     # If imported without alias, local uses should be renamed.
-                    from_imports.append((local, alias.asname is None, alias.asname is not None))
+                    from_imports.append(
+                        (local, alias.asname is None, alias.asname is not None)
+                    )
 
-                if target_type == "method" and method_class and alias.name == method_class:
+                if (
+                    target_type == "method"
+                    and method_class
+                    and alias.name == method_class
+                ):
                     imported_class_locals.append(local)
 
         if isinstance(node, ast.Import):
@@ -370,7 +384,9 @@ def _rewrite_local_names(
         return {}
 
     rename_local_names = {
-        local for (local, should_rename, _has_as) in from_imports if should_rename and local == old_short
+        local
+        for (local, should_rename, _has_as) in from_imports
+        if should_rename and local == old_short
     }
     if not rename_local_names:
         return {}
@@ -383,7 +399,9 @@ def _rewrite_local_names(
             args = getattr(node, "args", None)
             if args:
                 for arg in (
-                    getattr(args, "posonlyargs", []) + getattr(args, "args", []) + getattr(args, "kwonlyargs", [])
+                    getattr(args, "posonlyargs", [])
+                    + getattr(args, "args", [])
+                    + getattr(args, "kwonlyargs", [])
                 ):
                     if arg and getattr(arg, "arg", None):
                         params.add(arg.arg)
@@ -409,14 +427,21 @@ def _rewrite_local_names(
             globals_declared, nonlocals_declared = _scope_flags(node)
             # [20260108_BUGFIX] Avoid renaming when symbol is shadowed by parameters unless global/nonlocal restores outer binding
             has_param_shadow = (
-                old_short in params and old_short not in globals_declared and old_short not in nonlocals_declared
+                old_short in params
+                and old_short not in globals_declared
+                and old_short not in nonlocals_declared
             )
             new_shadowed = shadowed or has_param_shadow
             for child in ast.iter_child_nodes(node):
                 walk(child, new_shadowed)
             return
 
-        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load) and node.id == old_short and not shadowed:
+        if (
+            isinstance(node, ast.Name)
+            and isinstance(node.ctx, ast.Load)
+            and node.id == old_short
+            and not shadowed
+        ):
             if hasattr(node, "lineno") and hasattr(node, "col_offset"):
                 replacements[(node.lineno, node.col_offset)] = (old_short, new_short)
 
@@ -734,7 +759,9 @@ def rename_references_across_project(
             break
 
         try:
-            backup_path = _write_text_atomic(py_file, new_code, create_backup=create_backup)
+            backup_path = _write_text_atomic(
+                py_file, new_code, create_backup=create_backup
+            )
             rel_path = _relativize(py_file, project_root)
             changed_files.append(rel_path)
             backup_paths[rel_path] = backup_path

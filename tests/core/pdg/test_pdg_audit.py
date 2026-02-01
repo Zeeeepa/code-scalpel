@@ -42,7 +42,9 @@ y = x
         pdg, _ = build_pdg(code)
 
         # Find the two assign nodes
-        assign_nodes = [(n, d) for n, d in pdg.nodes(data=True) if d.get("type") == "assign"]
+        assign_nodes = [
+            (n, d) for n, d in pdg.nodes(data=True) if d.get("type") == "assign"
+        ]
         assert len(assign_nodes) == 2
 
         # Find nodes by their targets
@@ -63,7 +65,9 @@ y = 2
 """
         pdg, _ = build_pdg(code)
 
-        assign_nodes = [(n, d) for n, d in pdg.nodes(data=True) if d.get("type") == "assign"]
+        assign_nodes = [
+            (n, d) for n, d in pdg.nodes(data=True) if d.get("type") == "assign"
+        ]
         assert len(assign_nodes) == 2
 
         x_node = next(n for n, d in assign_nodes if "x" in d.get("targets", []))
@@ -93,11 +97,19 @@ z = y
         z_node = assign_nodes["z"]
 
         # Check chain: x -> y
-        x_edges = [e for _, e, d in pdg.out_edges(x_node, data=True) if d.get("type") == "data_dependency"]
+        x_edges = [
+            e
+            for _, e, d in pdg.out_edges(x_node, data=True)
+            if d.get("type") == "data_dependency"
+        ]
         assert y_node in x_edges
 
         # Check chain: y -> z
-        y_edges = [e for _, e, d in pdg.out_edges(y_node, data=True) if d.get("type") == "data_dependency"]
+        y_edges = [
+            e
+            for _, e, d in pdg.out_edges(y_node, data=True)
+            if d.get("type") == "data_dependency"
+        ]
         assert z_node in y_edges
 
     def test_multiple_uses_same_variable(self):
@@ -135,7 +147,9 @@ y = x
         pdg, _ = build_pdg(code)
 
         # Find all assign nodes
-        assign_nodes = [(n, d) for n, d in pdg.nodes(data=True) if d.get("type") == "assign"]
+        assign_nodes = [
+            (n, d) for n, d in pdg.nodes(data=True) if d.get("type") == "assign"
+        ]
 
         # Find x assignments (there should be 2) and y assignment
         x_assigns = [(n, d) for n, d in assign_nodes if "x" in d.get("targets", [])]
@@ -174,7 +188,9 @@ if x > 0:
 
         # The assign should have a control dependency from the if
         ctrl_deps = [
-            (u, v) for u, v, d in pdg.edges(data=True) if d.get("type") == "control_dependency" and u == if_node
+            (u, v)
+            for u, v, d in pdg.edges(data=True)
+            if d.get("type") == "control_dependency" and u == if_node
         ]
         assert len(ctrl_deps) >= 1
 
@@ -195,7 +211,9 @@ else:
 
         # Both branches should depend on the if
         ctrl_deps = [
-            (u, v) for u, v, d in pdg.edges(data=True) if d.get("type") == "control_dependency" and u == if_node
+            (u, v)
+            for u, v, d in pdg.edges(data=True)
+            if d.get("type") == "control_dependency" and u == if_node
         ]
         # Should have at least 2 control deps (one for each branch)
         assert len(ctrl_deps) >= 2
@@ -233,7 +251,8 @@ for i in range(10):
         ctrl_deps = [
             (u, v)
             for u, v, d in pdg.edges(data=True)
-            if d.get("type") in ("control_dependency", "loop_dependency") and u == for_node
+            if d.get("type") in ("control_dependency", "loop_dependency")
+            and u == for_node
         ]
         assert len(ctrl_deps) >= 1
 
@@ -306,7 +325,9 @@ def foo(a):
         pdg, _ = build_pdg(code)
 
         # Find parameter node
-        param_nodes = [n for n, d in pdg.nodes(data=True) if d.get("type") == "parameter"]
+        param_nodes = [
+            n for n, d in pdg.nodes(data=True) if d.get("type") == "parameter"
+        ]
 
         # Parameters should exist
         assert len(param_nodes) >= 1
@@ -388,7 +409,9 @@ x = y = z = 1
 """
         pdg, _ = build_pdg(code)
 
-        assign_nodes = [(n, d) for n, d in pdg.nodes(data=True) if d.get("type") == "assign"]
+        assign_nodes = [
+            (n, d) for n, d in pdg.nodes(data=True) if d.get("type") == "assign"
+        ]
         # May create one node with multiple targets or multiple nodes
         assert len(assign_nodes) >= 1
 
@@ -755,7 +778,9 @@ class TestSlicerCorrectness:
         pdg.add_edge("n2", "n3", type="data_dependency")
 
         slicer = ProgramSlicer(pdg)
-        criteria = SlicingCriteria(nodes={"n3"}, variables=set(), include_control=True, include_data=False)
+        criteria = SlicingCriteria(
+            nodes={"n3"}, variables=set(), include_control=True, include_data=False
+        )
 
         slice_result = slicer.compute_slice(criteria, SliceType.BACKWARD)
 

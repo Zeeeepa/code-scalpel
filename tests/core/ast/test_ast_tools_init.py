@@ -168,7 +168,9 @@ class TestVisualizeAst:
         # Only test if visualizer is available
         if ast_tools.ASTVisualizer is not None:
             # Mock the visualize method to avoid actual file creation
-            with patch.object(ast_tools.ASTVisualizer, "visualize", return_value="output.png") as mock_viz:
+            with patch.object(
+                ast_tools.ASTVisualizer, "visualize", return_value="output.png"
+            ) as mock_viz:
                 # Call the module-level convenience function
                 result = visualize_ast(tree, "test_output", "png", False)
                 # The mock should have been called
@@ -240,19 +242,25 @@ class TestImportErrorBranches:
 
         # If ASTTransformer is None, that branch was executed
         # If it's not None, that means the import succeeded
-        assert ast_tools.ASTTransformer is None or hasattr(ast_tools.ASTTransformer, "__call__")
+        assert ast_tools.ASTTransformer is None or hasattr(
+            ast_tools.ASTTransformer, "__call__"
+        )
 
     def test_import_with_mocked_visualizer_failure(self):
         """Test handling when visualizer import fails (lines 13-14)."""
         from code_scalpel import ast_tools
 
-        assert ast_tools.ASTVisualizer is None or hasattr(ast_tools.ASTVisualizer, "__call__")
+        assert ast_tools.ASTVisualizer is None or hasattr(
+            ast_tools.ASTVisualizer, "__call__"
+        )
 
     def test_import_with_mocked_validator_failure(self):
         """Test handling when validator import fails (lines 18-19)."""
         from code_scalpel import ast_tools
 
-        assert ast_tools.ASTValidator is None or hasattr(ast_tools.ASTValidator, "__call__")
+        assert ast_tools.ASTValidator is None or hasattr(
+            ast_tools.ASTValidator, "__call__"
+        )
 
     def test_utils_import_failure_handling(self):
         """Test handling when utils imports fail."""

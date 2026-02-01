@@ -35,7 +35,6 @@ def _get_current_tier() -> str:
     return get_tier()
 
 
-@with_oracle_resilience(tool_id="get_call_graph", strategy=SymbolStrategy)
 async def _get_call_graph_tool(
     project_root: str | None = None,
     entry_point: str | None = None,
@@ -138,16 +137,17 @@ async def _get_call_graph_tool(
 
 
 get_call_graph = mcp.tool()(
-    envelop_tool_function(
-        _get_call_graph_tool,
-        tool_id="get_call_graph",
-        tool_version=_pkg_version,
-        tier_getter=_tier_getter,
+    with_oracle_resilience(tool_id="get_call_graph", strategy=PathStrategy)(
+        envelop_tool_function(
+            _get_call_graph_tool,
+            tool_id="get_call_graph",
+            tool_version=_pkg_version,
+            tier_getter=_tier_getter,
+        )
     )
 )
 
 
-@with_oracle_resilience(tool_id="get_graph_neighborhood", strategy=NodeIdFormatStrategy)
 async def _get_graph_neighborhood_tool(
     center_node_id: str,
     k: int = 2,
@@ -227,11 +227,13 @@ async def _get_graph_neighborhood_tool(
 
 
 get_graph_neighborhood = mcp.tool()(
-    envelop_tool_function(
-        _get_graph_neighborhood_tool,
-        tool_id="get_graph_neighborhood",
-        tool_version=_pkg_version,
-        tier_getter=_tier_getter,
+    with_oracle_resilience(tool_id="get_graph_neighborhood", strategy=NodeIdFormatStrategy)(
+        envelop_tool_function(
+            _get_graph_neighborhood_tool,
+            tool_id="get_graph_neighborhood",
+            tool_version=_pkg_version,
+            tier_getter=_tier_getter,
+        )
     )
 )
 
@@ -370,16 +372,17 @@ async def _get_project_map_tool(
 
 
 get_project_map = mcp.tool()(
-    envelop_tool_function(
-        _get_project_map_tool,
-        tool_id="get_project_map",
-        tool_version=_pkg_version,
-        tier_getter=_tier_getter,
+    with_oracle_resilience(tool_id="get_project_map", strategy=PathStrategy)(
+        envelop_tool_function(
+            _get_project_map_tool,
+            tool_id="get_project_map",
+            tool_version=_pkg_version,
+            tier_getter=_tier_getter,
+        )
     )
 )
 
 
-@with_oracle_resilience(tool_id="get_cross_file_dependencies", strategy=SymbolStrategy)
 async def _get_cross_file_dependencies_tool(
     target_file: str,
     target_symbol: str,
@@ -469,16 +472,17 @@ async def _get_cross_file_dependencies_tool(
 
 
 get_cross_file_dependencies = mcp.tool()(
-    envelop_tool_function(
-        _get_cross_file_dependencies_tool,
-        tool_id="get_cross_file_dependencies",
-        tool_version=_pkg_version,
-        tier_getter=_tier_getter,
+    with_oracle_resilience(tool_id="get_cross_file_dependencies", strategy=PathStrategy)(
+        envelop_tool_function(
+            _get_cross_file_dependencies_tool,
+            tool_id="get_cross_file_dependencies",
+            tool_version=_pkg_version,
+            tier_getter=_tier_getter,
+        )
     )
 )
 
 
-@with_oracle_resilience(tool_id="cross_file_security_scan", strategy=PathStrategy)
 async def _cross_file_security_scan_tool(
     project_root: str | None = None,
     entry_points: list[str] | None = None,
@@ -577,11 +581,13 @@ async def _cross_file_security_scan_tool(
 
 
 cross_file_security_scan = mcp.tool()(
-    envelop_tool_function(
-        _cross_file_security_scan_tool,
-        tool_id="cross_file_security_scan",
-        tool_version=_pkg_version,
-        tier_getter=_tier_getter,
+    with_oracle_resilience(tool_id="cross_file_security_scan", strategy=PathStrategy)(
+        envelop_tool_function(
+            _cross_file_security_scan_tool,
+            tool_id="cross_file_security_scan",
+            tool_version=_pkg_version,
+            tier_getter=_tier_getter,
+        )
     )
 )
 

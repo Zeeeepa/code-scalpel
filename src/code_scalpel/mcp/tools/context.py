@@ -13,7 +13,11 @@ from code_scalpel.mcp.helpers.context_helpers import (
 )
 from code_scalpel.mcp.protocol import mcp, _get_current_tier
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
-from code_scalpel.mcp.oracle_middleware import with_oracle_resilience, SymbolStrategy, PathStrategy
+from code_scalpel.mcp.oracle_middleware import (
+    with_oracle_resilience,
+    SymbolStrategy,
+    PathStrategy,
+)
 from code_scalpel import __version__ as _pkg_version
 
 

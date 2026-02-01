@@ -76,7 +76,9 @@ def _default_server_command(repo_root: Path) -> str:
     return sys.executable
 
 
-def _make_pro_test_project(base_dir: Path, bulk_files: int = 140) -> tuple[Path, dict[str, Path]]:
+def _make_pro_test_project(
+    base_dir: Path, bulk_files: int = 140
+) -> tuple[Path, dict[str, Path]]:
     root = base_dir / "proj"
     pkg = root / "pkg"
     bulk = root / "bulk"
@@ -154,7 +156,9 @@ async def missing_await():
     }
 
 
-async def _call(session: ClientSession, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+async def _call(
+    session: ClientSession, tool: str, args: dict[str, Any]
+) -> dict[str, Any]:
     res = await session.call_tool(tool, args)
     return res.model_dump()
 
@@ -198,13 +202,17 @@ async def main() -> int:
         print("FAIL: CODE_SCALPEL_LICENSE_PATH is not set; cannot validate Pro tier")
         return 1
 
-    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(repo_root)
+    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(
+        repo_root
+    )
     if server_cmd.endswith("code-scalpel"):
         server_args = ["mcp", "--root", str(project_root)]
     else:
         server_args = ["-m", "code_scalpel.mcp.server", "--root", str(project_root)]
 
-    params = StdioServerParameters(command=server_cmd, args=server_args, env=env, cwd=run_dir)
+    params = StdioServerParameters(
+        command=server_cmd, args=server_args, env=env, cwd=run_dir
+    )
 
     checks: list[ToolCheck] = []
 
@@ -229,7 +237,9 @@ async def main() -> int:
             else:
                 checks.append(ToolCheck("list_tools", True, "22 tools"))
 
-            py_snippet = "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            py_snippet = (
+                "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            )
 
             # --- Smoke calls for all tools (basic correctness) ---
             smoke: list[tuple[str, dict[str, Any]]] = [
@@ -429,7 +439,9 @@ async def main() -> int:
 
             # --- Pro limit: code_policy_check should exceed Community max_files ---
             try:
-                payload = await _call(session, "code_policy_check", {"paths": [str(project_root)]})
+                payload = await _call(
+                    session, "code_policy_check", {"paths": [str(project_root)]}
+                )
                 data = _structured_data(payload)
                 # NOTE: code_policy_check may report `success=False` when violations exist.
                 # For tier validation we only care that the tool executed and analyzed >100 files.
@@ -474,7 +486,9 @@ async def main() -> int:
                     )
                 )
             except Exception as e:
-                checks.append(ToolCheck("enterprise_denied_code_policy_check", False, str(e)))
+                checks.append(
+                    ToolCheck("enterprise_denied_code_policy_check", False, str(e))
+                )
 
             # --- Enterprise feature denial: graph query flags must remain false in Pro ---
             try:

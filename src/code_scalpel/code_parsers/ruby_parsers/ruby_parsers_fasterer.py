@@ -43,10 +43,14 @@ class FastererParser:
     def categorize_issues(self, issues: List[PerformanceIssue]) -> Dict:
         raise NotImplementedError("Phase 2: Issue categorization")
 
-    def detect_n_plus_one_queries(self, issues: List[PerformanceIssue]) -> List[PerformanceIssue]:
+    def detect_n_plus_one_queries(
+        self, issues: List[PerformanceIssue]
+    ) -> List[PerformanceIssue]:
         raise NotImplementedError("Phase 2: N+1 query detection")
 
-    def detect_inefficient_operations(self, issues: List[PerformanceIssue]) -> List[PerformanceIssue]:
+    def detect_inefficient_operations(
+        self, issues: List[PerformanceIssue]
+    ) -> List[PerformanceIssue]:
         raise NotImplementedError("Phase 2: Inefficient operation detection")
 
     def calculate_performance_metrics(self, issues: List[PerformanceIssue]) -> Dict:

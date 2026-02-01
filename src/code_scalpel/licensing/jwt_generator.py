@@ -200,7 +200,9 @@ def generate_license(
 
 def main():
     """CLI entry point for license generation."""
-    parser = argparse.ArgumentParser(description="Generate JWT license keys for Code Scalpel")
+    parser = argparse.ArgumentParser(
+        description="Generate JWT license keys for Code Scalpel"
+    )
 
     parser.add_argument(
         "--tier",
@@ -209,7 +211,9 @@ def main():
         help="License tier",
     )
 
-    parser.add_argument("--customer", required=True, help="Customer ID (unique identifier)")
+    parser.add_argument(
+        "--customer", required=True, help="Customer ID (unique identifier)"
+    )
 
     parser.add_argument("--organization", help="Organization name")
 
@@ -226,13 +230,18 @@ def main():
         help="License duration in days (default: 365)",
     )
 
-    parser.add_argument("--seats", type=int, help="Number of seats (for enterprise tier)")
+    parser.add_argument(
+        "--seats", type=int, help="Number of seats (for enterprise tier)"
+    )
 
     parser.add_argument(
         "--backdate-seconds",
         type=int,
         default=10,
-        help=("Backdate iat/nbf by this many seconds to tolerate clock skew " "(default: 10)"),
+        help=(
+            "Backdate iat/nbf by this many seconds to tolerate clock skew "
+            "(default: 10)"
+        ),
     )
 
     parser.add_argument(
@@ -242,7 +251,9 @@ def main():
         help="JWT signing algorithm (default: RS256)",
     )
 
-    parser.add_argument("--secret", help="Secret key for HS256 algorithm (required for HS256)")
+    parser.add_argument(
+        "--secret", help="Secret key for HS256 algorithm (required for HS256)"
+    )
 
     parser.add_argument(
         "--private-key",
@@ -338,7 +349,9 @@ def main():
             # Decode and show expiration
             claims = jwt.decode(token, options={"verify_signature": False})
             # [20251228_BUGFIX] Avoid deprecated datetime.utcfromtimestamp().
-            exp_date = datetime.fromtimestamp(claims["exp"], tz=timezone.utc).replace(tzinfo=None)
+            exp_date = datetime.fromtimestamp(claims["exp"], tz=timezone.utc).replace(
+                tzinfo=None
+            )
             print(f"  Expires: {exp_date.strftime('%Y-%m-%d %H:%M:%S')} UTC")
 
     except Exception as e:

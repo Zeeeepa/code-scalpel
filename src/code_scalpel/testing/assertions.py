@@ -33,9 +33,12 @@ def assert_tool_available(tool_id: str, tier: str = "community") -> None:
     capabilities = get_all_capabilities(tier)
     cap = capabilities.get(tool_id, {})
     if not cap.get("available", False):
-        locked_tools = {tid for tid, c in capabilities.items() if not c.get("available", False)}
+        locked_tools = {
+            tid for tid, c in capabilities.items() if not c.get("available", False)
+        }
         raise AssertionError(
-            f"Tool '{tool_id}' is not available in {tier} tier. " f"Locked tools: {sorted(locked_tools)}"
+            f"Tool '{tool_id}' is not available in {tier} tier. "
+            f"Locked tools: {sorted(locked_tools)}"
         )
 
 
@@ -52,10 +55,15 @@ def assert_tool_unavailable(tool_id: str, tier: str = "community") -> None:
     capabilities = get_all_capabilities(tier)
     cap = capabilities.get(tool_id, {})
     if cap.get("available", False):
-        raise AssertionError(f"Tool '{tool_id}' is available in {tier} tier, " f"but expected it to be locked")
+        raise AssertionError(
+            f"Tool '{tool_id}' is available in {tier} tier, "
+            f"but expected it to be locked"
+        )
 
 
-def assert_capability_present(tool_id: str, capability: str, tier: str = "community") -> None:
+def assert_capability_present(
+    tool_id: str, capability: str, tier: str = "community"
+) -> None:
     """Assert that a capability is present for a tool in a tier.
 
     Args:
@@ -97,7 +105,9 @@ def assert_capability_present(tool_id: str, capability: str, tier: str = "commun
         )
 
 
-def assert_limit_value(tool_id: str, limit_name: str, expected_value: int | float, tier: str = "community") -> None:
+def assert_limit_value(
+    tool_id: str, limit_name: str, expected_value: int | float, tier: str = "community"
+) -> None:
     """Assert that a limit has a specific value.
 
     Args:
@@ -115,11 +125,14 @@ def assert_limit_value(tool_id: str, limit_name: str, expected_value: int | floa
 
     if actual_value != expected_value:
         raise AssertionError(
-            f"Limit '{limit_name}' for tool '{tool_id}' in {tier} tier " f"is {actual_value}, expected {expected_value}"
+            f"Limit '{limit_name}' for tool '{tool_id}' in {tier} tier "
+            f"is {actual_value}, expected {expected_value}"
         )
 
 
-def assert_limits_present(tool_id: str, expected_limits: set[str], tier: str = "community") -> None:
+def assert_limits_present(
+    tool_id: str, expected_limits: set[str], tier: str = "community"
+) -> None:
     """Assert that expected limits are defined for a tool.
 
     Args:
@@ -136,7 +149,9 @@ def assert_limits_present(tool_id: str, expected_limits: set[str], tier: str = "
 
     missing = expected_limits - limit_keys
     if missing:
-        raise AssertionError(f"Tool '{tool_id}' in {tier} tier missing limits: {sorted(missing)}")
+        raise AssertionError(
+            f"Tool '{tool_id}' in {tier} tier missing limits: {sorted(missing)}"
+        )
 
 
 def assert_all_capabilities(
@@ -200,7 +215,9 @@ def assert_tier_detected(license_path: str | Path | None, expected_tier: str) ->
         detected_tier = _get_current_tier()
 
         if detected_tier != expected_tier:
-            raise AssertionError(f"Tier detected as '{detected_tier}', expected '{expected_tier}'")
+            raise AssertionError(
+                f"Tier detected as '{detected_tier}', expected '{expected_tier}'"
+            )
     finally:
         # Restore original state
         if original_path is None:
@@ -225,11 +242,15 @@ def assert_tool_count(tier: str, expected_count: int, message: str = "") -> None
         AssertionError: If tool count doesn't match
     """
     capabilities = get_all_capabilities(tier)
-    available_tools = {tool_id for tool_id, cap in capabilities.items() if cap.get("available", False)}
+    available_tools = {
+        tool_id for tool_id, cap in capabilities.items() if cap.get("available", False)
+    }
     actual_count = len(available_tools)
 
     if actual_count != expected_count:
-        error_msg = f"{tier} tier has {actual_count} available tools, expected {expected_count}"
+        error_msg = (
+            f"{tier} tier has {actual_count} available tools, expected {expected_count}"
+        )
         if message:
             error_msg = f"{message}: {error_msg}"
         raise AssertionError(error_msg)

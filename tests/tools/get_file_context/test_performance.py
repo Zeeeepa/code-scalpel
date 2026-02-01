@@ -14,7 +14,9 @@ import pytest
 # Test file paths (relative to project root)
 SMALL_FILE = "src/code_scalpel/licensing/__init__.py"  # ~50 lines
 MEDIUM_FILE = "src/code_scalpel/analysis/code_analyzer.py"  # ~1,700 lines
-LARGE_FILE = "src/code_scalpel/code_parsers/python_parsers/python_parsers_ast.py"  # ~4,000 lines
+LARGE_FILE = (
+    "src/code_scalpel/code_parsers/python_parsers/python_parsers_ast.py"  # ~4,000 lines
+)
 XLARGE_FILE = "src/code_scalpel/mcp/server.py"  # ~20,700 lines
 
 
@@ -34,7 +36,9 @@ class TestResponseTime:
 
         assert result is not None
         assert duration < 0.1, f"Small file took {duration:.3f}s, expected <0.1s"
-        print(f"✅ Small file ({result.get('line_count', 'N/A')} LOC): {duration*1000:.1f}ms")
+        print(
+            f"✅ Small file ({result.get('line_count', 'N/A')} LOC): {duration*1000:.1f}ms"
+        )
 
     def test_medium_file_under_1s(self, community_server, project_root):
         """Medium files (~1000-2000 LOC) complete in <1s.
@@ -49,7 +53,9 @@ class TestResponseTime:
 
         assert result is not None
         assert duration < 1.0, f"Medium file took {duration:.3f}s, expected <1s"
-        print(f"✅ Medium file ({result.get('line_count', 'N/A')} LOC): {duration*1000:.1f}ms")
+        print(
+            f"✅ Medium file ({result.get('line_count', 'N/A')} LOC): {duration*1000:.1f}ms"
+        )
 
     def test_large_file_4k_loc_under_5s(self, community_server, project_root):
         """Large files (~4K LOC) complete in <5s.
@@ -81,7 +87,9 @@ class TestResponseTime:
 
         assert result is not None
         assert duration < 10.0, f"XLarge file took {duration:.3f}s, expected <10s"
-        print(f"✅ XLarge file ({result.get('line_count', 'N/A')} LOC): {duration:.3f}s")
+        print(
+            f"✅ XLarge file ({result.get('line_count', 'N/A')} LOC): {duration:.3f}s"
+        )
 
     def test_performance_scales_linearly(self, community_server, project_root):
         """Performance degrades gracefully (not exponentially).
@@ -171,7 +179,9 @@ class TestMemoryUsage:
         peak_mb = peak / (1024 * 1024)
         assert result is not None
         assert peak_mb < 500, f"Large file used {peak_mb:.1f}MB, expected <500MB"
-        print(f"✅ Large file memory ({result.get('line_count', 'N/A')} LOC): {peak_mb:.2f}MB")
+        print(
+            f"✅ Large file memory ({result.get('line_count', 'N/A')} LOC): {peak_mb:.2f}MB"
+        )
 
     def test_no_memory_leaks_repeated_calls(self, community_server, project_root):
         """No memory leaks (repeated calls don't accumulate).
@@ -205,7 +215,9 @@ class TestMemoryUsage:
         assert (
             growth_ratio < 1.5
         ), f"Memory leak detected: {baseline_mb:.1f}MB -> {final_mb:.1f}MB (growth: {growth_ratio:.1f}x)"
-        print(f"✅ No memory leak: {baseline_mb:.1f}MB -> {final_mb:.1f}MB (growth: {growth_ratio:.2f}x)")
+        print(
+            f"✅ No memory leak: {baseline_mb:.1f}MB -> {final_mb:.1f}MB (growth: {growth_ratio:.2f}x)"
+        )
 
 
 class TestStressTests:
@@ -225,7 +237,9 @@ class TestStressTests:
         duration = time.time() - start
 
         avg_time = duration / 100
-        print(f"✅ 100 sequential requests: {duration:.2f}s total, {avg_time*1000:.1f}ms avg")
+        print(
+            f"✅ 100 sequential requests: {duration:.2f}s total, {avg_time*1000:.1f}ms avg"
+        )
 
     @pytest.mark.asyncio
     async def test_10_concurrent_requests(self, community_server, project_root):
@@ -288,9 +302,15 @@ class TestCrossPlatformStability:
 
         # Compare key fields (line_count, function count, etc.)
         for i in range(1, len(results)):
-            assert results[i].get("line_count") == results[0].get("line_count"), "line_count differs between runs"
-            assert results[i].get("functions") == results[0].get("functions"), "functions differ between runs"
-            assert results[i].get("classes") == results[0].get("classes"), "classes differ between runs"
+            assert results[i].get("line_count") == results[0].get(
+                "line_count"
+            ), "line_count differs between runs"
+            assert results[i].get("functions") == results[0].get(
+                "functions"
+            ), "functions differ between runs"
+            assert results[i].get("classes") == results[0].get(
+                "classes"
+            ), "classes differ between runs"
 
         print(f"✅ Deterministic output across {len(results)} calls")
 
@@ -329,8 +349,12 @@ def community_server():
                 return {
                     "file_path": result.file_path,
                     "line_count": result.line_count,
-                    "functions": ([f.name for f in result.functions] if result.functions else []),
-                    "classes": ([c.name for c in result.classes] if result.classes else []),
+                    "functions": (
+                        [f.name for f in result.functions] if result.functions else []
+                    ),
+                    "classes": (
+                        [c.name for c in result.classes] if result.classes else []
+                    ),
                     "imports": result.imports or [],
                     "complexity_score": result.complexity_score,
                 }

@@ -23,9 +23,13 @@ class TestEnterpriseFeatureVisualization:
     @pytest.mark.asyncio
     async def test_city_map_data_accessible(self, enterprise_server, simple_project):
         """Enterprise tier: city_map_data field accessible."""
-        result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=True)
+        result = await enterprise_server.get_project_map(
+            project_root=str(simple_project), include_complexity=True
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         assert (
             "city_map_data" in result_dict
@@ -34,18 +38,28 @@ class TestEnterpriseFeatureVisualization:
     @pytest.mark.asyncio
     async def test_force_graph_accessible(self, enterprise_server, flask_project):
         """Enterprise tier: force_graph field accessible."""
-        result = await enterprise_server.get_project_map(project_root=str(flask_project), include_complexity=False)
+        result = await enterprise_server.get_project_map(
+            project_root=str(flask_project), include_complexity=False
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
-        assert "force_graph" in result_dict, f"Enterprise missing force_graph. Available: {list(result_dict.keys())}"
+        assert (
+            "force_graph" in result_dict
+        ), f"Enterprise missing force_graph. Available: {list(result_dict.keys())}"
 
     @pytest.mark.asyncio
     async def test_pro_no_city_map(self, pro_server, simple_project):
         """Pro tier: city_map_data not populated."""
-        result = await pro_server.get_project_map(project_root=str(simple_project), include_complexity=True)
+        result = await pro_server.get_project_map(
+            project_root=str(simple_project), include_complexity=True
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         if "city_map_data" in result_dict:
             value = result_dict["city_map_data"]
@@ -62,18 +76,28 @@ class TestEnterpriseFeatureHotspots:
     @pytest.mark.asyncio
     async def test_bug_hotspots_accessible(self, enterprise_server, simple_project):
         """Enterprise tier: bug_hotspots field accessible."""
-        result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
+        result = await enterprise_server.get_project_map(
+            project_root=str(simple_project), include_complexity=False
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
-        assert "bug_hotspots" in result_dict, f"Enterprise missing bug_hotspots. Available: {list(result_dict.keys())}"
+        assert (
+            "bug_hotspots" in result_dict
+        ), f"Enterprise missing bug_hotspots. Available: {list(result_dict.keys())}"
 
     @pytest.mark.asyncio
     async def test_churn_heatmap_accessible(self, enterprise_server, simple_project):
         """Enterprise tier: churn_heatmap field accessible."""
-        result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
+        result = await enterprise_server.get_project_map(
+            project_root=str(simple_project), include_complexity=False
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         assert (
             "churn_heatmap" in result_dict
@@ -84,11 +108,17 @@ class TestEnterpriseFeatureMultiRepo:
     """Test Enterprise tier multi-repository features."""
 
     @pytest.mark.asyncio
-    async def test_multi_repo_summary_accessible(self, enterprise_server, simple_project):
+    async def test_multi_repo_summary_accessible(
+        self, enterprise_server, simple_project
+    ):
         """Enterprise tier: multi_repo_summary field accessible."""
-        result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
+        result = await enterprise_server.get_project_map(
+            project_root=str(simple_project), include_complexity=False
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         assert (
             "multi_repo_summary" in result_dict
@@ -97,9 +127,13 @@ class TestEnterpriseFeatureMultiRepo:
     @pytest.mark.asyncio
     async def test_pro_no_multi_repo(self, pro_server, simple_project):
         """Pro tier: multi_repo_summary not populated."""
-        result = await pro_server.get_project_map(project_root=str(simple_project), include_complexity=False)
+        result = await pro_server.get_project_map(
+            project_root=str(simple_project), include_complexity=False
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         if "multi_repo_summary" in result_dict:
             value = result_dict["multi_repo_summary"]
@@ -114,11 +148,17 @@ class TestEnterpriseFeatureCompliance:
     """Test Enterprise tier compliance features."""
 
     @pytest.mark.asyncio
-    async def test_compliance_overlay_accessible(self, enterprise_server, flask_project):
+    async def test_compliance_overlay_accessible(
+        self, enterprise_server, flask_project
+    ):
         """Enterprise tier: compliance_overlay field accessible."""
-        result = await enterprise_server.get_project_map(project_root=str(flask_project), include_complexity=False)
+        result = await enterprise_server.get_project_map(
+            project_root=str(flask_project), include_complexity=False
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         assert (
             "compliance_overlay" in result_dict
@@ -127,9 +167,13 @@ class TestEnterpriseFeatureCompliance:
     @pytest.mark.asyncio
     async def test_pro_no_compliance(self, pro_server, flask_project):
         """Pro tier: compliance_overlay not populated."""
-        result = await pro_server.get_project_map(project_root=str(flask_project), include_complexity=False)
+        result = await pro_server.get_project_map(
+            project_root=str(flask_project), include_complexity=False
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         if "compliance_overlay" in result_dict:
             value = result_dict["compliance_overlay"]
@@ -144,22 +188,37 @@ class TestEnterpriseFeatureCustomMetrics:
     """Test Enterprise tier custom metrics and trends."""
 
     @pytest.mark.asyncio
-    async def test_historical_trends_accessible(self, enterprise_server, simple_project):
+    async def test_historical_trends_accessible(
+        self, enterprise_server, simple_project
+    ):
         """Enterprise tier: historical_trends field accessible."""
-        result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
+        result = await enterprise_server.get_project_map(
+            project_root=str(simple_project), include_complexity=False
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # May be named historical_trends or historical_architecture_trends
-        has_trends = "historical_trends" in result_dict or "historical_architecture_trends" in result_dict
-        assert has_trends, f"Enterprise missing historical trends field. Available: {list(result_dict.keys())}"
+        has_trends = (
+            "historical_trends" in result_dict
+            or "historical_architecture_trends" in result_dict
+        )
+        assert (
+            has_trends
+        ), f"Enterprise missing historical trends field. Available: {list(result_dict.keys())}"
 
     @pytest.mark.asyncio
     async def test_custom_metrics_accessible(self, enterprise_server, simple_project):
         """Enterprise tier: custom_metrics field accessible."""
-        result = await enterprise_server.get_project_map(project_root=str(simple_project), include_complexity=False)
+        result = await enterprise_server.get_project_map(
+            project_root=str(simple_project), include_complexity=False
+        )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         assert (
             "custom_metrics" in result_dict

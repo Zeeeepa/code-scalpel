@@ -120,19 +120,27 @@ class SecurityAnalysisResult:
 
     def get_sql_injections(self) -> List[Vulnerability]:
         """Get SQL injection vulnerabilities."""
-        return [v for v in self.vulnerabilities if v.sink_type == SecuritySink.SQL_QUERY]
+        return [
+            v for v in self.vulnerabilities if v.sink_type == SecuritySink.SQL_QUERY
+        ]
 
     def get_xss(self) -> List[Vulnerability]:
         """Get XSS vulnerabilities."""
-        return [v for v in self.vulnerabilities if v.sink_type == SecuritySink.HTML_OUTPUT]
+        return [
+            v for v in self.vulnerabilities if v.sink_type == SecuritySink.HTML_OUTPUT
+        ]
 
     def get_path_traversals(self) -> List[Vulnerability]:
         """Get path traversal vulnerabilities."""
-        return [v for v in self.vulnerabilities if v.sink_type == SecuritySink.FILE_PATH]
+        return [
+            v for v in self.vulnerabilities if v.sink_type == SecuritySink.FILE_PATH
+        ]
 
     def get_command_injections(self) -> List[Vulnerability]:
         """Get command injection vulnerabilities."""
-        return [v for v in self.vulnerabilities if v.sink_type == SecuritySink.SHELL_COMMAND]
+        return [
+            v for v in self.vulnerabilities if v.sink_type == SecuritySink.SHELL_COMMAND
+        ]
 
     def to_dict(self) -> SecurityAnalysisResultDict:
         """Convert to dictionary for JSON serialization."""
@@ -401,7 +409,9 @@ class SecurityAnalyzer:
             else:
                 # vuln.sink_location can be None in some cases
                 if vuln.sink_location:
-                    logger.info(f"Pruned vulnerability at line {vuln.sink_location[0]} using symbolic execution")
+                    logger.info(
+                        f"Pruned vulnerability at line {vuln.sink_location[0]} using symbolic execution"
+                    )
                 else:
                     logger.info("Pruned vulnerability using symbolic execution")
 
@@ -409,7 +419,9 @@ class SecurityAnalyzer:
 
         secret_vulns = self._secret_scanner.scan(tree)
         # [20251216_FEATURE] v2.2.0 - SSR vulnerability detection
-        ssr_vulns = detect_ssr_vulnerabilities(tree, framework=None, taint_tracker=self._taint_tracker)
+        ssr_vulns = detect_ssr_vulnerabilities(
+            tree, framework=None, taint_tracker=self._taint_tracker
+        )
         result.vulnerabilities = taint_vulns + secret_vulns + ssr_vulns
 
         result.taint_flows = {
@@ -473,7 +485,9 @@ class SecurityAnalyzer:
             for item in node.items:
                 # First, analyze the context expression as a potential sink
                 if isinstance(item.context_expr, ast.Call):
-                    self._analyze_call(item.context_expr, (node.lineno, node.col_offset))
+                    self._analyze_call(
+                        item.context_expr, (node.lineno, node.col_offset)
+                    )
 
                 # Then propagate taint to the bound variable
                 if item.optional_vars and isinstance(item.optional_vars, ast.Name):
@@ -483,7 +497,9 @@ class SecurityAnalyzer:
                     # Propagate taint from source variables to the target
                     # signature: propagate_assignment(target, source_names: List[str])
                     if source_vars and self._taint_tracker:
-                        self._taint_tracker.propagate_assignment(target_var, source_vars)
+                        self._taint_tracker.propagate_assignment(
+                            target_var, source_vars
+                        )
 
             for child in node.body:
                 self._analyze_node(child, result)
@@ -527,7 +543,9 @@ class SecurityAnalyzer:
         elif isinstance(node.value, ast.BinOp):
             self._check_concat_html_xss(node.value, location)
 
-    def _check_fstring_html_xss(self, fstring: ast.JoinedStr, location: Tuple[int, int]) -> None:
+    def _check_fstring_html_xss(
+        self, fstring: ast.JoinedStr, location: Tuple[int, int]
+    ) -> None:
         """
         Check f-string return for XSS vulnerability.
 
@@ -563,7 +581,9 @@ class SecurityAnalyzer:
                 )
                 self._taint_tracker._vulnerabilities.append(vuln)
 
-    def _check_concat_html_xss(self, binop: ast.BinOp, location: Tuple[int, int]) -> None:
+    def _check_concat_html_xss(
+        self, binop: ast.BinOp, location: Tuple[int, int]
+    ) -> None:
         """
         Check string concatenation return for XSS vulnerability.
 
@@ -629,7 +649,9 @@ class SecurityAnalyzer:
             self._analyze_call(node.value, (node.lineno, node.col_offset))
 
         # Check if RHS introduces taint
-        source_info = self._check_taint_source(node.value, (node.lineno, node.col_offset))
+        source_info = self._check_taint_source(
+            node.value, (node.lineno, node.col_offset)
+        )
 
         if source_info is not None:
             # RHS is a taint source
@@ -651,7 +673,9 @@ class SecurityAnalyzer:
                 # Check if RHS propagates taint (no sanitizer)
                 source_vars = self._extract_variable_names(node.value)
                 for target in targets:
-                    propagated = self._taint_tracker.propagate_assignment(target, source_vars)
+                    propagated = self._taint_tracker.propagate_assignment(
+                        target, source_vars
+                    )
                     if propagated is not None:
                         self._current_taint_map[target] = propagated
 
@@ -699,7 +723,9 @@ class SecurityAnalyzer:
 
         # Recursively analyze chained calls like hashlib.md5(...).hexdigest()
         # The inner call (hashlib.md5) is in node.func.value when node.func is Attribute
-        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Call):
+        if isinstance(node.func, ast.Attribute) and isinstance(
+            node.func.value, ast.Call
+        ):
             self._analyze_call(node.func.value, location)
 
         # Also check args that are calls
@@ -763,7 +789,9 @@ class SecurityAnalyzer:
                 if isinstance(arg, ast.Name):
                     self._taint_tracker.apply_sanitizer(arg.id, sanitizer)
 
-    def _check_taint_source(self, node: ast.expr, location: Tuple[int, int]) -> Optional[TaintInfo]:
+    def _check_taint_source(
+        self, node: ast.expr, location: Tuple[int, int]
+    ) -> Optional[TaintInfo]:
         """Check if an expression is a taint source."""
 
         if isinstance(node, ast.Call):
@@ -840,7 +868,9 @@ class SecurityAnalyzer:
 
         return None
 
-    def _check_dangerous_patterns(self, func_name: str, node: ast.Call, location: Tuple[int, int]) -> None:
+    def _check_dangerous_patterns(
+        self, func_name: str, node: ast.Call, location: Tuple[int, int]
+    ) -> None:
         """
         [20251214_FEATURE] v2.0.0 - Check for dangerous patterns regardless of taint.
 
@@ -861,7 +891,10 @@ class SecurityAnalyzer:
             for keyword in node.keywords:
                 if keyword.arg == "shell":
                     # Check if shell=True
-                    if isinstance(keyword.value, ast.Constant) and keyword.value.value is True:
+                    if (
+                        isinstance(keyword.value, ast.Constant)
+                        and keyword.value.value is True
+                    ):
                         self._add_dangerous_pattern_vuln(
                             sink_type=SecuritySink.SHELL_COMMAND,
                             description=f"{func_name}(shell=True) is dangerous - command injection risk",
@@ -932,7 +965,9 @@ class SecurityAnalyzer:
                 location=location,
             )
 
-    def _add_dangerous_pattern_vuln(self, sink_type: SecuritySink, description: str, location: Tuple[int, int]) -> None:
+    def _add_dangerous_pattern_vuln(
+        self, sink_type: SecuritySink, description: str, location: Tuple[int, int]
+    ) -> None:
         """
         Add a vulnerability for a dangerous pattern (without taint tracking).
 

@@ -86,7 +86,9 @@ class TestRefactorSimulatorMore:
 
         simulator = RefactorSimulator()
 
-        result = simulator.simulate("const x = 1;", "const x = 2;", language="javascript")
+        result = simulator.simulate(
+            "const x = 1;", "const x = 2;", language="javascript"
+        )
         # Non-python still runs simulation
         assert result is not None
 

@@ -75,7 +75,9 @@ class DocstringValidator:
                 # Check if this is an MCP tool (has @mcp.tool decorator)
                 if self._has_mcp_tool_decorator(node):
                     self.tools_checked += 1
-                    issues = self._validate_tool_docstring(node.name, ast.get_docstring(node), node.lineno, file_path)
+                    issues = self._validate_tool_docstring(
+                        node.name, ast.get_docstring(node), node.lineno, file_path
+                    )
                     file_issues.extend(issues)
 
         return file_issues
@@ -138,7 +140,9 @@ class DocstringValidator:
                 )
 
         # Check for old section naming (Tier Features, Tier Requirements, Tier Capabilities)
-        if re.search(r"\s*\*\*Tier (Features|Requirements|Capabilities):\*\*", docstring):
+        if re.search(
+            r"\s*\*\*Tier (Features|Requirements|Capabilities):\*\*", docstring
+        ):
             # Make sure it's only "Tier Behavior" and "Tier Capabilities"
             if re.search(r"\s*\*\*Tier (Features|Requirements):\*\*", docstring):
                 issues.append(
@@ -172,7 +176,9 @@ class DocstringValidator:
 
         # Check that Returns has proper format
         if "**Returns:**" in docstring:
-            returns_section = re.search(r"\s*\*\*Returns:\*\*\s+(.*?)(?=\s*\*\*|$)", docstring, re.DOTALL)
+            returns_section = re.search(
+                r"\s*\*\*Returns:\*\*\s+(.*?)(?=\s*\*\*|$)", docstring, re.DOTALL
+            )
             if returns_section:
                 returns_content = returns_section.group(1)
                 # Should mention ToolResponseEnvelope

@@ -44,7 +44,9 @@ def test_pro_tamper_detection_fails_verification(
 
     # Assert failure
     assert result.success is False, "Pro tier verification should FAIL on tampered file"
-    assert "tampered or missing" in str(result.error).lower(), f"Unexpected error message: {result.error}"
+    assert (
+        "tampered or missing" in str(result.error).lower()
+    ), f"Unexpected error message: {result.error}"
 
 
 def test_community_ignores_tamper(
@@ -126,7 +128,9 @@ def test_missing_certificate_fields_gap_analysis(
     print(f"[GAP REPORT] crl_status exists: {has_crl}")
 
     if has_cert_chain:
-        print(f"[GAP REPORT] certificate_chain_valid value: {result.certificate_chain_valid}")
+        print(
+            f"[GAP REPORT] certificate_chain_valid value: {result.certificate_chain_valid}"
+        )
 
     # This assertion documents the gap.
     # If the user expects them to work, and they don't verify, we know why.

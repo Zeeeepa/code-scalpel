@@ -104,10 +104,14 @@ class ScanResults:
             self.total_errors += 1
 
             # Track by type
-            self.error_types[error.error_type] = self.error_types.get(error.error_type, 0) + 1
+            self.error_types[error.error_type] = (
+                self.error_types.get(error.error_type, 0) + 1
+            )
 
             # Track by severity
-            self.severity_counts[error.severity] = self.severity_counts.get(error.severity, 0) + 1
+            self.severity_counts[error.severity] = (
+                self.severity_counts.get(error.severity, 0) + 1
+            )
 
     def get_errors_by_file(self, file_path: str) -> list[CodeError]:
         """Get all errors for a specific file."""
@@ -146,7 +150,9 @@ class ErrorScanner:
     addressing the limitations of directory-level error scanning.
     """
 
-    def __init__(self, batch_size: int = 30, verbose: bool = False, use_pylint: bool = False):
+    def __init__(
+        self, batch_size: int = 30, verbose: bool = False, use_pylint: bool = False
+    ):
         """
         Initialize the ErrorScanner.
 
@@ -200,7 +206,9 @@ class ErrorScanner:
             batch_num = (i // self.batch_size) + 1
             total_batches = (len(python_files) + self.batch_size - 1) // self.batch_size
 
-            logger.info(f"Processing batch {batch_num}/{total_batches} ({len(batch)} files)")
+            logger.info(
+                f"Processing batch {batch_num}/{total_batches} ({len(batch)} files)"
+            )
 
             # Check this batch
             batch_errors = self._check_files_batch(batch)
@@ -721,7 +729,9 @@ class ErrorScanner:
         if results.error_types:
             lines.append("ERRORS BY TYPE")
             lines.append("-" * 40)
-            for error_type, count in sorted(results.error_types.items(), key=lambda x: x[1], reverse=True):
+            for error_type, count in sorted(
+                results.error_types.items(), key=lambda x: x[1], reverse=True
+            ):
                 lines.append(f"  {error_type:30} {count:5d}")
             lines.append("")
 
@@ -758,7 +768,9 @@ class ErrorScanner:
                     ErrorSeverity.INFO: "ℹ️ ",
                 }
 
-                lines.append(f"  {severity_emoji[error.severity]} Line {error.line_number}: {error.error_type}")
+                lines.append(
+                    f"  {severity_emoji[error.severity]} Line {error.line_number}: {error.error_type}"
+                )
                 lines.append(f"     {error.message}")
                 if error.code:
                     lines.append(f"     Code: {error.code}")
@@ -838,7 +850,9 @@ class ErrorScanner:
                 ]
             )
 
-            for error_type, count in sorted(results.error_types.items(), key=lambda x: x[1], reverse=True):
+            for error_type, count in sorted(
+                results.error_types.items(), key=lambda x: x[1], reverse=True
+            ):
                 html_lines.append(f"    <tr><td>{error_type}</td><td>{count}</td></tr>")
 
             html_lines.append("  </table>")
@@ -851,7 +865,9 @@ class ErrorScanner:
             for error in results.sort_by_file():
                 if error.file_path != current_file:
                     current_file = error.file_path
-                    html_lines.append(f"  <div class='file-name'>📄 {error.file_path}</div>")
+                    html_lines.append(
+                        f"  <div class='file-name'>📄 {error.file_path}</div>"
+                    )
 
                 severity_class = error.severity.value
                 html_lines.append(f"  <div class='error {severity_class}'>")
@@ -874,7 +890,9 @@ def main():
     """Command-line interface for error scanning."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Comprehensive project error scanner for code-scalpel")
+    parser = argparse.ArgumentParser(
+        description="Comprehensive project error scanner for code-scalpel"
+    )
     parser.add_argument(
         "--path",
         type=str,
@@ -910,7 +928,9 @@ def main():
     args = parser.parse_args()
 
     # Create scanner and run
-    scanner = ErrorScanner(batch_size=args.batch_size, verbose=args.verbose, use_pylint=args.pylint)
+    scanner = ErrorScanner(
+        batch_size=args.batch_size, verbose=args.verbose, use_pylint=args.pylint
+    )
 
     print(f"Scanning {args.path}...", file=sys.stderr)
     start = time.time()

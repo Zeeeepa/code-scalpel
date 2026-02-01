@@ -29,7 +29,9 @@ class TestDeterminism:
 
         # Validate identical results
         assert files1 == files2, f"File count differs: {files1} vs {files2}"
-        assert functions1 == functions2, f"Function count differs: {functions1} vs {functions2}"
+        assert (
+            functions1 == functions2
+        ), f"Function count differs: {functions1} vs {functions2}"
         assert classes1 == classes2, f"Class count differs: {classes1} vs {classes2}"
 
     def test_language_detection_consistent(self, multilang_project, community_env):
@@ -45,7 +47,9 @@ class TestDeterminism:
         languages2 = sorted([f.language for f in result2.files_analyzed])
 
         # Language list should be identical
-        assert languages1 == languages2, f"Languages differ:\n  Run 1: {languages1}\n  Run 2: {languages2}"
+        assert (
+            languages1 == languages2
+        ), f"Languages differ:\n  Run 1: {languages1}\n  Run 2: {languages2}"
 
     def test_file_ordering_consistent(self, small_python_extended, community_env):
         """Test that files are processed in consistent order.
@@ -82,4 +86,6 @@ class TestDeterminism:
         complexity2 = {f.path: f.complexity_score for f in result2.files_analyzed}
 
         # Complexity scores should match
-        assert complexity1 == complexity2, f"Complexity differs:\n  {complexity1}\n  vs\n  {complexity2}"
+        assert (
+            complexity1 == complexity2
+        ), f"Complexity differs:\n  {complexity1}\n  vs\n  {complexity2}"

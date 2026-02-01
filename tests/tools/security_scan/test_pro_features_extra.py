@@ -52,7 +52,9 @@ def _use_pro_license(monkeypatch: pytest.MonkeyPatch) -> Path:
             data = validator.validate_token(token)
             if data.is_valid and data.tier == "pro":
                 monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(candidate))
-                monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+                monkeypatch.delenv(
+                    "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False
+                )
                 monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
                 return candidate
@@ -71,7 +73,9 @@ async def test_nosql_injection_detection(monkeypatch: pytest.MonkeyPatch):
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert any(v.cwe == "CWE-943" or "nosql" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-943" or "nosql" in v.type.lower() for v in result.vulnerabilities
+    )
 
 
 async def test_ldap_injection_detection(monkeypatch: pytest.MonkeyPatch):
@@ -88,7 +92,9 @@ async def test_ldap_injection_detection(monkeypatch: pytest.MonkeyPatch):
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert any(v.cwe == "CWE-90" or "ldap" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-90" or "ldap" in v.type.lower() for v in result.vulnerabilities
+    )
 
 
 async def test_secret_detection(monkeypatch: pytest.MonkeyPatch):
@@ -105,7 +111,8 @@ async def test_secret_detection(monkeypatch: pytest.MonkeyPatch):
     assert result.success is True
     assert result.vulnerability_count >= 1
     assert any(
-        "Secret" in v.type or "secret" in v.description.lower() or v.cwe == "CWE-798" for v in result.vulnerabilities
+        "Secret" in v.type or "secret" in v.description.lower() or v.cwe == "CWE-798"
+        for v in result.vulnerabilities
     )
 
 
@@ -137,12 +144,18 @@ async def test_remediation_suggestions_pro_tier(monkeypatch: pytest.MonkeyPatch)
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert result.remediation_suggestions is not None, "Pro tier should return remediation_suggestions"
+    assert (
+        result.remediation_suggestions is not None
+    ), "Pro tier should return remediation_suggestions"
     assert len(result.remediation_suggestions) > 0
 
     # Verify remediation content is useful
     remediation_text = " ".join(result.remediation_suggestions).lower()
-    assert "subprocess" in remediation_text or "shell" in remediation_text or "command" in remediation_text
+    assert (
+        "subprocess" in remediation_text
+        or "shell" in remediation_text
+        or "command" in remediation_text
+    )
 
 
 async def test_remediation_suggestions_community_none(monkeypatch: pytest.MonkeyPatch):

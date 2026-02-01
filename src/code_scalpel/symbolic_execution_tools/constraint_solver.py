@@ -164,7 +164,9 @@ class ConstraintSolver:
             # Found a counterexample
             z3_model = solver.model()
             counterexample = self._model_to_dict(z3_model)
-            return SolverResult(status=SolverStatus.INVALID, counterexample=counterexample)
+            return SolverResult(
+                status=SolverStatus.INVALID, counterexample=counterexample
+            )
         else:
             return SolverResult(status=SolverStatus.UNKNOWN, counterexample=None)
 
@@ -262,7 +264,9 @@ class ConstraintSolver:
             try:
                 return float(z3_value.as_decimal(10).rstrip("?"))
             except Exception:
-                return float(z3_value.numerator_as_long()) / float(z3_value.denominator_as_long())
+                return float(z3_value.numerator_as_long()) / float(
+                    z3_value.denominator_as_long()
+                )
 
         # BitVector
         if z3.is_bv_value(z3_value):

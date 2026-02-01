@@ -237,7 +237,9 @@ class TestSecretsManagerSetSecret:
         """Test setting a secret with expiry date."""
         manager = SecretsManager()
         expires = datetime.now() + timedelta(days=30)
-        secret = manager.set_secret("EXPIRING_SECRET", "value", "custom", expires_at=expires)
+        secret = manager.set_secret(
+            "EXPIRING_SECRET", "value", "custom", expires_at=expires
+        )
         assert secret.expires_at == expires
 
     def test_set_secret_empty_value_raises_error(self):
@@ -256,7 +258,9 @@ class TestSecretsManagerSetSecret:
     def test_set_secret_with_custom_environment(self):
         """Test setting a secret with custom environment."""
         manager = SecretsManager()
-        secret = manager.set_secret("STAGING_SECRET", "value", "custom", environment="staging")
+        secret = manager.set_secret(
+            "STAGING_SECRET", "value", "custom", environment="staging"
+        )
         assert secret.environment == "staging"
 
 
@@ -318,7 +322,9 @@ class TestSecretsManagerReporting:
     def test_get_expiry_report_expiring_soon(self):
         """Test expiry report with secret expiring soon."""
         manager = SecretsManager()
-        manager.set_secret("SOON", "value", "test", expires_at=datetime.now() + timedelta(days=15))
+        manager.set_secret(
+            "SOON", "value", "test", expires_at=datetime.now() + timedelta(days=15)
+        )
         report = manager.get_expiry_report()
         assert len(report["expiring_soon"]) > 0
 

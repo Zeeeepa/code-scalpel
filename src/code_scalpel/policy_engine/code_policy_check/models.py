@@ -307,14 +307,18 @@ class CodePolicyResult:
 
         # Add Pro tier fields if present
         if self.tier in ("pro", "enterprise"):
-            result["best_practices_violations"] = [v.to_dict() for v in self.best_practices_violations]
+            result["best_practices_violations"] = [
+                v.to_dict() for v in self.best_practices_violations
+            ]
             result["pattern_matches"] = [m.to_dict() for m in self.pattern_matches]
             result["security_warnings"] = [w.to_dict() for w in self.security_warnings]
             result["custom_rule_results"] = self.custom_rule_results
 
         # Add Enterprise tier fields if present
         if self.tier == "enterprise":
-            result["compliance_reports"] = {k: v.to_dict() for k, v in self.compliance_reports.items()}
+            result["compliance_reports"] = {
+                k: v.to_dict() for k, v in self.compliance_reports.items()
+            }
             result["audit_trail"] = [e.to_dict() for e in self.audit_trail]
             result["pdf_report"] = self.pdf_report
             result["compliance_score"] = self.compliance_score

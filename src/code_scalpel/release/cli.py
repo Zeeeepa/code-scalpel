@@ -294,7 +294,9 @@ def build_docker_images(
                 print(f"\n✅ Docker images published to {registry}")
             else:
                 print("\n✅ Docker images built successfully")
-                print(f"To push to registry, run: docker push {registry}/code-scalpel:{current_version}")
+                print(
+                    f"To push to registry, run: docker push {registry}/code-scalpel:{current_version}"
+                )
 
         return 0
 

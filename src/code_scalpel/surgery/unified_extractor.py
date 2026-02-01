@@ -343,12 +343,18 @@ class UnifiedExtractionResult:
             parts.append(f"**Language:** {self.language}")
             if self.file_path:
                 parts.append(f"**File:** `{self.file_path}`")
-            parts.append(f"**Lines:** {self.start_line}-{self.end_line} ({self.line_count} lines)")
+            parts.append(
+                f"**Lines:** {self.start_line}-{self.end_line} ({self.line_count} lines)"
+            )
             parts.append(f"**Token Estimate:** ~{self.token_estimate}")
             if self.dependencies:
-                parts.append(f"**Dependencies:** {', '.join(f'`{d}`' for d in self.dependencies)}")
+                parts.append(
+                    f"**Dependencies:** {', '.join(f'`{d}`' for d in self.dependencies)}"
+                )
             if self.imports_needed:
-                parts.append(f"**Imports:** {', '.join(f'`{i}`' for i in self.imports_needed)}")
+                parts.append(
+                    f"**Imports:** {', '.join(f'`{i}`' for i in self.imports_needed)}"
+                )
             parts.append("")
 
         # Add context if present
@@ -417,7 +423,9 @@ class UnifiedExtractionResult:
     # - is_complex: bool - Whether complexity exceeds threshold
 
 
-def detect_language(file_path: Optional[str] = None, code: Optional[str] = None) -> Language:
+def detect_language(
+    file_path: Optional[str] = None, code: Optional[str] = None
+) -> Language:
     """
     Detect programming language from file path or code content.
 
@@ -563,7 +571,9 @@ class UnifiedExtractor:
         self._impl = None  # Lazy-loaded language-specific implementation
 
     @classmethod
-    def from_file(cls, file_path: str, language: Language = Language.AUTO, encoding: str = "utf-8") -> UnifiedExtractor:
+    def from_file(
+        cls, file_path: str, language: Language = Language.AUTO, encoding: str = "utf-8"
+    ) -> UnifiedExtractor:
         """
         Create extractor by reading from file.
 
@@ -585,7 +595,9 @@ class UnifiedExtractor:
         code = path.read_text(encoding=encoding)
         return cls(code, file_path=str(path.resolve()), language=language)
 
-    def list_symbols(self, symbol_types: Optional[list[str]] = None) -> list[SymbolInfo]:
+    def list_symbols(
+        self, symbol_types: Optional[list[str]] = None
+    ) -> list[SymbolInfo]:
         """
         List all extractable symbols in the code.
 
@@ -611,7 +623,9 @@ class UnifiedExtractor:
         else:
             return []  # Not yet implemented for other languages
 
-    def _list_symbols_python(self, symbol_types: Optional[list[str]]) -> list[SymbolInfo]:
+    def _list_symbols_python(
+        self, symbol_types: Optional[list[str]]
+    ) -> list[SymbolInfo]:
         """List symbols in Python code."""
         import ast
 
@@ -631,7 +645,11 @@ class UnifiedExtractor:
                 self.current_class: Optional[str] = None
 
             def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-                if symbol_types and "function" not in symbol_types and "method" not in symbol_types:
+                if (
+                    symbol_types
+                    and "function" not in symbol_types
+                    and "method" not in symbol_types
+                ):
                     self.generic_visit(node)
                     return
 
@@ -654,7 +672,11 @@ class UnifiedExtractor:
                 self.generic_visit(node)
 
             def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-                if symbol_types and "function" not in symbol_types and "method" not in symbol_types:
+                if (
+                    symbol_types
+                    and "function" not in symbol_types
+                    and "method" not in symbol_types
+                ):
                     self.generic_visit(node)
                     return
 
@@ -678,7 +700,9 @@ class UnifiedExtractor:
 
             def visit_ClassDef(self, node: ast.ClassDef) -> None:
                 if symbol_types is None or "class" in symbol_types:
-                    decorators = [self._get_decorator_name(d) for d in node.decorator_list]
+                    decorators = [
+                        self._get_decorator_name(d) for d in node.decorator_list
+                    ]
                     symbols.append(
                         SymbolInfo(
                             name=node.name,
@@ -708,7 +732,9 @@ class UnifiedExtractor:
         visitor.visit(tree)
         return symbols
 
-    def _list_symbols_polyglot(self, symbol_types: Optional[list[str]]) -> list[SymbolInfo]:
+    def _list_symbols_polyglot(
+        self, symbol_types: Optional[list[str]]
+    ) -> list[SymbolInfo]:
         """List symbols in JS/TS/Java code."""
         # Delegate to polyglot if available
         try:
@@ -760,11 +786,15 @@ class UnifiedExtractor:
         """
         results: list[UnifiedExtractionResult] = []
         for target_type, target_name in targets:
-            result = self.extract(target_type, target_name, include_context=include_context)
+            result = self.extract(
+                target_type, target_name, include_context=include_context
+            )
             results.append(result)
         return results
 
-    def extract_by_line(self, line_number: int, include_context: bool = False) -> UnifiedExtractionResult:
+    def extract_by_line(
+        self, line_number: int, include_context: bool = False
+    ) -> UnifiedExtractionResult:
         """
         Extract the symbol that contains a specific line number.
 
@@ -787,7 +817,9 @@ class UnifiedExtractor:
 
         # Find innermost symbol containing this line
         # (innermost = smallest range, handles nested functions/methods)
-        containing: list[SymbolInfo] = [s for s in symbols if s.line_start <= line_number <= s.line_end]
+        containing: list[SymbolInfo] = [
+            s for s in symbols if s.line_start <= line_number <= s.line_end
+        ]
 
         if not containing:
             return UnifiedExtractionResult(
@@ -821,7 +853,9 @@ class UnifiedExtractor:
         """
         return self.list_symbols([symbol_type])
 
-    def extract_all_of_type(self, symbol_type: str, include_context: bool = False) -> list[UnifiedExtractionResult]:
+    def extract_all_of_type(
+        self, symbol_type: str, include_context: bool = False
+    ) -> list[UnifiedExtractionResult]:
         """
         Extract all symbols of a specific type.
 
@@ -954,9 +988,15 @@ class UnifiedExtractor:
             >>> routes = extractor.find_by_decorator("app.route")
         """
         symbols = self.list_symbols()
-        return [s for s in symbols if any(decorator_name in d or d == decorator_name for d in s.decorators)]
+        return [
+            s
+            for s in symbols
+            if any(decorator_name in d or d == decorator_name for d in s.decorators)
+        ]
 
-    def extract_signatures(self, symbol_types: Optional[list[str]] = None) -> list[SignatureInfo]:
+    def extract_signatures(
+        self, symbol_types: Optional[list[str]] = None
+    ) -> list[SignatureInfo]:
         """
         Extract function/method signatures without full code.
 
@@ -980,7 +1020,9 @@ class UnifiedExtractor:
             return self._extract_signatures_python(symbol_types)
         return []
 
-    def _extract_signatures_python(self, symbol_types: Optional[list[str]]) -> list[SignatureInfo]:
+    def _extract_signatures_python(
+        self, symbol_types: Optional[list[str]]
+    ) -> list[SignatureInfo]:
         """Extract signatures from Python code."""
         import ast
 
@@ -1015,7 +1057,9 @@ class UnifiedExtractor:
                 self.generic_visit(node)
                 self.current_class = old_class
 
-            def _process_function(self, node: ast.FunctionDef | ast.AsyncFunctionDef, is_async: bool) -> None:
+            def _process_function(
+                self, node: ast.FunctionDef | ast.AsyncFunctionDef, is_async: bool
+            ) -> None:
                 is_method = self.current_class is not None
                 sym_type = "method" if is_method else "function"
 
@@ -1036,7 +1080,11 @@ class UnifiedExtractor:
                 # Extract docstring
                 docstring = ast.get_docstring(node)
 
-                qualified = f"{self.current_class}.{node.name}" if self.current_class else node.name
+                qualified = (
+                    f"{self.current_class}.{node.name}"
+                    if self.current_class
+                    else node.name
+                )
 
                 signatures.append(
                     SignatureInfo(
@@ -1123,7 +1171,9 @@ class UnifiedExtractor:
             return self._get_docstring_python(target_type, target_name)
         return None
 
-    def _get_docstring_python(self, target_type: str, target_name: str) -> Optional[str]:
+    def _get_docstring_python(
+        self, target_type: str, target_name: str
+    ) -> Optional[str]:
         """Get docstring from Python code."""
         import ast
 
@@ -1146,7 +1196,9 @@ class UnifiedExtractor:
                 if node.name == target_name:
                     return ast.get_docstring(node)
 
-            elif target_type == "function" and isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            elif target_type == "function" and isinstance(
+                node, (ast.FunctionDef, ast.AsyncFunctionDef)
+            ):
                 if node.name == target_name:
                     return ast.get_docstring(node)
 
@@ -1239,7 +1291,9 @@ class UnifiedExtractor:
             # Future: Route to code_parser for other languages
             return self._extract_via_code_parser(target_type, target_name)
 
-    def _extract_python(self, target_type: str, target_name: str, include_context: bool) -> UnifiedExtractionResult:
+    def _extract_python(
+        self, target_type: str, target_name: str, include_context: bool
+    ) -> UnifiedExtractionResult:
         """
         Extract from Python code using surgical_extractor.
 
@@ -1262,7 +1316,8 @@ class UnifiedExtractor:
                         target_name=target_name,
                         target_type=target_type,
                         language=self.language.value,
-                        error=ctx_result.target.error or f"{target_type} '{target_name}' not found",
+                        error=ctx_result.target.error
+                        or f"{target_type} '{target_name}' not found",
                     )
                 return UnifiedExtractionResult(
                     success=True,
@@ -1339,7 +1394,9 @@ class UnifiedExtractor:
                 error=str(e),
             )
 
-    def _extract_polyglot(self, target_type: str, target_name: str) -> UnifiedExtractionResult:
+    def _extract_polyglot(
+        self, target_type: str, target_name: str
+    ) -> UnifiedExtractionResult:
         """
         Extract from JS/TS/Java using polyglot extractor.
 
@@ -1363,7 +1420,9 @@ class UnifiedExtractor:
                 Language.JAVA: PolyglotLang.JAVA,
             }
 
-            polyglot_extractor = PolyglotExtractor(self.code, self.file_path, lang_map[self.language])
+            polyglot_extractor = PolyglotExtractor(
+                self.code, self.file_path, lang_map[self.language]
+            )
 
             result = polyglot_extractor.extract(target_type, target_name)
 
@@ -1402,7 +1461,9 @@ class UnifiedExtractor:
                 error=str(e),
             )
 
-    def _extract_via_code_parser(self, target_type: str, target_name: str) -> UnifiedExtractionResult:
+    def _extract_via_code_parser(
+        self, target_type: str, target_name: str
+    ) -> UnifiedExtractionResult:
         """
         Extract using code_parser for languages not yet supported.
 

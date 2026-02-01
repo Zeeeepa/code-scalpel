@@ -59,7 +59,9 @@ class TestToolAvailability:
         }
 
         # All expected parameters should be present
-        assert expected_params.issubset(params), f"Missing parameters: {expected_params - params}"
+        assert expected_params.issubset(
+            params
+        ), f"Missing parameters: {expected_params - params}"
 
     async def test_tool_in_server_registry(self):
         """[20260103_TEST] Tool is in MCP server registry."""
@@ -378,7 +380,9 @@ def calculate(x, y):
             tmpdir_path = Path(tmpdir)
 
             (tmpdir_path / "a.py").write_text("def f_a(): pass")
-            (tmpdir_path / "b.py").write_text("from a import f_a\ndef f_b(): return f_a()")
+            (tmpdir_path / "b.py").write_text(
+                "from a import f_a\ndef f_b(): return f_a()"
+            )
 
             result = await cross_file_security_scan(
                 project_root=tmpdir,
@@ -392,7 +396,9 @@ def calculate(x, y):
             assert result.success
             # Diagram should be generated (check if field exists)
             if hasattr(result, "mermaid_diagram"):
-                assert result.mermaid_diagram is None or isinstance(result.mermaid_diagram, str)
+                assert result.mermaid_diagram is None or isinstance(
+                    result.mermaid_diagram, str
+                )
 
 
 # =============================================================================

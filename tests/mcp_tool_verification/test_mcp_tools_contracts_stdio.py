@@ -65,7 +65,9 @@ def add(a: int, b: int) -> int:
         encoding="utf-8",
     )
 
-    (project_root / "requirements.txt").write_text("requests==2.31.0\n", encoding="utf-8")
+    (project_root / "requirements.txt").write_text(
+        "requests==2.31.0\n", encoding="utf-8"
+    )
 
     (project_root / "package.json").write_text(
         """\
@@ -127,7 +129,9 @@ def _tool_envelope(result) -> dict:
     try:
         envelope = json.loads(text)
     except json.JSONDecodeError as exc:
-        raise AssertionError("Tool content is not valid JSON; first 200 chars: " + repr(text[:200])) from exc
+        raise AssertionError(
+            "Tool content is not valid JSON; first 200 chars: " + repr(text[:200])
+        ) from exc
 
     # [v3.2.8] Validate universal response envelope
     for key in (
@@ -186,7 +190,8 @@ async def _strict_stdio_client(server: StdioServerParameters):
                         message = mcp_types.JSONRPCMessage.model_validate_json(line)
                     except Exception as exc:
                         raise AssertionError(
-                            "Server wrote non-JSON-RPC data to stdout; " f"first invalid line: {line[:200]!r}"
+                            "Server wrote non-JSON-RPC data to stdout; "
+                            f"first invalid line: {line[:200]!r}"
                         ) from exc
 
                     await read_stream_writer.send(SessionMessage(message))
@@ -196,7 +201,9 @@ async def _strict_stdio_client(server: StdioServerParameters):
 
         async with write_stream_reader:
             async for session_message in write_stream_reader:
-                payload = session_message.message.model_dump_json(by_alias=True, exclude_none=True)
+                payload = session_message.message.model_dump_json(
+                    by_alias=True, exclude_none=True
+                )
                 await process.stdin.send(
                     (payload + "\n").encode(
                         encoding=server.encoding,
@@ -352,7 +359,9 @@ async def test_tool_analyze_extract_update_and_context(tmp_path: Path):
             )
             vp_json = _tool_json(vp)
             assert "accessible" in vp_json and "inaccessible" in vp_json
-            assert any(str(paths["target_file"]) == p for p in vp_json.get("accessible", []))
+            assert any(
+                str(paths["target_file"]) == p for p in vp_json.get("accessible", [])
+            )
 
 
 async def test_tool_security_type_evaporation_and_testing(tmp_path: Path):
@@ -526,7 +535,9 @@ async def test_tool_graphs_cross_file_and_policy(tmp_path: Path):
             neigh_ok_json = _tool_json(neigh_ok)
             assert neigh_ok_json.get("success") is True
 
-            target_file_rel = str(paths["target_file"].relative_to(paths["project_root"]))
+            target_file_rel = str(
+                paths["target_file"].relative_to(paths["project_root"])
+            )
             deps_ok = await session.call_tool(
                 "get_cross_file_dependencies",
                 arguments={

@@ -149,7 +149,10 @@ class DockerImageBuilder:
             }
 
         except FileNotFoundError:
-            raise RuntimeError("Docker is not installed or not in PATH. " "Install Docker to use this feature.")
+            raise RuntimeError(
+                "Docker is not installed or not in PATH. "
+                "Install Docker to use this feature."
+            )
 
     def authenticate(self, dry_run: bool = False) -> bool:
         """Authenticate with Docker registry.
@@ -195,7 +198,10 @@ class DockerImageBuilder:
             return True
 
         except FileNotFoundError:
-            raise RuntimeError("Docker is not installed or not in PATH. " "Install Docker to use this feature.")
+            raise RuntimeError(
+                "Docker is not installed or not in PATH. "
+                "Install Docker to use this feature."
+            )
 
     def push_image(
         self,
@@ -242,7 +248,10 @@ class DockerImageBuilder:
             }
 
         except FileNotFoundError:
-            raise RuntimeError("Docker is not installed or not in PATH. " "Install Docker to use this feature.")
+            raise RuntimeError(
+                "Docker is not installed or not in PATH. "
+                "Install Docker to use this feature."
+            )
 
     def publish_release(
         self,

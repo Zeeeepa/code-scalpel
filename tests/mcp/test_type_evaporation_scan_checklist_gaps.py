@@ -446,7 +446,10 @@ async def e0():
     warnings = data.get("warnings") or []
     assert not any("truncated" in w.lower() for w in warnings)
     # Should have enterprise-specific fields like api_contract or compliance_report
-    assert data.get("api_contract") is not None or data.get("compliance_report") is not None
+    assert (
+        data.get("api_contract") is not None
+        or data.get("compliance_report") is not None
+    )
 
 
 async def test_type_evaporation_scan_enterprise_performance_at_scale(

@@ -36,7 +36,9 @@ class TestTaintTrackerFinal:
         taint = TaintInfo(source=TaintSource.USER_INPUT)
         tracker.mark_tainted("input", taint)
         for i in range(5):
-            tracker.propagate_assignment(f"step{i}", [f"step{i - 1}" if i > 0 else "input"])
+            tracker.propagate_assignment(
+                f"step{i}", [f"step{i - 1}" if i > 0 else "input"]
+            )
         assert tracker.is_tainted("step4")
 
 
@@ -59,7 +61,9 @@ class TestCallGraphFinal:
         from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
         with tempfile.TemporaryDirectory() as tmp:
-            (Path(tmp) / "a.py").write_text("from b import helper\ndef main(): return helper()")
+            (Path(tmp) / "a.py").write_text(
+                "from b import helper\ndef main(): return helper()"
+            )
             (Path(tmp) / "b.py").write_text("def helper(): return 42")
             builder = CallGraphBuilder(Path(tmp))
             graph = builder.build()
@@ -223,7 +227,9 @@ class TestOSVClientFinal:
 
         client = OSVClient()
         with patch("requests.post") as mock_post:
-            mock_post.return_value.json.return_value = {"vulns": [{"id": "CVE-2021-1234", "summary": "Test vuln"}]}
+            mock_post.return_value.json.return_value = {
+                "vulns": [{"id": "CVE-2021-1234", "summary": "Test vuln"}]
+            }
             mock_post.return_value.status_code = 200
             result = client.query_package("vulnerable-pkg", "1.0.0")
             assert result is not None

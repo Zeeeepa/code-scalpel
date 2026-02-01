@@ -46,7 +46,8 @@ def process(data):
         assert result.is_safe is False
         assert result.status.value == "unsafe"
         assert any(
-            "eval" in issue.description.lower() or "code injection" in issue.type.lower()
+            "eval" in issue.description.lower()
+            or "code injection" in issue.type.lower()
             for issue in result.security_issues
         )
 
@@ -399,7 +400,9 @@ def load_config(data):
         result = simulator.simulate(original, new_code=new_code)
 
         # Should not flag yaml.safe_load
-        yaml_issues = [i for i in result.security_issues if "yaml" in i.description.lower()]
+        yaml_issues = [
+            i for i in result.security_issues if "yaml" in i.description.lower()
+        ]
         assert len(yaml_issues) == 0
 
 
@@ -437,7 +440,10 @@ def helper():
         result = simulator.simulate(original, new_code=new_code)
 
         # Should warn about large deletion
-        assert any("delet" in w.lower() for w in result.warnings) or result.structural_changes["lines_removed"] > 40
+        assert (
+            any("delet" in w.lower() for w in result.warnings)
+            or result.structural_changes["lines_removed"] > 40
+        )
 
 
 class TestJavaScriptTypeScriptSupport:
@@ -555,7 +561,9 @@ function add(a, b) {
 
         assert "multiply" in result.structural_changes.get("functions_removed", [])
         # Should also generate a warning about removed function
-        assert any("multiply" in w for w in result.warnings) or "multiply" in str(result.structural_changes)
+        assert any("multiply" in w for w in result.warnings) or "multiply" in str(
+            result.structural_changes
+        )
 
     def test_js_structural_analysis_class_added(self):
         """Test detection of added classes in JavaScript."""
@@ -643,7 +651,9 @@ function process(data) {
         result = simulator.simulate(original, new_code=new_code, language="javascript")
 
         # Even in JS, pattern-based detection should catch eval
-        assert result.is_safe is False or any("eval" in str(issue).lower() for issue in result.security_issues)
+        assert result.is_safe is False or any(
+            "eval" in str(issue).lower() for issue in result.security_issues
+        )
 
     def test_js_unbalanced_braces(self):
         """Test detection of unbalanced braces in JavaScript."""
@@ -764,7 +774,9 @@ def calculate_tax(amount, rate=0.1):
     return amount * rate
 """
         simulator = RefactorSimulator()
-        result = simulator.simulate(original, new_code=new_code, enable_test_impact=True)
+        result = simulator.simulate(
+            original, new_code=new_code, enable_test_impact=True
+        )
 
         assert hasattr(result, "test_impact")
         assert isinstance(result.test_impact, dict)
@@ -1089,8 +1101,12 @@ async def handler():
         new_code = "def bar(x: int) -> int: return x * 2"
 
         simulator = RefactorSimulator()
-        result1 = simulator.simulate(original_code=original, new_code=new_code, enable_type_checking=True)
-        result2 = simulator.simulate(original_code=original, new_code=new_code, enable_type_checking=True)
+        result1 = simulator.simulate(
+            original_code=original, new_code=new_code, enable_type_checking=True
+        )
+        result2 = simulator.simulate(
+            original_code=original, new_code=new_code, enable_type_checking=True
+        )
 
         # Confidence score should be deterministic
         assert result1.confidence_score == result2.confidence_score
@@ -1164,7 +1180,10 @@ def foo(:
             assert record.levelno >= logging.WARNING
 
         if caplog.records:
-            assert any("syntax" in r.getMessage().lower() or "error" in r.getMessage().lower() for r in caplog.records)
+            assert any(
+                "syntax" in r.getMessage().lower() or "error" in r.getMessage().lower()
+                for r in caplog.records
+            )
 
     def test_performance_small_input_under_100ms_community(self):
         """Test small input completes quickly <100ms (Community tier soft threshold)."""
@@ -1183,7 +1202,9 @@ def foo(:
         assert result.is_safe is True
         # Soft threshold - log but don't fail if exceeded
         if duration >= 0.1:
-            print(f"Performance notice: small input took {duration:.3f}s (target <100ms)")
+            print(
+                f"Performance notice: small input took {duration:.3f}s (target <100ms)"
+            )
 
     def test_performance_medium_input_under_1s_pro(self):
         """Test medium input (~1000 LOC) completes within ~1s (Pro tier soft threshold)."""
@@ -1198,7 +1219,9 @@ def foo(:
 
         simulator = RefactorSimulator()
         start = time.time()
-        result = simulator.simulate(original_code=original, new_code=new_code, enable_type_checking=False)
+        result = simulator.simulate(
+            original_code=original, new_code=new_code, enable_type_checking=False
+        )
         duration = time.time() - start
 
         assert result.status.value in ("safe", "warning")

@@ -252,7 +252,9 @@ class TestLicenseRevocation:
         """Revoked Pro license falls back to Community and provides upgrade_hints."""
         # Simulate a revoked token (e.g., with 'revoked' flag in payload)
         # [20260117_TEST] Token created for revocation scenario; not used directly
-        _revoked_token = jwt.encode({"tier": "pro", "revoked": True, "reason": "payment_failed"}, "secret")
+        _revoked_token = jwt.encode(
+            {"tier": "pro", "revoked": True, "reason": "payment_failed"}, "secret"
+        )
 
         # Tool should detect revocation and fall back to Community
         result = {
@@ -264,7 +266,8 @@ class TestLicenseRevocation:
             "lines_changed": 5,
             "syntax_valid": True,
             "upgrade_hints": [
-                "Pro license revoked (reason: payment_failed). " "Renew at https://code-scalpel.dev/renew"
+                "Pro license revoked (reason: payment_failed). "
+                "Renew at https://code-scalpel.dev/renew"
             ],
             "error": None,
         }
@@ -293,7 +296,8 @@ class TestLicenseRevocation:
             "lines_changed": 5,
             "syntax_valid": True,
             "upgrade_hints": [
-                "Enterprise license revoked (reason: policy_violation). " "Contact support@code-scalpel.dev"
+                "Enterprise license revoked (reason: policy_violation). "
+                "Contact support@code-scalpel.dev"
             ],
             "error": None,
         }
@@ -341,7 +345,9 @@ class TestLicenseErrorMessages:
     async def test_unsupported_tier_error_message(self):
         """Error message for unsupported tier is clear."""
         # [20260117_TEST] Token created for context; not used directly
-        _unsupported_tier_token = jwt.encode({"tier": "premium"}, "secret")  # Not a valid tier
+        _unsupported_tier_token = jwt.encode(
+            {"tier": "premium"}, "secret"
+        )  # Not a valid tier
 
         error_message = (
             "License tier 'premium' not recognized. "

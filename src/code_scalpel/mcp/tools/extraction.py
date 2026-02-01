@@ -13,10 +13,16 @@ from code_scalpel.mcp.helpers import extraction_helpers as _helpers
 from code_scalpel.mcp.models.core import PatchResultModel
 from code_scalpel.mcp.protocol import mcp, _get_current_tier
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
-from code_scalpel.mcp.oracle_middleware import with_oracle_resilience, SymbolStrategy, RenameSymbolStrategy
+from code_scalpel.mcp.oracle_middleware import (
+    with_oracle_resilience,
+    SymbolStrategy,
+    RenameSymbolStrategy,
+)
 from code_scalpel import __version__ as _pkg_version
 
-_extract_code = getattr(_helpers, "extract_code", None) or getattr(_helpers, "_extract_code_impl", None)
+_extract_code = getattr(_helpers, "extract_code", None) or getattr(
+    _helpers, "_extract_code_impl", None
+)
 _rename_symbol = getattr(_helpers, "rename_symbol", None)
 _update_symbol = getattr(_helpers, "update_symbol", None)
 
@@ -328,7 +334,9 @@ async def update_symbol(
                 raise
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
-        debug_print(f"DEBUG:update_symbol: helper returned, preparing envelope (duration_ms={duration_ms})")
+        debug_print(
+            f"DEBUG:update_symbol: helper returned, preparing envelope (duration_ms={duration_ms})"
+        )
         try:
             env = make_envelope(
                 data=result,

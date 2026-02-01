@@ -23,7 +23,9 @@ class TestMermaidBasicStructure:
 
     def test_mermaid_starts_with_graph_declaration(self, sample_call_graph):
         """Mermaid diagram should start with valid graph declaration."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, max_nodes=100)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=1, max_nodes=100
+        )
 
         # Mock object should have mermaid attribute
         if hasattr(result, "mermaid") and result.mermaid:
@@ -45,28 +47,42 @@ class TestMermaidBasicStructure:
 
     def test_mermaid_contains_nodes(self, sample_call_graph):
         """Mermaid diagram should reference graph nodes."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, max_nodes=100)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=1, max_nodes=100
+        )
 
         if hasattr(result, "mermaid") and result.mermaid:
             mermaid = str(result.mermaid)
             # Should contain node references (alphanumeric IDs)
-            assert re.search(r"[A-Za-z0-9_]+", mermaid), "Mermaid diagram should contain node identifiers"
+            assert re.search(
+                r"[A-Za-z0-9_]+", mermaid
+            ), "Mermaid diagram should contain node identifiers"
 
     def test_mermaid_contains_edges(self, sample_call_graph):
         """Mermaid diagram should include edge relationships."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, max_nodes=100)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=1, max_nodes=100
+        )
 
-        if hasattr(result, "mermaid") and result.mermaid and len(result.subgraph.edges) > 0:
+        if (
+            hasattr(result, "mermaid")
+            and result.mermaid
+            and len(result.subgraph.edges) > 0
+        ):
             mermaid = str(result.mermaid)
             # Skip validation for MagicMock objects
             if "MagicMock" in mermaid or "Mock" in mermaid:
                 pytest.skip("Skipping Mermaid validation for mock fixtures")
             # Should contain edge arrows: -->, --->, -.->, ==>, etc.
-            assert re.search(r"(-->|---|==>|-.->)", mermaid), "Mermaid diagram should contain edge arrows"
+            assert re.search(
+                r"(-->|---|==>|-.->)", mermaid
+            ), "Mermaid diagram should contain edge arrows"
 
     def test_mermaid_is_non_empty_string(self, simple_graph):
         """Mermaid diagram should be a non-empty string."""
-        result = simple_graph.get_neighborhood("python::service::function::caller", k=1, max_nodes=100)
+        result = simple_graph.get_neighborhood(
+            "python::service::function::caller", k=1, max_nodes=100
+        )
 
         if hasattr(result, "mermaid") and result.success:
             assert result.mermaid is not None
@@ -79,7 +95,9 @@ class TestMermaidNodeRepresentation:
 
     def test_mermaid_node_format(self, simple_graph):
         """Nodes should use valid Mermaid node syntax."""
-        result = simple_graph.get_neighborhood("python::service::function::caller", k=1, max_nodes=100)
+        result = simple_graph.get_neighborhood(
+            "python::service::function::caller", k=1, max_nodes=100
+        )
 
         if hasattr(result, "mermaid") and result.mermaid:
             mermaid = str(result.mermaid)
@@ -91,7 +109,9 @@ class TestMermaidNodeRepresentation:
 
     def test_mermaid_nodes_have_labels(self, simple_graph):
         """Nodes should have readable labels."""
-        result = simple_graph.get_neighborhood("python::service::function::caller", k=1, max_nodes=100)
+        result = simple_graph.get_neighborhood(
+            "python::service::function::caller", k=1, max_nodes=100
+        )
 
         if hasattr(result, "mermaid") and result.mermaid:
             mermaid = str(result.mermaid)
@@ -103,7 +123,9 @@ class TestMermaidNodeRepresentation:
 
     def test_mermaid_handles_special_characters(self, simple_graph):
         """Special characters in node names should be escaped/handled."""
-        result = simple_graph.get_neighborhood("python::service::function::caller", k=1, max_nodes=100)
+        result = simple_graph.get_neighborhood(
+            "python::service::function::caller", k=1, max_nodes=100
+        )
 
         if hasattr(result, "mermaid") and result.mermaid:
             mermaid = str(result.mermaid)
@@ -111,7 +133,9 @@ class TestMermaidNodeRepresentation:
             # Look for balanced quotes or proper escaping
             # This is a basic check - advanced would parse Mermaid AST
             assert (
-                mermaid.count('"') % 2 == 0 or mermaid.count("'") % 2 == 0 or "\\" in mermaid
+                mermaid.count('"') % 2 == 0
+                or mermaid.count("'") % 2 == 0
+                or "\\" in mermaid
             ), "Quotes should be balanced or escaped"
 
 
@@ -120,9 +144,15 @@ class TestMermaidEdgeRepresentation:
 
     def test_mermaid_edge_format(self, simple_graph):
         """Edges should use valid Mermaid arrow syntax."""
-        result = simple_graph.get_neighborhood("python::service::function::caller", k=1, max_nodes=100)
+        result = simple_graph.get_neighborhood(
+            "python::service::function::caller", k=1, max_nodes=100
+        )
 
-        if hasattr(result, "mermaid") and result.mermaid and len(result.subgraph.edges) > 0:
+        if (
+            hasattr(result, "mermaid")
+            and result.mermaid
+            and len(result.subgraph.edges) > 0
+        ):
             mermaid = str(result.mermaid)
             # Skip validation for MagicMock objects
             if "MagicMock" in mermaid or "Mock" in mermaid:
@@ -139,21 +169,35 @@ class TestMermaidEdgeRepresentation:
 
     def test_mermaid_edges_connect_nodes(self, simple_graph):
         """Edges should connect valid node identifiers."""
-        result = simple_graph.get_neighborhood("python::service::function::caller", k=1, max_nodes=100)
+        result = simple_graph.get_neighborhood(
+            "python::service::function::caller", k=1, max_nodes=100
+        )
 
-        if hasattr(result, "mermaid") and result.mermaid and len(result.subgraph.edges) > 0:
+        if (
+            hasattr(result, "mermaid")
+            and result.mermaid
+            and len(result.subgraph.edges) > 0
+        ):
             mermaid = str(result.mermaid)
             # Pattern: nodeA --> nodeB
-            edge_connection_pattern = r"[A-Za-z][A-Za-z0-9_]*\s*(-->|---|==>|-\.->)\s*[A-Za-z][A-Za-z0-9_]*"
+            edge_connection_pattern = (
+                r"[A-Za-z][A-Za-z0-9_]*\s*(-->|---|==>|-\.->)\s*[A-Za-z][A-Za-z0-9_]*"
+            )
             matches = re.findall(edge_connection_pattern, mermaid)
             # Should have at least some edge connections
             assert len(matches) >= 0, "Edges should connect nodes"
 
     def test_mermaid_edge_labels(self, sample_call_graph):
         """Edges can optionally have labels (e.g., edge type, confidence)."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, max_nodes=100)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=1, max_nodes=100
+        )
 
-        if hasattr(result, "mermaid") and result.mermaid and len(result.subgraph.edges) > 0:
+        if (
+            hasattr(result, "mermaid")
+            and result.mermaid
+            and len(result.subgraph.edges) > 0
+        ):
             mermaid = str(result.mermaid)
             # Edge labels: A -->|label| B or A -->|"label"| B
             label_pattern = r"-->\|[^\|]+\|"
@@ -168,7 +212,9 @@ class TestMermaidTruncationIndicators:
 
     def test_truncated_diagram_includes_warning_comment(self, sample_call_graph):
         """Truncated diagrams should include a comment or note."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=5)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=2, max_nodes=5
+        )
 
         if hasattr(result, "mermaid") and result.mermaid and result.truncated:
             mermaid = str(result.mermaid)
@@ -186,7 +232,9 @@ class TestMermaidTruncationIndicators:
 
     def test_truncated_diagram_shows_partial_graph(self, sample_call_graph):
         """Truncated diagrams should show only included nodes."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=5)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=2, max_nodes=5
+        )
 
         if hasattr(result, "mermaid") and result.mermaid and result.truncated:
             mermaid = str(result.mermaid)
@@ -199,7 +247,9 @@ class TestMermaidDepthInformation:
 
     def test_mermaid_may_include_depth_info(self, sample_call_graph):
         """Diagrams can optionally include depth/distance information."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=100)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=2, max_nodes=100
+        )
 
         if hasattr(result, "mermaid") and result.mermaid:
             mermaid = str(result.mermaid)
@@ -216,16 +266,24 @@ class TestMermaidSyntaxCorrectness:
 
     def test_mermaid_no_syntax_errors(self, sample_call_graph):
         """Mermaid diagram should not contain obvious syntax errors."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, max_nodes=100)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=1, max_nodes=100
+        )
 
         if hasattr(result, "mermaid") and result.mermaid:
             mermaid = str(result.mermaid)
 
             # Check for common syntax errors
             # 1. Balanced brackets
-            assert mermaid.count("[") == mermaid.count("]"), "Square brackets should be balanced"
-            assert mermaid.count("(") == mermaid.count(")"), "Parentheses should be balanced"
-            assert mermaid.count("{") == mermaid.count("}"), "Curly braces should be balanced"
+            assert mermaid.count("[") == mermaid.count(
+                "]"
+            ), "Square brackets should be balanced"
+            assert mermaid.count("(") == mermaid.count(
+                ")"
+            ), "Parentheses should be balanced"
+            assert mermaid.count("{") == mermaid.count(
+                "}"
+            ), "Curly braces should be balanced"
 
             # 2. No unescaped dangerous characters in node IDs (if simple format)
             # Node IDs should be alphanumeric + underscore + hyphen
@@ -233,12 +291,16 @@ class TestMermaidSyntaxCorrectness:
 
     def test_mermaid_valid_direction(self, sample_call_graph):
         """If direction is specified, it should be valid."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, max_nodes=100)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=1, max_nodes=100
+        )
 
         if hasattr(result, "mermaid") and result.mermaid:
             mermaid = str(result.mermaid)
             # Valid directions: TD (top-down), LR (left-right), BT, RL
-            direction_match = re.search(r"(graph|flowchart)\s+(TD|LR|TB|RL|BT)", mermaid, re.IGNORECASE)
+            direction_match = re.search(
+                r"(graph|flowchart)\s+(TD|LR|TB|RL|BT)", mermaid, re.IGNORECASE
+            )
             if direction_match:
                 direction = direction_match.group(2).upper()
                 assert direction in [
@@ -252,7 +314,9 @@ class TestMermaidSyntaxCorrectness:
     def test_mermaid_renders_without_crash(self, simple_graph):
         """Mermaid generation should not crash or raise exceptions."""
         # This test just ensures mermaid generation completes
-        result = simple_graph.get_neighborhood("python::service::function::caller", k=1, max_nodes=100)
+        result = simple_graph.get_neighborhood(
+            "python::service::function::caller", k=1, max_nodes=100
+        )
 
         # Should complete without exception
         assert result is not None
@@ -272,7 +336,9 @@ class TestMermaidEmptyGraph:
     def test_mermaid_empty_graph(self, simple_graph):
         """Empty graph should still produce valid (minimal) Mermaid."""
         # Try to get neighborhood of non-existent node
-        result = simple_graph.get_neighborhood("python::nonexistent::function::fake", k=1, max_nodes=100)
+        result = simple_graph.get_neighborhood(
+            "python::nonexistent::function::fake", k=1, max_nodes=100
+        )
 
         if not result.success and hasattr(result, "mermaid"):
             # Even on error, mermaid might be None or minimal
@@ -322,7 +388,9 @@ class TestMermaidIntegrationWithFeatures:
 
     def test_mermaid_with_truncation(self, sample_call_graph):
         """Mermaid should integrate with truncation protection."""
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=3)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=2, max_nodes=3
+        )
 
         if hasattr(result, "mermaid") and result.mermaid:
             mermaid = str(result.mermaid)

@@ -180,7 +180,9 @@ def helper():
 
     def test_update_class_not_found(self, patcher):
         """Test error when class doesn't exist."""
-        result = patcher.update_class("NonexistentClass", "class NonexistentClass: pass")
+        result = patcher.update_class(
+            "NonexistentClass", "class NonexistentClass: pass"
+        )
 
         assert result.success is False
         assert "not found" in result.error.lower()
@@ -233,14 +235,18 @@ def helper():
 
     def test_update_method_not_found(self, patcher):
         """Test error when method doesn't exist."""
-        result = patcher.update_method("Calculator", "nonexistent", "def nonexistent(self): pass")
+        result = patcher.update_method(
+            "Calculator", "nonexistent", "def nonexistent(self): pass"
+        )
 
         assert result.success is False
         assert "not found" in result.error.lower()
 
     def test_update_method_class_not_found(self, patcher):
         """Test error when class doesn't exist."""
-        result = patcher.update_method("NonexistentClass", "method", "def method(self): pass")
+        result = patcher.update_method(
+            "NonexistentClass", "method", "def method(self): pass"
+        )
 
         assert result.success is False
         assert "not found" in result.error.lower()
@@ -331,7 +337,9 @@ class TestConvenienceFunctions:
         test_file = tmp_path / "test.py"
         test_file.write_text(code)
 
-        result = update_class_in_file(str(test_file), "Old", "class Old:\n    value = 42")
+        result = update_class_in_file(
+            str(test_file), "Old", "class Old:\n    value = 42"
+        )
 
         assert result.success is True
         assert "value = 42" in test_file.read_text()
@@ -342,7 +350,9 @@ class TestConvenienceFunctions:
         test_file = tmp_path / "test.py"
         test_file.write_text(code)
 
-        result = update_method_in_file(str(test_file), "Calc", "add", "def add(self): return 42")
+        result = update_method_in_file(
+            str(test_file), "Calc", "add", "def add(self): return 42"
+        )
 
         assert result.success is True
         assert "return 42" in test_file.read_text()

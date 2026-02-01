@@ -75,7 +75,9 @@ def _get_project_files(project_root: str | Path, max_files: int = 1000) -> list[
     return files
 
 
-def _find_similar_file_paths(invalid_path: str, project_files: list[str], max_suggestions: int = 3) -> dict:
+def _find_similar_file_paths(
+    invalid_path: str, project_files: list[str], max_suggestions: int = 3
+) -> dict:
     """Find similar file paths using fuzzy string matching.
 
     Args:
@@ -93,7 +95,9 @@ def _find_similar_file_paths(invalid_path: str, project_files: list[str], max_su
     invalid_filename = Path(invalid_path).name
 
     # Find closest matches using difflib
-    matches = difflib.get_close_matches(invalid_path, project_files, n=max_suggestions * 2, cutoff=0.4)
+    matches = difflib.get_close_matches(
+        invalid_path, project_files, n=max_suggestions * 2, cutoff=0.4
+    )
 
     # Also try matching just the filename
     filename_matches = difflib.get_close_matches(
@@ -105,7 +109,9 @@ def _find_similar_file_paths(invalid_path: str, project_files: list[str], max_su
 
     # Convert filename matches back to full paths
     filename_to_full = {Path(f).name: f for f in project_files}
-    full_filename_matches = [filename_to_full[name] for name in filename_matches if name in filename_to_full]
+    full_filename_matches = [
+        filename_to_full[name] for name in filename_matches if name in filename_to_full
+    ]
 
     # Combine and deduplicate matches
     all_matches = list(set(matches + full_filename_matches))
@@ -223,7 +229,9 @@ async def analyze_code(
                 if project_root:
                     try:
                         project_files = _get_project_files(project_root, max_files=500)
-                        oracle_suggestion = _find_similar_file_paths(file_path, project_files)
+                        oracle_suggestion = _find_similar_file_paths(
+                            file_path, project_files
+                        )
                         if oracle_suggestion:
                             error_msg = f"File not found: {file_path}"
                             error_obj = ToolError(
@@ -251,14 +259,18 @@ async def analyze_code(
             # Check file size before reading
             file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
             if limit_mb is not None and file_size_mb > limit_mb:
-                raise ValueError(f"File size {file_size_mb:.2f} MB exceeds limit of {limit_mb} MB for {tier} tier")
+                raise ValueError(
+                    f"File size {file_size_mb:.2f} MB exceeds limit of {limit_mb} MB for {tier} tier"
+                )
 
             # Read the file
             with open(file_path, "r", encoding="utf-8") as f:
                 code = f.read()
 
         try:
-            ctx = adapter.create_source_context(code=code, file_path=file_path, language=language)
+            ctx = adapter.create_source_context(
+                code=code, file_path=file_path, language=language
+            )
             is_valid, error_obj, suggestions = adapter.validate_input(ctx)
 
             if not is_valid and error_obj:
@@ -280,7 +292,9 @@ async def analyze_code(
             # Validation setup error
             pass  # Continue with legacy code path
 
-        result = await asyncio.to_thread(_analyze_code_sync, code or "", language, file_path)
+        result = await asyncio.to_thread(
+            _analyze_code_sync, code or "", language, file_path
+        )
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
         return make_envelope(

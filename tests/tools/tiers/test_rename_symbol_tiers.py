@@ -17,26 +17,34 @@ class TestRenameSymbolCommunityTier:
         """Verify Python function rename capability for Community tier."""
         capabilities = get_tool_capabilities("rename_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "definition_rename" in cap_set, "Community should have definition_rename capability"
+        assert (
+            "definition_rename" in cap_set
+        ), "Community should have definition_rename capability"
 
     def test_python_class_rename_capability(self, community_tier):
         """Verify Python class rename capability for Community tier."""
         capabilities = get_tool_capabilities("rename_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "definition_rename" in cap_set, "Community should have definition_rename for classes"
+        assert (
+            "definition_rename" in cap_set
+        ), "Community should have definition_rename for classes"
 
     def test_python_method_rename_capability(self, community_tier):
         """Verify Python method rename capability for Community tier."""
         capabilities = get_tool_capabilities("rename_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "definition_rename" in cap_set, "Community should have definition_rename for methods"
+        assert (
+            "definition_rename" in cap_set
+        ), "Community should have definition_rename for methods"
 
     def test_automatic_reference_updates_same_file_capability(self, community_tier):
         """Verify automatic reference updates in same file for Community tier."""
         capabilities = get_tool_capabilities("rename_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
         # definition_rename implies same-file reference updates via tokenize
-        assert "definition_rename" in cap_set, "Community should support same-file reference updates"
+        assert (
+            "definition_rename" in cap_set
+        ), "Community should support same-file reference updates"
 
     def test_syntax_validation_via_ast_capability(self, community_tier):
         """Verify syntax validation via AST parsing for Community tier."""
@@ -50,7 +58,9 @@ class TestRenameSymbolCommunityTier:
         capabilities = get_tool_capabilities("rename_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
         # Identifier validation is part of definition_rename
-        assert "definition_rename" in cap_set, "Community should enforce snake_case validation"
+        assert (
+            "definition_rename" in cap_set
+        ), "Community should enforce snake_case validation"
 
     def test_community_no_cross_file_rename_limits(self, community_tier):
         """Verify Community tier has zero cross-file rename limits."""
@@ -58,8 +68,12 @@ class TestRenameSymbolCommunityTier:
         limits = capabilities.get("limits", {}) or {}
         max_searched = limits.get("max_files_searched")
         max_updated = limits.get("max_files_updated")
-        assert max_searched == 0, f"Community should have max_files_searched=0, got {max_searched}"
-        assert max_updated == 0, f"Community should have max_files_updated=0, got {max_updated}"
+        assert (
+            max_searched == 0
+        ), f"Community should have max_files_searched=0, got {max_searched}"
+        assert (
+            max_updated == 0
+        ), f"Community should have max_files_updated=0, got {max_updated}"
 
 
 class TestRenameSymbolProTier:
@@ -72,13 +86,17 @@ class TestRenameSymbolProTier:
         # Pro should have all Community capabilities
         assert "definition_rename" in cap_set, "Pro should have definition_rename"
         assert "backup" in cap_set, "Pro should have backup"
-        assert "path_security_validation" in cap_set, "Pro should have path_security_validation"
+        assert (
+            "path_security_validation" in cap_set
+        ), "Pro should have path_security_validation"
 
     def test_cross_file_rename_propagation_capability(self, pro_tier):
         """Verify cross-file rename propagation for Pro tier."""
         capabilities = get_tool_capabilities("rename_symbol", "pro") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "cross_file_reference_rename" in cap_set, "Pro should have cross_file_reference_rename capability"
+        assert (
+            "cross_file_reference_rename" in cap_set
+        ), "Pro should have cross_file_reference_rename capability"
 
     def test_import_statement_updates_capability(self, pro_tier):
         """Verify import statement updates for Pro tier."""
@@ -92,8 +110,12 @@ class TestRenameSymbolProTier:
         limits = capabilities.get("limits", {}) or {}
         max_searched = limits.get("max_files_searched")
         max_updated = limits.get("max_files_updated")
-        assert max_searched == 500, f"Pro should have max_files_searched=500, got {max_searched}"
-        assert max_updated == 200, f"Pro should have max_files_updated=200, got {max_updated}"
+        assert (
+            max_searched == 500
+        ), f"Pro should have max_files_searched=500, got {max_searched}"
+        assert (
+            max_updated == 200
+        ), f"Pro should have max_files_updated=200, got {max_updated}"
 
     def test_backup_and_rollback_support_pro(self, pro_tier):
         """Verify backup and rollback support for Pro tier."""
@@ -133,7 +155,9 @@ class TestRenameSymbolEnterpriseTier:
         """Verify organization-wide rename capability for Enterprise tier."""
         capabilities = get_tool_capabilities("rename_symbol", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "organization_wide_rename" in cap_set, "Enterprise should have organization_wide_rename capability"
+        assert (
+            "organization_wide_rename" in cap_set
+        ), "Enterprise should have organization_wide_rename capability"
 
     def test_enterprise_unlimited_cross_file_limits(self, enterprise_tier):
         """Verify Enterprise tier has unlimited cross-file rename limits."""
@@ -142,10 +166,16 @@ class TestRenameSymbolEnterpriseTier:
         max_searched = limits.get("max_files_searched")
         max_updated = limits.get("max_files_updated")
         # Enterprise should have None (unlimited) limits
-        assert max_searched is None, f"Enterprise should have unlimited max_files_searched, got {max_searched}"
-        assert max_updated is None, f"Enterprise should have unlimited max_files_updated, got {max_updated}"
+        assert (
+            max_searched is None
+        ), f"Enterprise should have unlimited max_files_searched, got {max_searched}"
+        assert (
+            max_updated is None
+        ), f"Enterprise should have unlimited max_files_updated, got {max_updated}"
 
-    def test_enterprise_has_advanced_features_pro_lacks(self, enterprise_tier, pro_tier):
+    def test_enterprise_has_advanced_features_pro_lacks(
+        self, enterprise_tier, pro_tier
+    ):
         """Verify Enterprise has advanced features that Pro lacks."""
         pro_caps = get_tool_capabilities("rename_symbol", "pro") or {}
         ent_caps = get_tool_capabilities("rename_symbol", "enterprise") or {}
@@ -197,23 +227,33 @@ class TestRenameSymbolCrossTierComparison:
 class TestRenameSymbolConsistency:
     """Consistency and backup capability tests (3 tests)."""
 
-    def test_backup_capability_across_all_tiers(self, community_tier, pro_tier, enterprise_tier):
+    def test_backup_capability_across_all_tiers(
+        self, community_tier, pro_tier, enterprise_tier
+    ):
         """Verify backup capability is available in all tiers."""
         for tier in ["community", "pro", "enterprise"]:
             capabilities = get_tool_capabilities("rename_symbol", tier) or {}
             cap_set = set(capabilities.get("capabilities", []) or [])
             assert "backup" in cap_set, f"{tier} should have backup capability"
 
-    def test_path_security_validation_across_all_tiers(self, community_tier, pro_tier, enterprise_tier):
+    def test_path_security_validation_across_all_tiers(
+        self, community_tier, pro_tier, enterprise_tier
+    ):
         """Verify path security validation is available in all tiers."""
         for tier in ["community", "pro", "enterprise"]:
             capabilities = get_tool_capabilities("rename_symbol", tier) or {}
             cap_set = set(capabilities.get("capabilities", []) or [])
-            assert "path_security_validation" in cap_set, f"{tier} should have path_security_validation"
+            assert (
+                "path_security_validation" in cap_set
+            ), f"{tier} should have path_security_validation"
 
-    def test_definition_rename_core_capability(self, community_tier, pro_tier, enterprise_tier):
+    def test_definition_rename_core_capability(
+        self, community_tier, pro_tier, enterprise_tier
+    ):
         """Verify definition_rename is the core capability in all tiers."""
         for tier in ["community", "pro", "enterprise"]:
             capabilities = get_tool_capabilities("rename_symbol", tier) or {}
             cap_set = set(capabilities.get("capabilities", []) or [])
-            assert "definition_rename" in cap_set, f"{tier} should have definition_rename core capability"
+            assert (
+                "definition_rename" in cap_set
+            ), f"{tier} should have definition_rename core capability"

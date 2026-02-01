@@ -137,7 +137,9 @@ def test_symlink_loop_detected(tmp_path: Path, scope_filesystem: None):
     assert result.success
 
 
-def test_path_outside_allowed_roots_rejected(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def test_path_outside_allowed_roots_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
     """[20260108_TEST] Operations outside allowed roots are rejected."""
     # Create target outside allowed roots
     outside = tmp_path / "outside"
@@ -178,7 +180,9 @@ def test_path_redaction_relative_paths(tmp_path: Path, scope_filesystem: None):
     ref = tmp_path / "ref.py"
 
     target.write_text("def old_name():\n    return 1\n", encoding="utf-8")
-    ref.write_text("from module import old_name\nvalue = old_name()\n", encoding="utf-8")
+    ref.write_text(
+        "from module import old_name\nvalue = old_name()\n", encoding="utf-8"
+    )
 
     result = rename_references_across_project(
         project_root=tmp_path,

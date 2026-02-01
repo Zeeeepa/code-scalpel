@@ -190,7 +190,9 @@ class DataFlow:
     @property
     def description(self) -> str:
         """Human-readable flow description."""
-        flow_str = " → ".join([self.source.pattern] + self.intermediate_variables + [self.sink.pattern])
+        flow_str = " → ".join(
+            [self.source.pattern] + self.intermediate_variables + [self.sink.pattern]
+        )
         return f"[{self.risk_level}] {flow_str}"
 
 
@@ -558,7 +560,9 @@ class FrontendInputTracker:
                 FrontendFramework.REACT,
             )
         elif result.framework == FrontendFramework.VUE:
-            self._apply_patterns(source_code, lines, VUE_INPUT_PATTERNS, result, FrontendFramework.VUE)
+            self._apply_patterns(
+                source_code, lines, VUE_INPUT_PATTERNS, result, FrontendFramework.VUE
+            )
         elif result.framework == FrontendFramework.ANGULAR:
             self._apply_patterns(
                 source_code,
@@ -642,7 +646,9 @@ class FrontendInputTracker:
         """Track which state variables are assigned from input."""
         # React useState pattern: const [value, setValue] = useState(...)
         # Look for setValue(e.target.value) pattern
-        state_pattern = re.compile(r"const\s+\[(\w+),\s*set(\w+)\]\s*=\s*useState", re.MULTILINE)
+        state_pattern = re.compile(
+            r"const\s+\[(\w+),\s*set(\w+)\]\s*=\s*useState", re.MULTILINE
+        )
 
         for match in state_pattern.finditer(source_code):
             var_name = match.group(1)
@@ -694,7 +700,10 @@ class FrontendInputTracker:
 
                     # Indirect flow via variable
                     elif source.variable_name:
-                        if source.variable_name in sink_line or source.variable_name in context:
+                        if (
+                            source.variable_name in sink_line
+                            or source.variable_name in context
+                        ):
                             flow = DataFlow(
                                 source=source,
                                 sink=sink,
@@ -792,7 +801,8 @@ class FrontendInputTracker:
                 "or refactor to avoid dynamic code execution"
             ),
             DangerousSinkType.LOCATION: (
-                "Validate URLs before redirect. Use allowlist of permitted domains " "and validate with URL constructor"
+                "Validate URLs before redirect. Use allowlist of permitted domains "
+                "and validate with URL constructor"
             ),
         }
         return recommendations.get(
@@ -856,7 +866,10 @@ def analyze_frontend_codebase(
     for ext in extensions:
         for file_path in root.rglob(f"*{ext}"):
             # Skip node_modules and build directories
-            if any(part in file_path.parts for part in ["node_modules", "dist", "build", ".next", ".nuxt"]):
+            if any(
+                part in file_path.parts
+                for part in ["node_modules", "dist", "build", ".next", ".nuxt"]
+            ):
                 continue
 
             try:

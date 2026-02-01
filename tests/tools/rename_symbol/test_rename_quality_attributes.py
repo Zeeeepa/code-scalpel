@@ -138,7 +138,9 @@ class TestStressTesting:
         def rename_one(index: int, src_path: Path):
             """Rename one file."""
             patcher = UnifiedPatcher.from_file(str(src_path))
-            return patcher.rename_symbol("function", f"old_func_{index}", f"new_func_{index}")
+            return patcher.rename_symbol(
+                "function", f"old_func_{index}", f"new_func_{index}"
+            )
 
         # Run 10 concurrent renames via ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=10) as executor:
@@ -307,7 +309,9 @@ class TestSecurity:
     def test_no_code_execution(self, tmp_path: Path):
         """Malicious code in input not executed."""
         src = tmp_path / "malicious.py"
-        src.write_text("def old_func():\n    import os\n    os.system('touch /tmp/pwned')\n    return 1\n")
+        src.write_text(
+            "def old_func():\n    import os\n    os.system('touch /tmp/pwned')\n    return 1\n"
+        )
 
         # Should parse, not execute
         patcher = UnifiedPatcher.from_file(str(src))

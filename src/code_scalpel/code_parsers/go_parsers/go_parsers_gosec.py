@@ -64,7 +64,9 @@ class GosecParser:
         self.config = GosecConfig()
         self.issues: List[SecurityIssue] = []
 
-    def execute_gosec(self, paths: List[Path], config: Optional[GosecConfig] = None) -> List[SecurityIssue]:
+    def execute_gosec(
+        self, paths: List[Path], config: Optional[GosecConfig] = None
+    ) -> List[SecurityIssue]:
         raise NotImplementedError("Phase 2: Gosec execution")
 
     def parse_json_report(self, report_path: Path) -> List[SecurityIssue]:
@@ -73,10 +75,14 @@ class GosecParser:
     def load_config(self, config_file: Path) -> GosecConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_vulnerabilities(self, issues: List[SecurityIssue]) -> Dict[VulnerabilityType, List[SecurityIssue]]:
+    def categorize_vulnerabilities(
+        self, issues: List[SecurityIssue]
+    ) -> Dict[VulnerabilityType, List[SecurityIssue]]:
         raise NotImplementedError("Phase 2: Vulnerability categorization")
 
-    def filter_by_severity(self, issues: List[SecurityIssue], min_severity: str) -> List[SecurityIssue]:
+    def filter_by_severity(
+        self, issues: List[SecurityIssue], min_severity: str
+    ) -> List[SecurityIssue]:
         raise NotImplementedError("Phase 2: Severity filtering")
 
     def map_to_cwe(self, issues: List[SecurityIssue]) -> Dict[str, List[SecurityIssue]]:

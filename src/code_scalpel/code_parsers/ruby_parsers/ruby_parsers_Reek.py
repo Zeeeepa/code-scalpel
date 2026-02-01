@@ -64,7 +64,9 @@ class ReekParser:
     def parse_xml_report(self, report_path: Path) -> List[ReekSmell]:
         raise NotImplementedError("Phase 2: XML report parsing")
 
-    def execute_reek(self, paths: List[Path], config: ReekConfig = None) -> List[ReekSmell]:
+    def execute_reek(
+        self, paths: List[Path], config: ReekConfig = None
+    ) -> List[ReekSmell]:
         raise NotImplementedError("Phase 2: Reek execution")
 
     def load_config(self, config_file: Path) -> ReekConfig:

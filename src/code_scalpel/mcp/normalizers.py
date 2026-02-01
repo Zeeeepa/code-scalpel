@@ -79,7 +79,9 @@ def read_file_content(file_path: str, encoding: str = "utf-8") -> str:
         with open(abs_path, "r", encoding=encoding) as f:
             return f.read()
     except UnicodeDecodeError as e:
-        raise InputNormalizationError(f"File encoding error in {file_path}: {e}. Try a different encoding.") from e
+        raise InputNormalizationError(
+            f"File encoding error in {file_path}: {e}. Try a different encoding."
+        ) from e
     except IOError as e:
         raise InputNormalizationError(f"Cannot read file {file_path}: {e}") from e
 
@@ -99,7 +101,9 @@ def check_file_size_limit(file_path: str, max_bytes: int) -> None:
     if file_size > max_bytes:
         size_mb = file_size / (1024 * 1024)
         max_mb = max_bytes / (1024 * 1024)
-        raise InputNormalizationError(f"File size {size_mb:.1f}MB exceeds limit of {max_mb:.1f}MB")
+        raise InputNormalizationError(
+            f"File size {size_mb:.1f}MB exceeds limit of {max_mb:.1f}MB"
+        )
 
 
 def normalize_input(
@@ -143,7 +147,9 @@ def normalize_input(
         ) -> Any:
             """Async wrapper for normalize_input."""
             # Validate inputs: exactly one of code or file_path must be provided
-            if (code is None and file_path is None) or (code is not None and file_path is not None):
+            if (code is None and file_path is None) or (
+                code is not None and file_path is not None
+            ):
                 raise InputNormalizationError(
                     "Must provide exactly one of: 'code' or 'file_path' (not both, not neither)"
                 )
@@ -214,7 +220,9 @@ def normalize_input(
         ) -> Any:
             """Sync wrapper for normalize_input (for non-async functions)."""
             # Validate inputs: exactly one of code or file_path must be provided
-            if (code is None and file_path is None) or (code is not None and file_path is not None):
+            if (code is None and file_path is None) or (
+                code is not None and file_path is not None
+            ):
                 raise InputNormalizationError(
                     "Must provide exactly one of: 'code' or 'file_path' (not both, not neither)"
                 )

@@ -184,8 +184,13 @@ class TestChangelogGeneratorCategorization:
     def test_categorize_feature(self):
         """Test categorizing feature message."""
         generator = ChangelogGenerator()
-        assert generator._categorize_message("feat: add new feature") == ChangeType.FEATURE
-        assert generator._categorize_message("feat(api): add endpoint") == ChangeType.FEATURE
+        assert (
+            generator._categorize_message("feat: add new feature") == ChangeType.FEATURE
+        )
+        assert (
+            generator._categorize_message("feat(api): add endpoint")
+            == ChangeType.FEATURE
+        )
         assert generator._categorize_message("This is a #feature") == ChangeType.FEATURE
 
     def test_categorize_fix(self):
@@ -198,38 +203,74 @@ class TestChangelogGeneratorCategorization:
     def test_categorize_breaking(self):
         """Test categorizing breaking change."""
         generator = ChangelogGenerator()
-        assert generator._categorize_message("BREAKING CHANGE: API redesign") == ChangeType.BREAKING
-        assert generator._categorize_message("BREAKING-CHANGE: remove endpoint") == ChangeType.BREAKING
+        assert (
+            generator._categorize_message("BREAKING CHANGE: API redesign")
+            == ChangeType.BREAKING
+        )
+        assert (
+            generator._categorize_message("BREAKING-CHANGE: remove endpoint")
+            == ChangeType.BREAKING
+        )
 
     def test_categorize_security(self):
         """Test categorizing security message."""
         generator = ChangelogGenerator()
-        assert generator._categorize_message("security: fix vulnerability") == ChangeType.SECURITY
-        assert generator._categorize_message("security(auth): update token handling") == ChangeType.SECURITY
+        assert (
+            generator._categorize_message("security: fix vulnerability")
+            == ChangeType.SECURITY
+        )
+        assert (
+            generator._categorize_message("security(auth): update token handling")
+            == ChangeType.SECURITY
+        )
 
     def test_categorize_documentation(self):
         """Test categorizing documentation message."""
         generator = ChangelogGenerator()
-        assert generator._categorize_message("docs: update README") == ChangeType.DOCUMENTATION
-        assert generator._categorize_message("docs(api): add examples") == ChangeType.DOCUMENTATION
+        assert (
+            generator._categorize_message("docs: update README")
+            == ChangeType.DOCUMENTATION
+        )
+        assert (
+            generator._categorize_message("docs(api): add examples")
+            == ChangeType.DOCUMENTATION
+        )
 
     def test_categorize_performance(self):
         """Test categorizing performance message."""
         generator = ChangelogGenerator()
-        assert generator._categorize_message("perf: optimize database") == ChangeType.PERFORMANCE
-        assert generator._categorize_message("perf(search): improve query speed") == ChangeType.PERFORMANCE
+        assert (
+            generator._categorize_message("perf: optimize database")
+            == ChangeType.PERFORMANCE
+        )
+        assert (
+            generator._categorize_message("perf(search): improve query speed")
+            == ChangeType.PERFORMANCE
+        )
 
     def test_categorize_refactor(self):
         """Test categorizing refactor message."""
         generator = ChangelogGenerator()
-        assert generator._categorize_message("refactor: restructure code") == ChangeType.REFACTOR
-        assert generator._categorize_message("refactor(api): simplify logic") == ChangeType.REFACTOR
+        assert (
+            generator._categorize_message("refactor: restructure code")
+            == ChangeType.REFACTOR
+        )
+        assert (
+            generator._categorize_message("refactor(api): simplify logic")
+            == ChangeType.REFACTOR
+        )
 
     def test_categorize_deprecation(self):
         """Test categorizing deprecation message."""
         generator = ChangelogGenerator()
-        assert generator._categorize_message("deprecate: old API") == ChangeType.DEPRECATION
-        assert generator._categorize_message("deprecated function") == ChangeType.DEPRECATION
+        assert (
+            generator._categorize_message("deprecate: old API")
+            == ChangeType.DEPRECATION
+        )
+        assert (
+            generator._categorize_message("deprecated function")
+            == ChangeType.DEPRECATION
+        )
 
     def test_categorize_unknown(self):
         """Test categorizing unknown message type."""
@@ -270,7 +311,9 @@ class TestChangelogGeneratorBreakingDetails:
     def test_extract_breaking_details_hyphen(self):
         """Test extracting with hyphenated BREAKING-CHANGE."""
         generator = ChangelogGenerator()
-        result = generator._extract_breaking_details("BREAKING-CHANGE: endpoint changed")
+        result = generator._extract_breaking_details(
+            "BREAKING-CHANGE: endpoint changed"
+        )
         assert result is not None
 
     def test_extract_breaking_no_match(self):

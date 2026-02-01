@@ -246,7 +246,8 @@ class TypeScriptParser:
         # Import pattern
         # [20251215_FEATURE] Support `import type` fallback handling
         import_pattern = re.compile(
-            r"^import\s+(?:type\s+)?(?:{([^}]+)}|(\w+)|\*\s+as\s+(\w+))" r"\s+from\s+[\'\"]([^\'\"]+)[\'\"]"
+            r"^import\s+(?:type\s+)?(?:{([^}]+)}|(\w+)|\*\s+as\s+(\w+))"
+            r"\s+from\s+[\'\"]([^\'\"]+)[\'\"]"
         )
 
         # Export pattern
@@ -264,7 +265,9 @@ class TypeScriptParser:
                     {
                         "name": match.group(1),
                         "params": match.group(2),
-                        "return_type": (match.group(3).strip() if match.group(3) else None),
+                        "return_type": (
+                            match.group(3).strip() if match.group(3) else None
+                        ),
                         "line": line_num,
                         "is_async": "async" in stripped.split("function")[0],
                         "is_exported": stripped.startswith("export"),
@@ -295,7 +298,9 @@ class TypeScriptParser:
                     {
                         "name": match.group(1),
                         "extends": match.group(2),
-                        "implements": (match.group(3).strip() if match.group(3) else None),
+                        "implements": (
+                            match.group(3).strip() if match.group(3) else None
+                        ),
                         "line": line_num,
                         "is_exported": stripped.startswith("export"),
                     }

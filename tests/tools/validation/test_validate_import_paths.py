@@ -148,8 +148,12 @@ import code_scalpel.helpers as helpers
         assert len(suggestions) >= 2
 
         # Check specific suggestions
-        server_suggestion = next((s for s in suggestions if "server" in s["original"]), None)
-        helpers_suggestion = next((s for s in suggestions if "helpers" in s["original"]), None)
+        server_suggestion = next(
+            (s for s in suggestions if "server" in s["original"]), None
+        )
+        helpers_suggestion = next(
+            (s for s in suggestions if "helpers" in s["original"]), None
+        )
 
         assert server_suggestion
         assert "mcp.tools" in server_suggestion["suggested"]

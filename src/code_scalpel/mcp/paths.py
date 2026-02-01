@@ -49,7 +49,9 @@ def maybe_auto_init_config_dir(
     from code_scalpel.mcp import governance
 
     auto_init_mode = mode or os.environ.get("CODE_SCALPEL_CONFIG_AUTO_INIT", "safe")
-    auto_init_target = target or os.environ.get("CODE_SCALPEL_CONFIG_AUTO_TARGET", "project")
+    auto_init_target = target or os.environ.get(
+        "CODE_SCALPEL_CONFIG_AUTO_TARGET", "project"
+    )
 
     if enabled is None:
         enabled = env_truthy(os.environ.get("CODE_SCALPEL_CONFIG_AUTO_INIT"))

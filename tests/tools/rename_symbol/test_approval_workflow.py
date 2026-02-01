@@ -53,7 +53,9 @@ class TestApprovalBasics:
 
     def test_approval_response_creation(self):
         """ApprovalResponse can be created."""
-        response = ApprovalResponse(approval_id="test-123", status=ApprovalStatus.PENDING)
+        response = ApprovalResponse(
+            approval_id="test-123", status=ApprovalStatus.PENDING
+        )
 
         assert response.approval_id == "test-123"
         assert response.status == ApprovalStatus.PENDING
@@ -75,7 +77,9 @@ class TestApprovalRequests:
         """Requesting approval generates unique ID."""
         workflow = ApprovalWorkflow()
 
-        request = ApprovalRequest(operation="test", title="Test operation", description="Test description")
+        request = ApprovalRequest(
+            operation="test", title="Test operation", description="Test description"
+        )
 
         approval_id = workflow.request_approval(request)
         assert approval_id is not None
@@ -310,7 +314,9 @@ class TestSynchronousWait:
 
         # Wait with short timeout
         start = time.time()
-        status = workflow.wait_for_approval(approval_id, poll_interval=0.1, max_wait=0.3)
+        status = workflow.wait_for_approval(
+            approval_id, poll_interval=0.1, max_wait=0.3
+        )
         elapsed = time.time() - start
 
         # Should timeout

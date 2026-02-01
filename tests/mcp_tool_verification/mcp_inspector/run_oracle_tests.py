@@ -24,6 +24,7 @@ sys.path.insert(0, str(project_root))
 @dataclass
 class TestResult:
     """Result of a single test case."""
+
     tool_name: str
     test_name: str
     test_input: Dict[str, Any]
@@ -49,6 +50,7 @@ class OracleTestClient:
         try:
             # Import MCP tools directly
             from code_scalpel.mcp import tools as mcp_tools
+
             self.tools_module = mcp_tools
             print("✅ Initialized MCP tools module")
         except ImportError as e:
@@ -79,12 +81,15 @@ class OracleTestClient:
         # Get the module
         if module_name == "extraction":
             from code_scalpel.mcp.tools import extraction
+
             module = extraction
         elif module_name == "context":
             from code_scalpel.mcp.tools import context
+
             module = context
         elif module_name == "graph":
             from code_scalpel.mcp.tools import graph
+
             module = graph
         else:
             raise ValueError(f"Unknown module: {module_name}")
@@ -96,7 +101,9 @@ class OracleTestClient:
 
         return func
 
-    def validate_oracle_response(self, response: Dict[str, Any]) -> tuple[bool, List[str]]:
+    def validate_oracle_response(
+        self, response: Dict[str, Any]
+    ) -> tuple[bool, List[str]]:
         """
         Validate that the response has oracle resilience structure.
 
@@ -138,7 +145,9 @@ class OracleTestClient:
 
         suggestions = error_details.get("suggestions", [])
         if not isinstance(suggestions, list):
-            errors.append(f"'suggestions' should be list, got {type(suggestions).__name__}")
+            errors.append(
+                f"'suggestions' should be list, got {type(suggestions).__name__}"
+            )
             return False, errors
 
         if len(suggestions) == 0:
@@ -161,7 +170,9 @@ class OracleTestClient:
             else:
                 score = suggestion.get("score")
                 if not isinstance(score, (int, float)):
-                    errors.append(f"Suggestion {i} score should be number, got {type(score).__name__}")
+                    errors.append(
+                        f"Suggestion {i} score should be number, got {type(score).__name__}"
+                    )
                 elif not (0.0 <= score <= 1.0):
                     errors.append(f"Suggestion {i} score out of range: {score}")
 
@@ -172,16 +183,11 @@ class OracleTestClient:
         return len(errors) == 0, errors
 
     async def run_test(
-        self,
-        test_name: str,
-        tool_name: str,
-        arguments: Dict[str, Any]
+        self, test_name: str, tool_name: str, arguments: Dict[str, Any]
     ) -> TestResult:
         """Run a single test case."""
         result = TestResult(
-            tool_name=tool_name,
-            test_name=test_name,
-            test_input=arguments
+            tool_name=tool_name, test_name=test_name, test_input=arguments
         )
 
         try:
@@ -200,7 +206,9 @@ class OracleTestClient:
             elif isinstance(response, dict):
                 response_dict = response
             else:
-                response_dict = response.__dict__ if hasattr(response, "__dict__") else {}
+                response_dict = (
+                    response.__dict__ if hasattr(response, "__dict__") else {}
+                )
 
             result.raw_response = response_dict
 
@@ -210,9 +218,13 @@ class OracleTestClient:
 
             # Extract oracle information
             error = response_dict.get("error", {})
-            result.error_code = error.get("error_code") if isinstance(error, dict) else None
+            result.error_code = (
+                error.get("error_code") if isinstance(error, dict) else None
+            )
 
-            error_details = error.get("error_details", {}) if isinstance(error, dict) else {}
+            error_details = (
+                error.get("error_details", {}) if isinstance(error, dict) else {}
+            )
             suggestions = error_details.get("suggestions", [])
 
             result.has_suggestions = len(suggestions) > 0
@@ -229,7 +241,9 @@ class OracleTestClient:
                 print(f"   ✅ PASSED")
                 print(f"      - error_code: {result.error_code}")
                 print(f"      - suggestions: {result.suggestion_count}")
-                print(f"      - top: {result.top_suggestion} (score: {result.top_score})")
+                print(
+                    f"      - top: {result.top_suggestion} (score: {result.top_score})"
+                )
             else:
                 print(f"   ❌ FAILED")
                 for error in errors:
@@ -240,6 +254,7 @@ class OracleTestClient:
             result.errors = [str(e)]
             print(f"   ❌ ERROR: {e}")
             import traceback
+
             traceback.print_exc()
 
         self.results.append(result)
@@ -259,8 +274,8 @@ class OracleTestClient:
                 "args": {
                     "file_path": "tests/mcp_tool_verification/mcp_inspector/test_code.py",
                     "target_type": "function",
-                    "target_name": "proces_data"
-                }
+                    "target_name": "proces_data",
+                },
             },
             {
                 "name": "Test 2.1: rename_symbol - Missing Symbol",
@@ -269,8 +284,8 @@ class OracleTestClient:
                     "file_path": "tests/mcp_tool_verification/mcp_inspector/test_code.py",
                     "target_type": "function",
                     "target_name": "proces_data",
-                    "new_name": "process_input"
-                }
+                    "new_name": "process_input",
+                },
             },
             {
                 "name": "Test 3.1: update_symbol - Missing Symbol",
@@ -280,16 +295,16 @@ class OracleTestClient:
                     "target_type": "function",
                     "target_name": "proces_item",
                     "new_code": "def process_item(y):\n    return y + 2",
-                    "operation": "replace"
-                }
+                    "operation": "replace",
+                },
             },
             {
                 "name": "Test 4.1: get_symbol_references - Missing Symbol",
                 "tool": "get_symbol_references",
                 "args": {
                     "symbol_name": "proces_data",
-                    "project_root": "tests/mcp_tool_verification/mcp_inspector"
-                }
+                    "project_root": "tests/mcp_tool_verification/mcp_inspector",
+                },
             },
             {
                 "name": "Test 5.1: get_call_graph - Entry Point Typo",
@@ -297,8 +312,8 @@ class OracleTestClient:
                 "args": {
                     "project_root": "tests/mcp_tool_verification/mcp_inspector",
                     "entry_point": "proces_data",
-                    "depth": 2
-                }
+                    "depth": 2,
+                },
             },
             {
                 "name": "Test 6.1: get_graph_neighborhood - Node Typo",
@@ -307,8 +322,8 @@ class OracleTestClient:
                     "center_node_id": "python::test_code::function::proces_data",
                     "k": 2,
                     "direction": "both",
-                    "project_root": "tests/mcp_tool_verification/mcp_inspector"
-                }
+                    "project_root": "tests/mcp_tool_verification/mcp_inspector",
+                },
             },
             {
                 "name": "Test 7.1: get_cross_file_dependencies - Symbol Typo",
@@ -317,8 +332,8 @@ class OracleTestClient:
                     "target_file": "test_code.py",
                     "target_symbol": "proces_data",
                     "project_root": "tests/mcp_tool_verification/mcp_inspector",
-                    "max_depth": 2
-                }
+                    "max_depth": 2,
+                },
             },
         ]
 
@@ -327,7 +342,7 @@ class OracleTestClient:
             await self.run_test(
                 test_name=test_case["name"],
                 tool_name=test_case["tool"],
-                arguments=test_case["args"]
+                arguments=test_case["args"],
             )
 
         # Print summary
@@ -358,7 +373,9 @@ class OracleTestClient:
             print(f"       Error Code: {result.error_code}")
             print(f"       Suggestions: {result.suggestion_count}")
             if result.top_suggestion:
-                print(f"       Top: {result.top_suggestion} (score: {result.top_score})")
+                print(
+                    f"       Top: {result.top_suggestion} (score: {result.top_score})"
+                )
 
             if result.errors:
                 print(f"       Issues:")
@@ -404,37 +421,47 @@ class OracleTestClient:
 
         for result in self.results:
             status = "✅ PASS" if result.passed else "❌ FAIL"
-            top_sugg = f"{result.top_suggestion} ({result.top_score})" if result.top_suggestion else "N/A"
+            top_sugg = (
+                f"{result.top_suggestion} ({result.top_score})"
+                if result.top_suggestion
+                else "N/A"
+            )
 
             lines.append(
                 f"| {result.test_name} | {result.tool_name} | {status} | "
                 f"{result.error_code or 'N/A'} | {result.suggestion_count} | {top_sugg} |"
             )
 
-        lines.extend([
-            "",
-            "---",
-            "",
-            "## Detailed Results",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                "---",
+                "",
+                "## Detailed Results",
+                "",
+            ]
+        )
 
         for result in self.results:
             status = "✅ PASS" if result.passed else "❌ FAIL"
-            lines.extend([
-                f"### {result.test_name}",
-                "",
-                f"**Status**: {status}",
-                f"**Tool**: {result.tool_name}",
-                f"**Error Code**: {result.error_code or 'N/A'}",
-                f"**Suggestions Count**: {result.suggestion_count}",
-            ])
+            lines.extend(
+                [
+                    f"### {result.test_name}",
+                    "",
+                    f"**Status**: {status}",
+                    f"**Tool**: {result.tool_name}",
+                    f"**Error Code**: {result.error_code or 'N/A'}",
+                    f"**Suggestions Count**: {result.suggestion_count}",
+                ]
+            )
 
             if result.top_suggestion:
-                lines.extend([
-                    f"**Top Suggestion**: {result.top_suggestion}",
-                    f"**Score**: {result.top_score}",
-                ])
+                lines.extend(
+                    [
+                        f"**Top Suggestion**: {result.top_suggestion}",
+                        f"**Score**: {result.top_score}",
+                    ]
+                )
 
             if result.errors:
                 lines.append("**Issues**:")
@@ -442,13 +469,15 @@ class OracleTestClient:
                     lines.append(f"- {error}")
 
             if result.raw_response:
-                lines.extend([
-                    "",
-                    "**Raw Response**:",
-                    "```json",
-                    json.dumps(result.raw_response, indent=2),
-                    "```",
-                ])
+                lines.extend(
+                    [
+                        "",
+                        "**Raw Response**:",
+                        "```json",
+                        json.dumps(result.raw_response, indent=2),
+                        "```",
+                    ]
+                )
 
             lines.append("")
 
@@ -469,6 +498,7 @@ async def main():
     except Exception as e:
         print(f"\n❌ Fatal Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

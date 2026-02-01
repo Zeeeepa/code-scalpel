@@ -22,8 +22,12 @@ from code_scalpel.parsing.unified_parser import (
 )
 from importlib import import_module
 
-_analyze_code_sync = import_module("code_scalpel.mcp.helpers.analyze_helpers")._analyze_code_sync
-parse_file_cached = import_module("code_scalpel.mcp.helpers.ast_helpers").parse_file_cached
+_analyze_code_sync = import_module(
+    "code_scalpel.mcp.helpers.analyze_helpers"
+)._analyze_code_sync
+parse_file_cached = import_module(
+    "code_scalpel.mcp.helpers.ast_helpers"
+).parse_file_cached
 _core_models = import_module("code_scalpel.mcp.models.core")
 
 ClassInfo = _core_models.ClassInfo
@@ -70,7 +74,9 @@ def _is_env_file(path: Path) -> bool:
     return name == ".env" or name.startswith(".env.")
 
 
-def _redact_sensitive_content(path: Path, content: str) -> tuple[str, bool, bool, list[str]]:
+def _redact_sensitive_content(
+    path: Path, content: str
+) -> tuple[str, bool, bool, list[str]]:
     """Redact secrets/PII before analysis.
 
     Returns:
@@ -176,7 +182,9 @@ def _crawl_project_discovery(
         if respect_gitignore:
             gitignore_file = root / ".gitignore"
             if gitignore_file.exists() and gitignore_file.is_file():
-                for raw in gitignore_file.read_text(encoding="utf-8", errors="ignore").splitlines():
+                for raw in gitignore_file.read_text(
+                    encoding="utf-8", errors="ignore"
+                ).splitlines():
                     line = raw.strip()
                     if not line or line.startswith("#"):
                         continue
@@ -185,7 +193,9 @@ def _crawl_project_discovery(
                         continue
                     gitignore_patterns.append(line)
 
-        def _gitignore_match(rel_posix_path: str, pattern: str, *, is_dir: bool) -> bool:
+        def _gitignore_match(
+            rel_posix_path: str, pattern: str, *, is_dir: bool
+        ) -> bool:
             if pattern.endswith("/"):
                 if not is_dir:
                     return False
@@ -198,7 +208,10 @@ def _crawl_project_discovery(
             if not gitignore_patterns:
                 return False
             rel_posix = rel_path.as_posix().lstrip("./")
-            return any(_gitignore_match(rel_posix, pat, is_dir=is_dir) for pat in gitignore_patterns)
+            return any(
+                _gitignore_match(rel_posix, pat, is_dir=is_dir)
+                for pat in gitignore_patterns
+            )
 
         python_files: list[CrawlFileResult] = []
         entrypoints: list[str] = []
@@ -295,7 +308,8 @@ def _crawl_project_discovery(
 
         # Build discovery report
         languages = ", ".join(
-            f"{ext}={count}" for ext, count in sorted(ext_counts.items(), key=lambda kv: (-kv[1], kv[0]))
+            f"{ext}={count}"
+            for ext, count in sorted(ext_counts.items(), key=lambda kv: (-kv[1], kv[0]))
         )
         limit_note = "" if not reached_limit else "(limit reached)"
         report = f"""# Project Discovery Report
@@ -430,17 +444,23 @@ def _crawl_project_sync(
                     if "include_extensions" in custom_config:
                         include_extensions = tuple(custom_config["include_extensions"])
                         # [20260102_DEBUG] Log config loading for debugging
-                        logger.info(f"Loaded include_extensions from config: {include_extensions}")
+                        logger.info(
+                            f"Loaded include_extensions from config: {include_extensions}"
+                        )
                     # Merge exclude_dirs from config
                     if "exclude_dirs" in custom_config:
                         custom_exclude_dirs.extend(custom_config["exclude_dirs"])
                 except Exception as e:
                     # [20260102_BUGFIX] Don't silently ignore errors - log them for debugging
-                    logger.warning(f"Failed to load custom crawl config from {config_file}: {e}")
+                    logger.warning(
+                        f"Failed to load custom crawl config from {config_file}: {e}"
+                    )
 
         crawler = ProjectCrawler(
             root_path,
-            exclude_dirs=(frozenset(custom_exclude_dirs) if custom_exclude_dirs else None),
+            exclude_dirs=(
+                frozenset(custom_exclude_dirs) if custom_exclude_dirs else None
+            ),
             complexity_threshold=complexity_threshold,
             max_files=max_files,
             max_depth=max_depth,
@@ -451,7 +471,9 @@ def _crawl_project_sync(
         # [20251229_FEATURE] Enterprise: Optimization for 100k+ files
         use_optimization = capabilities and "100k_plus_files_support" in capabilities
         if use_optimization:
-            logger.info(f"Enterprise mode: Optimizing for large-scale crawl in {root_path}")
+            logger.info(
+                f"Enterprise mode: Optimizing for large-scale crawl in {root_path}"
+            )
 
         result = crawler.crawl()
 
@@ -485,7 +507,9 @@ def _crawl_project_sync(
                     filtered_files.append(file_result)
 
             # Update result with filtered files
-            result.files_analyzed = filtered_files if filtered_files else result.files_analyzed
+            result.files_analyzed = (
+                filtered_files if filtered_files else result.files_analyzed
+            )
 
             # Save cache (always write when incremental is enabled)
             if cache_file:
@@ -613,7 +637,9 @@ def _crawl_project_sync(
                         framework_signals.add("Next.js (Pages Router)")
                         for page_file in pages_dir.rglob("*.{js,jsx,ts,tsx}"):
                             rel_path = page_file.relative_to(pages_dir)
-                            route = "/" + str(rel_path.with_suffix("")).replace("\\", "/")
+                            route = "/" + str(rel_path.with_suffix("")).replace(
+                                "\\", "/"
+                            )
                             if route.endswith("/index"):
                                 route = route[:-6] or "/"
                             # Detect dynamic routes
@@ -711,7 +737,11 @@ def _crawl_project_sync(
                                             {
                                                 "route": route,
                                                 "methods": (
-                                                    methods.replace('"', "").replace("'", "") if methods else "GET"
+                                                    methods.replace('"', "").replace(
+                                                        "'", ""
+                                                    )
+                                                    if methods
+                                                    else "GET"
                                                 ),
                                                 "file": fr.path,
                                             }
@@ -782,14 +812,20 @@ def _crawl_project_sync(
                             # Check first 20 lines for generation markers
                             header = "".join(f.readline().lower() for _ in range(20))
                             if any(marker in header for marker in generation_markers):
-                                generated_files.append(str(Path(fr.path).relative_to(root)))
+                                generated_files.append(
+                                    str(Path(fr.path).relative_to(root))
+                                )
                     except Exception:
                         pass
 
                 if present or generated_files:
                     report += "\n\n## Generated/Third-Party Code\n"
                     if present:
-                        report += "### Folders (Heuristics)\n" + "\n".join(f"- {d}" for d in present) + "\n"
+                        report += (
+                            "### Folders (Heuristics)\n"
+                            + "\n".join(f"- {d}" for d in present)
+                            + "\n"
+                        )
                     if generated_files:
                         report += "\n### Files (Content Analysis)\n" + "\n".join(
                             f"- {f}" for f in generated_files[:20]  # Limit to 20
@@ -813,12 +849,16 @@ def _crawl_project_sync(
                             if "workspaces" in pkg_data:
                                 workspace_patterns = pkg_data["workspaces"]
                                 if isinstance(workspace_patterns, dict):
-                                    workspace_patterns = workspace_patterns.get("packages", [])
+                                    workspace_patterns = workspace_patterns.get(
+                                        "packages", []
+                                    )
 
                                 for pattern in workspace_patterns:
                                     for workspace_dir in root.glob(pattern):
                                         if workspace_dir.is_dir():
-                                            workspace_pkg = workspace_dir / "package.json"
+                                            workspace_pkg = (
+                                                workspace_dir / "package.json"
+                                            )
                                             if workspace_pkg.exists():
                                                 try:
                                                     with open(
@@ -833,7 +873,11 @@ def _crawl_project_sync(
                                                                     "name",
                                                                     workspace_dir.name,
                                                                 ),
-                                                                "path": str(workspace_dir.relative_to(root)),
+                                                                "path": str(
+                                                                    workspace_dir.relative_to(
+                                                                        root
+                                                                    )
+                                                                ),
                                                                 "type": "npm-workspace",
                                                             }
                                                         )
@@ -853,7 +897,10 @@ def _crawl_project_sync(
                             packages = lerna_data.get("packages", ["packages/*"])
                             for pattern in packages:
                                 for pkg_dir in root.glob(pattern):
-                                    if pkg_dir.is_dir() and (pkg_dir / "package.json").exists():
+                                    if (
+                                        pkg_dir.is_dir()
+                                        and (pkg_dir / "package.json").exists()
+                                    ):
                                         workspaces.append(
                                             {
                                                 "name": pkg_dir.name,
@@ -873,7 +920,9 @@ def _crawl_project_sync(
 
                             with open(pyproject, "r", encoding="utf-8") as f:
                                 proj_data = toml.load(f)
-                                name = proj_data.get("project", {}).get("name", pyproject.parent.name)
+                                name = proj_data.get("project", {}).get(
+                                    "name", pyproject.parent.name
+                                )
                                 python_projects.append(
                                     {
                                         "name": name,
@@ -888,7 +937,9 @@ def _crawl_project_sync(
                     report += "\n\n## Monorepo Structure\n"
                     all_packages = workspaces + python_projects
                     for pkg in sorted(all_packages, key=lambda x: x["path"]):
-                        report += f"- **{pkg['name']}** (`{pkg['path']}`) - {pkg['type']}\n"
+                        report += (
+                            f"- **{pkg['name']}** (`{pkg['path']}`) - {pkg['type']}\n"
+                        )
 
             # [20251229_FEATURE] Enterprise: Cross-repository dependency linking
             if capabilities and "cross_repo_dependency_linking" in capabilities:
@@ -927,11 +978,15 @@ def _crawl_project_sync(
                             deps = pkg_data.get("dependencies", {})
                             for dep_name, dep_version in deps.items():
                                 # Detect workspace/monorepo references
-                                if dep_version.startswith("workspace:") or dep_version.startswith("link:"):
+                                if dep_version.startswith(
+                                    "workspace:"
+                                ) or dep_version.startswith("link:"):
                                     external_deps.append(
                                         {
                                             "name": dep_name,
-                                            "source": str(pkg_json.parent.relative_to(root)),
+                                            "source": str(
+                                                pkg_json.parent.relative_to(root)
+                                            ),
                                             "version": dep_version,
                                             "type": "workspace-link",
                                         }
@@ -945,9 +1000,7 @@ def _crawl_project_sync(
                         if dep["type"] == "git-submodule":
                             report += f"- **{dep['name']}** (submodule) - `{dep['path']}` from {dep['url']}\n"
                         elif dep["type"] == "workspace-link":
-                            report += (
-                                f"- **{dep['name']}** (workspace) - {dep['version']} referenced by `{dep['source']}`\n"
-                            )
+                            report += f"- **{dep['name']}** (workspace) - {dep['version']} referenced by `{dep['source']}`\n"
 
         return ProjectCrawlResult(
             success=True,
@@ -1154,14 +1207,21 @@ async def crawl_project(
                             }
                             for match in pattern_result.matches
                         ],
-                        "pattern_total_matches": getattr(pattern_result, "total_matches", None),
-                        "pattern_files_scanned": getattr(pattern_result, "files_scanned", None),
-                        "pattern_explanation": getattr(pattern_result, "explanation", None),
+                        "pattern_total_matches": getattr(
+                            pattern_result, "total_matches", None
+                        ),
+                        "pattern_files_scanned": getattr(
+                            pattern_result, "files_scanned", None
+                        ),
+                        "pattern_explanation": getattr(
+                            pattern_result, "explanation", None
+                        ),
                     }
                 else:
                     payload = {
                         "pattern_success": False,
-                        "pattern_error": getattr(pattern_result, "error", None) or "Pattern extraction failed",
+                        "pattern_error": getattr(pattern_result, "error", None)
+                        or "Pattern extraction failed",
                     }
 
                 try:
@@ -1268,7 +1328,9 @@ def _get_file_context_sync(
             )
 
         code = path.read_text(encoding="utf-8")
-        code, pii_redacted, secrets_masked, redaction_summary = _redact_sensitive_content(path, code)
+        code, pii_redacted, secrets_masked, redaction_summary = (
+            _redact_sensitive_content(path, code)
+        )
         lines = code.splitlines()
         line_count = len(lines)
 
@@ -1302,9 +1364,7 @@ def _get_file_context_sync(
             if "semantic_summarization" in cap_set:
                 function_count = len(analysis.functions)
                 class_count = len(analysis.classes)
-                semantic_summary = (
-                    f"{detected_lang.title()} module with {function_count} function(s) and {class_count} class(es)."
-                )
+                semantic_summary = f"{detected_lang.title()} module with {function_count} function(s) and {class_count} class(es)."
 
             expanded_context = None
             if "smart_context_expansion" in cap_set:
@@ -1334,7 +1394,8 @@ def _get_file_context_sync(
                 pii_redacted=pii_redacted,
                 secrets_masked=secrets_masked,
                 redaction_summary=redaction_summary,
-                access_controlled="rbac_aware_retrieval" in cap_set or "file_access_control" in cap_set,
+                access_controlled="rbac_aware_retrieval" in cap_set
+                or "file_access_control" in cap_set,
                 error=analysis.error,
             )
 
@@ -1371,7 +1432,8 @@ def _get_file_context_sync(
                     pii_redacted=pii_redacted,
                     secrets_masked=secrets_masked,
                     redaction_summary=redaction_summary,
-                    access_controlled="rbac_aware_retrieval" in cap_set or "file_access_control" in cap_set,
+                    access_controlled="rbac_aware_retrieval" in cap_set
+                    or "file_access_control" in cap_set,
                     error="Invalid Python syntax and sanitization failed.",
                 )
             code = sanitized
@@ -1411,7 +1473,11 @@ def _get_file_context_sync(
                     complexity += _count_complexity_node(node)
             elif isinstance(node, ast.ClassDef):
                 if hasattr(node, "col_offset") and node.col_offset == 0:
-                    methods = [n.name for n in node.body if isinstance(n, ast.FunctionDef | ast.AsyncFunctionDef)]
+                    methods = [
+                        n.name
+                        for n in node.body
+                        if isinstance(n, ast.FunctionDef | ast.AsyncFunctionDef)
+                    ]
                     classes.append(
                         ClassInfo(
                             name=node.name,
@@ -1434,13 +1500,18 @@ def _get_file_context_sync(
                     if isinstance(target, ast.Name) and target.id == "__all__":
                         if isinstance(node.value, ast.List | ast.Tuple):
                             for elt in node.value.elts:
-                                if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                                if isinstance(elt, ast.Constant) and isinstance(
+                                    elt.value, str
+                                ):
                                     exports.append(elt.value)
 
         # Quick security check
         has_security_issues = False
         # [20260104_BUGFIX] Treat bare except handlers as security findings for Community tier.
-        bare_except = any(isinstance(node, ast.ExceptHandler) and node.type is None for node in ast.walk(tree))
+        bare_except = any(
+            isinstance(node, ast.ExceptHandler) and node.type is None
+            for node in ast.walk(tree)
+        )
         security_patterns = [
             "eval(",
             "exec(",
@@ -1509,10 +1580,15 @@ def _get_file_context_sync(
             if not expanded_context:
                 expanded_context = None
 
-        if not redaction_summary and {"pii_redaction", "secret_masking", "api_key_detection"} & cap_set:
+        if (
+            not redaction_summary
+            and {"pii_redaction", "secret_masking", "api_key_detection"} & cap_set
+        ):
             redaction_summary = []
 
-        access_controlled = "rbac_aware_retrieval" in cap_set or "file_access_control" in cap_set
+        access_controlled = (
+            "rbac_aware_retrieval" in cap_set or "file_access_control" in cap_set
+        )
 
         # [20251231_FEATURE] v3.3.1 - Pro tier: Code quality metrics
         code_smells: list[dict[str, Any]] = []
@@ -1544,7 +1620,9 @@ def _get_file_context_sync(
             compliance_flags = _detect_compliance_flags(code, path)
 
         if "technical_debt_scoring" in cap_set:
-            technical_debt_score = _calculate_technical_debt(code_smells, complexity, doc_coverage, line_count)
+            technical_debt_score = _calculate_technical_debt(
+                code_smells, complexity, doc_coverage, line_count
+            )
 
         if "owner_team_mapping" in cap_set:
             owners = _get_code_owners(path)
@@ -1612,7 +1690,9 @@ def _count_complexity_node(node: ast.AST) -> int:
 # [20251231_FEATURE] v3.3.1 - Pro tier helper functions for code quality metrics
 
 
-def _detect_code_smells(tree: ast.Module, code: str, lines: list[str]) -> list[dict[str, Any]]:
+def _detect_code_smells(
+    tree: ast.Module, code: str, lines: list[str]
+) -> list[dict[str, Any]]:
     """
     Detect common code smells in Python code.
 
@@ -1663,7 +1743,11 @@ def _detect_code_smells(tree: ast.Module, code: str, lines: list[str]) -> list[d
 
         # God class (>20 methods)
         if isinstance(node, ast.ClassDef):
-            method_count = sum(1 for n in node.body if isinstance(n, ast.FunctionDef | ast.AsyncFunctionDef))
+            method_count = sum(
+                1
+                for n in node.body
+                if isinstance(n, ast.FunctionDef | ast.AsyncFunctionDef)
+            )
             if method_count > 20:
                 smells.append(
                     {
@@ -1719,7 +1803,9 @@ def _get_nesting_depth(node: ast.AST, current_depth: int = 1) -> int:
     return max_depth
 
 
-def _calculate_doc_coverage(tree: ast.Module, functions: list[str], classes: list[str]) -> float:
+def _calculate_doc_coverage(
+    tree: ast.Module, functions: list[str], classes: list[str]
+) -> float:
     """
     Calculate documentation coverage percentage.
 
@@ -1751,7 +1837,9 @@ def _calculate_doc_coverage(tree: ast.Module, functions: list[str], classes: lis
     return round((documented_items / total_items) * 100, 1)
 
 
-def _calculate_maintainability_index(line_count: int, complexity: int, symbol_count: int) -> float:
+def _calculate_maintainability_index(
+    line_count: int, complexity: int, symbol_count: int
+) -> float:
     """
     Calculate Maintainability Index (0-100 scale, higher is better).
 
@@ -1773,7 +1861,12 @@ def _calculate_maintainability_index(line_count: int, complexity: int, symbol_co
     volume = max(1, line_count * math.log2(max(1, symbol_count + 1)))
 
     # Simplified MI formula
-    mi = 171 - 5.2 * math.log(max(1, volume)) - 0.23 * complexity - 16.2 * math.log(max(1, line_count))
+    mi = (
+        171
+        - 5.2 * math.log(max(1, volume))
+        - 0.23 * complexity
+        - 16.2 * math.log(max(1, line_count))
+    )
     mi = (mi * 100) / 171
 
     return round(max(0.0, min(100.0, mi)), 1)
@@ -1920,7 +2013,9 @@ def _get_code_owners(file_path: Path) -> list[str]:
     return []
 
 
-def _parse_codeowners(codeowners_file: Path, target_file: Path, repo_root: Path) -> list[str]:
+def _parse_codeowners(
+    codeowners_file: Path, target_file: Path, repo_root: Path
+) -> list[str]:
     """Parse CODEOWNERS and return owners matching the target file."""
     try:
         rel_path = str(target_file.relative_to(repo_root))
@@ -1958,7 +2053,9 @@ def _codeowners_pattern_matches(pattern: str, file_path: str) -> bool:
 
     # Handle directory patterns
     if pattern.endswith("/"):
-        return file_path.startswith(pattern) or fnmatch.fnmatch(file_path, pattern + "*")
+        return file_path.startswith(pattern) or fnmatch.fnmatch(
+            file_path, pattern + "*"
+        )
 
     # Handle glob patterns
     if "*" in pattern:
@@ -2003,7 +2100,9 @@ def _get_historical_metrics(file_path: Path) -> dict[str, Any] | None:
             text=True,
             timeout=10,
         )
-        commit_count = len(result.stdout.strip().splitlines()) if result.returncode == 0 else 0
+        commit_count = (
+            len(result.stdout.strip().splitlines()) if result.returncode == 0 else 0
+        )
 
         # Get unique contributors
         result = subprocess.run(
@@ -2013,7 +2112,11 @@ def _get_historical_metrics(file_path: Path) -> dict[str, Any] | None:
             text=True,
             timeout=10,
         )
-        contributors = list(set(result.stdout.strip().splitlines())) if result.returncode == 0 else []
+        contributors = (
+            list(set(result.stdout.strip().splitlines()))
+            if result.returncode == 0
+            else []
+        )
 
         # Get file age (first commit date)
         result = subprocess.run(
@@ -2057,10 +2160,14 @@ def _get_historical_metrics(file_path: Path) -> dict[str, Any] | None:
 
         return {
             "churn": commit_count,
-            "age_days": (int((now - first_commit_ts) / 86400) if first_commit_ts else None),
+            "age_days": (
+                int((now - first_commit_ts) / 86400) if first_commit_ts else None
+            ),
             "contributors": contributors[:10],  # Limit to 10
             "contributor_count": len(contributors),
-            "last_modified_days_ago": (int((now - last_modified_ts) / 86400) if last_modified_ts else None),
+            "last_modified_days_ago": (
+                int((now - last_modified_ts) / 86400) if last_modified_ts else None
+            ),
         }
 
     except Exception:
@@ -2184,7 +2291,11 @@ def _get_symbol_references_sync(
         def _is_test_path(rel_path: str) -> bool:
             p = rel_path.replace("\\", "/")
             name = p.rsplit("/", 1)[-1]
-            return "/tests/" in f"/{p}/" or name.startswith("test_") or name.endswith("_test.py")
+            return (
+                "/tests/" in f"/{p}/"
+                or name.startswith("test_")
+                or name.endswith("_test.py")
+            )
 
         # [20251226_FEATURE] Enterprise: Enhanced CODEOWNERS support with validation
         def _find_codeowners_file(search_root: Path) -> Path | None:
@@ -2202,7 +2313,9 @@ def _get_symbol_references_sync(
             path: Path,
         ) -> tuple[list[tuple[str, list[str], int]], list[str] | None]:
             """Parse CODEOWNERS with validation. Returns (rules, default_owners)."""
-            rules: list[tuple[str, list[str], int]] = []  # (pattern, owners, specificity)
+            rules: list[tuple[str, list[str], int]] = (
+                []
+            )  # (pattern, owners, specificity)
             default_owners: list[str] | None = None
             try:
                 for raw in path.read_text(encoding="utf-8").splitlines():
@@ -2215,7 +2328,9 @@ def _get_symbol_references_sync(
                     pattern = parts[0].lstrip("/")
                     owners = [p for p in parts[1:] if p.startswith("@")] or parts[1:]
                     # [20251226_FEATURE] Calculate pattern specificity (more specific wins)
-                    specificity = len(pattern.split("/")) + (0 if "*" in pattern else 10)
+                    specificity = len(pattern.split("/")) + (
+                        0 if "*" in pattern else 10
+                    )
                     if pattern == "*":
                         default_owners = owners
                     else:
@@ -2267,7 +2382,9 @@ def _get_symbol_references_sync(
         if enable_codeowners or enable_impact_analysis:
             codeowners_file = _find_codeowners_file(root)
             if codeowners_file is not None:
-                codeowners_rules, default_owners = _parse_codeowners_inner(codeowners_file)
+                codeowners_rules, default_owners = _parse_codeowners_inner(
+                    codeowners_file
+                )
 
         # [20251226_FEATURE] Enterprise: Track complexity per file for impact analysis
         file_complexity: dict[str, int] = {}
@@ -2280,7 +2397,9 @@ def _get_symbol_references_sync(
         for py_file in root.rglob("*.py"):
             # Skip common non-source directories
             if any(
-                part.startswith(".") or part in ("__pycache__", "node_modules", "venv", ".venv", "dist", "build")
+                part.startswith(".")
+                or part
+                in ("__pycache__", "node_modules", "venv", ".venv", "dist", "build")
                 for part in py_file.parts
             ):
                 continue
@@ -2290,7 +2409,9 @@ def _get_symbol_references_sync(
             except Exception:
                 continue
 
-            if scope_norm and not rel_path.replace("\\", "/").startswith(scope_norm.replace("\\", "/")):
+            if scope_norm and not rel_path.replace("\\", "/").startswith(
+                scope_norm.replace("\\", "/")
+            ):
                 continue
 
             if not include_tests and _is_test_path(rel_path):
@@ -2304,7 +2425,9 @@ def _get_symbol_references_sync(
         if max_files is not None and total_files > max_files:
             candidate_files = candidate_files[:max_files]
             files_truncated = True
-            file_truncation_warning = f"File scan truncated: scanned {max_files} of {total_files} files."
+            file_truncation_warning = (
+                f"File scan truncated: scanned {max_files} of {total_files} files."
+            )
 
         category_counts: dict[str, int] = {}
         owner_counts: dict[str, int] = {}
@@ -2326,14 +2449,18 @@ def _get_symbol_references_sync(
                 owners = None
                 owner_confidence = 0.0
                 if enable_codeowners or enable_impact_analysis:
-                    owners, owner_confidence = _match_owners(codeowners_rules, rel_path, default_owners)
+                    owners, owner_confidence = _match_owners(
+                        codeowners_rules, rel_path, default_owners
+                    )
 
                 # [20251226_FEATURE] Enterprise: Track file complexity for impact analysis
                 if enable_impact_analysis and rel_path not in file_complexity:
                     # Simple complexity heuristic: count branches and function definitions
                     complexity = 0
                     for n in ast.walk(tree):
-                        if isinstance(n, (ast.If, ast.For, ast.While, ast.Try, ast.With)):
+                        if isinstance(
+                            n, (ast.If, ast.For, ast.While, ast.Try, ast.With)
+                        ):
                             complexity += 1
                         elif isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
                             complexity += 2
@@ -2359,7 +2486,9 @@ def _get_symbol_references_sync(
                     ref_type = "reference"
 
                     # Check definitions (FunctionDef, AsyncFunctionDef, ClassDef)
-                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                    if isinstance(
+                        node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+                    ):
                         if node.name == symbol_name:
                             matched = True
                             is_def = True
@@ -2377,23 +2506,43 @@ def _get_symbol_references_sync(
                                 if dec_key in seen:
                                     continue
                                 dec_matched = False
-                                if isinstance(decorator, ast.Name) and decorator.id == symbol_name:
+                                if (
+                                    isinstance(decorator, ast.Name)
+                                    and decorator.id == symbol_name
+                                ):
                                     dec_matched = True
-                                elif isinstance(decorator, ast.Attribute) and decorator.attr == symbol_name:
+                                elif (
+                                    isinstance(decorator, ast.Attribute)
+                                    and decorator.attr == symbol_name
+                                ):
                                     dec_matched = True
                                 elif isinstance(decorator, ast.Call):
                                     dec_func = decorator.func
-                                    if isinstance(dec_func, ast.Name) and dec_func.id == symbol_name:
+                                    if (
+                                        isinstance(dec_func, ast.Name)
+                                        and dec_func.id == symbol_name
+                                    ):
                                         dec_matched = True
-                                    elif isinstance(dec_func, ast.Attribute) and dec_func.attr == symbol_name:
+                                    elif (
+                                        isinstance(dec_func, ast.Attribute)
+                                        and dec_func.attr == symbol_name
+                                    ):
                                         dec_matched = True
                                 if dec_matched:
                                     seen.add(dec_key)
-                                    dec_context = lines[dec_line - 1] if 0 < dec_line <= len(lines) else ""
-                                    category_counts["decorator"] = category_counts.get("decorator", 0) + 1
+                                    dec_context = (
+                                        lines[dec_line - 1]
+                                        if 0 < dec_line <= len(lines)
+                                        else ""
+                                    )
+                                    category_counts["decorator"] = (
+                                        category_counts.get("decorator", 0) + 1
+                                    )
                                     if owners:
                                         for owner in owners:
-                                            owner_counts[owner] = owner_counts.get(owner, 0) + 1
+                                            owner_counts[owner] = (
+                                                owner_counts.get(owner, 0) + 1
+                                            )
                                     references.append(
                                         SymbolReference(
                                             file=rel_path,
@@ -2406,11 +2555,16 @@ def _get_symbol_references_sync(
                                             owners=owners,
                                         )
                                     )
-                                    if max_references is not None and len(references) >= max_references:
+                                    if (
+                                        max_references is not None
+                                        and len(references) >= max_references
+                                    ):
                                         break
 
                         # [20251226_FEATURE] Pro tier: Check return type annotation
-                        if enable_categorization and isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        if enable_categorization and isinstance(
+                            node, (ast.FunctionDef, ast.AsyncFunctionDef)
+                        ):
                             if node.returns is not None:
                                 ret_ann = node.returns
                                 ret_line = getattr(ret_ann, "lineno", node_line)
@@ -2418,25 +2572,44 @@ def _get_symbol_references_sync(
                                 ret_key = (rel_path, ret_line, ret_col)
                                 if ret_key not in seen:
                                     ret_matched = False
-                                    if isinstance(ret_ann, ast.Name) and ret_ann.id == symbol_name:
+                                    if (
+                                        isinstance(ret_ann, ast.Name)
+                                        and ret_ann.id == symbol_name
+                                    ):
                                         ret_matched = True
-                                    elif isinstance(ret_ann, ast.Attribute) and ret_ann.attr == symbol_name:
+                                    elif (
+                                        isinstance(ret_ann, ast.Attribute)
+                                        and ret_ann.attr == symbol_name
+                                    ):
                                         ret_matched = True
                                     elif isinstance(ret_ann, ast.Subscript):
                                         val = ret_ann.value
-                                        if isinstance(val, ast.Name) and val.id == symbol_name:
+                                        if (
+                                            isinstance(val, ast.Name)
+                                            and val.id == symbol_name
+                                        ):
                                             ret_matched = True
-                                        elif isinstance(val, ast.Attribute) and val.attr == symbol_name:
+                                        elif (
+                                            isinstance(val, ast.Attribute)
+                                            and val.attr == symbol_name
+                                        ):
                                             ret_matched = True
                                     if ret_matched:
                                         seen.add(ret_key)
-                                        ret_context = lines[ret_line - 1] if 0 < ret_line <= len(lines) else ""
+                                        ret_context = (
+                                            lines[ret_line - 1]
+                                            if 0 < ret_line <= len(lines)
+                                            else ""
+                                        )
                                         category_counts["type_annotation"] = (
-                                            category_counts.get("type_annotation", 0) + 1
+                                            category_counts.get("type_annotation", 0)
+                                            + 1
                                         )
                                         if owners:
                                             for owner in owners:
-                                                owner_counts[owner] = owner_counts.get(owner, 0) + 1
+                                                owner_counts[owner] = (
+                                                    owner_counts.get(owner, 0) + 1
+                                                )
                                         references.append(
                                             SymbolReference(
                                                 file=rel_path,
@@ -2451,7 +2624,11 @@ def _get_symbol_references_sync(
                                         )
 
                             # [20251226_FEATURE] Pro tier: Check parameter type annotations
-                            for arg in node.args.args + node.args.posonlyargs + node.args.kwonlyargs:
+                            for arg in (
+                                node.args.args
+                                + node.args.posonlyargs
+                                + node.args.kwonlyargs
+                            ):
                                 if arg.annotation is not None:
                                     ann = arg.annotation
                                     ann_line = getattr(ann, "lineno", node_line)
@@ -2459,25 +2636,46 @@ def _get_symbol_references_sync(
                                     ann_key = (rel_path, ann_line, ann_col)
                                     if ann_key not in seen:
                                         ann_matched = False
-                                        if isinstance(ann, ast.Name) and ann.id == symbol_name:
+                                        if (
+                                            isinstance(ann, ast.Name)
+                                            and ann.id == symbol_name
+                                        ):
                                             ann_matched = True
-                                        elif isinstance(ann, ast.Attribute) and ann.attr == symbol_name:
+                                        elif (
+                                            isinstance(ann, ast.Attribute)
+                                            and ann.attr == symbol_name
+                                        ):
                                             ann_matched = True
                                         elif isinstance(ann, ast.Subscript):
                                             val = ann.value
-                                            if isinstance(val, ast.Name) and val.id == symbol_name:
+                                            if (
+                                                isinstance(val, ast.Name)
+                                                and val.id == symbol_name
+                                            ):
                                                 ann_matched = True
-                                            elif isinstance(val, ast.Attribute) and val.attr == symbol_name:
+                                            elif (
+                                                isinstance(val, ast.Attribute)
+                                                and val.attr == symbol_name
+                                            ):
                                                 ann_matched = True
                                         if ann_matched:
                                             seen.add(ann_key)
-                                            ann_context = lines[ann_line - 1] if 0 < ann_line <= len(lines) else ""
+                                            ann_context = (
+                                                lines[ann_line - 1]
+                                                if 0 < ann_line <= len(lines)
+                                                else ""
+                                            )
                                             category_counts["type_annotation"] = (
-                                                category_counts.get("type_annotation", 0) + 1
+                                                category_counts.get(
+                                                    "type_annotation", 0
+                                                )
+                                                + 1
                                             )
                                             if owners:
                                                 for owner in owners:
-                                                    owner_counts[owner] = owner_counts.get(owner, 0) + 1
+                                                    owner_counts[owner] = (
+                                                        owner_counts.get(owner, 0) + 1
+                                                    )
                                             references.append(
                                                 SymbolReference(
                                                     file=rel_path,
@@ -2501,21 +2699,35 @@ def _get_symbol_references_sync(
                             ann_matched = False
                             if isinstance(ann, ast.Name) and ann.id == symbol_name:
                                 ann_matched = True
-                            elif isinstance(ann, ast.Attribute) and ann.attr == symbol_name:
+                            elif (
+                                isinstance(ann, ast.Attribute)
+                                and ann.attr == symbol_name
+                            ):
                                 ann_matched = True
                             elif isinstance(ann, ast.Subscript):
                                 val = ann.value
                                 if isinstance(val, ast.Name) and val.id == symbol_name:
                                     ann_matched = True
-                                elif isinstance(val, ast.Attribute) and val.attr == symbol_name:
+                                elif (
+                                    isinstance(val, ast.Attribute)
+                                    and val.attr == symbol_name
+                                ):
                                     ann_matched = True
                             if ann_matched:
                                 seen.add(ann_key)
-                                ann_context = lines[ann_line - 1] if 0 < ann_line <= len(lines) else ""
-                                category_counts["type_annotation"] = category_counts.get("type_annotation", 0) + 1
+                                ann_context = (
+                                    lines[ann_line - 1]
+                                    if 0 < ann_line <= len(lines)
+                                    else ""
+                                )
+                                category_counts["type_annotation"] = (
+                                    category_counts.get("type_annotation", 0) + 1
+                                )
                                 if owners:
                                     for owner in owners:
-                                        owner_counts[owner] = owner_counts.get(owner, 0) + 1
+                                        owner_counts[owner] = (
+                                            owner_counts.get(owner, 0) + 1
+                                        )
                                 references.append(
                                     SymbolReference(
                                         file=rel_path,
@@ -2549,7 +2761,9 @@ def _get_symbol_references_sync(
                         if isinstance(func, ast.Name) and func.id == symbol_name:
                             matched = True
                             ref_type = "call"
-                        elif isinstance(func, ast.Attribute) and func.attr == symbol_name:
+                        elif (
+                            isinstance(func, ast.Attribute) and func.attr == symbol_name
+                        ):
                             matched = True
                             # [20251226_FEATURE] Pro tier: Distinguish method call context
                             if enable_categorization:
@@ -2587,9 +2801,13 @@ def _get_symbol_references_sync(
 
                     if matched:
                         seen.add(loc_key)
-                        context = lines[node_line - 1] if 0 < node_line <= len(lines) else ""
+                        context = (
+                            lines[node_line - 1] if 0 < node_line <= len(lines) else ""
+                        )
                         if enable_categorization:
-                            category_counts[ref_type] = category_counts.get(ref_type, 0) + 1
+                            category_counts[ref_type] = (
+                                category_counts.get(ref_type, 0) + 1
+                            )
                         if owners:
                             for owner in owners:
                                 owner_counts[owner] = owner_counts.get(owner, 0) + 1
@@ -2600,13 +2818,18 @@ def _get_symbol_references_sync(
                                 column=node_col,
                                 context=context.strip(),
                                 is_definition=is_def,
-                                reference_type=(ref_type if enable_categorization else None),
+                                reference_type=(
+                                    ref_type if enable_categorization else None
+                                ),
                                 is_test_file=is_test_file,
                                 owners=owners,
                             )
                         )
 
-                        if max_references is not None and len(references) >= max_references:
+                        if (
+                            max_references is not None
+                            and len(references) >= max_references
+                        ):
                             break
 
                 if max_references is not None and len(references) >= max_references:
@@ -2660,7 +2883,9 @@ def _get_symbol_references_sync(
                 risk_factors.append(f"High reference count ({total_refs} references)")
             elif total_refs >= 50:
                 base_score += 20
-                risk_factors.append(f"Moderate reference count ({total_refs} references)")
+                risk_factors.append(
+                    f"Moderate reference count ({total_refs} references)"
+                )
             elif total_refs >= 20:
                 base_score += 10
                 risk_factors.append(f"Multiple references ({total_refs} references)")
@@ -2680,10 +2905,14 @@ def _get_symbol_references_sync(
             if test_coverage_ratio is not None:
                 if test_coverage_ratio < 0.1:
                     base_score += 20
-                    risk_factors.append(f"Low test coverage ({test_coverage_ratio:.1%})")
+                    risk_factors.append(
+                        f"Low test coverage ({test_coverage_ratio:.1%})"
+                    )
                 elif test_coverage_ratio < 0.3:
                     base_score += 10
-                    risk_factors.append(f"Moderate test coverage ({test_coverage_ratio:.1%})")
+                    risk_factors.append(
+                        f"Moderate test coverage ({test_coverage_ratio:.1%})"
+                    )
 
             # Factor 4: Complexity hotspots (0-15 points)
             if file_complexity:
@@ -2695,18 +2924,26 @@ def _get_symbol_references_sync(
                 ]
                 if len(complexity_hotspots_list) >= 5:
                     base_score += 15
-                    risk_factors.append(f"Multiple complexity hotspots ({len(complexity_hotspots_list)} files)")
+                    risk_factors.append(
+                        f"Multiple complexity hotspots ({len(complexity_hotspots_list)} files)"
+                    )
                 elif len(complexity_hotspots_list) >= 2:
                     base_score += 8
-                    risk_factors.append(f"Some complexity hotspots ({len(complexity_hotspots_list)} files)")
+                    risk_factors.append(
+                        f"Some complexity hotspots ({len(complexity_hotspots_list)} files)"
+                    )
 
             # Factor 5: Ownership coverage (0-15 points, better coverage = lower risk)
             if codeowners_coverage is not None and codeowners_coverage < 0.5:
                 base_score += 15
-                risk_factors.append(f"Low ownership coverage ({codeowners_coverage:.1%})")
+                risk_factors.append(
+                    f"Low ownership coverage ({codeowners_coverage:.1%})"
+                )
             elif codeowners_coverage is not None and codeowners_coverage < 0.8:
                 base_score += 5
-                risk_factors.append(f"Partial ownership coverage ({codeowners_coverage:.1%})")
+                risk_factors.append(
+                    f"Partial ownership coverage ({codeowners_coverage:.1%})"
+                )
 
             risk_score = min(100, base_score)
 
@@ -2730,7 +2967,9 @@ def _get_symbol_references_sync(
                     is_test = any(r.is_test_file for r in references if r.file == file)
                     label = file.replace("/", "_").replace(".", "_")
                     if is_test:
-                        mermaid_lines.append(f'    {node_id}["{label} ({ref_count})"]:::test')
+                        mermaid_lines.append(
+                            f'    {node_id}["{label} ({ref_count})"]:::test'
+                        )
                     else:
                         mermaid_lines.append(f'    {node_id}["{label} ({ref_count})"]')
                     mermaid_lines.append(f"    SYMBOL --> {node_id}")
@@ -2873,16 +3112,23 @@ async def get_symbol_references(
     max_references = limits.get("max_references")
 
     enable_categorization = bool(
-        {"usage_categorization", "read_write_classification", "import_classification"} & cap_set
+        {"usage_categorization", "read_write_classification", "import_classification"}
+        & cap_set
     )
-    enable_codeowners = bool({"codeowners_integration", "ownership_attribution", "impact_analysis"} & cap_set)
+    enable_codeowners = bool(
+        {"codeowners_integration", "ownership_attribution", "impact_analysis"} & cap_set
+    )
 
     # Only allow Pro+ filtering controls when capability is present.
     effective_scope = scope_prefix if "scope_filtering" in cap_set else None
-    effective_include_tests = include_tests if "test_file_filtering" in cap_set else True
+    effective_include_tests = (
+        include_tests if "test_file_filtering" in cap_set else True
+    )
 
     # [20251226_FEATURE] Enterprise: Enable impact analysis for advanced risk assessment
-    enable_impact_analysis = bool({"impact_analysis", "change_risk_assessment"} & cap_set)
+    enable_impact_analysis = bool(
+        {"impact_analysis", "change_risk_assessment"} & cap_set
+    )
 
     result = await asyncio.to_thread(
         _get_symbol_references_sync,
@@ -2900,6 +3146,8 @@ async def get_symbol_references(
     )
 
     if ctx:
-        await ctx.report_progress(100, 100, f"Found {result.total_references} references")
+        await ctx.report_progress(
+            100, 100, f"Found {result.total_references} references"
+        )
 
     return result

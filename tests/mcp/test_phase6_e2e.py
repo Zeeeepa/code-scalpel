@@ -478,7 +478,11 @@ class TestPhase6SchemaVersioning:
         assert "schema_version" in response
         # Should be SchemaVersion enum or string representation
         schema_version = response["schema_version"]
-        schema_str = schema_version.value if hasattr(schema_version, "value") else str(schema_version)
+        schema_str = (
+            schema_version.value
+            if hasattr(schema_version, "value")
+            else str(schema_version)
+        )
         assert schema_str in ["1.0", "1.1", "2.0", "V1_0", "V1_1", "V2_0"]
 
     def test_validation_metadata_preserved(self):

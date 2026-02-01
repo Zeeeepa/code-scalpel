@@ -95,7 +95,9 @@ def _find_limits_file() -> Path:
             logger.debug(f"Found limits.toml via CODE_SCALPEL_LIMITS_FILE: {path}")
             return path
         else:
-            logger.warning(f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}")
+            logger.warning(
+                f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}"
+            )
 
     # 2. Project directory (search up tree or use current)
     project_path = Path.cwd() / ".code-scalpel" / "limits.toml"
@@ -109,7 +111,9 @@ def _find_limits_file() -> Path:
     for parent in current_file.parents:
         project_candidate = parent / ".code-scalpel" / "limits.toml"
         if project_candidate.exists():
-            logger.debug(f"Found limits.toml via source tree search: {project_candidate}")
+            logger.debug(
+                f"Found limits.toml via source tree search: {project_candidate}"
+            )
             return project_candidate
 
     # 3. User home directory

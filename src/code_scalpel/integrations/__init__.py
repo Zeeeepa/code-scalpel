@@ -35,12 +35,14 @@ def __getattr__(name: str) -> Any:
 
     if name in deprecated_agents:
         raise ImportError(
-            f"'{name}' has been moved to codescalpel-agents package. " f"Install with: pip install codescalpel-agents"
+            f"'{name}' has been moved to codescalpel-agents package. "
+            f"Install with: pip install codescalpel-agents"
         )
 
     if name in deprecated_web:
         raise ImportError(
-            f"'{name}' has been moved to codescalpel-web package. " f"Install with: pip install codescalpel-web"
+            f"'{name}' has been moved to codescalpel-web package. "
+            f"Install with: pip install codescalpel-web"
         )
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

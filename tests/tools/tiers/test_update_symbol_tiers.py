@@ -17,37 +17,53 @@ class TestUpdateSymbolCommunityTier:
         """Verify function replacement capability for Community tier."""
         capabilities = get_tool_capabilities("update_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "basic_replacement" in cap_set, "Community should have basic_replacement for functions"
+        assert (
+            "basic_replacement" in cap_set
+        ), "Community should have basic_replacement for functions"
 
     def test_class_replacement_by_name_capability(self, community_tier):
         """Verify class replacement capability for Community tier."""
         capabilities = get_tool_capabilities("update_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "basic_replacement" in cap_set, "Community should have basic_replacement for classes"
+        assert (
+            "basic_replacement" in cap_set
+        ), "Community should have basic_replacement for classes"
 
     def test_method_replacement_in_classes_capability(self, community_tier):
         """Verify method replacement capability for Community tier."""
         capabilities = get_tool_capabilities("update_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "basic_replacement" in cap_set, "Community should have basic_replacement for methods"
+        assert (
+            "basic_replacement" in cap_set
+        ), "Community should have basic_replacement for methods"
 
     def test_automatic_backup_creation_capability(self, community_tier):
         """Verify automatic backup creation capability for Community tier."""
         capabilities = get_tool_capabilities("update_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
         limits = capabilities.get("limits", {}) or {}
-        assert "automatic_backup" in cap_set, "Community should have automatic_backup capability"
-        assert limits.get("backup_enabled") is True, "Community should have backup_enabled=True"
+        assert (
+            "automatic_backup" in cap_set
+        ), "Community should have automatic_backup capability"
+        assert (
+            limits.get("backup_enabled") is True
+        ), "Community should have backup_enabled=True"
 
     def test_syntax_validation_before_write_capability(self, community_tier):
         """Verify syntax validation capability for Community tier."""
         capabilities = get_tool_capabilities("update_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
         limits = capabilities.get("limits", {}) or {}
-        assert "syntax_validation" in cap_set, "Community should have syntax_validation capability"
-        assert limits.get("validation_level") == "syntax", "Community should have syntax validation level"
+        assert (
+            "syntax_validation" in cap_set
+        ), "Community should have syntax_validation capability"
+        assert (
+            limits.get("validation_level") == "syntax"
+        ), "Community should have syntax validation level"
 
-    def test_language_support_python_javascript_typescript_java_capability(self, community_tier):
+    def test_language_support_python_javascript_typescript_java_capability(
+        self, community_tier
+    ):
         """Verify language support for Community tier."""
         capabilities = get_tool_capabilities("update_symbol", "community") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
@@ -65,7 +81,9 @@ class TestUpdateSymbolCommunityTier:
         limits = capabilities.get("limits", {}) or {}
         # Now called max_updates_per_call instead of max_updates_per_session
         max_updates = limits.get("max_updates_per_call")
-        assert max_updates == 10, f"Community should have max_updates_per_call=10, got {max_updates}"
+        assert (
+            max_updates == 10
+        ), f"Community should have max_updates_per_call=10, got {max_updates}"
 
 
 class TestUpdateSymbolProTier:
@@ -80,38 +98,52 @@ class TestUpdateSymbolProTier:
         limits = capabilities.get("limits", {}) or {}
         # Now called max_updates_per_call instead of max_updates_per_session
         max_updates = limits.get("max_updates_per_call")
-        assert max_updates == -1, f"Pro should have unlimited (-1) updates, got {max_updates}"
+        assert (
+            max_updates == -1
+        ), f"Pro should have unlimited (-1) updates, got {max_updates}"
 
     def test_atomic_multi_file_updates_capability(self, pro_tier):
         """Verify atomic multi-file updates for Pro tier."""
         capabilities = get_tool_capabilities("update_symbol", "pro") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "atomic_multi_file" in cap_set, "Pro should have atomic_multi_file capability"
+        assert (
+            "atomic_multi_file" in cap_set
+        ), "Pro should have atomic_multi_file capability"
 
     def test_rollback_on_failure_supported_capability(self, pro_tier):
         """Verify rollback on failure is supported for Pro tier."""
         capabilities = get_tool_capabilities("update_symbol", "pro") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "rollback_on_failure" in cap_set, "Pro should have rollback_on_failure capability"
+        assert (
+            "rollback_on_failure" in cap_set
+        ), "Pro should have rollback_on_failure capability"
 
     def test_pre_post_update_hooks_executed_capability(self, pro_tier):
         """Verify pre/post update hooks are available for Pro tier."""
         capabilities = get_tool_capabilities("update_symbol", "pro") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "pre_update_hook" in cap_set, "Pro should have pre_update_hook capability"
-        assert "post_update_hook" in cap_set, "Pro should have post_update_hook capability"
+        assert (
+            "pre_update_hook" in cap_set
+        ), "Pro should have pre_update_hook capability"
+        assert (
+            "post_update_hook" in cap_set
+        ), "Pro should have post_update_hook capability"
 
     def test_formatting_preservation_across_updates_capability(self, pro_tier):
         """Verify formatting preservation for Pro tier."""
         capabilities = get_tool_capabilities("update_symbol", "pro") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "formatting_preservation" in cap_set, "Pro should have formatting_preservation capability"
+        assert (
+            "formatting_preservation" in cap_set
+        ), "Pro should have formatting_preservation capability"
 
     def test_import_auto_adjustment_applied_capability(self, pro_tier):
         """Verify import auto-adjustment for Pro tier."""
         capabilities = get_tool_capabilities("update_symbol", "pro") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "import_auto_adjustment" in cap_set, "Pro should have import_auto_adjustment capability"
+        assert (
+            "import_auto_adjustment" in cap_set
+        ), "Pro should have import_auto_adjustment capability"
 
 
 class TestUpdateSymbolEnterpriseTier:
@@ -129,17 +161,23 @@ class TestUpdateSymbolEnterpriseTier:
         assert "formatting_preservation" in cap_set
         assert "import_auto_adjustment" in cap_set
 
-    def test_code_review_approval_requirement_enforced_capability(self, enterprise_tier):
+    def test_code_review_approval_requirement_enforced_capability(
+        self, enterprise_tier
+    ):
         """Verify code review approval for Enterprise tier."""
         capabilities = get_tool_capabilities("update_symbol", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "code_review_approval" in cap_set, "Enterprise should require code review approval"
+        assert (
+            "code_review_approval" in cap_set
+        ), "Enterprise should require code review approval"
 
     def test_compliance_checked_updates_validated_capability(self, enterprise_tier):
         """Verify compliance-checked updates for Enterprise tier."""
         capabilities = get_tool_capabilities("update_symbol", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "compliance_check" in cap_set, "Enterprise should have compliance_check capability"
+        assert (
+            "compliance_check" in cap_set
+        ), "Enterprise should have compliance_check capability"
 
     def test_audit_trail_recorded_for_modifications_capability(self, enterprise_tier):
         """Verify audit trail for Enterprise tier."""
@@ -151,31 +189,41 @@ class TestUpdateSymbolEnterpriseTier:
         """Verify custom validation rules for Enterprise tier."""
         capabilities = get_tool_capabilities("update_symbol", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "custom_validation_rules" in cap_set, "Enterprise should have custom_validation_rules capability"
+        assert (
+            "custom_validation_rules" in cap_set
+        ), "Enterprise should have custom_validation_rules capability"
 
     def test_policy_gated_mutations_enforced_capability(self, enterprise_tier):
         """Verify policy-gated mutations for Enterprise tier."""
         capabilities = get_tool_capabilities("update_symbol", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "policy_gated_mutations" in cap_set, "Enterprise should have policy_gated_mutations capability"
+        assert (
+            "policy_gated_mutations" in cap_set
+        ), "Enterprise should have policy_gated_mutations capability"
 
     def test_impact_analysis_before_update_capability(self, enterprise_tier):
         """Verify impact analysis for Enterprise tier."""
         capabilities = get_tool_capabilities("update_symbol", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "impact_analysis" in cap_set, "Enterprise should have impact_analysis capability"
+        assert (
+            "impact_analysis" in cap_set
+        ), "Enterprise should have impact_analysis capability"
 
     def test_git_integration_enabled_capability(self, enterprise_tier):
         """Verify git integration for Enterprise tier."""
         capabilities = get_tool_capabilities("update_symbol", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "git_integration" in cap_set, "Enterprise should have git_integration capability"
+        assert (
+            "git_integration" in cap_set
+        ), "Enterprise should have git_integration capability"
 
     def test_test_execution_after_update_capability(self, enterprise_tier):
         """Verify test execution for Enterprise tier."""
         capabilities = get_tool_capabilities("update_symbol", "enterprise") or {}
         cap_set = set(capabilities.get("capabilities", []) or [])
-        assert "test_execution" in cap_set, "Enterprise should have test_execution capability"
+        assert (
+            "test_execution" in cap_set
+        ), "Enterprise should have test_execution capability"
 
 
 class TestUpdateSymbolCrossTierComparison:
@@ -213,7 +261,9 @@ class TestUpdateSymbolCrossTierComparison:
 class TestUpdateSymbolEdgeCases:
     """Edge case and validation level tests (3 tests)."""
 
-    def test_validation_level_progression(self, community_tier, pro_tier, enterprise_tier):
+    def test_validation_level_progression(
+        self, community_tier, pro_tier, enterprise_tier
+    ):
         """Verify validation level progression across tiers.
 
         [20260121_REFACTOR] Unchanged by per-call refactor; still test validation levels.
@@ -226,20 +276,32 @@ class TestUpdateSymbolEdgeCases:
         pro_level = pro_caps.get("limits", {}).get("validation_level")
         ent_level = ent_caps.get("limits", {}).get("validation_level")
 
-        assert comm_level == "syntax", f"Community should have syntax validation, got {comm_level}"
-        assert pro_level == "semantic", f"Pro should have semantic validation, got {pro_level}"
-        assert ent_level == "full", f"Enterprise should have full validation, got {ent_level}"
+        assert (
+            comm_level == "syntax"
+        ), f"Community should have syntax validation, got {comm_level}"
+        assert (
+            pro_level == "semantic"
+        ), f"Pro should have semantic validation, got {pro_level}"
+        assert (
+            ent_level == "full"
+        ), f"Enterprise should have full validation, got {ent_level}"
 
-    def test_backup_capability_across_all_tiers(self, community_tier, pro_tier, enterprise_tier):
+    def test_backup_capability_across_all_tiers(
+        self, community_tier, pro_tier, enterprise_tier
+    ):
         """Verify backup capability is available in all tiers."""
         for tier in ["community", "pro", "enterprise"]:
             capabilities = get_tool_capabilities("update_symbol", tier) or {}
             cap_set = set(capabilities.get("capabilities", []) or [])
             limits = capabilities.get("limits", {}) or {}
             assert "automatic_backup" in cap_set, f"{tier} should have automatic_backup"
-            assert limits.get("backup_enabled") is True, f"{tier} should have backup_enabled=True"
+            assert (
+                limits.get("backup_enabled") is True
+            ), f"{tier} should have backup_enabled=True"
 
-    def test_language_support_consistency(self, community_tier, pro_tier, enterprise_tier):
+    def test_language_support_consistency(
+        self, community_tier, pro_tier, enterprise_tier
+    ):
         """Verify all tiers support core languages."""
         core_langs = [
             "python_support",

@@ -35,4 +35,6 @@ try:
     __all__ = ["MCPServerConfig", "create_app", "run_server", "_elapsed_ms"]
 
 except ImportError as e:
-    raise ImportError("REST API server requires the web package. Install with: pip install code-scalpel[web]") from e
+    raise ImportError(
+        "REST API server requires the web package. Install with: pip install code-scalpel[web]"
+    ) from e

@@ -57,7 +57,9 @@ class FixResults:
         self.results.append(result)
         if result.fixed:
             self.total_fixed += 1
-            self.fixes_by_type[result.error_type] = self.fixes_by_type.get(result.error_type, 0) + 1
+            self.fixes_by_type[result.error_type] = (
+                self.fixes_by_type.get(result.error_type, 0) + 1
+            )
 
 
 class ErrorFixer:
@@ -96,7 +98,9 @@ class ErrorFixer:
             ".pytest_cache",
         }
 
-        python_files = [f for f in python_files if not any(part in skip_dirs for part in f.parts)]
+        python_files = [
+            f for f in python_files if not any(part in skip_dirs for part in f.parts)
+        ]
 
         logger.info(f"Found {len(python_files)} Python files to fix")
 
@@ -192,7 +196,9 @@ class ErrorFixer:
         if results.fixes_by_type:
             lines.append("FIXES BY TYPE")
             lines.append("-" * 40)
-            for error_type, count in sorted(results.fixes_by_type.items(), key=lambda x: x[1], reverse=True):
+            for error_type, count in sorted(
+                results.fixes_by_type.items(), key=lambda x: x[1], reverse=True
+            ):
                 lines.append(f"  {error_type:20} {count:5d}")
             lines.append("")
 
@@ -205,7 +211,9 @@ class ErrorFixer:
 
             lines.append("TOP FILES BY FIX COUNT")
             lines.append("-" * 40)
-            for file_path, count in sorted(file_counts.items(), key=lambda x: x[1], reverse=True)[:15]:
+            for file_path, count in sorted(
+                file_counts.items(), key=lambda x: x[1], reverse=True
+            )[:15]:
                 lines.append(f"  {count:3d}  {file_path}")
 
         lines.append("")
@@ -220,7 +228,9 @@ def main():
 
     parser = argparse.ArgumentParser(description="Fix whitespace errors")
     parser.add_argument("--path", type=str, default="src/", help="Directory to fix")
-    parser.add_argument("--fix", action="store_true", help="Apply fixes (default: dry-run only)")
+    parser.add_argument(
+        "--fix", action="store_true", help="Apply fixes (default: dry-run only)"
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging")
 
     args = parser.parse_args()

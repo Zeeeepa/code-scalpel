@@ -394,5 +394,6 @@ class TestSecurityScanAsyncInterface:
 
         assert envelope.success is True
         # Should delegate to data for pro tier attributes
-        assert envelope.confidence_scores is not None or envelope.vulnerability_count == 0
-
+        assert (
+            envelope.confidence_scores is not None or envelope.vulnerability_count == 0
+        )

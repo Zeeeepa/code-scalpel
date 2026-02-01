@@ -85,7 +85,9 @@ class LanguageRouter:
     }
 
     @classmethod
-    def detect_from_content(cls, content: str, confidence_threshold: float = 0.7) -> Optional[Language]:
+    def detect_from_content(
+        cls, content: str, confidence_threshold: float = 0.7
+    ) -> Optional[Language]:
         """Detect language from code content (shebang, imports, syntax).
 
         Args:
@@ -148,7 +150,9 @@ class LanguageRouter:
             return Language.GO
 
         # Rust indicators
-        if "fn " in content_lower and ("use " in content_lower or "impl " in content_lower):
+        if "fn " in content_lower and (
+            "use " in content_lower or "impl " in content_lower
+        ):
             logger.debug("Detected RUST by content patterns")
             return Language.RUST
 
@@ -158,7 +162,9 @@ class LanguageRouter:
             return Language.JSON
 
         # YAML indicators
-        if content.lstrip().startswith("---") or (":" in content and "{" not in content.split("\n")[0]):
+        if content.lstrip().startswith("---") or (
+            ":" in content and "{" not in content.split("\n")[0]
+        ):
             logger.debug("Detected YAML by content patterns")
             return Language.YAML
 
@@ -363,7 +369,8 @@ class LanguageRouter:
         parser_tier = LanguageRouter.get_parser_tier(language)
 
         logger.debug(
-            f"Routed {language.value} to tier {parser_tier}: " f"{LanguageRouter.get_tier_description(parser_tier)}"
+            f"Routed {language.value} to tier {parser_tier}: "
+            f"{LanguageRouter.get_tier_description(parser_tier)}"
         )
 
         return language, suggestions, parser_tier

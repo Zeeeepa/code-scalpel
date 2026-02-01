@@ -48,7 +48,11 @@ class TestPathResolverInit:
                 resolver = PathResolver()
                 normalized_workspace = os.path.normpath("/workspace")
                 # Count occurrences of /workspace (normalized for platform)
-                count = sum(1 for root in resolver.workspace_roots if os.path.normpath(root) == normalized_workspace)
+                count = sum(
+                    1
+                    for root in resolver.workspace_roots
+                    if os.path.normpath(root) == normalized_workspace
+                )
                 assert count == 1, "Workspace root should not be duplicated"
 
 
@@ -65,7 +69,9 @@ class TestDockerDetection:
     def test_cgroup_detection(self):
         """Test Docker detection via /proc/1/cgroup."""
         with patch("os.path.exists", return_value=False):
-            with patch("builtins.open", mock_open(read_data="12:memory:/docker/abc123")):
+            with patch(
+                "builtins.open", mock_open(read_data="12:memory:/docker/abc123")
+            ):
                 resolver = PathResolver()
                 assert resolver.is_docker is True
 
@@ -276,7 +282,9 @@ class TestPathValidation:
         good_file.write_text("# good")
 
         resolver = PathResolver(workspace_roots=[str(tmp_path)])
-        accessible, inaccessible = resolver.validate_paths([str(good_file), "/fake/bad.py"])
+        accessible, inaccessible = resolver.validate_paths(
+            [str(good_file), "/fake/bad.py"]
+        )
 
         assert len(accessible) == 1
         assert len(inaccessible) == 1
@@ -371,7 +379,9 @@ class TestEnvironmentVariables:
         with patch.dict(os.environ, {"WORKSPACE_ROOT": "/custom/workspace"}):
             resolver = PathResolver()
             normalized_root = os.path.normpath("/custom/workspace")
-            assert normalized_root in [os.path.normpath(r) for r in resolver.workspace_roots]
+            assert normalized_root in [
+                os.path.normpath(r) for r in resolver.workspace_roots
+            ]
             # Should be first (highest priority)
             assert os.path.normpath(resolver.workspace_roots[0]) == normalized_root
 
@@ -380,7 +390,9 @@ class TestEnvironmentVariables:
         with patch.dict(os.environ, {"PROJECT_ROOT": "/custom/project"}):
             resolver = PathResolver()
             normalized_root = os.path.normpath("/custom/project")
-            assert normalized_root in [os.path.normpath(r) for r in resolver.workspace_roots]
+            assert normalized_root in [
+                os.path.normpath(r) for r in resolver.workspace_roots
+            ]
 
 
 class TestEdgeCases:

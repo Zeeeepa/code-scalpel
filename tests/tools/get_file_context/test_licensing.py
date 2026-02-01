@@ -80,7 +80,9 @@ class TestProTierLimits:
     def test_pro_tier_2000_line_limit(self):
         """Pro tier should enforce 2000-line limit."""
         # Create file with 2500 lines
-        large_code = "\n".join(f"def func_{i}(a, b):\n    return a + b\n" for i in range(1250))
+        large_code = "\n".join(
+            f"def func_{i}(a, b):\n    return a + b\n" for i in range(1250)
+        )
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(large_code)
@@ -130,10 +132,20 @@ class TestProTierLimits:
             )
 
             # Pro should return more or equal context
-            community_lines = len(community_result.expanded_context or "") if community_result.expanded_context else 0
-            pro_lines = len(pro_result.expanded_context or "") if pro_result.expanded_context else 0
+            community_lines = (
+                len(community_result.expanded_context or "")
+                if community_result.expanded_context
+                else 0
+            )
+            pro_lines = (
+                len(pro_result.expanded_context or "")
+                if pro_result.expanded_context
+                else 0
+            )
 
-            assert pro_lines >= community_lines, "Pro tier should have higher limit than Community"
+            assert (
+                pro_lines >= community_lines
+            ), "Pro tier should have higher limit than Community"
         finally:
             import os
 
@@ -147,7 +159,8 @@ class TestEnterpriseTierLimits:
         """Enterprise tier should allow unlimited lines."""
         # Create very large file
         large_code = "\n".join(
-            f"def func_{i}(a, b):\n    # Function {i}\n    return a + b\n" for i in range(5000)  # 15000 lines
+            f"def func_{i}(a, b):\n    # Function {i}\n    return a + b\n"
+            for i in range(5000)  # 15000 lines
         )
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
@@ -302,7 +315,9 @@ def bad_function(a, b, c, d, e):
         )
 
         # Feature should be available with capability
-        assert with_cap.code_smells is not None or isinstance(with_cap.code_smells, list)
+        assert with_cap.code_smells is not None or isinstance(
+            with_cap.code_smells, list
+        )
         assert not without.code_smells or without.code_smells == []
 
     def test_wrong_capability_key_does_not_enable_feature(self, tmpdir):

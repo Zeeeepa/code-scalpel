@@ -127,7 +127,9 @@ class TestMutationGateExceptionPaths:
         from code_scalpel.autonomy.sandbox import SandboxExecutor
 
         sandbox = SandboxExecutor(max_cpu_seconds=10)
-        gate = MutationTestGate(sandbox=sandbox, min_mutation_score=0.9, max_additional_mutations=10)
+        gate = MutationTestGate(
+            sandbox=sandbox, min_mutation_score=0.9, max_additional_mutations=10
+        )
         assert gate.min_mutation_score == 0.9
         assert gate.max_additional_mutations == 10
 

@@ -87,7 +87,9 @@ class TestCommunityTierLineLimits:
         # Should not exceed 500 lines in context
         if result.expanded_context:
             lines = result.expanded_context.count("\n")
-            assert lines <= 500, f"Community tier exceeded 500-line limit: {lines} lines"
+            assert (
+                lines <= 500
+            ), f"Community tier exceeded 500-line limit: {lines} lines"
 
 
 class TestCommunityTierSecurityIssues:
@@ -139,7 +141,9 @@ class TestCommunityTierNoProFeatures:
         )
 
         # Community tier should have empty or no code_smells
-        assert not result.code_smells or result.code_smells == [], "Community tier should not return code_smells"
+        assert (
+            not result.code_smells or result.code_smells == []
+        ), "Community tier should not return code_smells"
 
     def test_doc_coverage_empty_for_community(self, temp_python_project):
         """Community tier should NOT include doc_coverage (Pro feature)."""
@@ -153,7 +157,9 @@ class TestCommunityTierNoProFeatures:
         )
 
         # Community tier should not have doc_coverage
-        assert result.doc_coverage is None, "Community tier should not return doc_coverage"
+        assert (
+            result.doc_coverage is None
+        ), "Community tier should not return doc_coverage"
 
     def test_maintainability_index_empty_for_community(self, temp_python_project):
         """Community tier should NOT include maintainability_index (Pro feature)."""
@@ -167,7 +173,9 @@ class TestCommunityTierNoProFeatures:
         )
 
         # Community tier should not have maintainability_index
-        assert result.maintainability_index is None, "Community tier should not return maintainability_index"
+        assert (
+            result.maintainability_index is None
+        ), "Community tier should not return maintainability_index"
 
 
 class TestCommunityTierNoEnterpriseFeatures:
@@ -217,7 +225,9 @@ class TestCommunityTierNoEnterpriseFeatures:
         )
 
         # Community tier should have empty owners
-        assert not result.owners or result.owners == [], "Community tier should not return owners"
+        assert (
+            not result.owners or result.owners == []
+        ), "Community tier should not return owners"
 
     def test_technical_debt_score_empty_for_community(self, temp_python_project):
         """Community tier should NOT include technical_debt_score (Enterprise feature)."""
@@ -231,7 +241,9 @@ class TestCommunityTierNoEnterpriseFeatures:
         )
 
         # Community tier should not have technical_debt_score
-        assert result.technical_debt_score is None, "Community tier should not return technical_debt_score"
+        assert (
+            result.technical_debt_score is None
+        ), "Community tier should not return technical_debt_score"
 
 
 class TestCommunityTierErrorHandling:

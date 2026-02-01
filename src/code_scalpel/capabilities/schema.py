@@ -162,12 +162,17 @@ class CapabilityEnvelope:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> CapabilityEnvelope:
         """Create CapabilityEnvelope from a dictionary."""
-        capabilities = {tool_id: Capability.from_dict(cap) for tool_id, cap in data.get("capabilities", {}).items()}
+        capabilities = {
+            tool_id: Capability.from_dict(cap)
+            for tool_id, cap in data.get("capabilities", {}).items()
+        }
 
         return cls(
             tier=data["tier"],
             tool_count=data.get("tool_count", len(capabilities)),
-            available_count=data.get("available_count", sum(1 for c in capabilities.values() if c.available)),
+            available_count=data.get(
+                "available_count", sum(1 for c in capabilities.values() if c.available)
+            ),
             capabilities=capabilities,
             generated_at=data.get("generated_at"),
         )
@@ -178,7 +183,9 @@ class CapabilityEnvelope:
             "tier": self.tier,
             "tool_count": self.tool_count,
             "available_count": self.available_count,
-            "capabilities": {tool_id: cap.to_dict() for tool_id, cap in self.capabilities.items()},
+            "capabilities": {
+                tool_id: cap.to_dict() for tool_id, cap in self.capabilities.items()
+            },
             "generated_at": self.generated_at,
         }
 

@@ -62,7 +62,9 @@ class GitHistoryAnalyzer:
             if result.returncode != 0:
                 return None
 
-            tag_name = result.stdout.strip().split("-")[0]  # Handle "v1.0.0-5-gabcdef" format
+            tag_name = result.stdout.strip().split("-")[
+                0
+            ]  # Handle "v1.0.0-5-gabcdef" format
 
             # Get commit hash for tag
             commit_result = subprocess.run(

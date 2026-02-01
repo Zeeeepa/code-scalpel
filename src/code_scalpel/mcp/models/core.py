@@ -14,7 +14,9 @@ class FunctionInfo(BaseModel):
 
     name: str = Field(description="Function name")
     lineno: int = Field(description="Line number where function starts")
-    end_lineno: int | None = Field(default=None, description="Line number where function ends")
+    end_lineno: int | None = Field(
+        default=None, description="Line number where function ends"
+    )
     is_async: bool = Field(default=False, description="Whether function is async")
 
 
@@ -23,8 +25,12 @@ class ClassInfo(BaseModel):
 
     name: str = Field(description="Class name")
     lineno: int = Field(description="Line number where class starts")
-    end_lineno: int | None = Field(default=None, description="Line number where class ends")
-    methods: list[str] = Field(default_factory=list, description="Method names in class")
+    end_lineno: int | None = Field(
+        default=None, description="Line number where class ends"
+    )
+    methods: list[str] = Field(
+        default_factory=list, description="Method names in class"
+    )
 
 
 class AnalysisResult(BaseModel):
@@ -50,7 +56,9 @@ class AnalysisResult(BaseModel):
     function_details: list[FunctionInfo] = Field(
         default_factory=list, description="Detailed function info with line numbers"
     )
-    class_details: list[ClassInfo] = Field(default_factory=list, description="Detailed class info with line numbers")
+    class_details: list[ClassInfo] = Field(
+        default_factory=list, description="Detailed class info with line numbers"
+    )
     # [20251229_FEATURE] v3.3.0: Tier-gated advanced metrics
     cognitive_complexity: int = Field(
         default=0,
@@ -189,10 +197,16 @@ class SecurityResult(BaseModel):
     has_vulnerabilities: bool = Field(description="Whether vulnerabilities were found")
     vulnerability_count: int = Field(description="Number of vulnerabilities")
     risk_level: str = Field(description="Overall risk level")
-    vulnerabilities: list[VulnerabilityInfo] = Field(default_factory=list, description="List of vulnerabilities")
-    taint_sources: list[str] = Field(default_factory=list, description="Identified taint sources")
+    vulnerabilities: list[VulnerabilityInfo] = Field(
+        default_factory=list, description="List of vulnerabilities"
+    )
+    taint_sources: list[str] = Field(
+        default_factory=list, description="Identified taint sources"
+    )
     # [20251226_FEATURE] Tier-aware optional security outputs for Pro/Enterprise
-    sanitizer_paths: list[str] | None = Field(default=None, description="Detected sanitizer usages (Pro/Enterprise)")
+    sanitizer_paths: list[str] | None = Field(
+        default=None, description="Detected sanitizer usages (Pro/Enterprise)"
+    )
     confidence_scores: dict[str, float] | None = Field(
         default=None, description="Heuristic confidence scores per finding"
     )
@@ -231,7 +245,9 @@ class UnifiedDetectedSink(BaseModel):
     """Detected sink with confidence and OWASP mapping."""
 
     # [20260110_FEATURE] v1.0 - Stable identifier for correlation across runs
-    sink_id: str = Field(description="Stable sink identifier (for correlation across runs)")
+    sink_id: str = Field(
+        description="Stable sink identifier (for correlation across runs)"
+    )
 
     pattern: str = Field(description="Sink pattern matched")
     sink_type: str = Field(description="Sink type classification")
@@ -240,12 +256,22 @@ class UnifiedDetectedSink(BaseModel):
     column: int = Field(default=0, description="Column offset of sink occurrence")
     code_snippet: str = Field(default="", description="Snippet around the sink")
     # [20260110_FEATURE] v1.0 - Snippet truncation observability
-    code_snippet_truncated: bool = Field(default=False, description="Whether code_snippet was truncated")
-    code_snippet_original_len: int | None = Field(default=None, description="Original snippet length before truncation")
-    vulnerability_type: str | None = Field(default=None, description="Vulnerability category key")
-    owasp_category: str | None = Field(default=None, description="Mapped OWASP Top 10 category")
+    code_snippet_truncated: bool = Field(
+        default=False, description="Whether code_snippet was truncated"
+    )
+    code_snippet_original_len: int | None = Field(
+        default=None, description="Original snippet length before truncation"
+    )
+    vulnerability_type: str | None = Field(
+        default=None, description="Vulnerability category key"
+    )
+    owasp_category: str | None = Field(
+        default=None, description="Mapped OWASP Top 10 category"
+    )
     # [20251231_FEATURE] v1.0 - Added CWE mapping
-    cwe_id: str | None = Field(default=None, description="CWE identifier (e.g., CWE-89)")
+    cwe_id: str | None = Field(
+        default=None, description="CWE identifier (e.g., CWE-89)"
+    )
 
 
 class UnifiedSinkResult(BaseModel):
@@ -253,12 +279,18 @@ class UnifiedSinkResult(BaseModel):
 
     success: bool = Field(description="Whether detection succeeded")
     # [20260110_FEATURE] v1.0 - Machine-readable failures
-    error_code: str | None = Field(default=None, description="Machine-readable error code")
+    error_code: str | None = Field(
+        default=None, description="Machine-readable error code"
+    )
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     language: str = Field(description="Language analyzed")
     sink_count: int = Field(description="Number of sinks detected")
-    sinks: list[UnifiedDetectedSink] = Field(default_factory=list, description="Detected sinks meeting threshold")
-    coverage_summary: dict[str, Any] = Field(default_factory=dict, description="Summary of sink pattern coverage")
+    sinks: list[UnifiedDetectedSink] = Field(
+        default_factory=list, description="Detected sinks meeting threshold"
+    )
+    coverage_summary: dict[str, Any] = Field(
+        default_factory=dict, description="Summary of sink pattern coverage"
+    )
     # [20251225_FEATURE] Tier-specific outputs for Pro/Enterprise
     logic_sinks: list[dict[str, Any]] = Field(
         default_factory=list,
@@ -281,7 +313,9 @@ class UnifiedSinkResult(BaseModel):
         default_factory=list, description="Enterprise custom sink pattern matches"
     )
     # [20251231_FEATURE] v1.0 - New fields for roadmap compliance
-    context_analysis: dict[str, Any] | None = Field(default=None, description="[Pro] Context-aware detection results")
+    context_analysis: dict[str, Any] | None = Field(
+        default=None, description="[Pro] Context-aware detection results"
+    )
     framework_sinks: list[dict[str, Any]] = Field(
         default_factory=list, description="[Pro] Framework-specific sink detections"
     )
@@ -298,9 +332,15 @@ class UnifiedSinkResult(BaseModel):
     )
 
     # [20260110_FEATURE] v1.0 - Limit observability (populated when applicable)
-    truncated: bool | None = Field(default=None, description="Whether results were truncated")
-    sinks_detected: int | None = Field(default=None, description="Total sinks detected before truncation")
-    max_sinks_applied: int | None = Field(default=None, description="max_sinks limit applied to this response")
+    truncated: bool | None = Field(
+        default=None, description="Whether results were truncated"
+    )
+    sinks_detected: int | None = Field(
+        default=None, description="Total sinks detected before truncation"
+    )
+    max_sinks_applied: int | None = Field(
+        default=None, description="max_sinks limit applied to this response"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -317,7 +357,9 @@ class ExecutionPath(BaseModel):
     path_id: int = Field(description="Unique path identifier")
     conditions: list[str] = Field(description="Conditions along the path")
     final_state: dict[str, Any] = Field(description="Variable values at path end")
-    reproduction_input: dict[str, Any] | None = Field(default=None, description="Input values that trigger this path")
+    reproduction_input: dict[str, Any] | None = Field(
+        default=None, description="Input values that trigger this path"
+    )
     is_reachable: bool = Field(description="Whether path is reachable")
 
 
@@ -331,8 +373,12 @@ class SymbolicResult(BaseModel):
         default_factory=list,
         description="Discovered execution paths (may be limited by configuration)",
     )
-    symbolic_variables: list[str] = Field(default_factory=list, description="Variables treated symbolically")
-    constraints: list[str] = Field(default_factory=list, description="Discovered constraints")
+    symbolic_variables: list[str] = Field(
+        default_factory=list, description="Variables treated symbolically"
+    )
+    constraints: list[str] = Field(
+        default_factory=list, description="Discovered constraints"
+    )
     total_paths: int | None = Field(
         default=None,
         description="Total paths discovered before limiting (if known)",
@@ -355,7 +401,9 @@ class SymbolicResult(BaseModel):
     state_space_analysis: dict[str, Any] | None = Field(
         default=None, description="State space reduction analysis (Enterprise)"
     )
-    memory_model: dict[str, Any] | None = Field(default=None, description="Memory modeling results (Enterprise)")
+    memory_model: dict[str, Any] | None = Field(
+        default=None, description="Memory modeling results (Enterprise)"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -366,7 +414,9 @@ class GeneratedTestCase(BaseModel):
     function_name: str = Field(description="Function being tested")
     inputs: dict[str, Any] = Field(description="Input values for this test")
     description: str = Field(description="Human-readable description")
-    path_conditions: list[str] = Field(default_factory=list, description="Conditions that define this path")
+    path_conditions: list[str] = Field(
+        default_factory=list, description="Conditions that define this path"
+    )
 
 
 class TestGenerationResult(BaseModel):
@@ -376,11 +426,17 @@ class TestGenerationResult(BaseModel):
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     function_name: str = Field(description="Function tests were generated for")
     test_count: int = Field(description="Number of test cases generated")
-    test_cases: list[GeneratedTestCase] = Field(default_factory=list, description="Generated test cases")
+    test_cases: list[GeneratedTestCase] = Field(
+        default_factory=list, description="Generated test cases"
+    )
     # [20251225_FEATURE] Tier-aware truncation metadata (neutral messaging).
-    total_test_cases: int = Field(default=0, description="Total test cases before truncation")
+    total_test_cases: int = Field(
+        default=0, description="Total test cases before truncation"
+    )
     truncated: bool = Field(default=False, description="Whether results were truncated")
-    truncation_warning: str | None = Field(default=None, description="Neutral warning when truncation occurs")
+    truncation_warning: str | None = Field(
+        default=None, description="Neutral warning when truncation occurs"
+    )
     pytest_code: str = Field(default="", description="Generated pytest code")
     unittest_code: str = Field(default="", description="Generated unittest code")
     error: str | None = Field(default=None, description="Error message if failed")
@@ -426,8 +482,12 @@ class RefactorSimulationResult(BaseModel):
     is_safe: bool = Field(description="Whether the refactor is safe to apply")
     status: str = Field(description="Status: safe, unsafe, warning, or error")
     reason: str | None = Field(default=None, description="Reason if not safe")
-    security_issues: list[RefactorSecurityIssue] = Field(default_factory=list, description="Security issues found")
-    structural_changes: dict[str, Any] = Field(default_factory=dict, description="Functions/classes added/removed")
+    security_issues: list[RefactorSecurityIssue] = Field(
+        default_factory=list, description="Security issues found"
+    )
+    structural_changes: dict[str, Any] = Field(
+        default_factory=dict, description="Functions/classes added/removed"
+    )
     warnings: list[str] = Field(default_factory=list, description="Warnings")
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -445,7 +505,9 @@ class CrawlClassInfo(BaseModel):
 
     name: str = Field(description="Class name")
     lineno: int = Field(description="Line number")
-    methods: list[CrawlFunctionInfo] = Field(default_factory=list, description="Methods in the class")
+    methods: list[CrawlFunctionInfo] = Field(
+        default_factory=list, description="Methods in the class"
+    )
     bases: list[str] = Field(default_factory=list, description="Base classes")
 
 
@@ -455,10 +517,16 @@ class CrawlFileResult(BaseModel):
     path: str = Field(description="Relative path to the file")
     status: str = Field(description="success or error")
     lines_of_code: int = Field(default=0, description="Lines of code")
-    functions: list[CrawlFunctionInfo] = Field(default_factory=list, description="Top-level functions")
-    classes: list[CrawlClassInfo] = Field(default_factory=list, description="Classes found")
+    functions: list[CrawlFunctionInfo] = Field(
+        default_factory=list, description="Top-level functions"
+    )
+    classes: list[CrawlClassInfo] = Field(
+        default_factory=list, description="Classes found"
+    )
     imports: list[str] = Field(default_factory=list, description="Import statements")
-    complexity_warnings: list[CrawlFunctionInfo] = Field(default_factory=list, description="High-complexity functions")
+    complexity_warnings: list[CrawlFunctionInfo] = Field(
+        default_factory=list, description="High-complexity functions"
+    )
     error: str | None = Field(default=None, description="Error if failed")
 
 
@@ -492,8 +560,12 @@ class ProjectCrawlResult(BaseModel):
     root_path: str = Field(description="Project root path")
     timestamp: str = Field(description="When the crawl was performed")
     summary: CrawlSummary = Field(description="Summary statistics")
-    files: list[CrawlFileResult] = Field(default_factory=list, description="Analyzed files")
-    errors: list[CrawlFileResult] = Field(default_factory=list, description="Files with errors")
+    files: list[CrawlFileResult] = Field(
+        default_factory=list, description="Analyzed files"
+    )
+    errors: list[CrawlFileResult] = Field(
+        default_factory=list, description="Files with errors"
+    )
     markdown_report: str = Field(default="", description="Markdown report")
     error: str | None = Field(default=None, description="Error if failed")
     # [20260106_FEATURE] v1.0 pre-release - Output transparency metadata
@@ -509,7 +581,9 @@ class ProjectCrawlResult(BaseModel):
         default=None, description="Max files limit that was applied (None = unlimited)"
     )
     # Tier-gated fields (best-effort, optional)
-    language_breakdown: dict[str, int] | None = Field(default=None, description="Counts of files per detected language")
+    language_breakdown: dict[str, int] | None = Field(
+        default=None, description="Counts of files per detected language"
+    )
     cache_hits: int | None = Field(
         default=None,
         description="Number of files reused from cache (Pro/Enterprise incremental)",
@@ -520,7 +594,9 @@ class ProjectCrawlResult(BaseModel):
     framework_hints: list[str] | None = Field(
         default=None, description="Detected frameworks/entrypoints in discovery mode"
     )
-    entrypoints: list[str] | None = Field(default=None, description="Detected entrypoint file paths")
+    entrypoints: list[str] | None = Field(
+        default=None, description="Detected entrypoint file paths"
+    )
 
 
 class SurgicalExtractionResult(BaseModel):
@@ -533,8 +609,12 @@ class SurgicalExtractionResult(BaseModel):
     node_type: str = Field(description="Type: function, class, or method")
     line_start: int = Field(default=0, description="Starting line number")
     line_end: int = Field(default=0, description="Ending line number")
-    dependencies: list[str] = Field(default_factory=list, description="Names of dependencies")
-    imports_needed: list[str] = Field(default_factory=list, description="Required import statements")
+    dependencies: list[str] = Field(
+        default_factory=list, description="Names of dependencies"
+    )
+    imports_needed: list[str] = Field(
+        default_factory=list, description="Required import statements"
+    )
     token_estimate: int = Field(default=0, description="Estimated token count")
     error: str | None = Field(default=None, description="Error if failed")
 
@@ -558,7 +638,9 @@ class ContextualExtractionResult(BaseModel):
     target_code: str = Field(description="Target element source code")
     context_code: str = Field(description="Combined dependency source code")
     full_code: str = Field(description="Complete code block for LLM consumption")
-    context_items: list[str] = Field(default_factory=list, description="Names of included dependencies")
+    context_items: list[str] = Field(
+        default_factory=list, description="Names of included dependencies"
+    )
     total_lines: int = Field(default=0, description="Total lines in extraction")
     # v1.3.0: Line number information
     line_start: int = Field(default=0, description="Starting line number of target")
@@ -585,16 +667,26 @@ class ContextualExtractionResult(BaseModel):
     )
 
     # [20251216_FEATURE] v2.0.2 - JSX/TSX extraction metadata
-    jsx_normalized: bool = Field(default=False, description="Whether JSX syntax was normalized")
-    is_server_component: bool = Field(default=False, description="Next.js Server Component (async)")
-    is_server_action: bool = Field(default=False, description="Next.js Server Action ('use server')")
-    component_type: str | None = Field(default=None, description="React component type: 'functional', 'class', or None")
+    jsx_normalized: bool = Field(
+        default=False, description="Whether JSX syntax was normalized"
+    )
+    is_server_component: bool = Field(
+        default=False, description="Next.js Server Component (async)"
+    )
+    is_server_action: bool = Field(
+        default=False, description="Next.js Server Action ('use server')"
+    )
+    component_type: str | None = Field(
+        default=None, description="React component type: 'functional', 'class', or None"
+    )
     # [20260103_FEATURE] v3.3.1 - Warnings field for tier-aware behavior messaging
     warnings: list[str] = Field(
         default_factory=list,
         description="Non-fatal warnings (e.g., tier-aware context depth clamping)",
     )
-    advanced: dict[str, Any] = Field(default_factory=dict, description="Tier-specific or experimental metadata")
+    advanced: dict[str, Any] = Field(
+        default_factory=dict, description="Tier-specific or experimental metadata"
+    )
 
 
 class PatchResultModel(BaseModel):
@@ -610,13 +702,23 @@ class PatchResultModel(BaseModel):
     lines_delta: int = Field(default=0, description="Change in line count")
     backup_path: str | None = Field(default=None, description="Path to backup file")
     # [20260110_FEATURE] Machine-readable failure signaling for minimal output profiles.
-    error_code: str | None = Field(default=None, description="Machine-readable error code if failed")
-    hint: str | None = Field(default=None, description="Actionable hint to remediate failure")
+    error_code: str | None = Field(
+        default=None, description="Machine-readable error code if failed"
+    )
+    hint: str | None = Field(
+        default=None, description="Actionable hint to remediate failure"
+    )
     # [20260121_REFACTOR] Switched to per-call throughput model; removed session state fields
     # Batch operations report aggregate results and truncation warnings instead of session counts
-    max_updates_per_call: int | None = Field(default=None, description="Per-call throughput cap applied for this tier")
-    updates_in_batch: int | None = Field(default=None, description="Number of updates in this batch (for batch calls)")
-    batch_truncated: bool = Field(default=False, description="True if batch was truncated due to per-call limit")
+    max_updates_per_call: int | None = Field(
+        default=None, description="Per-call throughput cap applied for this tier"
+    )
+    updates_in_batch: int | None = Field(
+        default=None, description="Number of updates in this batch (for batch calls)"
+    )
+    batch_truncated: bool = Field(
+        default=False, description="True if batch was truncated due to per-call limit"
+    )
     # [20251225_FEATURE] Optional warnings for tier-aware behavior (neutral messaging).
     warnings: list[str] = Field(
         default_factory=list,
@@ -659,18 +761,34 @@ class FileContextResult(BaseModel):
     file_path: str = Field(description="Path to the analyzed file")
     language: str = Field(default="python", description="Detected language")
     line_count: int = Field(description="Total lines in file")
-    functions: list[FunctionInfo | str] = Field(default_factory=list, description="Function names or detailed info")
-    classes: list[ClassInfo | str] = Field(default_factory=list, description="Class names or detailed info")
-    imports: list[str] = Field(default_factory=list, description="Import statements (max 20)")
-    exports: list[str] = Field(default_factory=list, description="Exported symbols (__all__)")
-    complexity_score: int = Field(default=0, description="Overall cyclomatic complexity")
-    has_security_issues: bool = Field(default=False, description="Whether file has security issues")
+    functions: list[FunctionInfo | str] = Field(
+        default_factory=list, description="Function names or detailed info"
+    )
+    classes: list[ClassInfo | str] = Field(
+        default_factory=list, description="Class names or detailed info"
+    )
+    imports: list[str] = Field(
+        default_factory=list, description="Import statements (max 20)"
+    )
+    exports: list[str] = Field(
+        default_factory=list, description="Exported symbols (__all__)"
+    )
+    complexity_score: int = Field(
+        default=0, description="Overall cyclomatic complexity"
+    )
+    has_security_issues: bool = Field(
+        default=False, description="Whether file has security issues"
+    )
     summary: str = Field(default="", description="Brief description of file purpose")
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    imports_truncated: bool = Field(default=False, description="Whether imports list was truncated")
+    imports_truncated: bool = Field(
+        default=False, description="Whether imports list was truncated"
+    )
     total_imports: int = Field(default=0, description="Total imports before truncation")
     # [20251225_FEATURE] v3.3.0 - Tiered enrichments and safeguards
-    semantic_summary: str | None = Field(default=None, description="AI-lite semantic summary when enabled")
+    semantic_summary: str | None = Field(
+        default=None, description="AI-lite semantic summary when enabled"
+    )
     intent_tags: list[str] = Field(
         default_factory=list,
         description="Extracted intents/topics from docstrings/names",
@@ -682,10 +800,18 @@ class FileContextResult(BaseModel):
     expanded_context: str | None = Field(
         default=None, description="Smartly expanded context when allowed by tier limits"
     )
-    pii_redacted: bool = Field(default=False, description="Whether PII content was redacted")
-    secrets_masked: bool = Field(default=False, description="Whether secrets/API keys were masked")
-    redaction_summary: list[str] = Field(default_factory=list, description="What redactions/masking actions were taken")
-    access_controlled: bool = Field(default=False, description="Whether RBAC/file access controls were applied")
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII content was redacted"
+    )
+    secrets_masked: bool = Field(
+        default=False, description="Whether secrets/API keys were masked"
+    )
+    redaction_summary: list[str] = Field(
+        default_factory=list, description="What redactions/masking actions were taken"
+    )
+    access_controlled: bool = Field(
+        default=False, description="Whether RBAC/file access controls were applied"
+    )
     # [20251231_FEATURE] v3.3.1 - Pro tier: code quality metrics
     code_smells: list[dict[str, Any]] = Field(
         default_factory=list,
@@ -730,7 +856,9 @@ class SymbolReference(BaseModel):
     line: int = Field(description="Line number of the reference")
     column: int = Field(default=0, description="Column number")
     context: str = Field(description="Code snippet showing usage context")
-    is_definition: bool = Field(default=False, description="Whether this is the definition")
+    is_definition: bool = Field(
+        default=False, description="Whether this is the definition"
+    )
     # [20251225_FEATURE] Tiered symbol references: optional metadata
     reference_type: str | None = Field(
         default=None,
@@ -775,27 +903,55 @@ class SymbolReferencesResult(BaseModel):
     )
 
     symbol_name: str = Field(description="Name of the searched symbol")
-    definition_file: str | None = Field(default=None, description="File where symbol is defined")
-    definition_line: int | None = Field(default=None, description="Line where symbol is defined")
-    references: list[SymbolReference] = Field(default_factory=list, description="References found (max 100)")
-    total_references: int = Field(default=0, description="Total reference count before truncation")
+    definition_file: str | None = Field(
+        default=None, description="File where symbol is defined"
+    )
+    definition_line: int | None = Field(
+        default=None, description="Line where symbol is defined"
+    )
+    references: list[SymbolReference] = Field(
+        default_factory=list, description="References found (max 100)"
+    )
+    total_references: int = Field(
+        default=0, description="Total reference count before truncation"
+    )
     # [20251225_FEATURE] Tiered symbol references: scan metadata
     files_scanned: int = Field(default=0, description="Number of files scanned")
-    total_files: int = Field(default=0, description="Total candidate files before filtering")
-    files_truncated: bool = Field(default=False, description="Whether file scanning was truncated")
-    file_truncation_warning: str | None = Field(default=None, description="Warning if file scan was truncated")
-    category_counts: dict[str, int] | None = Field(default=None, description="Counts by reference category (Pro+)")
-    owner_counts: dict[str, int] | None = Field(default=None, description="Counts by CODEOWNERS owner (Enterprise)")
-    change_risk: str | None = Field(default=None, description="Heuristic change risk (Enterprise)")
+    total_files: int = Field(
+        default=0, description="Total candidate files before filtering"
+    )
+    files_truncated: bool = Field(
+        default=False, description="Whether file scanning was truncated"
+    )
+    file_truncation_warning: str | None = Field(
+        default=None, description="Warning if file scan was truncated"
+    )
+    category_counts: dict[str, int] | None = Field(
+        default=None, description="Counts by reference category (Pro+)"
+    )
+    owner_counts: dict[str, int] | None = Field(
+        default=None, description="Counts by CODEOWNERS owner (Enterprise)"
+    )
+    change_risk: str | None = Field(
+        default=None, description="Heuristic change risk (Enterprise)"
+    )
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    references_truncated: bool = Field(default=False, description="Whether references list was truncated")
-    truncation_warning: str | None = Field(default=None, description="Warning if results truncated")
+    references_truncated: bool = Field(
+        default=False, description="Whether references list was truncated"
+    )
+    truncation_warning: str | None = Field(
+        default=None, description="Warning if results truncated"
+    )
     # [20251226_FEATURE] Enterprise tier: Impact analysis fields
-    risk_score: int | None = Field(default=None, description="Weighted risk score 0-100 (Enterprise)")
+    risk_score: int | None = Field(
+        default=None, description="Weighted risk score 0-100 (Enterprise)"
+    )
     risk_factors: list[str] | None = Field(
         default=None, description="List of factors contributing to risk (Enterprise)"
     )
-    blast_radius: int | None = Field(default=None, description="Number of unique files affected (Enterprise)")
+    blast_radius: int | None = Field(
+        default=None, description="Number of unique files affected (Enterprise)"
+    )
     test_coverage_ratio: float | None = Field(
         default=None, description="Ratio of references in test files (Enterprise)"
     )

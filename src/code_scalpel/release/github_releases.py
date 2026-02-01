@@ -39,18 +39,23 @@ class GitHubReleaseManager:
         """
         if Github is None:
             raise ImportError(
-                "PyGithub is required for GitHub release automation. " "Install with: pip install PyGithub"
+                "PyGithub is required for GitHub release automation. "
+                "Install with: pip install PyGithub"
             )
 
         self.token = token or os.environ.get("GITHUB_TOKEN")
         if not self.token:
             raise ValueError(
-                "GitHub token required. Pass 'token' argument or set GITHUB_TOKEN " "environment variable."
+                "GitHub token required. Pass 'token' argument or set GITHUB_TOKEN "
+                "environment variable."
             )
 
         self.repo_url = repo_url or self._get_origin_repo_url()
         if not self.repo_url:
-            raise ValueError("Repository URL required. Pass 'repo_url' argument or ensure " "git origin remote is set.")
+            raise ValueError(
+                "Repository URL required. Pass 'repo_url' argument or ensure "
+                "git origin remote is set."
+            )
 
         # Normalize repo URL to owner/repo format
         self.repo_url = self._normalize_repo_url(self.repo_url)
@@ -208,7 +213,9 @@ class GitHubReleaseManager:
         except Exception as e:
             raise RuntimeError(f"Failed to upload asset: {str(e)}") from e
 
-    def upload_assets(self, release_tag: str, asset_paths: list[str]) -> list[dict[str, str]]:
+    def upload_assets(
+        self, release_tag: str, asset_paths: list[str]
+    ) -> list[dict[str, str]]:
         """Upload multiple assets to a release.
 
         Args:

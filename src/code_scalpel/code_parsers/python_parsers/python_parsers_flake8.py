@@ -818,10 +818,15 @@ class Flake8Report:
             "error_count": self.error_count,
             "warning_count": self.warning_count,
             "files_with_issues": len(self.violations_by_file),
-            "by_source": {source: len(violations) for source, violations in self.violations_by_source.items()},
+            "by_source": {
+                source: len(violations)
+                for source, violations in self.violations_by_source.items()
+            },
             "top_violations": [
                 {"code": code, "count": len(violations)}
-                for code, violations in sorted(self.violations_by_code.items(), key=lambda x: -len(x[1]))[:10]
+                for code, violations in sorted(
+                    self.violations_by_code.items(), key=lambda x: -len(x[1])
+                )[:10]
             ],
         }
 
@@ -1063,7 +1068,10 @@ class Flake8Parser:
         )
 
         # Check if flake8-json is installed
-        has_json_plugin = any(p.name == "flake8-json" or p.name == "flake8_json" for p in self.installed_plugins)
+        has_json_plugin = any(
+            p.name == "flake8-json" or p.name == "flake8_json"
+            for p in self.installed_plugins
+        )
 
         # Build targets list
         if isinstance(target, (str, Path)):
@@ -1100,7 +1108,9 @@ class Flake8Parser:
                             for v_data in violations:
                                 # Ensure filename is set
                                 v_data["filename"] = filename
-                                report.violations.append(Flake8Violation.from_dict(v_data))
+                                report.violations.append(
+                                    Flake8Violation.from_dict(v_data)
+                                )
                     except json.JSONDecodeError as e:
                         report.errors.append(f"Failed to parse JSON output: {e}")
                         # Fall back to text parsing
@@ -1119,7 +1129,8 @@ class Flake8Parser:
         else:
             # Fall back to text format with warning
             report.errors.append(
-                "flake8-json plugin not installed. " "Using text output format. Install with: pip install flake8-json"
+                "flake8-json plugin not installed. "
+                "Using text output format. Install with: pip install flake8-json"
             )
             return self.analyze(target, config=config)
 

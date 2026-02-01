@@ -32,7 +32,9 @@ class JavaScriptParserAdapter(IParser):
     def __init__(self):
         """Initialize the JavaScript parser adapter."""
         if not JAVASCRIPT_PARSER_AVAILABLE or EsprimaParser is None:
-            raise ImportError("JavaScriptParser not available. Install esprima: pip install esprima")
+            raise ImportError(
+                "JavaScriptParser not available. Install esprima: pip install esprima"
+            )
         # Note: JavaScriptParser has an abstract method (parse_code) but we only use
         # its internal _parse_javascript method, so this is safe at runtime
         self._parser: Any = EsprimaParser()  # type: ignore[abstract]
@@ -121,7 +123,9 @@ class JavaScriptParserAdapter(IParser):
         if hasattr(self._parser, "extract_functions"):
             try:
                 funcs = self._parser.extract_functions(ast)
-                self._last_functions = [f.name for f in funcs if f.name and f.name != "<anonymous>"]
+                self._last_functions = [
+                    f.name for f in funcs if f.name and f.name != "<anonymous>"
+                ]
             except Exception:
                 pass
 
@@ -272,10 +276,14 @@ class TypeScriptParserAdapter(JavaScriptParserAdapter):
             code,
             flags=re.MULTILINE,
         )
-        code = re.sub(r"^\s*(?:export\s+)?type\s+\w+\s*=\s*[^;]+;", "", code, flags=re.MULTILINE)
+        code = re.sub(
+            r"^\s*(?:export\s+)?type\s+\w+\s*=\s*[^;]+;", "", code, flags=re.MULTILINE
+        )
 
         # Remove : Type from parameters and return types (very basic)
-        code = re.sub(r":\s*\w+(?:\[\])?(?:\s*\|\s*\w+(?:\[\])?)*(?=\s*[,)=\{])", "", code)
+        code = re.sub(
+            r":\s*\w+(?:\[\])?(?:\s*\|\s*\w+(?:\[\])?)*(?=\s*[,)=\{])", "", code
+        )
 
         # Remove <T> generics (basic)
         code = re.sub(r"<\w+(?:\s*,\s*\w+)*>", "", code)

@@ -145,7 +145,12 @@ class SymbolExtractor:
         docstring = ast.get_docstring(node)
 
         # Build signature string
-        params_str = ", ".join([f"{p['name']}: {p.get('type', '')}" if p.get("type") else p["name"] for p in params])
+        params_str = ", ".join(
+            [
+                f"{p['name']}: {p.get('type', '')}" if p.get("type") else p["name"]
+                for p in params
+            ]
+        )
         return_str = f" -> {return_type}" if return_type else ""
         signature = f"def {node.name}({params_str}){return_str}"
 

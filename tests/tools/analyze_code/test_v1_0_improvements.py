@@ -99,7 +99,9 @@ class TestOutputMetadata:
 
     def test_java_analysis_populates_language_detected(self):
         """Java analysis should populate language_detected field."""
-        code = "public class Calculator { public int calculate(int x) { return x * 2; } }"
+        code = (
+            "public class Calculator { public int calculate(int x) { return x * 2; } }"
+        )
         result = _analyze_code_sync(code=code, language="java")
 
         assert result.success is True
@@ -133,16 +135,24 @@ class TestConfigurationAlignment:
         import tomli
 
         # Load limits.toml
-        limits_path = Path(__file__).parent.parent.parent.parent / ".code-scalpel" / "limits.toml"
+        limits_path = (
+            Path(__file__).parent.parent.parent.parent / ".code-scalpel" / "limits.toml"
+        )
         with open(limits_path, "rb") as f:
             limits = tomli.load(f)
 
         # Check Pro tier languages
-        pro_langs = set(limits.get("pro", {}).get("analyze_code", {}).get("languages", []))
+        pro_langs = set(
+            limits.get("pro", {}).get("analyze_code", {}).get("languages", [])
+        )
 
         # Should NOT contain go or rust
-        assert "go" not in pro_langs, "Pro tier should not advertise Go until implemented"
-        assert "rust" not in pro_langs, "Pro tier should not advertise Rust until implemented"
+        assert (
+            "go" not in pro_langs
+        ), "Pro tier should not advertise Go until implemented"
+        assert (
+            "rust" not in pro_langs
+        ), "Pro tier should not advertise Rust until implemented"
 
         # Should only contain implemented languages
         assert pro_langs == {"python", "javascript", "typescript", "java"}
@@ -153,11 +163,19 @@ class TestConfigurationAlignment:
 
         import tomli
 
-        limits_path = Path(__file__).parent.parent.parent.parent / ".code-scalpel" / "limits.toml"
+        limits_path = (
+            Path(__file__).parent.parent.parent.parent / ".code-scalpel" / "limits.toml"
+        )
         with open(limits_path, "rb") as f:
             limits = tomli.load(f)
 
-        community_langs = set(limits.get("community", {}).get("analyze_code", {}).get("languages", []))
-        pro_langs = set(limits.get("pro", {}).get("analyze_code", {}).get("languages", []))
+        community_langs = set(
+            limits.get("community", {}).get("analyze_code", {}).get("languages", [])
+        )
+        pro_langs = set(
+            limits.get("pro", {}).get("analyze_code", {}).get("languages", [])
+        )
 
-        assert community_langs == pro_langs, "Language support should be consistent across tiers"
+        assert (
+            community_langs == pro_langs
+        ), "Language support should be consistent across tiers"

@@ -68,7 +68,10 @@ PRO_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/pro.license.jwt"
 ENTERPRISE_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/enterprise.license.jwt"
 
 # Fallback to archive if tests/licenses doesn't have valid ones
-ARCHIVE_PRO_LICENSE = PROJECT_ROOT / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
+ARCHIVE_PRO_LICENSE = (
+    PROJECT_ROOT
+    / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
+)
 
 
 def _find_valid_license(tier: str) -> Path | None:
@@ -81,13 +84,15 @@ def _find_valid_license(tier: str) -> Path | None:
     if tier == "pro":
         candidates = [
             PRO_LICENSE_PATH,
-            PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
+            PROJECT_ROOT
+            / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
             ARCHIVE_PRO_LICENSE,
         ]
     elif tier == "enterprise":
         candidates = [
             ENTERPRISE_LICENSE_PATH,
-            PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
+            PROJECT_ROOT
+            / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
         ]
     else:
         return None
@@ -610,7 +615,9 @@ def assert_result_has_community_fields():
         ]
         for field_name in pro_fields:
             if field_name in result:
-                assert result[field_name] is None, f"Community tier should not expose {field_name}"
+                assert (
+                    result[field_name] is None
+                ), f"Community tier should not expose {field_name}"
 
         return True
 
@@ -645,7 +652,9 @@ def assert_result_has_pro_fields():
         ]
         for field_name in enterprise_fields:
             if field_name in result:
-                assert result[field_name] is None, f"Pro tier should not expose {field_name}"
+                assert (
+                    result[field_name] is None
+                ), f"Pro tier should not expose {field_name}"
 
         return True
 
@@ -677,7 +686,9 @@ def assert_result_has_enterprise_fields():
             "error",
         ]
         for field_name in all_fields:
-            assert field_name in result, f"Enterprise result missing field: {field_name}"
+            assert (
+                field_name in result
+            ), f"Enterprise result missing field: {field_name}"
 
         return True
 

@@ -318,11 +318,21 @@ class CodeQualityAnalyzer:
 
         # Count severities
         result.total_code_smells = len(result.code_smells)
-        result.critical_count = sum(1 for s in result.code_smells if s.severity == CodeSmellSeverity.CRITICAL)
-        result.high_count = sum(1 for s in result.code_smells if s.severity == CodeSmellSeverity.HIGH)
-        result.medium_count = sum(1 for s in result.code_smells if s.severity == CodeSmellSeverity.MEDIUM)
-        result.low_count = sum(1 for s in result.code_smells if s.severity == CodeSmellSeverity.LOW)
-        result.info_count = sum(1 for s in result.code_smells if s.severity == CodeSmellSeverity.INFO)
+        result.critical_count = sum(
+            1 for s in result.code_smells if s.severity == CodeSmellSeverity.CRITICAL
+        )
+        result.high_count = sum(
+            1 for s in result.code_smells if s.severity == CodeSmellSeverity.HIGH
+        )
+        result.medium_count = sum(
+            1 for s in result.code_smells if s.severity == CodeSmellSeverity.MEDIUM
+        )
+        result.low_count = sum(
+            1 for s in result.code_smells if s.severity == CodeSmellSeverity.LOW
+        )
+        result.info_count = sum(
+            1 for s in result.code_smells if s.severity == CodeSmellSeverity.INFO
+        )
 
         return result
 
@@ -478,7 +488,8 @@ class CodeQualityAnalyzer:
                                     message="Magic string detected - consider using a constant",
                                     line=i,
                                     column=match.start() + 1,
-                                    code_snippet=content[:30] + ("..." if len(content) > 30 else ""),
+                                    code_snippet=content[:30]
+                                    + ("..." if len(content) > 30 else ""),
                                     auto_fixable=True,
                                 )
                             )
@@ -538,7 +549,9 @@ class CodeQualityAnalyzer:
         smells: list[CodeSmell] = []
 
         # Pattern to match function parameters
-        func_pattern = re.compile(r"(?:function\s+\w+|(?:async\s+)?(?:function|\w+)\s*[=:]?\s*)\s*\(([^)]*)\)")
+        func_pattern = re.compile(
+            r"(?:function\s+\w+|(?:async\s+)?(?:function|\w+)\s*[=:]?\s*)\s*\(([^)]*)\)"
+        )
 
         for i, line in enumerate(lines, 1):
             for match in func_pattern.finditer(line):
@@ -616,11 +629,15 @@ class CodeQualityAnalyzer:
 
         return smells
 
-    def _detect_console_statements(self, code: str, lines: list[str]) -> list[CodeSmell]:
+    def _detect_console_statements(
+        self, code: str, lines: list[str]
+    ) -> list[CodeSmell]:
         """Detect console.log and debug statements."""
         smells: list[CodeSmell] = []
 
-        console_pattern = re.compile(r"console\.(log|debug|info|warn|error|trace|dir|table)\s*\(")
+        console_pattern = re.compile(
+            r"console\.(log|debug|info|warn|error|trace|dir|table)\s*\("
+        )
 
         for i, line in enumerate(lines, 1):
             # Skip comments
@@ -631,7 +648,11 @@ class CodeQualityAnalyzer:
             match = console_pattern.search(line)
             if match:
                 method = match.group(1)
-                severity = CodeSmellSeverity.LOW if method in ("error", "warn") else CodeSmellSeverity.INFO
+                severity = (
+                    CodeSmellSeverity.LOW
+                    if method in ("error", "warn")
+                    else CodeSmellSeverity.INFO
+                )
                 smells.append(
                     CodeSmell(
                         smell_type=CodeSmellType.CONSOLE_LOG,
@@ -686,7 +707,9 @@ class CodeQualityAnalyzer:
 
         return smells
 
-    def _detect_complex_conditions(self, code: str, lines: list[str]) -> list[CodeSmell]:
+    def _detect_complex_conditions(
+        self, code: str, lines: list[str]
+    ) -> list[CodeSmell]:
         """Detect overly complex boolean conditions."""
         smells: list[CodeSmell] = []
 
@@ -767,9 +790,15 @@ class CodeQualityAnalyzer:
                         message=message,
                         line=i,
                         author=(
-                            author_or_priority if author_or_priority and not author_or_priority.isdigit() else None
+                            author_or_priority
+                            if author_or_priority and not author_or_priority.isdigit()
+                            else None
                         ),
-                        priority=(author_or_priority if author_or_priority and author_or_priority.isdigit() else None),
+                        priority=(
+                            author_or_priority
+                            if author_or_priority and author_or_priority.isdigit()
+                            else None
+                        ),
                     )
                 )
 
@@ -852,7 +881,11 @@ class CodeQualityAnalyzer:
         commonjs_requires = len(re.findall(r'require\s*\([\'"]', code))
         commonjs_exports = len(re.findall(r"module\.exports|exports\.", code))
         es6_imports = len(re.findall(r'import\s+.+\s+from\s+[\'"]', code))
-        es6_exports = len(re.findall(r"export\s+(default\s+)?(?:const|let|var|function|class|{)", code))
+        es6_exports = len(
+            re.findall(
+                r"export\s+(default\s+)?(?:const|let|var|function|class|{)", code
+            )
+        )
         dynamic_imports = len(re.findall(r'import\s*\([\'"]', code))
 
         # Determine module type
@@ -877,7 +910,9 @@ class CodeQualityAnalyzer:
             dynamic_imports=dynamic_imports,
         )
 
-    def _detect_duplicate_blocks(self, code: str, lines: list[str]) -> list[DuplicateCodeBlock]:
+    def _detect_duplicate_blocks(
+        self, code: str, lines: list[str]
+    ) -> list[DuplicateCodeBlock]:
         """Detect duplicate code blocks using line hashing."""
         duplicates: list[DuplicateCodeBlock] = []
 
@@ -901,7 +936,10 @@ class CodeQualityAnalyzer:
             if start_idx + self.min_duplicate_lines > len(line_hashes):
                 break
 
-            sequence = tuple(h[1] for h in line_hashes[start_idx : start_idx + self.min_duplicate_lines])
+            sequence = tuple(
+                h[1]
+                for h in line_hashes[start_idx : start_idx + self.min_duplicate_lines]
+            )
             seq_hash = hashlib.sha256("".join(sequence).encode()).hexdigest()
 
             actual_line = line_hashes[start_idx][0] + 1  # 1-indexed
@@ -919,7 +957,10 @@ class CodeQualityAnalyzer:
                         hash_signature=seq_hash,
                         lines_start=line_starts,
                         # [20251222_BUGFIX] Avoid ambiguous variable name (E741).
-                        lines_end=[start_line + self.min_duplicate_lines - 1 for start_line in line_starts],
+                        lines_end=[
+                            start_line + self.min_duplicate_lines - 1
+                            for start_line in line_starts
+                        ],
                         line_count=self.min_duplicate_lines,
                         similarity=1.0,
                     )
@@ -964,7 +1005,9 @@ class CodeQualityAnalyzer:
             summary[key] = summary.get(key, 0) + 1
         return summary
 
-    def filter_by_severity(self, result: CodeQualityResult, min_severity: CodeSmellSeverity) -> list[CodeSmell]:
+    def filter_by_severity(
+        self, result: CodeQualityResult, min_severity: CodeSmellSeverity
+    ) -> list[CodeSmell]:
         """Filter code smells by minimum severity."""
         severity_order = [
             CodeSmellSeverity.INFO,
@@ -975,4 +1018,8 @@ class CodeQualityAnalyzer:
         ]
 
         min_idx = severity_order.index(min_severity)
-        return [smell for smell in result.code_smells if severity_order.index(smell.severity) >= min_idx]
+        return [
+            smell
+            for smell in result.code_smells
+            if severity_order.index(smell.severity) >= min_idx
+        ]

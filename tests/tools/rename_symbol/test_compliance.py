@@ -43,7 +43,9 @@ class TestComplianceBasics:
                 "source": "policy",
             }
         ]
-        result = ComplianceCheckResult(allowed=False, reason="Policy violation", violations=violations)
+        result = ComplianceCheckResult(
+            allowed=False, reason="Policy violation", violations=violations
+        )
         assert result.allowed is False
         assert result.reason == "Policy violation"
         assert len(result.violations) == 1
@@ -250,7 +252,9 @@ class TestComplianceErrorMessages:
 
     def test_error_message_without_violations(self):
         """Error message works without violations list."""
-        result = ComplianceCheckResult(allowed=False, reason="Generic compliance failure")
+        result = ComplianceCheckResult(
+            allowed=False, reason="Generic compliance failure"
+        )
 
         msg = format_compliance_error(result)
         assert "Compliance check failed" in msg

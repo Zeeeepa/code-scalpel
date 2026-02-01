@@ -132,7 +132,9 @@ def use_{i}():
 
         # Step 1: Rename definition
         patcher = UnifiedPatcher.from_file(str(main_py))
-        def_result = patcher.rename_symbol("method", "OldClass.old_method", "new_method")
+        def_result = patcher.rename_symbol(
+            "method", "OldClass.old_method", "new_method"
+        )
         assert def_result.success
         patcher.save(backup=False)
 
@@ -361,7 +363,9 @@ class TestRenameSymbolExplicitDenials:
 
         assert result.success is True
         assert result.changed_files == []
-        assert any("max_files_searched=0" in warning for warning in result.warnings), result.warnings
+        assert any(
+            "max_files_searched=0" in warning for warning in result.warnings
+        ), result.warnings
 
         # No cross-file updates should occur at community tier
         utils_content = utils_py.read_text()
@@ -385,7 +389,9 @@ class TestRenameSymbolExplicitDenials:
 
         assert result.success is True
         assert len(result.changed_files) <= 1
-        assert any("max_files_updated=1" in warning for warning in result.warnings), result.warnings
+        assert any(
+            "max_files_updated=1" in warning for warning in result.warnings
+        ), result.warnings
 
         # At least one file should remain unchanged because Pro is bounded
         untouched = []
@@ -591,7 +597,9 @@ def use_{i}():
         )
 
         assert result.success is True
-        assert len(result.changed_files) >= len(extra_files) + 2  # utils + helper + extras
+        assert (
+            len(result.changed_files) >= len(extra_files) + 2
+        )  # utils + helper + extras
         assert not any("max_files" in w for w in result.warnings)
 
         for extra in extra_files:

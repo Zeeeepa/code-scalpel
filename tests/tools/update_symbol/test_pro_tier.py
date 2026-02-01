@@ -378,7 +378,9 @@ class TestUpdateSymbolProReturnModel:
 
         # Enterprise fields should not be present
         assert "approval_status" not in result or result.get("approval_status") is None
-        assert "compliance_check" not in result or result.get("compliance_check") is None
+        assert (
+            "compliance_check" not in result or result.get("compliance_check") is None
+        )
         assert "audit_id" not in result or result.get("audit_id") is None
         assert "mutation_policy" not in result or result.get("mutation_policy") is None
 

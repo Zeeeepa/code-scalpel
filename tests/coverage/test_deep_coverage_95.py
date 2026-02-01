@@ -233,9 +233,7 @@ class TestSymbolicEngineCoverage:
         """Cover while loop handling."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        code = (
-            "\ndef countdown(n):\n    _ = 0\n    while n > 0:\n        result += n\n        n -= 1\n    return result\n"
-        )
+        code = "\ndef countdown(n):\n    _ = 0\n    while n > 0:\n        result += n\n        n -= 1\n    return result\n"
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
