@@ -204,7 +204,7 @@ extend-exclude = '''
     | \.git
     | \.venv
     | vscode-extension/node_modules
-    | tests/mcp_tool_verification
+    | tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior
 )/
 '''
 
