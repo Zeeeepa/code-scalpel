@@ -8,7 +8,6 @@ from typing import Any
 from code_scalpel.mcp.contract import ToolResponseEnvelope, envelop_tool_function
 from code_scalpel.mcp.oracle_middleware import (
     with_oracle_resilience,
-    SymbolStrategy,
     PathStrategy,
     NodeIdFormatStrategy,
 )
@@ -227,7 +226,9 @@ async def _get_graph_neighborhood_tool(
 
 
 get_graph_neighborhood = mcp.tool()(
-    with_oracle_resilience(tool_id="get_graph_neighborhood", strategy=NodeIdFormatStrategy)(
+    with_oracle_resilience(
+        tool_id="get_graph_neighborhood", strategy=NodeIdFormatStrategy
+    )(
         envelop_tool_function(
             _get_graph_neighborhood_tool,
             tool_id="get_graph_neighborhood",
@@ -472,7 +473,9 @@ async def _get_cross_file_dependencies_tool(
 
 
 get_cross_file_dependencies = mcp.tool()(
-    with_oracle_resilience(tool_id="get_cross_file_dependencies", strategy=PathStrategy)(
+    with_oracle_resilience(
+        tool_id="get_cross_file_dependencies", strategy=PathStrategy
+    )(
         envelop_tool_function(
             _get_cross_file_dependencies_tool,
             tool_id="get_cross_file_dependencies",

@@ -17,9 +17,6 @@ from code_scalpel.licensing import tier_detector
 from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
 from code_scalpel.mcp.oracle_middleware import (
     with_oracle_resilience,
-    SymbolStrategy,
-    PathStrategy,
-    CompositeStrategy,
     GenerateTestsStrategy,
 )
 from code_scalpel import __version__ as _pkg_version

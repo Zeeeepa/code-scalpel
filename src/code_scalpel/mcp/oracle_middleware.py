@@ -220,7 +220,6 @@ class SafetyStrategy(RecoveryStrategy):
         new_name = context.get("new_name")
         file_path = context.get("file_path")
         code = context.get("code")
-        target_type = context.get("target_type", "function")  # Default to function
 
         if not new_name:
             return []
@@ -449,9 +448,9 @@ class RenameSymbolStrategy(RecoveryStrategy):
             all_suggestions.extend(safety_suggestions)
 
         # Return deduplicated and ranked suggestions
-        seen: dict[str, dict[str, Any]] = {}
+        seen: dict[tuple[str, Any] | str, dict[str, Any]] = {}
         for suggestion in all_suggestions:
-            key = None
+            key: tuple[str, Any] | str
             if "symbol" in suggestion:
                 key = ("symbol", suggestion["symbol"])
             elif "path" in suggestion:
@@ -524,11 +523,11 @@ class CompositeStrategy(RecoveryStrategy):
             Deduplicated and ranked suggestions
         """
         # Use symbol/path as unique key, keep highest score
-        seen: dict[str, dict[str, Any]] = {}
+        seen: dict[tuple[str, Any] | str, dict[str, Any]] = {}
 
         for suggestion in suggestions:
             # Determine unique key
-            key = None
+            key: tuple[str, Any] | str
             if "symbol" in suggestion:
                 key = ("symbol", suggestion["symbol"])
             elif "path" in suggestion:
