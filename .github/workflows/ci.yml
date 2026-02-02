@@ -391,9 +391,17 @@ jobs:
         pip install -r requirements.txt
         pip install -e .
 
+    - name: Setup test licenses for docs generation
+      run: |
+        mkdir -p tests/licenses
+        echo "${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}" > tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt
+      env:
+        TEST_ENTERPRISE_LICENSE_JWT: ${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}
+
     - name: Regenerate MCP tools reference
       env:
         CODE_SCALPEL_DOC_PROJECT_ROOT: ${{ runner.temp }}/mcp-tools-docgen
+        TEST_ENTERPRISE_LICENSE_JWT: ${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}
       run: |
         mkdir -p "$CODE_SCALPEL_DOC_PROJECT_ROOT"
         python scripts/generate_mcp_tools_reference.py
@@ -446,9 +454,20 @@ jobs:
         pip install -r requirements.txt
         pip install -e .
 
+    - name: Setup test licenses for docs generation
+      run: |
+        mkdir -p tests/licenses
+        echo "${{ secrets.TEST_PRO_LICENSE_JWT }}" > tests/licenses/code_scalpel_license_pro_20260101_190345.jwt
+        echo "${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}" > tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt
+      env:
+        TEST_PRO_LICENSE_JWT: ${{ secrets.TEST_PRO_LICENSE_JWT }}
+        TEST_ENTERPRISE_LICENSE_JWT: ${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}
+
     - name: Regenerate MCP tools tier matrix
       env:
         CODE_SCALPEL_DOC_PROJECT_ROOT: ${{ runner.temp }}/mcp-tools-docgen
+        TEST_PRO_LICENSE_JWT: ${{ secrets.TEST_PRO_LICENSE_JWT }}
+        TEST_ENTERPRISE_LICENSE_JWT: ${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}
       run: |
         mkdir -p "$CODE_SCALPEL_DOC_PROJECT_ROOT"
         python scripts/generate_mcp_tier_matrix.py
