@@ -71,10 +71,10 @@ In `.github/workflows/ci.yml`, the test job injects licenses before running test
 Test licenses are written to:
 ```
 tests/licenses/
-├── code_scalpel_license_pro_20260101_190345.jwt
-├── code_scalpel_license_enterprise_20260101_190754.jwt
-├── code_scalpel_license_pro_test_broken.jwt
-└── code_scalpel_license_enterprise_test_broken.jwt
+├── code_scalpel_license_[TIER]_[TIMESTAMP].jwt
+├── code_scalpel_license_[TIER]_[TIMESTAMP].jwt
+├── code_scalpel_license_[TIER]_test_broken.jwt
+└── code_scalpel_license_[TIER]_test_broken.jwt
 ```
 
 These paths are automatically discovered by pytest fixtures in:
@@ -153,25 +153,26 @@ All test licenses should follow this structure:
 
 ```json
 {
-  "tier": "pro",                    // or "enterprise"
-  "sub": "test-customer-001",       // subject (customer ID)
-  "iss": "code-scalpel",           // issuer
-  "aud": "code-scalpel-users",     // audience
-  "exp": 1798823075,               // expiration (unix timestamp)
-  "iat": 1767287075,               // issued at
-  "jti": "unique-token-id",        // JWT ID
-  "nbf": 1767287075,               // not before
-  "org": "Test Organization",       // organization name
-  "seats": 1                        // number of seats
+  "tier": "[pro|enterprise]",       // Tier level
+  "sub": "[customer-id]",           // Subject - unique customer identifier
+  "iss": "code-scalpel",            // Issuer
+  "aud": "code-scalpel-users",      // Audience
+  "exp": [future-unix-timestamp],   // Expiration - must be in future
+  "iat": [unix-timestamp],          // Issued at
+  "jti": "[unique-id]",             // JWT ID
+  "nbf": [unix-timestamp],          // Not before
+  "org": "[organization-name]",     // Organization name
+  "seats": [number]                 // Number of seats
 }
 ```
 
 ### Key Requirements:
 
-- **Signature**: Must be signed with RS256 algorithm using production private key
+- **Signature**: Must be signed with RS256 algorithm using production public key
 - **Expiration**: Should be far in future (2027+) to avoid test failures
 - **Claims**: Must include all required claims listed above
 - **Tier**: Must match the secret name (pro or enterprise)
+- **Full specifications**: Contact licensing team for complete JWT requirements
 
 ## Broken License Requirements
 
@@ -179,23 +180,11 @@ For validation testing, broken licenses must:
 
 1. Have valid RS256 signature
 2. Have valid expiration (future date)
-3. **Missing one or more required claims** (typically `sub`)
+3. **Missing one or more required claims** (for validation error testing)
 
-Example broken license (missing `sub`):
-```json
-{
-  "tier": "pro",
-  "iss": "code-scalpel",
-  "aud": "code-scalpel-users",
-  "exp": 1798823075,
-  "iat": 1767287075,
-  // "sub" is intentionally missing
-  "jti": "unique-token-id",
-  "nbf": 1767287075,
-  "org": "Test Organization",
-  "seats": 1
-}
-```
+Broken license examples are provided by the licensing team and should not be documented in this repository to prevent misuse.
+
+Contact your licensing team for test licenses that validate error handling scenarios.
 
 ## Testing with Local Development
 
@@ -258,8 +247,8 @@ The `.github/workflows/ci.yml` workflow includes these tier-related steps:
 **Symptom**: JWT signature validation fails in tests
 
 **Solution**:
-1. Verify license is signed with production public key: `vault-prod-2026-01.pem`
-2. Check license expiration is in future: `jti_decode --no-verify <token>`
+1. Verify license is signed with production public key (check with licensing team)
+2. Check license expiration is in future
 3. Verify all required claims are present
 4. Check license tier matches secret name
 
@@ -268,11 +257,7 @@ The `.github/workflows/ci.yml` workflow includes these tier-related steps:
 **Symptom**: Tests detect "community" tier even with Pro license
 
 **Solution**:
-1. Clear license cache before test:
-   ```python
-   from code_scalpel.licensing import jwt_validator
-   jwt_validator._LICENSE_VALIDATION_CACHE = None
-   ```
+1. Clear license cache before test (see licensing module documentation)
 2. Verify `CODE_SCALPEL_LICENSE_PATH` env var is set
 3. Check that license file exists and is readable
 
@@ -312,7 +297,7 @@ When test licenses expire or need renewal:
 - **License Validation**: `tests/licenses/README.md`
 - **Tier System**: `src/code_scalpel/licensing/`
 - **Capabilities Resolver**: `src/code_scalpel/capabilities/`
-- **CI/CD Workflow**: `.github/workflows/ci.yml`
+- **CI/CD Workflow**: `.github/workflows/ci.yml` (⚠️ Never commit secrets to this file - use GitHub Secrets instead)
 - **Test Fixtures**: `tests/capabilities/conftest.py`
 
 ## Questions or Issues?

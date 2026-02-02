@@ -266,3 +266,50 @@ examples/.internal/
 .pypirc
 *.archive
 .code-scalpel/audit.jsonl
+
+# ===== API TOKENS & CREDENTIALS [20260202_SECURITY] =====
+# Block all API tokens and credential files to prevent accidental commits
+.tokens/
+*.token
+*.apikey
+*.api_key
+credentials.json
+secrets.json
+.credentials/
+token.txt
+
+# ===== LOCAL ENVIRONMENT VARIANTS [20260202_SECURITY] =====
+# Block environment-specific config files that may contain secrets
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+.scalpel.env
+config.local.json
+config.local.yaml
+.code-scalpel/config.local.json
+.code-scalpel/config.local.yaml
+
+# ===== VAULT & KEY MANAGEMENT [20260202_SECURITY] =====
+# Block vault and key management files
+.vault/
+.vault.local
+vault_config.json
+vault_token
+.hcvault/
+
+# ===== CI/CD ARTIFACTS [20260202_SECURITY] =====
+# Block GitHub Actions artifacts with secrets
+.github/workflows/.env
+.github/workflows/*.token
+.github/workflows/secrets.json
+
+# ===== TEST ARTIFACTS WITH CREDENTIALS [20260202_SECURITY] =====
+# Block temporary test files that may contain credentials
+tests/.temp/
+tests/.tmp/
+tests/**/temp/
+tests/**/tmp/
+test_credentials.json
+test_tokens.json

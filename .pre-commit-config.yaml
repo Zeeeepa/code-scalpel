@@ -14,3 +14,14 @@ repos:
         entry: python scripts/hooks/ensure_commit_version.py
         language: system
         stages: [commit-msg]
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect secrets
+        entry: detect-secrets scan --baseline .secrets.baseline --all-files
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+        always_run: true
