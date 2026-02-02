@@ -21,7 +21,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-./tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/
+# Ninja Warrior test obstacle course (intentionally broken code for torture testing)
+tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/
 
 # Python Distribution / packaging
 .Python
@@ -265,4 +266,3 @@ examples/.internal/
 .pypirc
 *.archive
 .code-scalpel/audit.jsonl
-tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior
