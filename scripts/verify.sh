@@ -109,7 +109,7 @@ echo "🧩 Step 7/8: MCP Contract (All Tools)..."
 echo "----------------------------------------------"
 for transport in stdio streamable-http sse; do
     echo "Running MCP contract for transport: $transport"
-    MCP_CONTRACT_TRANSPORT="$transport" $PYTHON_BIN -m pytest -q tests/test_mcp_all_tools_contract.py 2>&1 || {
+    MCP_CONTRACT_TRANSPORT="$transport" $PYTHON_BIN -m pytest -q tests/mcp/test_mcp_all_tools_contract.py 2>&1 || {
         echo ""
         echo "ERROR: MCP contract test failed for transport: $transport"
         exit 1
@@ -131,7 +131,7 @@ echo ""
 
 echo "📚 Step 9/11: MCP Tools Reference Documentation..."
 echo "----------------------------------------------"
-if [ -f "scripts/generate_mcp_tools_reference.py" ]; then
+if [ -f "scripts/generate_mcp_tools_reference.py" ] && [ -n "$TEST_ENTERPRISE_LICENSE_JWT" ]; then
     TEMP_DIR=$(mktemp -d)
     export CODE_SCALPEL_DOC_PROJECT_ROOT="$TEMP_DIR"
     $PYTHON_BIN scripts/generate_mcp_tools_reference.py >/dev/null 2>&1
@@ -144,14 +144,17 @@ if [ -f "scripts/generate_mcp_tools_reference.py" ]; then
     fi
     rm -rf "$TEMP_DIR"
     echo "MCP tools reference validated"
-else
+elif [ -n "$TEST_ENTERPRISE_LICENSE_JWT" ]; then
     echo "⚠️  Script not found, skipping MCP tools reference validation"
+else
+    echo "⚠️  Skipping MCP tools reference validation (no TEST_ENTERPRISE_LICENSE_JWT)"
+    echo "    This will be validated in CI with injected secrets"
 fi
 echo ""
 
 echo "📚 Step 10/11: MCP Tools Tier Matrix..."
 echo "----------------------------------------------"
-if [ -f "scripts/generate_mcp_tier_matrix.py" ]; then
+if [ -f "scripts/generate_mcp_tier_matrix.py" ] && [ -n "$TEST_PRO_LICENSE_JWT" ]; then
     TEMP_DIR=$(mktemp -d)
     export CODE_SCALPEL_DOC_PROJECT_ROOT="$TEMP_DIR"
     $PYTHON_BIN scripts/generate_mcp_tier_matrix.py >/dev/null 2>&1
@@ -164,8 +167,11 @@ if [ -f "scripts/generate_mcp_tier_matrix.py" ]; then
     fi
     rm -rf "$TEMP_DIR"
     echo "MCP tier matrix validated"
-else
+elif [ -n "$TEST_PRO_LICENSE_JWT" ]; then
     echo "⚠️  Script not found, skipping MCP tier matrix validation"
+else
+    echo "⚠️  Skipping MCP tier matrix validation (no TEST_PRO_LICENSE_JWT)"
+    echo "    This will be validated in CI with injected secrets"
 fi
 echo ""
 

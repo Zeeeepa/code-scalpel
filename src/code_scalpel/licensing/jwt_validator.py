@@ -679,8 +679,14 @@ BwIDAQAB
                 if revocation_error:
                     return self._create_invalid_license(revocation_error)
 
-            expiration = _utcfromtimestamp_naive(exp_timestamp)
-            issued_at = _utcfromtimestamp_naive(iat_timestamp)
+            # Type guard: exp and iat are required by jwt.decode (see "require" clause above)
+            if not isinstance(exp_timestamp, (int, float)) or not isinstance(
+                iat_timestamp, (int, float)
+            ):
+                return self._create_invalid_license("Invalid timestamp in JWT claims")
+
+            expiration = _utcfromtimestamp_naive(int(exp_timestamp))
+            issued_at = _utcfromtimestamp_naive(int(iat_timestamp))
 
             # Calculate days until expiration
             delta = expiration - _utcnow_naive()
@@ -754,7 +760,17 @@ BwIDAQAB
                 )
 
                 exp_timestamp = claims.get("exp")
-                expiration = _utcfromtimestamp_naive(exp_timestamp)
+                iat_timestamp = claims.get("iat")
+
+                # Type guard: exp and iat are required by jwt.decode (see "require" clause above)
+                if not isinstance(exp_timestamp, (int, float)) or not isinstance(
+                    iat_timestamp, (int, float)
+                ):
+                    return self._create_invalid_license(
+                        "Invalid timestamp in JWT claims"
+                    )
+
+                expiration = _utcfromtimestamp_naive(int(exp_timestamp))
                 delta = expiration - _utcnow_naive()
                 days_until_exp = delta.days
 
@@ -764,7 +780,7 @@ BwIDAQAB
                     organization=claims.get("organization"),
                     features=set(claims.get("features", [])),
                     expiration=expiration,
-                    issued_at=_utcfromtimestamp_naive(claims.get("iat")),
+                    issued_at=_utcfromtimestamp_naive(int(iat_timestamp)),
                     seats=claims.get("seats"),
                     is_valid=False,
                     is_expired=True,
