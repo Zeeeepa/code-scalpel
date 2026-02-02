@@ -129,8 +129,62 @@ rm -rf /tmp/code-scalpel-test-build
 echo "Package builds successfully"
 echo ""
 
+echo "📚 Step 9/11: MCP Tools Reference Documentation..."
+echo "----------------------------------------------"
+if [ -f "scripts/generate_mcp_tools_reference.py" ]; then
+    TEMP_DIR=$(mktemp -d)
+    export CODE_SCALPEL_DOC_PROJECT_ROOT="$TEMP_DIR"
+    $PYTHON_BIN scripts/generate_mcp_tools_reference.py >/dev/null 2>&1
+
+    if [ -n "$(git diff --name-only docs/reference/mcp_tools_current.md 2>/dev/null)" ]; then
+        echo "ERROR: docs/reference/mcp_tools_current.md out of date"
+        echo "Run: python scripts/generate_mcp_tools_reference.py"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+    rm -rf "$TEMP_DIR"
+    echo "MCP tools reference validated"
+else
+    echo "⚠️  Script not found, skipping MCP tools reference validation"
+fi
+echo ""
+
+echo "📚 Step 10/11: MCP Tools Tier Matrix..."
+echo "----------------------------------------------"
+if [ -f "scripts/generate_mcp_tier_matrix.py" ]; then
+    TEMP_DIR=$(mktemp -d)
+    export CODE_SCALPEL_DOC_PROJECT_ROOT="$TEMP_DIR"
+    $PYTHON_BIN scripts/generate_mcp_tier_matrix.py >/dev/null 2>&1
+
+    if [ -n "$(git diff --name-only docs/reference/mcp_tools_by_tier.md 2>/dev/null)" ]; then
+        echo "ERROR: docs/reference/mcp_tools_by_tier.md out of date"
+        echo "Run: python scripts/generate_mcp_tier_matrix.py"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+    rm -rf "$TEMP_DIR"
+    echo "MCP tier matrix validated"
+else
+    echo "⚠️  Script not found, skipping MCP tier matrix validation"
+fi
+echo ""
+
+echo "📚 Step 11/11: Documentation Sync Validation..."
+echo "----------------------------------------------"
+if [ -f "scripts/validate_docs_sync.py" ]; then
+    $PYTHON_BIN scripts/validate_docs_sync.py 2>&1 || {
+        echo ""
+        echo "ERROR: Documentation out of sync with code"
+        exit 1
+    }
+    echo "Documentation sync validated"
+else
+    echo "⚠️  Script not found, skipping docs sync validation"
+fi
+echo ""
+
 echo "=============================================="
-echo "ALL VERIFICATION PASSED"
+echo "ALL VERIFICATION PASSED (11/11 checks)"
 echo "=============================================="
 echo ""
 echo "You are ready to commit and publish."

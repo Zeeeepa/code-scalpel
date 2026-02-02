@@ -1,9 +1,9 @@
 repos:
   - repo: local
     hooks:
-      - id: release-confidence
-        name: Release Confidence (local)
-        entry: ./scripts/verify.sh
+      - id: local-pre-flight
+        name: Local Pre-Flight Checks (Fast)
+        entry: ./scripts/verify_local.sh
         language: system
         pass_filenames: false
         always_run: true
