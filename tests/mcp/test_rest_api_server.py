@@ -119,7 +119,10 @@ def test_list_tools():
 # [20251214_TEST] Ensure production debug guard disables debug flag.
 def test_run_server_forces_debug_off_in_production(monkeypatch):
     import warnings
+    import sys
+    import flask
 
+    # Ensure module is loaded so we can patch the canonical reference
     from code_scalpel.integrations import rest_api_server
 
     captured = {}
@@ -134,7 +137,19 @@ def test_run_server_forces_debug_off_in_production(monkeypatch):
         captured["config"] = config
         return FakeApp()
 
-    monkeypatch.setattr(rest_api_server, "create_app", fake_create_app)
+    def fake_flask_run(self, host=None, port=None, debug=None, **options):
+        # Fail-safe: Prevent server start even if create_app patch fails
+        captured["host"] = host
+        captured["port"] = port
+        captured["debug"] = debug
+
+    # Patch create_app in the actual module object from sys.modules
+    real_module = sys.modules["codescalpel_web.server"]
+    monkeypatch.setattr(real_module, "create_app", fake_create_app)
+
+    # Patch Flask.run globally as a safety net against hangs
+    monkeypatch.setattr(flask.Flask, "run", fake_flask_run)
+
     monkeypatch.setenv("FLASK_ENV", "production")
 
     # [20251228_TEST] This test intentionally requests debug=True in production

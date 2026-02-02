@@ -261,7 +261,7 @@ class TestErrorToDiffMore:
 
     def test_error_to_diff_syntax_error(self):
         """Test analyze_error with syntax error."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as td:
             engine = ErrorToDiffEngine(td)
@@ -280,7 +280,7 @@ def foo(
 
     def test_error_to_diff_name_error(self):
         """Test analyze_error with NameError."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as td:
             engine = ErrorToDiffEngine(td)
@@ -308,7 +308,7 @@ class TestSandboxMore:
     def test_sandbox_executor_init(self):
         """Test SandboxExecutor initialization."""
         try:
-            from code_scalpel.autonomy.sandbox import SandboxExecutor
+            from codescalpel_agents.autonomy.sandbox import SandboxExecutor
 
             executor = SandboxExecutor(
                 isolation_level="process",

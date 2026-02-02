@@ -642,15 +642,13 @@ class TestCLIInProcess:
     def test_analyze_file_with_dead_code(self, tmp_path):
         """Test analyzing a file with dead code for detection."""
         test_file = tmp_path / "dead_code.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def unused_function():
     return "never called"
 
 def main():
     return 42
-"""
-        )
+""")
 
         result = subprocess.run(
             [sys.executable, "-m", "code_scalpel.cli", "analyze", str(test_file)],
@@ -935,8 +933,7 @@ def main():
     def test_analyze_complex_code(self, tmp_path):
         """Test analyzing more complex code with all features."""
         test_file = tmp_path / "complex.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import os
 
 class Calculator:
@@ -958,8 +955,7 @@ def main():
     calc = Calculator()
     calc.add(5).add(10)
     return calc.get_value()
-"""
-        )
+""")
 
         result = subprocess.run(
             [sys.executable, "-m", "code_scalpel.cli", "analyze", str(test_file)],

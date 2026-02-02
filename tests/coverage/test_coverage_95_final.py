@@ -569,7 +569,7 @@ class TestAdditionalEdgeCases:
 
     def test_error_to_diff_multiple_errors(self):
         """Test ErrorToDiffEngine with multiple errors."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as td:
             engine = ErrorToDiffEngine(td)

@@ -34,7 +34,7 @@ class TestAutogenFunctionBranches2:
 
     def test_scalpel_analyze_error_exception(self):
         """Test analyze error exception handling."""
-        from code_scalpel.autonomy.integrations.autogen import (
+        from codescalpel_agents.autonomy.integrations.autogen import (
             scalpel_analyze_error_impl,
         )
 
@@ -44,7 +44,9 @@ class TestAutogenFunctionBranches2:
 
     def test_scalpel_validate_exception_path(self):
         """Test validate exception path."""
-        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
+        from codescalpel_agents.autonomy.integrations.autogen import (
+            scalpel_validate_impl,
+        )
 
         # Test with invalid code
         result = scalpel_validate_impl("def foo(:")
@@ -56,7 +58,9 @@ class TestLanggraphExceptionBranches2:
 
     def test_analyze_error_node_exception(self):
         """Test analyze_error_node exception handling."""
-        from code_scalpel.autonomy.integrations.langgraph import analyze_error_node
+        from codescalpel_agents.autonomy.integrations.langgraph import (
+            analyze_error_node,
+        )
 
         # Empty state that might trigger exception
         state = {
@@ -72,7 +76,7 @@ class TestLanggraphExceptionBranches2:
 
     def test_generate_fix_node_exception(self):
         """Test generate_fix_node exception handling."""
-        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
+        from codescalpel_agents.autonomy.integrations.langgraph import generate_fix_node
 
         state = {
             "code": "def foo(:",
@@ -113,7 +117,7 @@ class TestErrorToDiffExtraBranches2:
 
     def test_analyze_error_with_value_error_diff(self):
         """Test when diff application raises ValueError."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(project_root=Path(tmp))
@@ -131,8 +135,8 @@ class TestMutationGateExtraBranches2:
 
     def test_mutation_test_gate_init(self):
         """Test MutationTestGate initialization."""
-        from code_scalpel.autonomy.mutation_gate import MutationTestGate
-        from code_scalpel.autonomy.sandbox import SandboxExecutor
+        from codescalpel_agents.autonomy.mutation_gate import MutationTestGate
+        from codescalpel_agents.autonomy.sandbox import SandboxExecutor
 
         sandbox = SandboxExecutor()
         gate = MutationTestGate(
@@ -149,7 +153,7 @@ class TestSandboxExtraBranches2:
 
     def test_sandbox_executor_init_options(self):
         """Test SandboxExecutor with various options."""
-        from code_scalpel.autonomy.sandbox import SandboxExecutor
+        from codescalpel_agents.autonomy.sandbox import SandboxExecutor
 
         sandbox = SandboxExecutor(
             isolation_level="process",

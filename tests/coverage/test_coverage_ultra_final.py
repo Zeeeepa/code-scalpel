@@ -14,7 +14,7 @@ class TestAutogenExceptionPaths:
 
     def test_analyze_error_analysis_exception(self):
         """Test when analysis itself throws exception."""
-        from code_scalpel.autonomy.integrations.autogen import (
+        from codescalpel_agents.autonomy.integrations.autogen import (
             scalpel_analyze_error_impl,
         )
 
@@ -23,14 +23,18 @@ class TestAutogenExceptionPaths:
 
     def test_apply_fix_parse_exception(self):
         """Test apply_fix with code that triggers exception."""
-        from code_scalpel.autonomy.integrations.autogen import scalpel_apply_fix_impl
+        from codescalpel_agents.autonomy.integrations.autogen import (
+            scalpel_apply_fix_impl,
+        )
 
         result = scalpel_apply_fix_impl("def :", "fix")
         assert result["success"] is False
 
     def test_validate_general_exception(self):
         """Test validate with code that triggers general exception."""
-        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
+        from codescalpel_agents.autonomy.integrations.autogen import (
+            scalpel_validate_impl,
+        )
 
         scalpel_validate_impl("")
 
@@ -40,7 +44,7 @@ class TestLanggraphExceptionPaths:
 
     def test_generate_fix_with_exception(self):
         """Test generate_fix_node when exception occurs."""
-        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
+        from codescalpel_agents.autonomy.integrations.langgraph import generate_fix_node
 
         state = {
             "code": "x = 1",
@@ -54,7 +58,7 @@ class TestLanggraphExceptionPaths:
 
     def test_validate_fix_with_exception(self):
         """Test validate_fix_node when exception occurs."""
-        from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
+        from codescalpel_agents.autonomy.integrations.langgraph import validate_fix_node
 
         state = {
             "code": "def foo(:",
@@ -73,7 +77,7 @@ class TestCrewAIExceptionPaths:
     def test_crewai_analyze_exception(self):
         """Test crewai analyze error with exception path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import (
+            from codescalpel_agents.autonomy.integrations.crewai import (
                 scalpel_analyze_error_impl,
             )
 
@@ -85,7 +89,9 @@ class TestCrewAIExceptionPaths:
     def test_crewai_apply_fix_exception(self):
         """Test crewai apply fix exception path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import scalpel_apply_fix_impl
+            from codescalpel_agents.autonomy.integrations.crewai import (
+                scalpel_apply_fix_impl,
+            )
 
             result = scalpel_apply_fix_impl("def :", "fix")
             assert result["success"] is False
@@ -95,7 +101,9 @@ class TestCrewAIExceptionPaths:
     def test_crewai_validate_exception(self):
         """Test crewai validate exception path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import scalpel_validate_impl
+            from codescalpel_agents.autonomy.integrations.crewai import (
+                scalpel_validate_impl,
+            )
 
             result = scalpel_validate_impl("def foo(:")
             assert result["success"] is False
@@ -108,7 +116,7 @@ class TestErrorToDiffExceptionPaths:
 
     def test_analyze_with_multiple_errors(self):
         """Test analyze_error with code that has multiple issues."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(project_root=Path(tmp))
@@ -123,8 +131,8 @@ class TestMutationGateExceptionPaths:
 
     def test_mutation_gate_with_custom_config(self):
         """Test MutationTestGate with custom configuration."""
-        from code_scalpel.autonomy.mutation_gate import MutationTestGate
-        from code_scalpel.autonomy.sandbox import SandboxExecutor
+        from codescalpel_agents.autonomy.mutation_gate import MutationTestGate
+        from codescalpel_agents.autonomy.sandbox import SandboxExecutor
 
         sandbox = SandboxExecutor(max_cpu_seconds=10)
         gate = MutationTestGate(
@@ -139,7 +147,7 @@ class TestSandboxExceptionPaths:
 
     def test_sandbox_with_docker_isolation(self):
         """Test SandboxExecutor with docker isolation level."""
-        from code_scalpel.autonomy.sandbox import SandboxExecutor
+        from codescalpel_agents.autonomy.sandbox import SandboxExecutor
 
         sandbox = SandboxExecutor(isolation_level="docker", network_enabled=False)
         assert sandbox is not None

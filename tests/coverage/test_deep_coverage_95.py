@@ -16,7 +16,7 @@ class TestErrorToDiffCoverage:
 
     def test_analyze_syntax_error(self):
         """Cover SyntaxError path."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -27,7 +27,7 @@ class TestErrorToDiffCoverage:
 
     def test_analyze_name_error(self):
         """Cover NameError path."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -38,7 +38,7 @@ class TestErrorToDiffCoverage:
 
     def test_fix_missing_colon(self):
         """Cover missing colon fix."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -49,7 +49,7 @@ class TestErrorToDiffCoverage:
 
     def test_fix_indentation(self):
         """Cover indentation fix path."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -60,7 +60,7 @@ class TestErrorToDiffCoverage:
 
     def test_fix_balance_parentheses_open(self):
         """Cover parentheses balancing (too many open)."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -71,7 +71,7 @@ class TestErrorToDiffCoverage:
 
     def test_fix_balance_parentheses_close(self):
         """Cover parentheses balancing (too many close)."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -82,7 +82,7 @@ class TestErrorToDiffCoverage:
 
     def test_non_python_language(self):
         """Cover non-Python language path (no AST validation)."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -132,7 +132,7 @@ class TestSandboxCoverage:
 
     def test_sandbox_properties(self):
         """Cover sandbox property access."""
-        from code_scalpel.autonomy.sandbox import SandboxExecutor
+        from codescalpel_agents.autonomy.sandbox import SandboxExecutor
 
         sandbox = SandboxExecutor()
         assert sandbox.max_cpu_seconds is not None

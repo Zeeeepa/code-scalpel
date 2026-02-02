@@ -98,7 +98,7 @@ class TestErrorToDiffBranches:
 
     def test_analyze_error_invalid_fix(self):
         """Test analyze_error with fix that produces invalid AST."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(project_root=Path(tmp))
@@ -109,7 +109,7 @@ class TestErrorToDiffBranches:
 
     def test_analyze_error_type_error_diff(self):
         """Test analyze_error with fix that raises TypeError."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(project_root=Path(tmp))
@@ -120,7 +120,7 @@ class TestErrorToDiffBranches:
 
     def test_apply_diff_no_match(self):
         """Test _apply_diff with no matching text."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(project_root=Path(tmp))
@@ -131,7 +131,7 @@ class TestErrorToDiffBranches:
 
     def test_apply_diff_multiple_matches(self):
         """Test _apply_diff with multiple matches."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(project_root=Path(tmp))
@@ -145,7 +145,7 @@ class TestAutogenBranches:
 
     def test_scalpel_analyze_error_impl_syntax_error(self):
         """Test analyze error with syntax error."""
-        from code_scalpel.autonomy.integrations.autogen import (
+        from codescalpel_agents.autonomy.integrations.autogen import (
             scalpel_analyze_error_impl,
         )
 
@@ -158,7 +158,7 @@ class TestAutogenBranches:
 
     def test_scalpel_analyze_error_impl_runtime(self):
         """Test analyze error with runtime error."""
-        from code_scalpel.autonomy.integrations.autogen import (
+        from codescalpel_agents.autonomy.integrations.autogen import (
             scalpel_analyze_error_impl,
         )
 
@@ -170,7 +170,9 @@ class TestAutogenBranches:
 
     def test_scalpel_apply_fix_impl_success(self):
         """Test apply fix with valid code."""
-        from code_scalpel.autonomy.integrations.autogen import scalpel_apply_fix_impl
+        from codescalpel_agents.autonomy.integrations.autogen import (
+            scalpel_apply_fix_impl,
+        )
 
         code = "x = 1"
         fix = "x = 2"
@@ -179,7 +181,9 @@ class TestAutogenBranches:
 
     def test_scalpel_apply_fix_impl_error(self):
         """Test apply fix with invalid code."""
-        from code_scalpel.autonomy.integrations.autogen import scalpel_apply_fix_impl
+        from codescalpel_agents.autonomy.integrations.autogen import (
+            scalpel_apply_fix_impl,
+        )
 
         code = "def foo(:"
         fix = "fix"
@@ -188,7 +192,9 @@ class TestAutogenBranches:
 
     def test_scalpel_validate_impl_success(self):
         """Test validate with valid code."""
-        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
+        from codescalpel_agents.autonomy.integrations.autogen import (
+            scalpel_validate_impl,
+        )
 
         code = "x = 1"
         result = scalpel_validate_impl(code)
@@ -196,7 +202,9 @@ class TestAutogenBranches:
 
     def test_scalpel_validate_impl_syntax_error(self):
         """Test validate with syntax error."""
-        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
+        from codescalpel_agents.autonomy.integrations.autogen import (
+            scalpel_validate_impl,
+        )
 
         code = "def foo(:"
         result = scalpel_validate_impl(code)
@@ -208,7 +216,9 @@ class TestLanggraphBranches:
 
     def test_analyze_error_node_syntax(self):
         """Test analyze_error_node with syntax error."""
-        from code_scalpel.autonomy.integrations.langgraph import analyze_error_node
+        from codescalpel_agents.autonomy.integrations.langgraph import (
+            analyze_error_node,
+        )
 
         state = {
             "code": "def foo(:",
@@ -222,7 +232,7 @@ class TestLanggraphBranches:
 
     def test_generate_fix_node_syntax(self):
         """Test generate_fix_node with syntax error."""
-        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
+        from codescalpel_agents.autonomy.integrations.langgraph import generate_fix_node
 
         state = {
             "code": "def foo(:",
@@ -236,7 +246,7 @@ class TestLanggraphBranches:
 
     def test_generate_fix_node_runtime(self):
         """Test generate_fix_node with runtime error."""
-        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
+        from codescalpel_agents.autonomy.integrations.langgraph import generate_fix_node
 
         state = {
             "code": "x = undefined",
@@ -250,7 +260,7 @@ class TestLanggraphBranches:
 
     def test_validate_fix_node_no_fix(self):
         """Test validate_fix_node with no fix."""
-        from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
+        from codescalpel_agents.autonomy.integrations.langgraph import validate_fix_node
 
         state = {
             "code": "x = 1",
@@ -264,7 +274,7 @@ class TestLanggraphBranches:
 
     def test_validate_fix_node_with_fix(self):
         """Test validate_fix_node with fix."""
-        from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
+        from codescalpel_agents.autonomy.integrations.langgraph import validate_fix_node
 
         state = {
             "code": "x = 1",
@@ -278,7 +288,7 @@ class TestLanggraphBranches:
 
     def test_apply_fix_node(self):
         """Test apply_fix_node."""
-        from code_scalpel.autonomy.integrations.langgraph import apply_fix_node
+        from codescalpel_agents.autonomy.integrations.langgraph import apply_fix_node
 
         state = {
             "code": "x = 1",
@@ -292,7 +302,7 @@ class TestLanggraphBranches:
 
     def test_escalate_node(self):
         """Test escalate_node."""
-        from code_scalpel.autonomy.integrations.langgraph import escalate_node
+        from codescalpel_agents.autonomy.integrations.langgraph import escalate_node
 
         state = {
             "code": "x = 1",
@@ -307,7 +317,7 @@ class TestLanggraphBranches:
 
     def test_has_valid_fixes_true(self):
         """Test has_valid_fixes when True."""
-        from code_scalpel.autonomy.integrations.langgraph import has_valid_fixes
+        from codescalpel_agents.autonomy.integrations.langgraph import has_valid_fixes
 
         state = {
             "code": "",
@@ -320,7 +330,7 @@ class TestLanggraphBranches:
 
     def test_has_valid_fixes_false(self):
         """Test has_valid_fixes when False."""
-        from code_scalpel.autonomy.integrations.langgraph import has_valid_fixes
+        from codescalpel_agents.autonomy.integrations.langgraph import has_valid_fixes
 
         state = {
             "code": "",
@@ -333,7 +343,7 @@ class TestLanggraphBranches:
 
     def test_fix_passed_true(self):
         """Test fix_passed when True."""
-        from code_scalpel.autonomy.integrations.langgraph import fix_passed
+        from codescalpel_agents.autonomy.integrations.langgraph import fix_passed
 
         state = {
             "code": "",
@@ -346,7 +356,7 @@ class TestLanggraphBranches:
 
     def test_fix_passed_false(self):
         """Test fix_passed when False."""
-        from code_scalpel.autonomy.integrations.langgraph import fix_passed
+        from codescalpel_agents.autonomy.integrations.langgraph import fix_passed
 
         state = {
             "code": "",
@@ -407,7 +417,7 @@ class TestMoreBranchCoverage:
 
     def test_audit_trail_branches(self):
         """Test audit trail branches."""
-        from code_scalpel.autonomy.audit import AutonomyAuditTrail
+        from codescalpel_agents.autonomy.audit import AutonomyAuditTrail
 
         with tempfile.TemporaryDirectory() as tmp:
             trail = AutonomyAuditTrail(storage_path=Path(tmp))
@@ -415,8 +425,8 @@ class TestMoreBranchCoverage:
 
     def test_mutation_gate_branches(self):
         """Test mutation gate branches."""
-        from code_scalpel.autonomy.mutation_gate import MutationTestGate
-        from code_scalpel.autonomy.sandbox import SandboxExecutor
+        from codescalpel_agents.autonomy.mutation_gate import MutationTestGate
+        from codescalpel_agents.autonomy.sandbox import SandboxExecutor
 
         sandbox = SandboxExecutor()
         gate = MutationTestGate(sandbox=sandbox)
@@ -424,7 +434,7 @@ class TestMoreBranchCoverage:
 
     def test_sandbox_branches(self):
         """Test sandbox branches."""
-        from code_scalpel.autonomy.sandbox import SandboxExecutor
+        from codescalpel_agents.autonomy.sandbox import SandboxExecutor
 
         sandbox = SandboxExecutor(isolation_level="process", max_cpu_seconds=5)
         assert sandbox is not None

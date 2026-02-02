@@ -112,8 +112,7 @@ class TestBuildWithDetails:
         """Create a simple project structure for testing."""
         # main.py
         main_py = tmp_path / "main.py"
-        main_py.write_text(
-            """
+        main_py.write_text("""
 def main():
     helper()
     print("done")
@@ -126,8 +125,7 @@ def utility():
 
 if __name__ == "__main__":
     main()
-"""
-        )
+""")
 
         return tmp_path
 
@@ -136,8 +134,7 @@ if __name__ == "__main__":
         """Create a multi-file project structure."""
         # main.py
         main_py = tmp_path / "main.py"
-        main_py.write_text(
-            """
+        main_py.write_text("""
 from utils import process
 
 def main():
@@ -146,13 +143,11 @@ def main():
 
 if __name__ == "__main__":
     main()
-"""
-        )
+""")
 
         # utils.py
         utils_py = tmp_path / "utils.py"
-        utils_py.write_text(
-            """
+        utils_py.write_text("""
 from helpers import validate
 
 def process():
@@ -162,20 +157,17 @@ def process():
 
 def compute():
     return 42
-"""
-        )
+""")
 
         # helpers.py
         helpers_py = tmp_path / "helpers.py"
-        helpers_py.write_text(
-            """
+        helpers_py.write_text("""
 def validate():
     return True
 
 def format_output(data):
     return str(data)
-"""
-        )
+""")
 
         return tmp_path
 
@@ -270,8 +262,7 @@ class TestMermaidGeneration:
     def sample_project(self, tmp_path):
         """Create a sample project for Mermaid tests."""
         main_py = tmp_path / "main.py"
-        main_py.write_text(
-            """
+        main_py.write_text("""
 def main():
     foo()
     bar()
@@ -284,8 +275,7 @@ def bar():
 
 def baz():
     pass
-"""
-        )
+""")
         return tmp_path
 
     def test_mermaid_starts_with_graph(self, sample_project):
@@ -542,14 +532,12 @@ class TestCircularImportDetection:
 
     def test_external_imports_ignored(self, tmp_path):
         """Test that external library imports don't cause false positives."""
-        (tmp_path / "app.py").write_text(
-            """
+        (tmp_path / "app.py").write_text("""
 import os
 import sys
 from pathlib import Path
 import json
-"""
-        )
+""")
 
         builder = CallGraphBuilder(tmp_path)
         cycles = builder.detect_circular_imports()
@@ -686,8 +674,7 @@ class TestIntegration:
         # app/__init__.py
         app_dir = tmp_path / "app"
         app_dir.mkdir()
-        (app_dir / "__init__.py").write_text(
-            """
+        (app_dir / "__init__.py").write_text("""
 from flask import Flask
 from app.routes import register_routes
 
@@ -695,23 +682,19 @@ def create_app():
     app = Flask(__name__)
     register_routes(app)
     return app
-"""
-        )
+""")
 
         # app/routes.py
-        (app_dir / "routes.py").write_text(
-            """
+        (app_dir / "routes.py").write_text("""
 from app.handlers import handle_index, handle_api
 
 def register_routes(app):
     app.route("/")(handle_index)
     app.route("/api")(handle_api)
-"""
-        )
+""")
 
         # app/handlers.py
-        (app_dir / "handlers.py").write_text(
-            """
+        (app_dir / "handlers.py").write_text("""
 from app.services import get_data
 
 def handle_index():
@@ -719,16 +702,13 @@ def handle_index():
 
 def handle_api():
     return get_data()
-"""
-        )
+""")
 
         # app/services.py
-        (app_dir / "services.py").write_text(
-            """
+        (app_dir / "services.py").write_text("""
 def get_data():
     return {"status": "ok"}
-"""
-        )
+""")
 
         builder = CallGraphBuilder(tmp_path)
         result = builder.build_with_details()

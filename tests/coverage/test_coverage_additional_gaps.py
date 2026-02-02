@@ -23,7 +23,7 @@ class TestErrorToDiffAdditionalGaps:
 
     def test_apply_diff_multiple_matches(self):
         """[20251217_TEST] Cover multiple match case (ambiguous) in diff application."""
-        from code_scalpel.autonomy import ErrorToDiffEngine
+        from codescalpel_agents.autonomy import ErrorToDiffEngine
 
         engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
@@ -40,7 +40,7 @@ x = foo()"""
 
     def test_diff_no_matches_returns_original(self):
         """[20251217_TEST] Cover no-match case in diff application."""
-        from code_scalpel.autonomy import ErrorToDiffEngine
+        from codescalpel_agents.autonomy import ErrorToDiffEngine
 
         engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
@@ -55,7 +55,7 @@ SyntaxError: unexpected token"""
 
     def test_linter_error_generator_unused(self):
         """[20251217_TEST] Cover linter 'unused' pattern in error generator."""
-        from code_scalpel.autonomy import ErrorToDiffEngine
+        from codescalpel_agents.autonomy import ErrorToDiffEngine
 
         engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
@@ -68,7 +68,7 @@ print("hello")"""
 
     def test_linter_error_generator_undefined(self):
         """[20251217_TEST] Cover linter 'undefined' pattern in error generator."""
-        from code_scalpel.autonomy import ErrorToDiffEngine
+        from codescalpel_agents.autonomy import ErrorToDiffEngine
 
         engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
@@ -84,7 +84,7 @@ class TestAuditAdditionalGaps:
 
     def test_hash_data_fallback_path(self):
         """[20251217_TEST] Cover hash_data fallback when JSON fails."""
-        from code_scalpel.autonomy import AutonomyAuditTrail
+        from codescalpel_agents.autonomy import AutonomyAuditTrail
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             audit = AutonomyAuditTrail(storage_path=tmp_dir)
@@ -111,7 +111,7 @@ class TestAuditAdditionalGaps:
 
     def test_audit_export_csv_format(self):
         """[20251217_TEST] Cover CSV export format."""
-        from code_scalpel.autonomy import AutonomyAuditTrail
+        from codescalpel_agents.autonomy import AutonomyAuditTrail
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             audit = AutonomyAuditTrail(storage_path=tmp_dir)
@@ -131,7 +131,7 @@ class TestAuditAdditionalGaps:
 
     def test_audit_export_html_format(self):
         """[20251217_TEST] Cover HTML export format."""
-        from code_scalpel.autonomy import AutonomyAuditTrail
+        from codescalpel_agents.autonomy import AutonomyAuditTrail
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             audit = AutonomyAuditTrail(storage_path=tmp_dir)
@@ -154,7 +154,7 @@ class TestAuditAdditionalGaps:
         """[20251217_TEST] Cover export with time range and event type filters."""
         from datetime import datetime, timedelta
 
-        from code_scalpel.autonomy import AutonomyAuditTrail
+        from codescalpel_agents.autonomy import AutonomyAuditTrail
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             audit = AutonomyAuditTrail(storage_path=tmp_dir)
@@ -196,7 +196,7 @@ class TestSandboxAdditionalGaps:
 
     def test_sandbox_build_command_failure(self):
         """[20251217_TEST] Cover build command failure path."""
-        from code_scalpel.autonomy.sandbox import FileChange, SandboxExecutor
+        from codescalpel_agents.autonomy.sandbox import FileChange, SandboxExecutor
 
         executor = SandboxExecutor(isolation_level="process")
         changes = [
@@ -216,7 +216,7 @@ class TestSandboxAdditionalGaps:
 
     def test_sandbox_timeout_handling(self):
         """[20251217_TEST] Cover timeout handling in sandbox execution."""
-        from code_scalpel.autonomy.sandbox import FileChange, SandboxExecutor
+        from codescalpel_agents.autonomy.sandbox import FileChange, SandboxExecutor
 
         executor = SandboxExecutor(isolation_level="process", max_cpu_seconds=1)
         changes = [
@@ -244,7 +244,9 @@ class TestCrewAIAdditionalGaps:
     def test_generate_fix_tool_syntax_error_path(self):
         """[20251217_TEST] Cover ScalpelGenerateFixTool syntax error path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import ScalpelGenerateFixTool
+            from codescalpel_agents.autonomy.integrations.crewai import (
+                ScalpelGenerateFixTool,
+            )
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -261,7 +263,9 @@ class TestCrewAIAdditionalGaps:
     def test_generate_fix_tool_exception_path(self):
         """[20251217_TEST] Cover ScalpelGenerateFixTool exception handling."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import ScalpelGenerateFixTool
+            from codescalpel_agents.autonomy.integrations.crewai import (
+                ScalpelGenerateFixTool,
+            )
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -278,7 +282,9 @@ class TestCrewAIAdditionalGaps:
     def test_analyze_tool_exception_path(self):
         """[20251217_TEST] Cover ScalpelAnalyzeTool with malformed input."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import ScalpelAnalyzeTool
+            from codescalpel_agents.autonomy.integrations.crewai import (
+                ScalpelAnalyzeTool,
+            )
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -295,7 +301,9 @@ class TestLangGraphAdditionalGaps:
     def test_analyze_error_node_exception(self):
         """[20251217_TEST] Cover analyze_error_node exception handling."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import analyze_error_node
+            from codescalpel_agents.autonomy.integrations.langgraph import (
+                analyze_error_node,
+            )
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -312,7 +320,9 @@ class TestLangGraphAdditionalGaps:
     def test_generate_fix_node_paths(self):
         """[20251217_TEST] Cover generate_fix_node various paths."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
+            from codescalpel_agents.autonomy.integrations.langgraph import (
+                generate_fix_node,
+            )
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -333,8 +343,8 @@ class TestMutationGateAdditionalGaps:
 
     def test_mutation_gate_revert_mutation(self):
         """[20251217_TEST] Cover revert mutation path."""
-        from code_scalpel.autonomy import MutationTestGate
-        from code_scalpel.autonomy.stubs import SandboxExecutor, SandboxResult
+        from codescalpel_agents.autonomy import MutationTestGate
+        from codescalpel_agents.autonomy.stubs import SandboxExecutor, SandboxResult
 
         # Create mock sandbox with controlled responses
         sandbox = MagicMock(spec=SandboxExecutor)
@@ -360,8 +370,8 @@ class TestMutationGateAdditionalGaps:
 
     def test_mutation_gate_hollow_fix_detection(self):
         """[20251217_TEST] Cover hollow fix detection path."""
-        from code_scalpel.autonomy import MutationTestGate
-        from code_scalpel.autonomy.stubs import SandboxExecutor, SandboxResult
+        from codescalpel_agents.autonomy import MutationTestGate
+        from codescalpel_agents.autonomy.stubs import SandboxExecutor, SandboxResult
 
         sandbox = MagicMock(spec=SandboxExecutor)
 
@@ -387,7 +397,7 @@ class TestMiscCoverageGaps:
     def test_import_error_handling(self):
         """[20251217_TEST] Cover module import error handling."""
         # Test that modules handle optional dependencies gracefully
-        from code_scalpel.autonomy.integrations import autogen, crewai, langgraph
+        from codescalpel_agents.autonomy.integrations import autogen, crewai, langgraph
 
         assert autogen is not None
         assert crewai is not None
@@ -395,7 +405,7 @@ class TestMiscCoverageGaps:
 
     def test_sandbox_cleanup(self):
         """[20251217_TEST] Cover sandbox cleanup operations."""
-        from code_scalpel.autonomy.sandbox import FileChange, SandboxExecutor
+        from codescalpel_agents.autonomy.sandbox import FileChange, SandboxExecutor
 
         executor = SandboxExecutor(isolation_level="process")
 

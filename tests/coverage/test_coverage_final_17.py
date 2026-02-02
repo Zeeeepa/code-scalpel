@@ -56,7 +56,7 @@ class TestFinal17Elements:
 
     def test_error_to_diff_non_python(self):
         """Test error_to_diff for non-Python language."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(project_root=Path(tmp))
@@ -105,7 +105,7 @@ class TestFinal17Elements:
     def test_crewai_import(self):
         """Test CrewAI integration import."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import (
+            from codescalpel_agents.autonomy.integrations.crewai import (
                 scalpel_analyze_error_impl as crewai_analyze,
             )
 

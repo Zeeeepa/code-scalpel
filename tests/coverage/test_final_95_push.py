@@ -19,7 +19,7 @@ class TestErrorToDiffFinalCoverage:
 
     def test_analyze_type_error(self):
         """Cover TypeError path."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -30,7 +30,7 @@ class TestErrorToDiffFinalCoverage:
 
     def test_analyze_attribute_error(self):
         """Cover AttributeError path."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -41,7 +41,7 @@ class TestErrorToDiffFinalCoverage:
 
     def test_analyze_import_error(self):
         """Cover ImportError path."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
@@ -57,7 +57,7 @@ class TestAutogenIntegration:
     def test_autogen_import(self):
         """Cover import path."""
         try:
-            from code_scalpel.autonomy.integrations import autogen
+            from codescalpel_agents.autonomy.integrations import autogen
 
             assert autogen is not None
         except ImportError:
@@ -70,7 +70,7 @@ class TestLanggraphIntegration:
     def test_langgraph_import(self):
         """Cover import path."""
         try:
-            from code_scalpel.autonomy.integrations import langgraph
+            from codescalpel_agents.autonomy.integrations import langgraph
 
             assert langgraph is not None
         except ImportError:
@@ -82,7 +82,7 @@ class TestMutationGateCoverage:
 
     def test_mutation_gate_properties(self):
         """Cover MutationTestGate properties."""
-        from code_scalpel.autonomy.mutation_gate import MutationTestGate
+        from codescalpel_agents.autonomy.mutation_gate import MutationTestGate
 
         with tempfile.TemporaryDirectory() as tmp:
             gate = MutationTestGate(Path(tmp))

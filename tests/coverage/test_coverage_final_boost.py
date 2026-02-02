@@ -68,7 +68,7 @@ class TestAutonomyIntegrationsCoverage:
     def test_langgraph_create_graph(self):
         """[20251217_TEST] Cover LangGraph graph creation."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import (
+            from codescalpel_agents.autonomy.integrations.langgraph import (
                 create_scalpel_fix_graph,
             )
         except ImportError:
@@ -79,15 +79,15 @@ class TestAutonomyIntegrationsCoverage:
     def test_crewai_crew_creation(self):
         """[20251217_TEST] Cover CrewAI crew creation."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import (
+            from codescalpel_agents.autonomy.integrations.crewai import (
                 create_scalpel_fix_crew,
             )
         except ImportError:
             pytest.skip("CrewAI not available")
-        with patch("code_scalpel.autonomy.integrations.crewai.Agent"):
-            with patch("code_scalpel.autonomy.integrations.crewai.Task"):
+        with patch("codescalpel_agents.autonomy.integrations.crewai.Agent"):
+            with patch("codescalpel_agents.autonomy.integrations.crewai.Task"):
                 with patch(
-                    "code_scalpel.autonomy.integrations.crewai.Crew"
+                    "codescalpel_agents.autonomy.integrations.crewai.Crew"
                 ) as mock_crew:
                     mock_crew.return_value = MagicMock()
                     crew = create_scalpel_fix_crew()
@@ -99,7 +99,7 @@ class TestErrorToDiffFinalGaps:
 
     def test_typescript_property_missing_error(self):
         """[20251217_TEST] Cover TypeScript Property missing error type."""
-        from code_scalpel.autonomy import ErrorToDiffEngine, ErrorType
+        from codescalpel_agents.autonomy import ErrorToDiffEngine, ErrorType
 
         engine = ErrorToDiffEngine(project_root="/tmp")
         error_output = "user.ts(5,1): error TS2741: Property 'email' is missing in type '{ name: string }'"
@@ -109,7 +109,10 @@ class TestErrorToDiffFinalGaps:
 
     def test_test_fix_generator(self):
         """[20251217_TEST] Cover TestFixGenerator paths."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine, ErrorType
+        from codescalpel_agents.autonomy.error_to_diff import (
+            ErrorToDiffEngine,
+            ErrorType,
+        )
 
         engine = ErrorToDiffEngine(project_root="/tmp")
         error_output = "AssertionError: assert 10 == 5"

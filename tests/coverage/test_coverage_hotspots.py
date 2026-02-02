@@ -298,6 +298,9 @@ def test_crewai_handles_analysis_error(monkeypatch) -> None:
 def test_run_server_disables_debug_in_production(monkeypatch) -> None:
     """run_server should warn and disable debug when FLASK_ENV=production."""
 
+    # [20260129_FIX] Import the actual implementation module, not the deprecated alias,
+    # to ensure monkeypatch works on the internal create_app call.
+    from codescalpel_web import server as real_server
     from code_scalpel.integrations import rest_api_server
 
     # [20251216_TEST] Exercise production debug warning path without starting server
@@ -308,7 +311,9 @@ def test_run_server_disables_debug_in_production(monkeypatch) -> None:
             calls.update({"host": host, "port": port, "debug": debug})
 
     monkeypatch.setenv("FLASK_ENV", "production")
-    monkeypatch.setattr(rest_api_server, "create_app", lambda config=None: StubApp())
+
+    # Patch the real module where run_server is defined
+    monkeypatch.setattr(real_server, "create_app", lambda config=None: StubApp())
 
     with pytest.warns(RuntimeWarning):
         rest_api_server.run_server(host="127.0.0.1", port=5000, debug=True)

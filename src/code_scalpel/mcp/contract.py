@@ -81,6 +81,51 @@ class ToolError(BaseModel):
         description="Optional structured details safe for clients; never include code contents",
     )
 
+    def __str__(self) -> str:
+        return self.error
+
+    def __getattr__(self, name: str) -> Any:
+        """Proxy string methods to the error message for backward compatibility."""
+        return getattr(self.error, name)
+
+    def __len__(self) -> int:
+        return len(self.error)
+
+    def __contains__(self, item: Any) -> bool:
+        return item in self.error
+
+    def __getitem__(self, key: int | slice) -> str:
+        return self.error[key]
+
+    def __add__(self, other: str) -> str:
+        return self.error + other
+
+    def __radd__(self, other: str) -> str:
+        return other + self.error
+
+
+class DictWithDotAccess(dict):
+    """Helper to allow dot access to dictionary fields for backward compatibility.
+
+    [20260126_COMPAT] Used when delegating attribute access to a dict payload that
+    was originally a Pydantic model. Allows nested dot access to work in tests.
+    """
+
+    def __getattr__(self, name: str) -> Any:
+        if name in self:
+            val = self[name]
+            if isinstance(val, dict):
+                return DictWithDotAccess(val)
+            if isinstance(val, list):
+                return [DictWithDotAccess(x) if isinstance(x, dict) else x for x in val]
+            return val
+        raise AttributeError(
+            f"'{type(self).__name__}' object has no attribute '{name}'"
+        )
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        self[name] = value
+
 
 class ToolResponseEnvelope(BaseModel):
     tier: str | None = Field(
@@ -135,8 +180,22 @@ class ToolResponseEnvelope(BaseModel):
         [20260125_BUGFIX] When envelope.error is None but tool returns error in data,
         delegate to data.error for backward compatibility with tests.
         """
-        # Avoid infinite recursion - only delegate if data exists and has the attr
         data = object.__getattribute__(self, "data")
+
+        # [20260126_FIX] Handle 'success' compatibility explicitly
+        # This handles cases where tests check result.success but result is now an envelope
+        if name == "success":
+            # 1. Check if success is explicitly in data (priority)
+            if data is not None:
+                if isinstance(data, dict) and "success" in data:
+                    return data["success"]
+                if hasattr(data, "success"):
+                    return getattr(data, "success")
+
+            # 2. Derive from error state (fallback)
+            error = object.__getattribute__(self, "error")
+            return error is None
+
         if data is not None:
             # [20260124_COMPAT] Handle computed properties that are lost in model_dump()
             # These were @property methods on the original Pydantic models
@@ -149,9 +208,63 @@ class ToolResponseEnvelope(BaseModel):
                 if name == "import_count" and "imports" in data:
                     return len(data["imports"])
                 if name in data:
-                    return data[name]
+                    val = data[name]
+                    # [20260126_COMPAT] recursively wrap for dot access compatibility
+                    if isinstance(val, dict):
+                        return DictWithDotAccess(val)
+                    if isinstance(val, list):
+                        return [
+                            DictWithDotAccess(x) if isinstance(x, dict) else x
+                            for x in val
+                        ]
+                    return val
             if hasattr(data, name):
                 return getattr(data, name)
+
+        # [20260126_FIX] Handle fields that may be filtered out by response config
+        # (e.g. exclude_empty_arrays=True). If 'data' is a dict and the field is missing,
+        # return an empty list for known list fields to restore Pydantic default behavior.
+        known_list_fields = {
+            "accessible",
+            "inaccessible",
+            "suggestions",
+            "workspace_roots",
+            "boundary_violations",
+            "traversal_vulnerabilities",
+            "dynamic_imports",
+            "functions",
+            "classes",
+            "imports",
+            "issues",
+            "findings",
+            "nodes",
+            "edges",
+            "warnings",
+            "violations",
+            "remediation_suggestions",
+            "complexity_hotspots",
+            "vulnerabilities",
+            "test_cases",
+            "generated_schemas",
+        }
+        if name in known_list_fields and data is not None and isinstance(data, dict):
+            return []
+
+        # [20260126_FIX] Handle nullable fields that may be filtered (exclude_null_values=True)
+        known_nullable_fields = {
+            "truncated",
+            "error_details",
+            "backup_path",
+            "diff",
+            "pro_features_enabled",
+        }
+        if (
+            name in known_nullable_fields
+            and data is not None
+            and isinstance(data, dict)
+        ):
+            return None
+
         raise AttributeError(
             f"'{type(self).__name__}' object has no attribute '{name}'"
         )
@@ -166,9 +279,9 @@ class ToolResponseEnvelope(BaseModel):
         # Use object.__getattribute__ to avoid recursion
         value = object.__getattribute__(self, name)
 
-        # For backward compatibility: if error/success are being accessed and
-        # are None/not meaningful, delegate to data
-        if name in ("error", "success") and value is None:
+        # For backward compatibility: if error is being accessed and
+        # is None, delegate to data
+        if name == "error" and value is None:
             try:
                 data = object.__getattribute__(self, "data")
                 if data is not None:

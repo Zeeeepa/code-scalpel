@@ -71,16 +71,14 @@ class TestOracleWritePerfectCodeWithWrongInputs:
         Expected: Successful response with constraint specification
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 def authenticate(user: str, password: str) -> bool:
     return user == "admin" and password == "secret"
 
 class AuthManager:
     def validate(self, token: str) -> bool:
         return len(token) > 0
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -181,15 +179,13 @@ class TestOracleExtractCodeWithWrongInputs:
         Expected: Error indicates function not found, may suggest similar names
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 def compute_sum(a, b):
     return a + b
 
 def compute_product(a, b):
     return a * b
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -216,8 +212,7 @@ def compute_product(a, b):
         Expected: Successful extraction with code and context
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 import math
 
 def calculate_distance(x1, y1, x2, y2):
@@ -228,8 +223,7 @@ class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -256,8 +250,7 @@ class Point:
         Expected: Successful extraction of method with class context
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 class Calculator:
     '''A simple calculator.'''
     
@@ -268,8 +261,7 @@ class Calculator:
     def multiply(self, a: int, b: int) -> int:
         '''Multiply two numbers.'''
         return a * b
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -295,15 +287,13 @@ class TestOracleRenameSymbolWithWrongInputs:
         Expected: Error indicates symbol not found
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 def authenticate_user(username, password):
     return True
 
 def validate_token(token):
     return len(token) > 0
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -329,15 +319,13 @@ def validate_token(token):
         Expected: Successful rename with backup created
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 def old_name(x):
     '''This will be renamed.'''
     return x * 2
 
 print(old_name(5))
-"""
-            )
+""")
             temp_path = f.name
 
         try:

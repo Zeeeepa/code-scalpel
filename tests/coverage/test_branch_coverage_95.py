@@ -366,7 +366,7 @@ class TestErrorToDiffBranchCoverage:
 
     def test_analyze_python_name_error(self):
         """[20251217_TEST] Cover Python NameError analysis."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(tmp)
@@ -382,7 +382,7 @@ NameError: name 'undefined_var' is not defined"""
 
     def test_analyze_python_type_error(self):
         """[20251217_TEST] Cover Python TypeError analysis."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(tmp)
@@ -394,7 +394,7 @@ NameError: name 'undefined_var' is not defined"""
 
     def test_analyze_python_syntax_error(self):
         """[20251217_TEST] Cover Python SyntaxError analysis."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(tmp)
@@ -406,7 +406,7 @@ NameError: name 'undefined_var' is not defined"""
 
     def test_analyze_python_import_error(self):
         """[20251217_TEST] Cover Python ImportError analysis."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(tmp)
@@ -418,7 +418,7 @@ NameError: name 'undefined_var' is not defined"""
 
     def test_analyze_python_attribute_error(self):
         """[20251217_TEST] Cover Python AttributeError analysis."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(tmp)
@@ -430,7 +430,7 @@ NameError: name 'undefined_var' is not defined"""
 
     def test_analyze_javascript_error(self):
         """[20251217_TEST] Cover JavaScript error analysis."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(tmp)
@@ -442,7 +442,7 @@ NameError: name 'undefined_var' is not defined"""
 
     def test_analyze_typescript_error(self):
         """[20251217_TEST] Cover TypeScript error analysis."""
-        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
+        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(tmp)

@@ -57,7 +57,7 @@ class TestAutogenIntegrationFull:
     def test_import_exception_paths(self):
         """[20251217_TEST] Cover autogen import exception handling."""
         # Test that module handles import errors gracefully
-        from code_scalpel.autonomy.integrations import autogen
+        from codescalpel_agents.autonomy.integrations import autogen
 
         assert autogen is not None
 
@@ -68,7 +68,9 @@ class TestLangGraphFull:
     def test_exception_in_analyze_node(self):
         """[20251217_TEST] Cover exception handling in analyze_error_node."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import analyze_error_node
+            from codescalpel_agents.autonomy.integrations.langgraph import (
+                analyze_error_node,
+            )
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -86,7 +88,9 @@ class TestLangGraphFull:
     def test_generate_fix_exception_path(self):
         """[20251217_TEST] Cover exception path in generate_fix_node."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
+            from codescalpel_agents.autonomy.integrations.langgraph import (
+                generate_fix_node,
+            )
         except ImportError:
             pytest.skip("LangGraph not available")
 

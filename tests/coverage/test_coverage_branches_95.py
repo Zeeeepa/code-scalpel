@@ -64,7 +64,7 @@ class TestErrorToDiffParsers:
 
     def test_java_error_parser(self):
         """[20251217_TEST] Cover Java error parsing."""
-        from code_scalpel.autonomy.error_to_diff import JavaErrorParser
+        from codescalpel_agents.autonomy.error_to_diff import JavaErrorParser
 
         parser = JavaErrorParser()
         error_msg = """
@@ -79,7 +79,7 @@ Main.java:10: error: cannot find symbol
 
     def test_javascript_error_parser(self):
         """[20251217_TEST] Cover JavaScript error parsing."""
-        from code_scalpel.autonomy.error_to_diff import JavaScriptErrorParser
+        from codescalpel_agents.autonomy.error_to_diff import JavaScriptErrorParser
 
         parser = JavaScriptErrorParser()
         error_msg = """
@@ -91,7 +91,7 @@ ReferenceError: foo is not defined
 
     def test_typescript_error_parser(self):
         """[20251217_TEST] Cover TypeScript error parsing."""
-        from code_scalpel.autonomy.error_to_diff import TypeScriptErrorParser
+        from codescalpel_agents.autonomy.error_to_diff import TypeScriptErrorParser
 
         parser = TypeScriptErrorParser()
         error_msg = """
@@ -103,7 +103,7 @@ error TS2322: Type 'string' is not assignable to type 'number'.
 
     def test_python_error_parser(self):
         """[20251217_TEST] Cover Python error parsing."""
-        from code_scalpel.autonomy.error_to_diff import PythonErrorParser
+        from codescalpel_agents.autonomy.error_to_diff import PythonErrorParser
 
         parser = PythonErrorParser()
         error_msg = """
@@ -276,7 +276,7 @@ class TestMutationGate:
 
     def test_mutation_gate_import(self):
         """[20251217_TEST] Cover mutation gate import."""
-        from code_scalpel.autonomy import mutation_gate
+        from codescalpel_agents.autonomy import mutation_gate
 
         assert mutation_gate is not None
 
