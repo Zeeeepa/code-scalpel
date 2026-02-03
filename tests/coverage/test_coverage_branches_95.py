@@ -6,6 +6,16 @@ Tests only include verified working APIs.
 import ast
 import tempfile
 
+import pytest
+
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 
 class TestTestGeneratorBranches:
     """Tests for test_generator.py branches - these work."""
@@ -59,6 +69,7 @@ def add_three(a: int, b: int, c: int) -> int:
         assert result is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestErrorToDiffParsers:
     """Tests for error_to_diff.py parsers - verified working."""
 
@@ -241,6 +252,7 @@ class TestUnifiedSinkDetector:
 
         code = """
 import os
+
 user_cmd = input()
 os.system(user_cmd)
 """
@@ -271,6 +283,7 @@ class TestPolicyEngine:
         assert policy_engine is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestMutationGate:
     """Tests for mutation_gate.py - target 91%."""
 

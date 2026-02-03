@@ -7,6 +7,7 @@ import json
 import sys
 
 from code_scalpel import cli
+import pytest
 
 
 def test_analyze_file_unknown_extension(monkeypatch, tmp_path, capsys):
@@ -220,6 +221,7 @@ def test_start_mcp_server_http_keyboard_interrupt(monkeypatch, capsys, tmp_path)
 def test_start_server_keyboard_interrupt(monkeypatch, capsys):
     """Ensure start_server handles KeyboardInterrupt gracefully."""
 
+    pytest.importorskip("codescalpel_web")
     import code_scalpel.integrations.rest_api_server as rest_server
 
     def _boom(**kwargs):  # noqa: ANN001

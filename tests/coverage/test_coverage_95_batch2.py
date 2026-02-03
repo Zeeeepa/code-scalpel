@@ -9,6 +9,15 @@ from pathlib import Path
 
 import pytest
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
+
 # =============================================================================
 # Tests for generators/test_generator.py - Uncovered lines 566, 606, 654
 # =============================================================================
@@ -256,6 +265,7 @@ class TestTaintTrackerMore:
 # =============================================================================
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestErrorToDiffMore:
     """More tests for ErrorToDiffEngine."""
 

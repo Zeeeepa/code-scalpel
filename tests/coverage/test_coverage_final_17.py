@@ -56,7 +56,10 @@ class TestFinal17Elements:
 
     def test_error_to_diff_non_python(self):
         """Test error_to_diff for non-Python language."""
-        from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
+        try:
+            from codescalpel_agents.autonomy.error_to_diff import ErrorToDiffEngine
+        except ImportError:
+            pytest.skip("codescalpel_agents package not installed")
 
         with tempfile.TemporaryDirectory() as tmp:
             engine = ErrorToDiffEngine(project_root=Path(tmp))

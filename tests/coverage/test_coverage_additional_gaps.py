@@ -18,6 +18,16 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../s
 SAFE_TMP = tempfile.gettempdir()
 
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
+
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestErrorToDiffAdditionalGaps:
     """Additional error_to_diff.py coverage tests."""
 
@@ -79,6 +89,7 @@ print("hello")"""
         assert analysis is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestAuditAdditionalGaps:
     """Additional audit.py coverage tests."""
 
@@ -191,6 +202,7 @@ class TestAuditAdditionalGaps:
             assert "TYPE_A" in filtered
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestSandboxAdditionalGaps:
     """Additional sandbox.py coverage tests."""
 
@@ -338,6 +350,7 @@ class TestLangGraphAdditionalGaps:
         assert "fix_attempts" in result
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestMutationGateAdditionalGaps:
     """Additional mutation_gate.py coverage tests."""
 
@@ -391,6 +404,7 @@ class TestMutationGateAdditionalGaps:
         assert result is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestMiscCoverageGaps:
     """Miscellaneous coverage gap tests."""
 

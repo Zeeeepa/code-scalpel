@@ -3,6 +3,15 @@
 
 import tempfile
 from pathlib import Path
+import pytest
+
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
 
 
 class TestASTToolsInitBranches:
@@ -29,6 +38,7 @@ class TestASTToolsInitBranches:
         assert hasattr(ast_tools, "CrossFileExtractor") or True
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestAutogenFunctionBranches2:
     """Test autogen.py uncovered function branches."""
 
@@ -53,6 +63,7 @@ class TestAutogenFunctionBranches2:
         assert result["success"] is False
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestLanggraphExceptionBranches2:
     """Test langgraph.py exception branches."""
 
@@ -112,6 +123,7 @@ class TestASTCacheExtraBranches2:
             assert stats is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestErrorToDiffExtraBranches2:
     """Test error_to_diff.py extra branches."""
 
@@ -130,6 +142,7 @@ class TestErrorToDiffExtraBranches2:
             assert result is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestMutationGateExtraBranches2:
     """Test mutation_gate.py extra branches."""
 
@@ -148,6 +161,7 @@ class TestMutationGateExtraBranches2:
         assert gate.min_mutation_score == 0.6
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestSandboxExtraBranches2:
     """Test sandbox.py extra branches."""
 

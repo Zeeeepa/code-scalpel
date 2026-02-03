@@ -11,6 +11,15 @@ Target uncovered branches in:
 import ast
 import tempfile
 from pathlib import Path
+import pytest
+
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
 
 
 class TestParallelParserBranches:
@@ -93,6 +102,7 @@ class TestASTCacheBranches:
             assert stats is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestErrorToDiffBranches:
     """Test error_to_diff.py uncovered branches."""
 
@@ -140,6 +150,7 @@ class TestErrorToDiffBranches:
             engine._apply_diff(source, diff)
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestAutogenBranches:
     """Test autogen.py uncovered branches."""
 
@@ -211,6 +222,7 @@ class TestAutogenBranches:
         assert result["success"] is False
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestLanggraphBranches:
     """Test langgraph.py uncovered branches."""
 
@@ -417,7 +429,10 @@ class TestMoreBranchCoverage:
 
     def test_audit_trail_branches(self):
         """Test audit trail branches."""
-        from codescalpel_agents.autonomy.audit import AutonomyAuditTrail
+        try:
+            from codescalpel_agents.autonomy.audit import AutonomyAuditTrail
+        except ImportError:
+            pytest.skip("codescalpel_agents package not installed")
 
         with tempfile.TemporaryDirectory() as tmp:
             trail = AutonomyAuditTrail(storage_path=Path(tmp))
@@ -425,7 +440,10 @@ class TestMoreBranchCoverage:
 
     def test_mutation_gate_branches(self):
         """Test mutation gate branches."""
-        from codescalpel_agents.autonomy.mutation_gate import MutationTestGate
+        try:
+            from codescalpel_agents.autonomy.mutation_gate import MutationTestGate
+        except ImportError:
+            pytest.skip("codescalpel_agents package not installed")
         from codescalpel_agents.autonomy.sandbox import SandboxExecutor
 
         sandbox = SandboxExecutor()
@@ -434,7 +452,10 @@ class TestMoreBranchCoverage:
 
     def test_sandbox_branches(self):
         """Test sandbox branches."""
-        from codescalpel_agents.autonomy.sandbox import SandboxExecutor
+        try:
+            from codescalpel_agents.autonomy.sandbox import SandboxExecutor
+        except ImportError:
+            pytest.skip("codescalpel_agents package not installed")
 
         sandbox = SandboxExecutor(isolation_level="process", max_cpu_seconds=5)
         assert sandbox is not None

@@ -373,6 +373,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [smoke]
     timeout-minutes: 10
+    # [20260202_FIX] Non-blocking: requires license JWTs to regenerate; warns if stale
+    continue-on-error: true
     permissions:
       contents: read
 
@@ -436,6 +438,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [smoke]
     timeout-minutes: 10
+    # [20260202_FIX] Non-blocking: requires license JWTs to regenerate; warns if stale
+    continue-on-error: true
     permissions:
       contents: read
 
