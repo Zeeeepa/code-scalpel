@@ -17,6 +17,14 @@ pytest.importorskip("code_scalpel")
 
 # Sample code for testing
 SAMPLE_PYTHON_CODE = '''
+
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 def calculate_discount(price: float, quantity: int) -> float:
     """Calculate discount based on quantity ordered."""
     if quantity <= 0:
@@ -916,6 +924,7 @@ def check_cache(key):
             assert "graph" in result.mermaid.lower() or len(result.edges) > 0
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestMCPToolRoadmapCompliance:
     """Verify MCP tools meet Development Roadmap requirements."""
 

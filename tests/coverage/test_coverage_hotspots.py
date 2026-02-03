@@ -11,6 +11,14 @@ from code_scalpel.security.analyzers.cross_file_taint import (
     CrossFileTaintTracker,
 )
 
+# [20260202_FIX] Skip tests when optional codescalpel-web package is not installed
+try:
+    import codescalpel_web  # noqa: F401
+
+    _HAS_WEB = True
+except ImportError:
+    _HAS_WEB = False
+
 
 def _write(tmp_path: Path, relative: str, content: str) -> Path:
     path = tmp_path / relative

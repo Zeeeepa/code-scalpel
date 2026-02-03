@@ -250,6 +250,7 @@ class TestSandboxAdditionalGaps:
         assert result.success is False
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestCrewAIAdditionalGaps:
     """Additional crewai.py coverage tests."""
 
@@ -307,6 +308,7 @@ class TestCrewAIAdditionalGaps:
         assert isinstance(result, str)
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestLangGraphAdditionalGaps:
     """Additional langgraph.py coverage tests."""
 

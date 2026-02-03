@@ -17,6 +17,15 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../s
 SAFE_TMP = tempfile.gettempdir()
 
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
+
 class TestASTToolsInitCoverage:
     """Tests for ast_tools/__init__.py gaps."""
 
@@ -62,6 +71,7 @@ class TestMCPServerCoverage:
                 server.ALLOWED_ROOTS = original_roots
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestAutonomyIntegrationsCoverage:
     """Additional integration tests for autonomy module."""
 
@@ -94,6 +104,7 @@ class TestAutonomyIntegrationsCoverage:
                     assert crew is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestErrorToDiffFinalGaps:
     """Final gap coverage for error_to_diff.py."""
 

@@ -6,6 +6,14 @@ from pathlib import Path
 
 import pytest
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 
 class TestFinal17Elements:
     """Final targeted tests."""

@@ -10,6 +10,14 @@ from unittest.mock import patch
 
 import pytest
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 # =============================================================================
 # Tests for ast_tools/builder.py - Uncovered lines 50-51, 78-80, 147-150
 # =============================================================================
@@ -527,6 +535,7 @@ class TestAliasResolverUncovered:
 # =============================================================================
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestAdditionalEdgeCases:
     """Additional edge case tests for coverage."""
 

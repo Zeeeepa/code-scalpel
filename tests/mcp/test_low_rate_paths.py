@@ -23,6 +23,14 @@ from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 from code_scalpel.mcp import server as mcp_server
 from code_scalpel.pdg_tools.visualizer import PDGVisualizer
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 
 def test_cli_analyze_file_missing_path(capsys):
     exit_code = cli.analyze_file("nonexistent_file.py")

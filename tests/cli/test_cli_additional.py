@@ -9,6 +9,14 @@ import sys
 from code_scalpel import cli
 import pytest
 
+# [20260202_FIX] Skip tests when optional codescalpel-web package is not installed
+try:
+    import codescalpel_web  # noqa: F401
+
+    _HAS_WEB = True
+except ImportError:
+    _HAS_WEB = False
+
 
 def test_analyze_file_unknown_extension(monkeypatch, tmp_path, capsys):
     """Exercise analyze_file fallback language selection."""

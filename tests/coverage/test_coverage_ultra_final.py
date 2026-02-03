@@ -8,6 +8,14 @@ from pathlib import Path
 
 import pytest
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 
 class TestAutogenExceptionPaths:
     """Test autogen.py exception paths lines 123-124, 157-158, 193-194."""
@@ -39,6 +47,7 @@ class TestAutogenExceptionPaths:
         scalpel_validate_impl("")
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestLanggraphExceptionPaths:
     """Test langgraph.py exception paths lines 136-145, 199-208."""
 
@@ -71,6 +80,7 @@ class TestLanggraphExceptionPaths:
         assert result is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestCrewAIExceptionPaths:
     """Test crewai.py exception paths."""
 
@@ -111,6 +121,7 @@ class TestCrewAIExceptionPaths:
             pytest.skip("CrewAI not installed")
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestErrorToDiffExceptionPaths:
     """Test error_to_diff.py uncovered lines."""
 
@@ -126,6 +137,7 @@ class TestErrorToDiffExceptionPaths:
             assert result is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestMutationGateExceptionPaths:
     """Test mutation_gate.py uncovered lines."""
 
@@ -142,6 +154,7 @@ class TestMutationGateExceptionPaths:
         assert gate.max_additional_mutations == 10
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestSandboxExceptionPaths:
     """Test sandbox.py uncovered lines."""
 

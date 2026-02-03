@@ -312,6 +312,7 @@ NameError: name 'undefined_var' is not defined
 # =============================================================================
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestSandboxMore:
     """More tests for Sandbox module."""
 

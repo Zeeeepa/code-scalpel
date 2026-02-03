@@ -11,6 +11,14 @@ from pathlib import Path
 
 import pytest
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 
@@ -51,6 +59,7 @@ class TestASTToolsInitFull:
         assert True  # Imports succeeded
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestAutogenIntegrationFull:
     """Tests for autogen.py - target from 80% to higher."""
 
@@ -62,6 +71,7 @@ class TestAutogenIntegrationFull:
         assert autogen is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestLangGraphFull:
     """Tests for langgraph.py - target from 83% to higher."""
 

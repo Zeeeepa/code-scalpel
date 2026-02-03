@@ -406,6 +406,7 @@ class TestMCPLoggingBranches:
         assert analytics is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestMoreBranchCoverage:
     """Additional branch coverage tests."""
 

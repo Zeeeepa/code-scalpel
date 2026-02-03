@@ -13,6 +13,14 @@ import json
 
 from code_scalpel.integrations.rest_api_server import MCPServerConfig, create_app
 
+# [20260202_FIX] Skip tests when optional codescalpel-web package is not installed
+try:
+    import codescalpel_web  # noqa: F401
+
+    _HAS_WEB = True
+except ImportError:
+    _HAS_WEB = False
+
 
 def _client(max_code_size: int = 100000):
     app = create_app(MCPServerConfig(max_code_size=max_code_size))

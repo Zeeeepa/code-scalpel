@@ -10,6 +10,14 @@ from pathlib import Path
 
 import pytest
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 # =============================================================================
 # TEST GENERATOR BRANCH COVERAGE (26 branches)
 # =============================================================================
@@ -361,6 +369,7 @@ class TestTaintTrackerBranchCoverage:
 @pytest.mark.skip(
     reason="Autonomy is now a separate product boundary (codescalpel-agents package)"
 )
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestErrorToDiffBranchCoverage:
     """Target uncovered branches in error_to_diff.py."""
 

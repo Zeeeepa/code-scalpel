@@ -10,6 +10,16 @@ from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
     TaintSource,
 )
 
+import pytest
+
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 
 class TestErrorToDiffCoverage:
     """Cover uncovered branches in error_to_diff.py."""
@@ -127,6 +137,7 @@ class TestASTBuilderCoverage:
         assert result is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestSandboxCoverage:
     """Cover uncovered lines in sandbox.py."""
 

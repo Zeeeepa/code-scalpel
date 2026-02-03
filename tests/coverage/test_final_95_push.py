@@ -13,6 +13,14 @@ from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
     TaintSource,
 )
 
+# [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
+try:
+    import codescalpel_agents  # noqa: F401
+
+    _HAS_AGENTS = True
+except ImportError:
+    _HAS_AGENTS = False
+
 
 class TestErrorToDiffFinalCoverage:
     """Cover more lines in error_to_diff.py."""
@@ -51,6 +59,7 @@ class TestErrorToDiffFinalCoverage:
             assert result is not None
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestAutogenIntegration:
     """Cover autogen integration lines."""
 
@@ -64,6 +73,7 @@ class TestAutogenIntegration:
             pytest.skip("AutoGen not installed")
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestLanggraphIntegration:
     """Cover langgraph integration lines."""
 
@@ -77,6 +87,7 @@ class TestLanggraphIntegration:
             pytest.skip("LangGraph not installed")
 
 
+@pytest.mark.skipif(not _HAS_AGENTS, reason="codescalpel-agents package not installed")
 class TestMutationGateCoverage:
     """Cover mutation_gate.py lines."""
 
