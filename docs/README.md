@@ -13,6 +13,11 @@ Welcome to the Code Scalpel documentation! This directory contains comprehensive
 | Want to contribute? | [CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Integration examples? | [Examples](getting_started/examples.md) |
 | API reference? | [Module Documentation](#module-documentation) |
+| MCP Tools Reference | [MCP Tools (current)](reference/mcp_tools_current.md) |
+| MCP Tools by Tier | [MCP Tools by Tier](reference/mcp_tools_by_tier.md) |
+| Development workflow? | [Development Workflow](DEVELOPMENT.md) |
+| CI/CD pipeline? | [Pipeline Documentation](PIPELINE.md) |
+| GitHub secrets setup? | [GitHub Secrets](GITHUB_SECRETS.md) |
 
 ---
 
@@ -227,5 +232,5 @@ For more details on documentation structure, see [DOCUMENT_ORGANIZATION.md](DOCU
 
 ---
 
-**Last Updated:** December 21, 2025  
-**Current Version:** v3.0.4 "Ninja Warrior"
+**Last Updated:** February 2, 2026
+**Current Version:** v1.3.2

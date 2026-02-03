@@ -89,7 +89,7 @@ class CacheConfig:
     # Cache location
     cache_dir: Path | None = None  # None = auto-detect
     use_global_cache: bool = True  # Use ~/.cache/code-scalpel/
-    use_local_cache: bool = True  # Use .scalpel_cache/
+    use_local_cache: bool = True  # Use .code-scalpel/cache/
 
     # Cache behavior
     max_entries: int = 10000  # Maximum cache entries
@@ -290,7 +290,7 @@ class AnalysisCache(Generic[T]):
 
         # Try local cache first (project-specific)
         if self.config.use_local_cache:
-            local_cache = Path.cwd() / ".scalpel_cache"
+            local_cache = Path.cwd() / ".code-scalpel" / "cache"
             if local_cache.exists() or self._can_create_dir(local_cache):
                 return local_cache
 

@@ -25,7 +25,9 @@ For AI agent integrations:
 # [20251225_RELEASE] v3.3.0 - Project Reorganization (Phases 1-4)
 # [20260126_RELEASE] v1.1.0 - Kernel integration pilot for analyze_code
 # [20260201_RELEASE] v1.3.0 - Oracle Resilience Middleware
-__version__ = "1.3.0"
+# [20260202_RELEASE] v1.3.2 - Security hardening and CI alignment
+# [20260202_RELEASE] v1.3.3 - Pipeline solidification and project organization
+__version__ = "1.3.3"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 

@@ -53,7 +53,7 @@ class IncrementalASTCache:
 
     """
 
-    def __init__(self, cache_dir: str | Path = ".scalpel_ast_cache"):
+    def __init__(self, cache_dir: str | Path = ".code-scalpel/cache/ast"):
         """
         Initialize the incremental AST cache.
 
@@ -405,7 +405,9 @@ class IncrementalASTCache:
 _global_ast_cache: Optional[IncrementalASTCache] = None
 
 
-def get_ast_cache(cache_dir: str | Path = ".scalpel_ast_cache") -> IncrementalASTCache:
+def get_ast_cache(
+    cache_dir: str | Path = ".code-scalpel/cache/ast",
+) -> IncrementalASTCache:
     """
     Get the global AST cache instance.
 

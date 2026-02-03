@@ -108,7 +108,7 @@ class ProjectContext:
         if cache_dir:
             self.cache_dir = Path(cache_dir).resolve()
         else:
-            self.cache_dir = self.root_path / ".code_scalpel_cache"
+            self.cache_dir = self.root_path / ".code-scalpel" / "cache"
 
         if enable_disk_cache:
             self.cache_dir.mkdir(parents=True, exist_ok=True)

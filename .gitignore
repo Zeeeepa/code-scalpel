@@ -41,9 +41,14 @@ pip-delete-this-directory.txt
 .code-scalpel.code-workspace
 pdg_visualizations/
 analysis_results/
-.scalpel_cache/
-.code_scalpel_cache/
-.scalpel_ast_cache/
+# [20260202_CLEANUP] Consolidated caches into .code-scalpel/cache/
+.scalpel_cache/            # Legacy cache dir (migrated)
+.code_scalpel_cache/       # Legacy cache dir (migrated)
+.scalpel_ast_cache/        # Legacy cache dir (migrated)
+.code-scalpel/cache/       # Consolidated cache directory
+.code-scalpel/runtime/     # Runtime state files
+.code-scalpel/logs/        # Application logs
+.code-scalpel/licenses/    # License JWTs (injected via GitHub Secrets in CI)
 .ruff_cache/
 compliance_reports/
 .code-scalpel/autonomy_audit/  # Autonomy audit trail runtime files
@@ -57,6 +62,7 @@ local_pipeline/
 .bench_tmp/
 .test_simple/
 .tmp_tier_comm/
+.tmp_tier_fallback/  # [20260202_CLEANUP] Migrated to .code-scalpel/runtime/
 
 # [20251228_TEST] Local remote-verifier integration artifacts (never commit)
 .code-scalpel/license.jwt

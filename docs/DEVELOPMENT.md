@@ -317,6 +317,65 @@ sudo apt-get install build-essential
 # Use Visual Studio Build Tools or MinGW
 ```
 
+### detect-secrets Hook Failing
+
+**Symptom**: Pre-commit fails with "Potential secrets detected"
+
+**Solution**:
+```bash
+# Review flagged secrets (marks false positives as allowed)
+detect-secrets audit .secrets.baseline
+
+# Update baseline with false positives marked
+detect-secrets scan > .secrets.baseline
+git add .secrets.baseline
+git commit -m "v1.3.2: Update secrets baseline"
+```
+
+### Missing .secrets.baseline
+
+**Symptom**: Pre-commit fails with `FileNotFoundError: .secrets.baseline`
+
+**Solution**:
+```bash
+detect-secrets scan > .secrets.baseline
+git add .secrets.baseline
+git commit -m "v1.3.2: Add secrets baseline"
+```
+
+### Version Mismatch Between Files
+
+**Symptom**: `verify.sh` fails with "Version mismatch detected"
+
+Version is defined in **two places** and must be kept in sync:
+- `pyproject.toml` (source of truth for builds)
+- `src/code_scalpel/__init__.py` (runtime version)
+
+**Solution**:
+```bash
+# Run the version sync checker for details
+./scripts/verify_version_sync.sh
+
+# Update both files to match
+VERSION="1.3.2"
+sed -i "s/version = \".*\"/version = \"$VERSION\"/" pyproject.toml
+sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" src/code_scalpel/__init__.py
+
+# Verify sync
+./scripts/verify_version_sync.sh
+```
+
+### Skipping Build Check in verify.sh
+
+If the package build check is slow during iteration:
+
+```bash
+# Skip the build step
+./scripts/verify.sh --skip-build
+```
+
+Note: The full build check will still run in CI.
+
 ## Related Documentation
 
 - [README.md](../README.md) - Project overview

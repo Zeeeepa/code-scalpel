@@ -17,6 +17,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.3] - 2026-02-02
+
+### Changed
+- **Project Structure Migration**: Consolidated scattered cache directories into `.code-scalpel/cache/`
+  - Migrated `.scalpel_cache/`, `.code_scalpel_cache/`, `.scalpel_ast_cache/` → `.code-scalpel/cache/`
+  - Renamed `.code-scalpel/license/` → `.code-scalpel/licenses/`
+  - Cleaned up temporary directories (`.tmp_tier_comm/`, `.tmp_tier_fallback/`)
+  - Updated all runtime cache path references in source code
+- **verify.sh Step Numbering**: Fixed inconsistent step numbering (was 1/4, 3/8, 5/8... now consistent 1/11 through 11/11)
+- **verify.sh Header Documentation**: Added comprehensive header with purpose, runtime, prerequisites, and usage
+
+### Added
+- **Version Sync Check**: Pre-check in `verify.sh` detects version mismatches between `pyproject.toml` and `__init__.py`
+- **`scripts/verify_version_sync.sh`**: Standalone version consistency checker
+- **`--skip-build` Flag**: `verify.sh` now supports `--skip-build` to skip expensive build check during iteration
+- **`scripts/migrate_project_structure.sh`**: One-time migration script for project structure consolidation
+- **`docs/PIPELINE.md`**: Comprehensive CI/CD pipeline documentation covering all three validation tiers
+- **`tests/README.md`**: Test suite organization guide with category descriptions and usage examples
+- **Troubleshooting Docs**: Added detect-secrets, version sync, and --skip-build troubleshooting to `docs/DEVELOPMENT.md`
+- **Navigation Links**: Updated `docs/README.md` with links to MCP tools reference, pipeline docs, and development workflow
+
+### Fixed
+- Version mismatch between `pyproject.toml` (1.3.2) and `src/code_scalpel/__init__.py` (was 1.3.0, now synced)
+
+---
+
+## [1.3.2] - 2026-02-02
+
+### Changed
+- **Security Hardening**: Added 40+ `.gitignore` patterns blocking API tokens, credentials, vault files, environment configs, and CI/CD artifacts
+
+### Added
+- **detect-secrets Pre-commit Hook**: Yelp/detect-secrets v1.4.0 integration with `.secrets.baseline`
+- **`.gitignore` Security Sections**: API tokens, environment variants, vault management, CI/CD artifacts, test credentials
+
+### Fixed
+- Redacted exact JWT file paths and vault key names from `docs/GITHUB_SECRETS.md`
+- Removed broken license examples from documentation (pointed to licensing team)
+
+---
+
+## [1.3.1] - 2026-02-01
+
+### Changed
+- **Black/Ruff Path Alignment**: Fixed `verify_local.sh` to check only `src/ tests/` (matching CI), not entire repo
+- **Pre-commit Hook Speed**: Changed pre-commit hook from `verify.sh` (comprehensive) to `verify_local.sh` (fast auto-fix)
+
+### Added
+- **Documentation Validation Steps**: Added Steps 9-11 to `verify.sh` for MCP tools reference and docs sync validation
+- **Optional Security Checks**: Added Bandit and pip-audit as warning-only checks in `verify_local.sh`
+
+---
+
 ## [1.3.0] - 2026-02-01
 
 ### Added

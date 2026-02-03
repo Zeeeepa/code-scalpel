@@ -369,7 +369,7 @@ class ProjectCrawler:
         self.parallelism = parallelism
         self.enable_cache = enable_cache
 
-        self._cache_dir = self.root_path / ".scalpel_cache"
+        self._cache_dir = self.root_path / ".code-scalpel" / "cache"
         self._cache_file = self._cache_dir / "crawl_cache_v1.json"
         self._cache_hits = 0
         self._cache_misses = 0
