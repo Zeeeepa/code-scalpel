@@ -15,15 +15,16 @@ import pytest
 # Skip imports that may not be available in all environments
 pytest.importorskip("code_scalpel")
 
-# Sample code for testing
-SAMPLE_PYTHON_CODE = '''
-
 # [20260202_FIX] Skip tests when optional codescalpel-agents package is not installed
 try:
     import codescalpel_agents  # noqa: F401
+
     _HAS_AGENTS = True
 except ImportError:
     _HAS_AGENTS = False
+
+# Sample code for testing
+SAMPLE_PYTHON_CODE = '''
 
 def calculate_discount(price: float, quantity: int) -> float:
     """Calculate discount based on quantity ordered."""
