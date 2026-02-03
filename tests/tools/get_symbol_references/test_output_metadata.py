@@ -40,14 +40,19 @@ def target():
 
     result = await server.get_symbol_references("target", project_root=str(project))
 
-    assert result.success is True
+    # Unwrap ToolResponseEnvelope: metadata lives in .data
+    data = (
+        result.data if hasattr(result, "data") and isinstance(result.data, dict) else {}
+    )
+    success = data.get("success", getattr(result, "success", False))
+    assert success is True
     # Verify output metadata fields are populated
-    assert result.tier_applied == "community"
-    assert result.max_files_applied == 3
-    assert result.max_references_applied == 10
+    assert data.get("tier_applied") == "community"
+    assert data.get("max_files_applied") == 3
+    assert data.get("max_references_applied") == 10
     # Community has no Pro/Enterprise features
-    assert result.pro_features_enabled is None
-    assert result.enterprise_features_enabled is None
+    assert data.get("pro_features_enabled") is None
+    assert data.get("enterprise_features_enabled") is None
 
 
 @pytest.mark.asyncio
@@ -86,17 +91,22 @@ result = target()
 
     result = await server.get_symbol_references("target", project_root=str(project))
 
-    assert result.success is True
+    data = (
+        result.data if hasattr(result, "data") and isinstance(result.data, dict) else {}
+    )
+    success = data.get("success", getattr(result, "success", False))
+    assert success is True
     # Verify output metadata
-    assert result.tier_applied == "pro"
-    assert result.max_files_applied is None  # Unlimited
-    assert result.max_references_applied is None  # Unlimited
+    assert data.get("tier_applied") == "pro"
+    assert data.get("max_files_applied") is None  # Unlimited
+    assert data.get("max_references_applied") is None  # Unlimited
     # Pro features should be listed
-    assert result.pro_features_enabled is not None
-    assert "usage_categorization" in result.pro_features_enabled
-    assert "scope_filtering" in result.pro_features_enabled
+    pro_features = data.get("pro_features_enabled")
+    assert pro_features is not None
+    assert "usage_categorization" in pro_features
+    assert "scope_filtering" in pro_features
     # No Enterprise features
-    assert result.enterprise_features_enabled is None
+    assert data.get("enterprise_features_enabled") is None
 
 
 @pytest.mark.asyncio
@@ -145,15 +155,21 @@ result = target()
 
     result = await server.get_symbol_references("target", project_root=str(project))
 
-    assert result.success is True
+    data = (
+        result.data if hasattr(result, "data") and isinstance(result.data, dict) else {}
+    )
+    success = data.get("success", getattr(result, "success", False))
+    assert success is True
     # Verify output metadata
-    assert result.tier_applied == "enterprise"
-    assert result.max_files_applied is None  # Unlimited
-    assert result.max_references_applied is None  # Unlimited
+    assert data.get("tier_applied") == "enterprise"
+    assert data.get("max_files_applied") is None  # Unlimited
+    assert data.get("max_references_applied") is None  # Unlimited
     # Pro features should be listed
-    assert result.pro_features_enabled is not None
-    assert "usage_categorization" in result.pro_features_enabled
+    pro_features = data.get("pro_features_enabled")
+    assert pro_features is not None
+    assert "usage_categorization" in pro_features
     # Enterprise features should be listed
-    assert result.enterprise_features_enabled is not None
-    assert "codeowners_integration" in result.enterprise_features_enabled
-    assert "impact_analysis" in result.enterprise_features_enabled
+    enterprise_features = data.get("enterprise_features_enabled")
+    assert enterprise_features is not None
+    assert "codeowners_integration" in enterprise_features
+    assert "impact_analysis" in enterprise_features

@@ -32,9 +32,21 @@ ENTERPRISE_LICENSE = (
 )
 
 
+def _clear_tier_caches():
+    """Clear licensing caches to prevent cross-test leakage."""
+    try:
+        from code_scalpel.licensing import jwt_validator, config_loader
+
+        jwt_validator._LICENSE_VALIDATION_CACHE = None
+        config_loader.clear_cache()
+    except Exception:
+        pass
+
+
 @pytest.fixture
 def clear_license_env():
-    """Clear license environment before test, restore after."""
+    """Clear license environment and caches before test, restore after."""
+    _clear_tier_caches()
     old_value = os.environ.get("CODE_SCALPEL_LICENSE_PATH")
     if "CODE_SCALPEL_LICENSE_PATH" in os.environ:
         del os.environ["CODE_SCALPEL_LICENSE_PATH"]
@@ -44,6 +56,7 @@ def clear_license_env():
         os.environ["CODE_SCALPEL_LICENSE_PATH"] = old_value
     elif "CODE_SCALPEL_LICENSE_PATH" in os.environ:
         del os.environ["CODE_SCALPEL_LICENSE_PATH"]
+    _clear_tier_caches()
 
 
 @pytest.fixture

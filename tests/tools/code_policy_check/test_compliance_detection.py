@@ -52,7 +52,7 @@ def get_records(request):
             compliance_standards=["hipaa", "soc2", "gdpr", "pci_dss"],
         )
 
-        assert result.tier == "enterprise"
+        assert result.tier_applied == "enterprise"
         assert getattr(
             result, "compliance_reports", None
         ), "Enterprise should return compliance reports"
@@ -93,7 +93,7 @@ def process(card):
             generate_report=True,
         )
 
-        assert result.tier == "enterprise"
+        assert result.tier_applied == "enterprise"
         assert getattr(result, "compliance_score", 0) > 0
         assert getattr(
             result, "pdf_report", None

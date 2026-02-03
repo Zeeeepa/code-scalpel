@@ -115,8 +115,29 @@ def calculate_tax(amount, rate=0.1):
         """Invalid/expired licenses should fall back to Community tier."""
         from code_scalpel.mcp.server import _get_current_tier
 
-        # Simulate license being invalid (e.g., missing or expired)
-        with patch.dict(os.environ, {"CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY": "1"}):
+        # Clear any cached tier from previous tests
+        try:
+            from code_scalpel.licensing import jwt_validator, config_loader
+
+            jwt_validator._LICENSE_VALIDATION_CACHE = None
+            config_loader.clear_cache()
+        except Exception:
+            pass
+
+        # Simulate license being invalid: disable discovery AND remove any explicit path
+        env_overrides = {
+            "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY": "1",
+        }
+        env_removals = {"CODE_SCALPEL_LICENSE_PATH", "CODE_SCALPEL_TIER"}
+        with patch.dict(os.environ, env_overrides):
+            for key in env_removals:
+                os.environ.pop(key, None)
+            # Clear cache again after env changes
+            try:
+                jwt_validator._LICENSE_VALIDATION_CACHE = None
+                config_loader.clear_cache()
+            except Exception:
+                pass
             tier = _get_current_tier()
             # Without explicit license path and discovery disabled, should be community
             assert tier == "community"

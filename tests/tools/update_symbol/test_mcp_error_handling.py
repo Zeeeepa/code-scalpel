@@ -314,12 +314,19 @@ async def test_update_symbol_redacts_pii_from_error_details(
     try:
         result = await tool.run(args, context=None, convert_result=False)
 
-        assert isinstance(result, (dict, PatchResultModel))
-        err = (
-            result.error
-            if isinstance(result, PatchResultModel)
-            else result.get("error")
-        )
+        # result may be a ToolResponseEnvelope, PatchResultModel, or dict
+        from code_scalpel.mcp.contract import ToolResponseEnvelope
+
+        if isinstance(result, ToolResponseEnvelope):
+            err = (
+                result.data.get("error")
+                if isinstance(result.data, dict)
+                else result.error
+            )
+        elif isinstance(result, PatchResultModel):
+            err = result.error
+        else:
+            err = result.get("error")
         assert err, "Should return error for nonexistent symbol"
 
         # Secret should not appear in error payload

@@ -37,8 +37,8 @@ class TestBrokenLicenseHandling:
 
         # Should fall back to Community tier when license is broken
         assert (
-            result.tier == "community"
-        ), f"Broken license should fall back to community tier, got {result.tier}"
+            result.tier_applied == "community"
+        ), f"Broken license should fall back to community tier, got {result.tier_applied}"
 
         monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
         monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
@@ -63,8 +63,8 @@ class TestBrokenLicenseHandling:
         result = await code_policy_check(paths=[str(test_file)])
 
         assert (
-            result.tier == "community"
-        ), f"Broken Enterprise license should fall back to community tier, got {result.tier}"
+            result.tier_applied == "community"
+        ), f"Broken Enterprise license should fall back to community tier, got {result.tier_applied}"
 
         monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
         monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
@@ -90,8 +90,8 @@ class TestMissingLicenseHandling:
         result = await code_policy_check(paths=[str(test_file)])
 
         assert (
-            result.tier == "community"
-        ), f"Missing license should default to community tier, got {result.tier}"
+            result.tier_applied == "community"
+        ), f"Missing license should default to community tier, got {result.tier_applied}"
 
         monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
         monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
@@ -113,8 +113,8 @@ class TestMissingLicenseHandling:
         result = await code_policy_check(paths=[str(test_file)])
 
         assert (
-            result.tier == "community"
-        ), f"Empty license directory should default to community tier, got {result.tier}"
+            result.tier_applied == "community"
+        ), f"Empty license directory should default to community tier, got {result.tier_applied}"
 
         monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
         monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
@@ -148,8 +148,8 @@ except:
 
         assert result.success, "Tool should succeed even with malformed license"
         assert (
-            result.tier == "community"
-        ), f"Malformed license should fall back to community tier, got {result.tier}"
+            result.tier_applied == "community"
+        ), f"Malformed license should fall back to community tier, got {result.tier_applied}"
         assert len(result.violations) > 0, "Should still detect violations"
 
         monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
@@ -167,10 +167,10 @@ except:
 
         # Verify tier attribute exists
         assert hasattr(result, "tier"), "Result should have tier attribute"
-        assert result.tier in [
+        assert result.tier_applied in [
             "community",
             "pro",
             "enterprise",
-        ], f"Tier should be valid value, got {result.tier}"
+        ], f"Tier should be valid value, got {result.tier_applied}"
 
         monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)

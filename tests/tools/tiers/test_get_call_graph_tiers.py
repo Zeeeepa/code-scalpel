@@ -7,7 +7,7 @@ are properly enforced and populated.
 
 import pytest
 
-from src.code_scalpel.mcp.server import CallGraphResultModel, get_call_graph
+from code_scalpel.mcp.server import CallGraphResultModel, get_call_graph
 
 
 class TestOutputMetadataFields:

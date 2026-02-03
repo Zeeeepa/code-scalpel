@@ -24,8 +24,11 @@ def _pythonpath_env(repo_root: Path) -> dict[str, str]:
     env = __import__("os").environ.copy()
     existing = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = str(src_root) + (":" + existing if existing else "")
-    # Keep license discovery deterministic
-    env.setdefault("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    # Keep license discovery deterministic and default to community
+    env["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = "1"
+    # Remove inherited license path so community tests aren't contaminated
+    env.pop("CODE_SCALPEL_LICENSE_PATH", None)
+    env.pop("CODE_SCALPEL_TIER", None)
     # Ensure policy signing secret for Enterprise tiers
     env.setdefault("SCALPEL_MANIFEST_SECRET", "unit-test-secret")
     return env

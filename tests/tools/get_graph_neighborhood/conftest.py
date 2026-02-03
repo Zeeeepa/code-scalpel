@@ -24,6 +24,29 @@ except (ImportError, ModuleNotFoundError):
     NeighborhoodNodeModel = None
     NeighborhoodEdgeModel = None
 
+
+@pytest.fixture(autouse=True)
+def clear_tier_cache():
+    """Clear tier detection cache before and after each test to prevent leakage."""
+    try:
+        from code_scalpel.licensing import jwt_validator, config_loader
+
+        jwt_validator._LICENSE_VALIDATION_CACHE = None
+        config_loader.clear_cache()
+    except Exception:
+        pass
+
+    yield
+
+    try:
+        from code_scalpel.licensing import jwt_validator, config_loader
+
+        jwt_validator._LICENSE_VALIDATION_CACHE = None
+        config_loader.clear_cache()
+    except Exception:
+        pass
+
+
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================

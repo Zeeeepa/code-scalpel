@@ -14,44 +14,64 @@ import pytest
 from code_scalpel.mcp.server import code_policy_check
 
 
+def _clear_caches():
+    try:
+        from code_scalpel.licensing import jwt_validator, config_loader
+
+        jwt_validator._LICENSE_VALIDATION_CACHE = None
+        config_loader.clear_cache()
+    except Exception:
+        pass
+
+
 @pytest.fixture
 def community_license(monkeypatch, tmp_path):
     """Set license to Community tier (no license file)."""
-    # Disable license discovery to force Community tier
+    _clear_caches()
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
-    # Also set path to non-existent file to ensure explicit path check fails
     empty_dir = tmp_path / "no_license"
     empty_dir.mkdir()
     monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(empty_dir / "nonexistent.jwt"))
     yield
     monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
     monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+    _clear_caches()
 
 
 @pytest.fixture
 def pro_license(monkeypatch):
     """Set license to Pro tier using tests/licenses/code_scalpel_license_pro_*.jwt."""
-    # Find the Pro license file
+    _clear_caches()
     license_dir = Path(__file__).parent.parent.parent / "licenses"
     pro_licenses = list(license_dir.glob("code_scalpel_license_pro_*.jwt"))
     assert pro_licenses, f"No Pro license found in {license_dir}"
-    license_path = pro_licenses[0]  # Use first match
+    license_path = pro_licenses[0]
 
     monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(license_path))
-    # Disable discovery to ensure only explicit path is used
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
     yield
     monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
     monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+    _clear_caches()
 
 
 @pytest.fixture
 def enterprise_license(monkeypatch):
-    """Set license to Enterprise tier using .code-scalpel/license folder."""
-    # Default behavior - use .code-scalpel/license folder
-    # Just ensure env var is cleared so it uses default discovery
-    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
+    """Set license to Enterprise tier using tests/licenses/."""
+    _clear_caches()
+    license_dir = Path(__file__).parent.parent.parent / "licenses"
+    enterprise_licenses = list(
+        license_dir.glob("code_scalpel_license_enterprise_*.jwt")
+    )
+    assert enterprise_licenses, f"No Enterprise license found in {license_dir}"
+    license_path = enterprise_licenses[0]
+
+    monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(license_path))
+    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
     yield
+    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
+    monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+    _clear_caches()
 
 
 class TestCommunityTierLimits:
@@ -68,7 +88,9 @@ class TestCommunityTierLimits:
         result = await code_policy_check(paths=[str(tmp_path)])
 
         # Verify tier is Community
-        assert result.tier == "community", f"Expected community tier, got {result.tier}"
+        assert (
+            result.tier_applied == "community"
+        ), f"Expected community tier, got {result.tier_applied}"
 
         # Should only check 100 files (Community limit)
         assert (
@@ -89,7 +111,9 @@ except:
         result = await code_policy_check(paths=[str(test_file)])
 
         # Verify tier is Community
-        assert result.tier == "community", f"Expected community tier, got {result.tier}"
+        assert (
+            result.tier_applied == "community"
+        ), f"Expected community tier, got {result.tier_applied}"
 
         # Should apply max 50 rules (Community limit)
         assert (
@@ -111,7 +135,9 @@ class TestProTierLimits:
         result = await code_policy_check(paths=[str(tmp_path)])
 
         # Verify tier is Pro
-        assert result.tier == "pro", f"Expected pro tier, got {result.tier}"
+        assert (
+            result.tier_applied == "pro"
+        ), f"Expected pro tier, got {result.tier_applied}"
 
         # Should check all 50 files (under Pro limit)
         assert (
@@ -132,7 +158,9 @@ except:
         result = await code_policy_check(paths=[str(test_file)])
 
         # Verify tier is Pro
-        assert result.tier == "pro", f"Expected pro tier, got {result.tier}"
+        assert (
+            result.tier_applied == "pro"
+        ), f"Expected pro tier, got {result.tier_applied}"
 
         # Pro tier should apply rules (actual count depends on implementation)
         assert (
@@ -159,8 +187,8 @@ class TestEnterpriseTierLimits:
 
         # Verify tier is Enterprise
         assert (
-            result.tier == "enterprise"
-        ), f"Expected enterprise tier, got {result.tier}"
+            result.tier_applied == "enterprise"
+        ), f"Expected enterprise tier, got {result.tier_applied}"
 
         # Should check all files (no limit)
         assert (
@@ -182,8 +210,8 @@ except:
 
         # Verify tier is Enterprise
         assert (
-            result.tier == "enterprise"
-        ), f"Expected enterprise tier, got {result.tier}"
+            result.tier_applied == "enterprise"
+        ), f"Expected enterprise tier, got {result.tier_applied}"
 
         # Should apply more than 200 rules (Pro limit) - Enterprise has no limit
         # Note: Current implementation may apply all rules regardless of tier
@@ -206,11 +234,14 @@ def func(x):
 
         result = await code_policy_check(paths=[str(test_file)])
 
-        assert result.tier == "community"
-        # Community tier: best_practices_violations should be empty or None
+        assert result.tier_applied == "community"
+        # Community tier: best practice violations should not appear
+        bp_violations = [
+            v for v in result.violations if v.get("category") == "best_practice"
+        ]
         assert (
-            not result.best_practices_violations
-        ), "Community tier should not provide best_practices_violations"
+            not bp_violations
+        ), "Community tier should not provide best practice violations"
 
     @pytest.mark.asyncio
     async def test_pro_has_best_practices(self, tmp_path, pro_license):
@@ -223,11 +254,12 @@ def func(x):
 
         result = await code_policy_check(paths=[str(test_file)])
 
-        assert result.tier == "pro"
-        # Pro tier: best_practices_violations should be available (may be empty list)
-        assert hasattr(
-            result, "best_practices_violations"
-        ), "Pro tier should provide best_practices_violations attribute"
+        assert result.tier_applied == "pro"
+        # Pro tier: best practice violations should appear in violations list
+        bp_violations = [
+            v for v in result.violations if v.get("category") == "best_practice"
+        ]
+        assert bp_violations, "Pro tier should detect best practice violations"
 
     @pytest.mark.asyncio
     async def test_enterprise_has_compliance_reports(
@@ -242,7 +274,7 @@ def func(x):
 
         result = await code_policy_check(paths=[str(test_file)])
 
-        assert result.tier == "enterprise"
+        assert result.tier_applied == "enterprise"
         # Enterprise tier: compliance_reports should be available
         assert hasattr(
             result, "compliance_reports"
@@ -261,7 +293,7 @@ value = 1
 
         result = await code_policy_check(paths=[str(test_file)], rules=["CUSTOM001"])
 
-        assert result.tier == "community"
+        assert result.tier_applied == "community"
         assert not getattr(
             result, "custom_rule_results", {}
         ), "Community tier should not provide custom rule results"
@@ -281,7 +313,7 @@ def handler(request):
             generate_report=True,
         )
 
-        assert result.tier == "pro"
+        assert result.tier_applied == "pro"
         assert not getattr(
             result, "compliance_reports", None
         ), "Pro tier should ignore compliance_reports field"
@@ -306,7 +338,7 @@ def log_patient(patient_id):
             generate_report=True,
         )
 
-        assert result.tier == "enterprise"
+        assert result.tier_applied == "enterprise"
         assert getattr(result, "compliance_score", 0) >= 0
         assert getattr(
             result, "audit_trail", []
