@@ -1,12 +1,9 @@
 """
-Test resolver with CI environment and limits file overrides.
+Test resolver with custom limits files and caching behaviour.
 
-Validates that the capabilities resolver handles CI environment correctly,
-including environment variable overrides and caching behavior.
+Limits injection is done by monkeypatching config_loader._find_config_file;
+no environment-variable overrides are honoured at runtime.
 """
-
-import os
-
 
 from code_scalpel.capabilities.resolver import (
     get_all_capabilities,
@@ -16,7 +13,7 @@ from code_scalpel.capabilities.resolver import (
 
 
 class TestResolverLimitsFileOverride:
-    """Test resolver with CODE_SCALPEL_LIMITS_FILE override."""
+    """Test resolver with custom limits file injection."""
 
     def test_resolver_uses_default_limits_file(self, clear_capabilities_cache):
         """Resolver should load from default limits.toml when no override."""
@@ -24,11 +21,10 @@ class TestResolverLimitsFileOverride:
         assert capabilities is not None
         assert len(capabilities) == 22
 
-    def test_resolver_respects_limits_file_override(
-        self, clear_capabilities_cache, tmp_path
+    def test_resolver_respects_custom_limits_file(
+        self, clear_capabilities_cache, tmp_path, monkeypatch
     ):
-        """Resolver should use CODE_SCALPEL_LIMITS_FILE override."""
-        # Create a minimal custom limits file
+        """Resolver should pick up a limits file returned by _find_config_file."""
         custom_limits = tmp_path / "custom_limits.toml"
         custom_limits.write_text("""
 [community]
@@ -41,21 +37,20 @@ get_file_context = { available = true, max_lines = 1999 }
 get_file_context = { available = true, max_lines = 9999 }
 """)
 
-        os.environ["CODE_SCALPEL_LIMITS_FILE"] = str(custom_limits)
+        monkeypatch.setattr(
+            "code_scalpel.licensing.config_loader._find_config_file",
+            lambda: custom_limits,
+        )
         reload_limits_cache()
 
-        try:
-            # Should now load from custom file
-            community_cap = get_tool_capabilities("get_file_context", "community")
-            assert community_cap is not None
-            assert community_cap["limits"]["max_lines"] == 999
-        finally:
-            os.environ.pop("CODE_SCALPEL_LIMITS_FILE", None)
-            reload_limits_cache()
+        community_cap = get_tool_capabilities("get_file_context", "community")
+        assert community_cap is not None
+        assert community_cap["limits"]["max_lines"] == 999
 
-    def test_resolver_caching_with_override(self, clear_capabilities_cache, tmp_path):
-        """Resolver cache should be cleared when override changes."""
-        # Create first custom limits file
+    def test_resolver_caching_with_override(
+        self, clear_capabilities_cache, tmp_path, monkeypatch
+    ):
+        """Resolver cache invalidates when the resolved file changes."""
         limits_v1 = tmp_path / "limits_v1.toml"
         limits_v1.write_text("""
 [community]
@@ -68,13 +63,15 @@ get_file_context = { available = true, max_lines = 100 }
 get_file_context = { available = true, max_lines = 100 }
 """)
 
-        # Load first version
-        os.environ["CODE_SCALPEL_LIMITS_FILE"] = str(limits_v1)
+        monkeypatch.setattr(
+            "code_scalpel.licensing.config_loader._find_config_file",
+            lambda: limits_v1,
+        )
         reload_limits_cache()
         cap_v1 = get_tool_capabilities("get_file_context", "community")
         assert cap_v1["limits"]["max_lines"] == 100
 
-        # Change to second version
+        # Swap to a new file — cache must pick it up after reload
         limits_v2 = tmp_path / "limits_v2.toml"
         limits_v2.write_text("""
 [community]
@@ -87,13 +84,13 @@ get_file_context = { available = true, max_lines = 200 }
 get_file_context = { available = true, max_lines = 200 }
 """)
 
-        os.environ["CODE_SCALPEL_LIMITS_FILE"] = str(limits_v2)
+        monkeypatch.setattr(
+            "code_scalpel.licensing.config_loader._find_config_file",
+            lambda: limits_v2,
+        )
         reload_limits_cache()
         cap_v2 = get_tool_capabilities("get_file_context", "community")
         assert cap_v2["limits"]["max_lines"] == 200
-
-        os.environ.pop("CODE_SCALPEL_LIMITS_FILE", None)
-        reload_limits_cache()
 
 
 class TestResolverCachingBehavior:
@@ -126,11 +123,13 @@ class TestResolverCachingBehavior:
         assert len(cap1) == len(cap2)
 
 
-class TestResolverEnvironmentPrecedence:
-    """Test environment variable precedence in resolver."""
+class TestResolverCustomConfigFlowThrough:
+    """Test that a custom limits file flows through the full resolver stack."""
 
-    def test_limits_file_override_precedence(self, clear_capabilities_cache, tmp_path):
-        """CODE_SCALPEL_LIMITS_FILE should take precedence."""
+    def test_custom_limits_visible_across_tiers(
+        self, clear_capabilities_cache, tmp_path, monkeypatch
+    ):
+        """Custom file loaded via _find_config_file should be visible at every tier."""
         custom_limits = tmp_path / "override_limits.toml"
         custom_limits.write_text("""
 [community]
@@ -143,15 +142,15 @@ get_file_context = { available = true, max_lines = 12345 }
 get_file_context = { available = true, max_lines = 12345 }
 """)
 
-        os.environ["CODE_SCALPEL_LIMITS_FILE"] = str(custom_limits)
+        monkeypatch.setattr(
+            "code_scalpel.licensing.config_loader._find_config_file",
+            lambda: custom_limits,
+        )
         reload_limits_cache()
 
-        try:
-            cap = get_tool_capabilities("get_file_context", "community")
+        for tier in ("community", "pro", "enterprise"):
+            cap = get_tool_capabilities("get_file_context", tier)
             assert cap["limits"]["max_lines"] == 12345
-        finally:
-            os.environ.pop("CODE_SCALPEL_LIMITS_FILE", None)
-            reload_limits_cache()
 
 
 class TestResolverWithMultipleTiers:

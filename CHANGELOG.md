@@ -8,12 +8,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Smart path suggestions for file resolution
-- Cache invalidation strategies (TTL-based)
-- Parallel file scanning for large projects
-- Incremental project updates
-- Custom language profile support
+- Custom language profile support (unified LanguageProfile abstraction; Phase 2 parser registries for Go, C#, C++, Ruby, Swift)
 - Language Server Protocol (LSP) integration
+
+---
+
+## [1.3.4] - 2026-02-05
+
+### Added
+- **`.code-scalpel/features.toml`**: New bundled TOML source of truth for capability
+  feature sets and descriptions (66 sections: 22 tools × 3 tiers).  Replaces the
+  1600-line hardcoded `TOOL_CAPABILITIES` dict in `features.py`.
+- **`config_loader` features subsystem**: Parallel to limits, adds `_find_features_file()`,
+  `load_features()`, `get_cached_features()`, `clear_features_cache()` with the same
+  bundled-only + stat-based caching pattern.
+- **Sentinel conversion**: `-1` in TOML (numeric limits) is converted to `None`
+  (unlimited) at runtime via `_sanitise_limits()` helper.
+
+### Changed
+- **limits.toml ownership**: Tier limits are now fully package-managed.  The single
+  source of truth is `.code-scalpel/limits.toml`; `hatch force-include` copies it into
+  the wheel at `code_scalpel/capabilities/limits.toml`.  No environment-variable or
+  user-filesystem overrides are honoured at runtime.
+- **`config_loader._find_config_file()`**: Replaced the 7-layer search (env var, CWD,
+  home, `/etc/`, package-root walk) with two paths: bundled wheel copy first, dev-checkout
+  fallback second.
+- **`capabilities/resolver.py`**: Removed duplicate file-finding, TOML loading, and
+  thread-locked cache.  Now delegates entirely to `config_loader` for all I/O and caching.
+- **`features.py` rewritten as thin loader**: Reduced from ~1600 lines to ~230 lines.
+  Now assembles capability envelopes by loading features.toml + limits.toml via
+  `config_loader`.  `TOOL_CAPABILITIES` dict is now a lazy-loading `_ToolCapabilitiesProxy`
+  shim for backward compatibility with existing test/assertion code.
+- **`pyproject.toml` force-include**: Added `.code-scalpel/features.toml` →
+  `code_scalpel/capabilities/features.toml` for both wheel and sdist targets.
+- **`.code-scalpel/limits.toml`**: Added missing limit keys from the old hardcoded
+  features.py (`vulnerability_types`, `max_depth` for `crawl_project`, `frontend_only`,
+  `custom_sinks_limit`, `signature_validation`, `tamper_detection`, etc.).  Uses `-1`
+  for unlimited values instead of omitting keys.
+
+### Removed
+- `src/code_scalpel/capabilities/limits.toml` — was a checked-in duplicate of
+  `.code-scalpel/limits.toml`.  The build reproduces it via `force-include`; it is no
+  longer committed to the repository.
+- Stale override documentation from both `limits.toml` files (env-var, home-dir,
+  `/etc/`, `limits.local.toml` references).
+
+### Fixed
+- **Test injection pattern**: 6 tests updated from `setenv("CODE_SCALPEL_LIMITS_FILE")`
+  (dead env var) to `monkeypatch.setattr("config_loader._find_config_file", lambda: ...)`
+  for custom limit injection.
+- **Sentinel conversion tests**: Updated `test_update_symbol_tiers.py` assertions from
+  `max_updates_per_call == -1` to `is None` (runtime semantic after sentinel conversion).
+- **Tool count assertions**: Updated `test_ci_license_injection.py` to match actual
+  limits.toml tool counts (pro: 2 locked, enterprise: 14 available).
+- **`test_null_values_in_config`**: Updated to assert on `enterprise.update_symbol.max_updates_per_call`
+  (which has `-1` → `None` conversion) instead of non-existent `max_depth`.
 
 ---
 
@@ -141,6 +190,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - File importance scoring (0.0-1.0 scale)
     - In-memory and optional SQLite caching
     - Change detection via MD5 hashing
+    - TTL-based cache invalidation (configurable per subsystem: 7 days project cache, 24h incremental index, 5 min graph cache)
+  - `ParallelCrawler`: Parallel file scanning via `ThreadPoolExecutor` (batch size 100, supports 100k+ files; Pro/Enterprise tier-gated)
+  - `IncrementalIndex` / `IncrementalIndexer`: Incremental project updates with SQLite backing, dependency-aware cascading invalidation, optional Redis support
   - `FileInfo`, `DirectoryInfo`, `ProjectMap` data classes
   - `DirectoryType` enum for semantic directory classification
   - All language extension constants exported from analysis module

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="6" failures="0" skipped="2" tests="8" time="36.565" timestamp="2026-02-01T17:11:00.466728-05:00" hostname="EE-UFO-TIM"><testcase classname="" name="tests.mcp.test_low_rate_paths" time="0.000"><skipped message="collection skipped">('/mnt/k/backup/Develop/code-scalpel/tests/mcp/test_low_rate_paths.py', 13, 'Skipped: Requires pip install code-scalpel[agents]')</skipped></testcase><testcase classname="" name="tests.mcp.test_rest_api_server" time="0.000"><error message="collection failure">ImportError while importing test module '/mnt/k/backup/Develop/code-scalpel/tests/mcp/test_rest_api_server.py'.
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="2" failures="0" skipped="2" tests="4" time="71.505" timestamp="2026-02-03T09:38:33.826176-05:00" hostname="EE-UFO-TIM"><testcase classname="" name="tests.mcp.test_low_rate_paths" time="0.000"><skipped message="collection skipped">('/mnt/k/backup/Develop/code-scalpel/tests/mcp/test_low_rate_paths.py', 13, 'Skipped: Requires pip install code-scalpel[agents]')</skipped></testcase><testcase classname="" name="tests.mcp.test_rest_api_server" time="0.000"><error message="collection failure">ImportError while importing test module '/mnt/k/backup/Develop/code-scalpel/tests/mcp/test_rest_api_server.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 src/code_scalpel/integrations/rest_api_server.py:20: in &lt;module&gt;
@@ -6,9 +6,9 @@ src/code_scalpel/integrations/rest_api_server.py:20: in &lt;module&gt;
 E   ModuleNotFoundError: No module named 'codescalpel_web'
 
 The above exception was the direct cause of the following exception:
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/python.py:507: in importtestmodule
+.venv/lib/python3.12/site-packages/_pytest/python.py:507: in importtestmodule
     mod = import_path(
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
+.venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
     importlib.import_module(module_name)
 /usr/lib/python3.12/importlib/__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
@@ -21,7 +21,7 @@ The above exception was the direct cause of the following exception:
     ???
 &lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
     ???
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
+.venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
     exec(co, module.__dict__)
 tests/mcp/test_rest_api_server.py:14: in &lt;module&gt;
     from code_scalpel.integrations.rest_api_server import MCPServerConfig, create_app
@@ -35,9 +35,9 @@ src/code_scalpel/integrations/rest_api_server.py:20: in &lt;module&gt;
 E   ModuleNotFoundError: No module named 'codescalpel_web'
 
 The above exception was the direct cause of the following exception:
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/python.py:507: in importtestmodule
+.venv/lib/python3.12/site-packages/_pytest/python.py:507: in importtestmodule
     mod = import_path(
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
+.venv/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
     importlib.import_module(module_name)
 /usr/lib/python3.12/importlib/__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
@@ -50,81 +50,10 @@ The above exception was the direct cause of the following exception:
     ???
 &lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
     ???
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
+.venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
     exec(co, module.__dict__)
 tests/mcp/test_rest_api_server_additional.py:12: in &lt;module&gt;
     from code_scalpel.integrations.rest_api_server import (
 src/code_scalpel/integrations/rest_api_server.py:38: in &lt;module&gt;
     raise ImportError(
-E   ImportError: REST API server requires the web package. Install with: pip install code-scalpel[web]</error></testcase><testcase classname="" name="tests.mcp_tool_verification.mcp_inspector.code-scalpel-ninja-warrior.workflow-compliance.change-budget.test_edge_cases" time="0.000"><error message="collection failure">import file mismatch:
-imported module 'test_edge_cases' has this __file__ attribute:
-  /mnt/k/backup/Develop/code-scalpel/tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/audit-trail/test_edge_cases.py
-which is not the same as the test file we want to collect:
-  /mnt/k/backup/Develop/code-scalpel/tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/change-budget/test_edge_cases.py
-HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules</error></testcase><testcase classname="" name="tests.mcp_tool_verification.mcp_inspector.code-scalpel-ninja-warrior.workflow-compliance.policy-engine.test_java_patterns" time="0.000"><error message="collection failure">ImportError while importing test module '/mnt/k/backup/Develop/code-scalpel/tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/policy-engine/test_java_patterns.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/python.py:507: in importtestmodule
-    mod = import_path(
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
-    importlib.import_module(module_name)
-/usr/lib/python3.12/importlib/__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
-    exec(co, module.__dict__)
-tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/policy-engine/test_java_patterns.py:25: in &lt;module&gt;
-    from policy_engine_framework import (
-E   ImportError: cannot import name 'PolicyTestRunner' from 'policy_engine_framework' (/mnt/k/backup/Develop/code-scalpel/tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/policy-engine/policy_engine_framework.py). Did you mean: 'PolicyTestCase'?</error></testcase><testcase classname="" name="tests.mcp_tool_verification.mcp_inspector.code-scalpel-ninja-warrior.workflow-compliance.policy-engine.test_python_patterns" time="0.000"><error message="collection failure">ImportError while importing test module '/mnt/k/backup/Develop/code-scalpel/tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/policy-engine/test_python_patterns.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/python.py:507: in importtestmodule
-    mod = import_path(
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
-    importlib.import_module(module_name)
-/usr/lib/python3.12/importlib/__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
-    exec(co, module.__dict__)
-tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/policy-engine/test_python_patterns.py:25: in &lt;module&gt;
-    from policy_engine_framework import (
-E   ImportError: cannot import name 'PolicyTestRunner' from 'policy_engine_framework' (/mnt/k/backup/Develop/code-scalpel/tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/policy-engine/policy_engine_framework.py). Did you mean: 'PolicyTestCase'?</error></testcase><testcase classname="" name="tests.mcp_tool_verification.mcp_inspector.code-scalpel-ninja-warrior.workflow-compliance.policy-engine.test_typescript_patterns" time="0.000"><error message="collection failure">ImportError while importing test module '/mnt/k/backup/Develop/code-scalpel/tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/policy-engine/test_typescript_patterns.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/python.py:507: in importtestmodule
-    mod = import_path(
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/pathlib.py:587: in import_path
-    importlib.import_module(module_name)
-/usr/lib/python3.12/importlib/__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
-    ???
-&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
-    ???
-&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
-    ???
-&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
-    ???
-/home/xbyooki/.local/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:197: in exec_module
-    exec(co, module.__dict__)
-tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/policy-engine/test_typescript_patterns.py:25: in &lt;module&gt;
-    from policy_engine_framework import (
-E   ImportError: cannot import name 'PolicyTestRunner' from 'policy_engine_framework' (/mnt/k/backup/Develop/code-scalpel/tests/mcp_tool_verification/mcp_inspector/code-scalpel-ninja-warrior/workflow-compliance/policy-engine/policy_engine_framework.py). Did you mean: 'PolicyTestCase'?</error></testcase><testcase classname="" name="tests.security.test_sandbox" time="0.000"><skipped message="collection skipped">('/mnt/k/backup/Develop/code-scalpel/tests/security/test_sandbox.py', 27, "Skipped: This test requires the agents package. Install with: pip install code-scalpel[agents] (Error: No module named 'codescalpel_agents')")</skipped></testcase></testsuite></testsuites>
+E   ImportError: REST API server requires the web package. Install with: pip install code-scalpel[web]</error></testcase><testcase classname="" name="tests.security.test_sandbox" time="0.000"><skipped message="collection skipped">('/mnt/k/backup/Develop/code-scalpel/tests/security/test_sandbox.py', 27, "Skipped: This test requires the agents package. Install with: pip install code-scalpel[agents] (Error: No module named 'codescalpel_agents')")</skipped></testcase></testsuite></testsuites>

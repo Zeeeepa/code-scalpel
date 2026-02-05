@@ -27,7 +27,8 @@ For AI agent integrations:
 # [20260201_RELEASE] v1.3.0 - Oracle Resilience Middleware
 # [20260202_RELEASE] v1.3.2 - Security hardening and CI alignment
 # [20260202_RELEASE] v1.3.3 - Pipeline solidification and project organization
-__version__ = "1.3.3"
+# [20260205_RELEASE] v1.3.4 - Bundled-only limits.toml, removed duplicate resolver internals
+__version__ = "1.3.4"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 

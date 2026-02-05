@@ -1,0 +1,1176 @@
+# Code Scalpel Feature Capabilities
+#
+# SOURCE OF TRUTH — this file is copied into the wheel by hatch
+# force-include and becomes code_scalpel/capabilities/features.toml.
+#
+# This file owns: enabled flag, capability lists, descriptions.
+# Limits (numeric thresholds, flags, string tunables) live in limits.toml.
+#
+# Capabilities are arrays of strings.  The runtime loader converts
+# them to sets for O(1) membership checks.
+#
+# Build flow:
+#   .code-scalpel/features.toml  ──► hatch force-include
+#        (this file)                        │
+#                                          ▼
+#                              code_scalpel/capabilities/features.toml
+#                                  (bundled in wheel / sdist)
+
+# ============================================================================
+# analyze_code
+# ============================================================================
+
+[community.analyze_code]
+enabled = true
+capabilities = [
+    "basic_ast",
+    "class_inventory",
+    "complexity_metrics",
+    "function_inventory",
+    "imports",
+]
+description = "Basic AST parsing with complexity metrics"
+
+[pro.analyze_code]
+enabled = true
+capabilities = [
+    "basic_ast",
+    "class_inventory",
+    "code_smells",
+    "cognitive_complexity",
+    "complexity_metrics",
+    "dead_code_detection",
+    "decorator_analysis",
+    "dependency_graph",
+    "duplicate_code_detection",
+    "framework_detection",
+    "function_inventory",
+    "halstead_metrics",
+    "imports",
+]
+description = "Full analysis with complexity metrics"
+
+[enterprise.analyze_code]
+enabled = true
+capabilities = [
+    "api_surface_analysis",
+    "architecture_patterns",
+    "basic_ast",
+    "class_inventory",
+    "code_smells",
+    "cognitive_complexity",
+    "compliance_checks",
+    "complexity_metrics",
+    "complexity_trends",
+    "custom_rules",
+    "dead_code_detection",
+    "decorator_analysis",
+    "dependency_graph",
+    "duplicate_code_detection",
+    "framework_detection",
+    "function_inventory",
+    "halstead_metrics",
+    "imports",
+    "naming_conventions",
+    "organization_patterns",
+    "priority_ordering",
+    "technical_debt_scoring",
+]
+description = "Advanced analysis with custom rules and compliance"
+
+# ============================================================================
+# code_policy_check
+# ============================================================================
+
+[community.code_policy_check]
+enabled = true
+capabilities = [
+    "basic_compliance",
+    "basic_patterns",
+    "eslint_rules",
+    "pep8_validation",
+    "style_guide_checking",
+]
+description = "Basic style guide and pattern checking"
+
+[pro.code_policy_check]
+enabled = true
+capabilities = [
+    "async_error_patterns",
+    "basic_compliance",
+    "basic_patterns",
+    "best_practice_analysis",
+    "custom_rules",
+    "eslint_rules",
+    "extended_compliance",
+    "pep8_validation",
+    "security_patterns",
+    "style_guide_checking",
+]
+description = "Advanced analysis with best practices and security patterns"
+
+[enterprise.code_policy_check]
+enabled = true
+capabilities = [
+    "async_error_patterns",
+    "audit_trail",
+    "basic_compliance",
+    "basic_patterns",
+    "best_practice_analysis",
+    "compliance_auditing",
+    "custom_rules",
+    "eslint_rules",
+    "extended_compliance",
+    "gdpr_compliance",
+    "hipaa_compliance",
+    "pci_dss_compliance",
+    "pdf_certification",
+    "pep8_validation",
+    "security_patterns",
+    "soc2_compliance",
+    "style_guide_checking",
+]
+description = "Enterprise compliance auditing with certifications"
+
+# ============================================================================
+# crawl_project
+# ============================================================================
+
+[community.crawl_project]
+enabled = true
+capabilities = [
+    "basic_statistics",
+    "entrypoint_detection",
+    "full_file_tree_indexing",
+    "gitignore_respect",
+    "language_breakdown",
+]
+description = "Full file tree indexing with language breakdown, respects .gitignore"
+
+[pro.crawl_project]
+enabled = true
+capabilities = [
+    "basic_statistics",
+    "dependency_mapping",
+    "django_views_detection",
+    "entrypoint_detection",
+    "flask_routes_detection",
+    "framework_entrypoint_detection",
+    "full_file_tree_indexing",
+    "generated_code_detection",
+    "gitignore_respect",
+    "hotspot_identification",
+    "incremental_crawling",
+    "language_breakdown",
+    "nextjs_pages_detection",
+    "parallel_file_processing",
+    "smart_crawl",
+]
+description = "Smart Crawl with framework-specific entry point detection"
+
+[enterprise.crawl_project]
+enabled = true
+capabilities = [
+    "100k_plus_files_support",
+    "basic_statistics",
+    "compliance_scanning",
+    "cross_repo_dependency_linking",
+    "custom_crawl_rules",
+    "dependency_mapping",
+    "django_views_detection",
+    "distributed_crawling",
+    "entrypoint_detection",
+    "flask_routes_detection",
+    "framework_entrypoint_detection",
+    "full_file_tree_indexing",
+    "generated_code_detection",
+    "gitignore_respect",
+    "historical_trend_analysis",
+    "hotspot_identification",
+    "incremental_crawling",
+    "incremental_indexing",
+    "language_breakdown",
+    "monorepo_support",
+    "nextjs_pages_detection",
+    "parallel_file_processing",
+    "smart_crawl",
+]
+description = "Incremental indexing for massive Monorepos and cross-repository linking"
+
+# ============================================================================
+# cross_file_security_scan
+# ============================================================================
+
+[community.cross_file_security_scan]
+enabled = true
+capabilities = [
+    "basic_cross_file_scan",
+    "basic_taint_propagation",
+    "single_module_taint_tracking",
+    "source_to_sink_tracing",
+]
+description = "Basic cross-file scan (10 files max)"
+
+[pro.cross_file_security_scan]
+enabled = true
+capabilities = [
+    "advanced_taint_tracking",
+    "basic_cross_file_scan",
+    "basic_taint_propagation",
+    "dependency_injection_resolution",
+    "framework_aware_taint",
+    "react_context_tracking",
+    "single_module_taint_tracking",
+    "source_to_sink_tracing",
+    "spring_bean_tracking",
+]
+description = "Advanced cross-file taint tracking"
+
+[enterprise.cross_file_security_scan]
+enabled = true
+capabilities = [
+    "advanced_taint_tracking",
+    "api_to_database_tracing",
+    "basic_cross_file_scan",
+    "basic_taint_propagation",
+    "custom_taint_rules",
+    "dependency_injection_resolution",
+    "framework_aware_taint",
+    "frontend_to_backend_tracing",
+    "global_taint_flow",
+    "microservice_boundary_crossing",
+    "project_wide_scan",
+    "react_context_tracking",
+    "single_module_taint_tracking",
+    "source_to_sink_tracing",
+    "spring_bean_tracking",
+]
+description = "Project-wide scan with custom rules"
+
+# ============================================================================
+# extract_code
+# ============================================================================
+
+[community.extract_code]
+enabled = true
+capabilities = [
+    "basic_symbols",
+    "single_file_extraction",
+]
+description = "Single-file symbol extraction only"
+
+[pro.extract_code]
+enabled = true
+capabilities = [
+    "basic_symbols",
+    "closure_detection",
+    "context_extraction",
+    "cross_file_deps",
+    "dependency_injection_suggestions",
+    "single_file_extraction",
+    "variable_promotion",
+]
+description = "Cross-file extraction with variable promotion"
+
+[enterprise.extract_code]
+enabled = true
+capabilities = [
+    "basic_symbols",
+    "cross_file_deps",
+    "context_extraction",
+    "custom_extraction_patterns",
+    "dockerfile_generation",
+    "org_wide_resolution",
+    "service_boundaries",
+    "single_file_extraction",
+]
+description = "Unlimited depth with Dockerfile generation and org-wide resolution"
+
+# ============================================================================
+# generate_unit_tests
+# ============================================================================
+
+[community.generate_unit_tests]
+enabled = true
+capabilities = [
+    "basic_test_generation",
+]
+description = "Basic test generation (5 tests max)"
+
+[pro.generate_unit_tests]
+enabled = true
+capabilities = [
+    "advanced_test_generation",
+    "basic_test_generation",
+    "data_driven_tests",
+    "edge_case_detection",
+]
+description = "Advanced test generation with edge cases"
+
+[enterprise.generate_unit_tests]
+enabled = true
+capabilities = [
+    "advanced_test_generation",
+    "basic_test_generation",
+    "bug_reproduction",
+    "coverage_optimization",
+    "custom_test_templates",
+    "data_driven_tests",
+    "edge_case_detection",
+]
+description = "Unlimited tests with custom templates"
+
+# ============================================================================
+# get_call_graph
+# ============================================================================
+
+[community.get_call_graph]
+enabled = true
+capabilities = [
+    "caller_analysis",
+    "callee_analysis",
+    "circular_import_detection",
+    "entry_point_detection",
+    "mermaid_diagram_generation",
+    "static_call_graph",
+]
+description = "Static call graph generation with tier limits"
+
+[pro.get_call_graph]
+enabled = true
+capabilities = [
+    "advanced_call_graph",
+    "caller_analysis",
+    "callee_analysis",
+    "circular_import_detection",
+    "dynamic_dispatch_analysis",
+    "entry_point_detection",
+    "interface_resolution",
+    "mermaid_diagram_generation",
+    "polymorphism_resolution",
+    "static_call_graph",
+    "virtual_call_tracking",
+]
+description = "Deeper call graphs with improved call resolution"
+
+[enterprise.get_call_graph]
+enabled = true
+capabilities = [
+    "advanced_call_graph",
+    "caller_analysis",
+    "callee_analysis",
+    "circular_import_detection",
+    "custom_graph_analysis",
+    "dead_code_detection",
+    "dynamic_dispatch_analysis",
+    "entry_point_detection",
+    "hot_path_identification",
+    "interface_resolution",
+    "mermaid_diagram_generation",
+    "polymorphism_resolution",
+    "runtime_trace_overlay",
+    "static_call_graph",
+    "virtual_call_tracking",
+]
+description = "Unlimited depth with advanced metadata"
+
+# ============================================================================
+# get_cross_file_dependencies
+# ============================================================================
+
+[community.get_cross_file_dependencies]
+enabled = true
+capabilities = [
+    "circular_import_detection",
+    "direct_import_mapping",
+    "import_graph_generation",
+]
+description = "Direct dependencies only"
+
+[pro.get_cross_file_dependencies]
+enabled = true
+capabilities = [
+    "circular_import_detection",
+    "deep_coupling_analysis",
+    "dependency_chain_visualization",
+    "direct_import_mapping",
+    "import_graph_generation",
+    "transitive_dependency_mapping",
+]
+description = "Transitive dependencies with graph"
+
+[enterprise.get_cross_file_dependencies]
+enabled = true
+capabilities = [
+    "architectural_firewall",
+    "boundary_violation_alerts",
+    "circular_import_detection",
+    "deep_coupling_analysis",
+    "dependency_chain_visualization",
+    "dependency_rule_engine",
+    "direct_import_mapping",
+    "import_graph_generation",
+    "layer_constraint_enforcement",
+    "transitive_dependency_mapping",
+]
+description = "Unlimited depth with circular detection"
+
+# ============================================================================
+# get_file_context
+# ============================================================================
+
+[community.get_file_context]
+enabled = true
+capabilities = [
+    "ast_based_outlining",
+    "class_folding",
+    "function_folding",
+    "line_range_extraction",
+    "raw_source_retrieval",
+]
+description = "Basic file overview with AST outlining"
+
+[pro.get_file_context]
+enabled = true
+capabilities = [
+    "ast_based_outlining",
+    "class_folding",
+    "code_smell_detection",
+    "documentation_coverage",
+    "function_folding",
+    "intent_extraction",
+    "line_range_extraction",
+    "maintainability_index",
+    "raw_source_retrieval",
+    "related_imports_inclusion",
+    "semantic_summarization",
+    "smart_context_expansion",
+]
+description = "Semantic summarization with code quality metrics"
+
+[enterprise.get_file_context]
+enabled = true
+capabilities = [
+    "api_key_detection",
+    "ast_based_outlining",
+    "class_folding",
+    "code_smell_detection",
+    "compliance_flags",
+    "custom_metadata_extraction",
+    "documentation_coverage",
+    "file_access_control",
+    "function_folding",
+    "historical_metrics",
+    "intent_extraction",
+    "line_range_extraction",
+    "maintainability_index",
+    "owner_team_mapping",
+    "pii_redaction",
+    "raw_source_retrieval",
+    "rbac_aware_retrieval",
+    "related_imports_inclusion",
+    "secret_masking",
+    "semantic_summarization",
+    "smart_context_expansion",
+    "technical_debt_scoring",
+]
+description = "Enterprise context with compliance, ownership, and metrics"
+
+# ============================================================================
+# get_graph_neighborhood
+# ============================================================================
+
+[community.get_graph_neighborhood]
+enabled = true
+capabilities = [
+    "basic_neighborhood",
+]
+description = "1-hop neighborhood only"
+
+[pro.get_graph_neighborhood]
+enabled = true
+capabilities = [
+    "advanced_neighborhood",
+    "basic_neighborhood",
+    "logical_relationship_detection",
+    "semantic_neighbors",
+]
+description = "Configurable k-hop traversal with semantic neighbors"
+
+[enterprise.get_graph_neighborhood]
+enabled = true
+capabilities = [
+    "advanced_neighborhood",
+    "basic_neighborhood",
+    "custom_traversal",
+    "custom_traversal_rules",
+    "graph_query_language",
+    "logical_relationship_detection",
+    "path_constraint_queries",
+    "semantic_neighbors",
+    "weighted_paths",
+]
+description = "Unlimited hops with query language and custom traversal"
+
+# ============================================================================
+# get_project_map
+# ============================================================================
+
+[community.get_project_map]
+enabled = true
+capabilities = [
+    "basic_mermaid_diagram",
+    "file_count_statistics",
+    "folder_structure_visualization",
+    "text_tree_generation",
+]
+description = "Basic project structure map"
+
+[pro.get_project_map]
+enabled = true
+capabilities = [
+    "architectural_layer_detection",
+    "basic_mermaid_diagram",
+    "code_ownership_mapping",
+    "coupling_analysis",
+    "file_count_statistics",
+    "folder_structure_visualization",
+    "git_blame_integration",
+    "import_dependency_diagram",
+    "module_relationship_visualization",
+    "text_tree_generation",
+]
+description = "Detailed map with dependencies and ownership"
+
+[enterprise.get_project_map]
+enabled = true
+capabilities = [
+    "architectural_layer_detection",
+    "basic_mermaid_diagram",
+    "bug_hotspot_heatmap",
+    "code_churn_visualization",
+    "compliance_overlay",
+    "coupling_analysis",
+    "file_count_statistics",
+    "folder_structure_visualization",
+    "force_directed_graph",
+    "git_blame_integration",
+    "historical_architecture_trends",
+    "import_dependency_diagram",
+    "interactive_city_map",
+    "module_relationship_visualization",
+    "multi_repository_maps",
+    "custom_map_metrics",
+    "text_tree_generation",
+]
+description = "Comprehensive map with multi-repo, historical trends, and compliance"
+
+# ============================================================================
+# get_symbol_references
+# ============================================================================
+
+[community.get_symbol_references]
+enabled = true
+capabilities = [
+    "ast_based_find_usages",
+    "comment_string_exclusion",
+    "definition_location",
+    "exact_reference_matching",
+]
+description = "Bounded reference search across the project"
+
+[pro.get_symbol_references]
+enabled = true
+capabilities = [
+    "ast_based_find_usages",
+    "comment_string_exclusion",
+    "definition_location",
+    "exact_reference_matching",
+    "import_classification",
+    "project_wide_search",
+    "read_write_classification",
+    "scope_filtering",
+    "test_file_filtering",
+    "usage_categorization",
+]
+description = "Full project-wide reference search with categorization"
+
+[enterprise.get_symbol_references]
+enabled = true
+capabilities = [
+    "ast_based_find_usages",
+    "change_risk_assessment",
+    "codeowners_integration",
+    "comment_string_exclusion",
+    "definition_location",
+    "exact_reference_matching",
+    "impact_analysis",
+    "import_classification",
+    "ownership_attribution",
+    "project_wide_search",
+    "read_write_classification",
+    "scope_filtering",
+    "test_file_filtering",
+    "usage_categorization",
+]
+description = "Ownership attribution and impact analysis"
+
+# ============================================================================
+# rename_symbol
+# ============================================================================
+
+[community.rename_symbol]
+enabled = true
+capabilities = [
+    "backup",
+    "definition_rename",
+    "path_security_validation",
+]
+description = "Rename symbol definition in a single file"
+
+[pro.rename_symbol]
+enabled = true
+capabilities = [
+    "backup",
+    "cross_file_reference_rename",
+    "definition_rename",
+    "import_rename",
+    "path_security_validation",
+]
+description = "Rename definition + conservative cross-file references/imports"
+
+[enterprise.rename_symbol]
+enabled = true
+capabilities = [
+    "backup",
+    "cross_file_reference_rename",
+    "definition_rename",
+    "import_rename",
+    "organization_wide_rename",
+    "path_security_validation",
+]
+description = "Enterprise-scale rename with org-wide scope"
+
+# ============================================================================
+# scan_dependencies
+# ============================================================================
+
+[community.scan_dependencies]
+enabled = true
+capabilities = [
+    "basic_dependency_scan",
+    "basic_remediation_suggestions",
+    "osv_vulnerability_detection",
+    "severity_scoring",
+]
+description = "Basic dependency vulnerability scan with CVE detection"
+
+[pro.scan_dependencies]
+enabled = true
+capabilities = [
+    "basic_dependency_scan",
+    "basic_remediation_suggestions",
+    "false_positive_reduction",
+    "license_compliance",
+    "osv_vulnerability_detection",
+    "reachability_analysis",
+    "severity_scoring",
+    "supply_chain_risk_scoring",
+    "typosquatting_detection",
+    "update_recommendations",
+]
+description = "Full scan with reachability analysis and license compliance"
+
+[enterprise.scan_dependencies]
+enabled = true
+capabilities = [
+    "automated_remediation",
+    "basic_dependency_scan",
+    "basic_remediation_suggestions",
+    "compliance_reporting",
+    "custom_vulnerability_database",
+    "false_positive_reduction",
+    "license_compliance",
+    "osv_vulnerability_detection",
+    "policy_based_blocking",
+    "private_dependency_scanning",
+    "reachability_analysis",
+    "severity_scoring",
+    "supply_chain_risk_scoring",
+    "typosquatting_detection",
+    "update_recommendations",
+]
+description = "Enterprise scan with compliance reporting and custom policies"
+
+# ============================================================================
+# security_scan
+# ============================================================================
+
+[community.security_scan]
+enabled = true
+capabilities = [
+    "ast_pattern_matching",
+    "basic_vulnerabilities",
+    "command_injection_detection",
+    "owasp_checks",
+    "path_traversal_detection",
+    "sql_injection_detection",
+    "xss_detection",
+]
+description = "Basic vulnerability detection with OWASP focus"
+
+[pro.security_scan]
+enabled = true
+capabilities = [
+    "ast_pattern_matching",
+    "basic_vulnerabilities",
+    "command_injection_detection",
+    "confidence_scoring",
+    "context_aware_scanning",
+    "csrf_detection",
+    "data_flow_sensitive_analysis",
+    "false_positive_reduction",
+    "full_vulnerability_list",
+    "jwt_vulnerability_detection",
+    "ldap_injection_detection",
+    "nosql_injection_detection",
+    "owasp_categorization",
+    "owasp_checks",
+    "path_traversal_detection",
+    "remediation_suggestions",
+    "sanitizer_recognition",
+    "secret_detection",
+    "sql_injection_detection",
+    "ssrf_detection",
+    "xss_detection",
+]
+description = "Advanced taint analysis with sanitizer recognition and FP reduction"
+
+[enterprise.security_scan]
+enabled = true
+capabilities = [
+    "ast_pattern_matching",
+    "basic_vulnerabilities",
+    "command_injection_detection",
+    "compliance_reporting",
+    "compliance_rule_checking",
+    "confidence_scoring",
+    "context_aware_scanning",
+    "cross_file_taint",
+    "csrf_detection",
+    "custom_policy_engine",
+    "custom_security_rules",
+    "data_flow_sensitive_analysis",
+    "false_positive_reduction",
+    "false_positive_tuning",
+    "full_vulnerability_list",
+    "jwt_vulnerability_detection",
+    "ldap_injection_detection",
+    "log_encryption_enforcement",
+    "nosql_injection_detection",
+    "org_specific_rules",
+    "owasp_categorization",
+    "owasp_checks",
+    "path_traversal_detection",
+    "priority_cve_alerts",
+    "priority_finding_ordering",
+    "remediation_suggestions",
+    "sanitizer_recognition",
+    "secret_detection",
+    "sql_injection_detection",
+    "ssrf_detection",
+    "vulnerability_reachability_analysis",
+    "xss_detection",
+]
+description = "Enterprise security with custom policy engine and compliance mapping"
+
+# ============================================================================
+# simulate_refactor
+# ============================================================================
+
+[community.simulate_refactor]
+enabled = true
+capabilities = [
+    "basic_simulation",
+    "structural_diff",
+]
+description = "Basic refactor simulation with structural diff"
+
+[pro.simulate_refactor]
+enabled = true
+capabilities = [
+    "advanced_simulation",
+    "basic_simulation",
+    "behavior_preservation",
+    "build_check",
+    "structural_diff",
+    "type_checking",
+]
+description = "Advanced simulation with type checking and behavior validation"
+
+[enterprise.simulate_refactor]
+enabled = true
+capabilities = [
+    "advanced_simulation",
+    "basic_simulation",
+    "behavior_preservation",
+    "build_check",
+    "compliance_validation",
+    "custom_rules",
+    "impact_analysis",
+    "regression_prediction",
+    "structural_diff",
+    "type_checking",
+]
+description = "Deep simulation with custom validation"
+
+# ============================================================================
+# symbolic_execute
+# ============================================================================
+
+[community.symbolic_execute]
+enabled = true
+capabilities = [
+    "basic_symbolic_execution",
+    "loop_unrolling",
+    "path_exploration",
+    "simple_constraints",
+]
+description = "Basic symbolic execution (50 paths max, basic types)"
+
+[pro.symbolic_execute]
+enabled = true
+capabilities = [
+    "basic_symbolic_execution",
+    "complex_constraints",
+    "concolic_execution",
+    "constraint_optimization",
+    "deep_loop_unrolling",
+    "list_dict_types",
+    "loop_unrolling",
+    "path_exploration",
+    "simple_constraints",
+    "smart_path_prioritization",
+    "string_constraints",
+]
+description = "Advanced symbolic execution with smart prioritization and concolic mode"
+
+[enterprise.symbolic_execute]
+enabled = true
+capabilities = [
+    "advanced_types",
+    "basic_symbolic_execution",
+    "complex_constraints",
+    "complex_object_types",
+    "concolic_execution",
+    "constraint_optimization",
+    "custom_path_prioritization",
+    "custom_solvers",
+    "deep_loop_unrolling",
+    "distributed_execution",
+    "equivalence_checking",
+    "formal_verification",
+    "list_dict_types",
+    "loop_unrolling",
+    "memory_modeling",
+    "path_exploration",
+    "simple_constraints",
+    "smart_path_prioritization",
+    "state_space_reduction",
+    "string_constraints",
+]
+description = "Unlimited symbolic execution with distributed analysis and memory modeling"
+
+# ============================================================================
+# type_evaporation_scan
+# ============================================================================
+
+[community.type_evaporation_scan]
+enabled = true
+capabilities = [
+    "basic_type_check",
+    "explicit_any_detection",
+    "typescript_any_scanning",
+]
+description = "Basic TypeScript type checking and explicit any detection"
+
+[pro.type_evaporation_scan]
+enabled = true
+capabilities = [
+    "basic_type_check",
+    "explicit_any_detection",
+    "frontend_backend_correlation",
+    "implicit_any_tracing",
+    "json_parse_tracking",
+    "library_boundary_analysis",
+    "network_boundary_analysis",
+    "typescript_any_scanning",
+]
+description = "Frontend-backend type correlation with boundary analysis"
+
+[enterprise.type_evaporation_scan]
+enabled = true
+capabilities = [
+    "api_contract_validation",
+    "automated_remediation",
+    "basic_type_check",
+    "compliance_validation",
+    "custom_type_rules",
+    "explicit_any_detection",
+    "frontend_backend_correlation",
+    "implicit_any_tracing",
+    "json_parse_tracking",
+    "library_boundary_analysis",
+    "network_boundary_analysis",
+    "pydantic_model_generation",
+    "schema_coverage_metrics",
+    "typescript_any_scanning",
+    "zod_schema_generation",
+]
+description = "Full type evaporation with schema generation and remediation"
+
+# ============================================================================
+# unified_sink_detect
+# ============================================================================
+
+[community.unified_sink_detect]
+enabled = true
+capabilities = [
+    "basic_confidence_scoring",
+    "cwe_mapping",
+    "file_operation_sinks",
+    "java_sink_detection",
+    "javascript_sink_detection",
+    "python_sink_detection",
+    "shell_command_sink_detection",
+    "sql_sink_detection",
+    "typescript_sink_detection",
+    "xss_sink_detection",
+]
+description = "Basic polyglot sink detection with CWE mapping"
+
+[pro.unified_sink_detect]
+enabled = true
+capabilities = [
+    "advanced_confidence_scoring",
+    "basic_confidence_scoring",
+    "context_aware_detection",
+    "cwe_mapping",
+    "custom_sink_definitions",
+    "email_send_detection",
+    "extended_language_support",
+    "file_operation_sinks",
+    "framework_specific_sinks",
+    "java_sink_detection",
+    "javascript_sink_detection",
+    "logic_sink_detection",
+    "payment_api_detection",
+    "python_sink_detection",
+    "s3_public_write_detection",
+    "shell_command_sink_detection",
+    "sink_coverage_analysis",
+    "sql_sink_detection",
+    "typescript_sink_detection",
+    "xss_sink_detection",
+]
+description = "Advanced sink detection with framework and context awareness"
+
+[enterprise.unified_sink_detect]
+enabled = true
+capabilities = [
+    "advanced_confidence_scoring",
+    "automated_sink_remediation",
+    "basic_confidence_scoring",
+    "clearance_requirement_tagging",
+    "compliance_mapping",
+    "context_aware_detection",
+    "cwe_mapping",
+    "custom_sink_definitions",
+    "custom_sink_patterns",
+    "email_send_detection",
+    "extended_language_support",
+    "file_operation_sinks",
+    "framework_specific_sinks",
+    "historical_sink_tracking",
+    "java_sink_detection",
+    "javascript_sink_detection",
+    "logic_sink_detection",
+    "organization_sink_rules",
+    "payment_api_detection",
+    "python_sink_detection",
+    "risk_level_tagging",
+    "s3_public_write_detection",
+    "shell_command_sink_detection",
+    "sink_categorization",
+    "sink_coverage_analysis",
+    "sink_inventory_reporting",
+    "sink_risk_scoring",
+    "sql_sink_detection",
+    "typescript_sink_detection",
+    "xss_sink_detection",
+]
+description = "Enterprise sink detection with compliance and remediation"
+
+# ============================================================================
+# update_symbol
+# ============================================================================
+
+[community.update_symbol]
+enabled = true
+capabilities = [
+    "automatic_backup",
+    "basic_replacement",
+    "java_support",
+    "javascript_support",
+    "python_support",
+    "syntax_validation",
+    "typescript_support",
+]
+description = "Replace a function/class/method with new code (10 updates/call)"
+
+[pro.update_symbol]
+enabled = true
+capabilities = [
+    "atomic_multi_file",
+    "automatic_backup",
+    "basic_replacement",
+    "cross_file_updates",
+    "formatting_preservation",
+    "import_auto_adjustment",
+    "java_support",
+    "javascript_support",
+    "post_update_hook",
+    "pre_update_hook",
+    "python_support",
+    "rollback_on_failure",
+    "semantic_validation",
+    "syntax_validation",
+    "typescript_support",
+]
+description = "Unlimited updates with atomic multi-file, rollback, and hooks"
+
+[enterprise.update_symbol]
+enabled = true
+capabilities = [
+    "atomic_multi_file",
+    "audit_trail",
+    "automatic_backup",
+    "basic_replacement",
+    "branch_creation",
+    "code_review_approval",
+    "compliance_check",
+    "cross_file_updates",
+    "custom_validation_rules",
+    "formatting_preservation",
+    "git_integration",
+    "impact_analysis",
+    "import_auto_adjustment",
+    "java_support",
+    "javascript_support",
+    "policy_gated_mutations",
+    "post_update_hook",
+    "pre_update_hook",
+    "python_support",
+    "rollback_on_failure",
+    "semantic_validation",
+    "syntax_validation",
+    "test_execution",
+    "typescript_support",
+]
+description = "Atomic refactoring: approval, compliance, audit trail, policies"
+
+# ============================================================================
+# validate_paths
+# ============================================================================
+
+[community.validate_paths]
+enabled = true
+capabilities = [
+    "actionable_error_messages",
+    "basic_validation",
+    "batch_path_validation",
+    "broken_reference_detection",
+    "docker_environment_detection",
+    "docker_volume_mount_suggestions",
+    "file_existence_validation",
+    "import_path_checking",
+    "path_accessibility_checking",
+    "workspace_root_detection",
+]
+description = "Path validation with Docker detection and volume suggestions"
+
+[pro.validate_paths]
+enabled = true
+capabilities = [
+    "actionable_error_messages",
+    "basic_validation",
+    "batch_path_validation",
+    "broken_reference_detection",
+    "docker_environment_detection",
+    "docker_volume_mount_suggestions",
+    "dynamic_import_resolution",
+    "extended_language_support",
+    "file_existence_validation",
+    "import_path_checking",
+    "path_accessibility_checking",
+    "path_alias_resolution",
+    "tsconfig_paths_support",
+    "webpack_alias_support",
+    "workspace_root_detection",
+]
+description = "Docker-aware validation with alias resolution and dynamic imports"
+
+[enterprise.validate_paths]
+enabled = true
+capabilities = [
+    "actionable_error_messages",
+    "basic_validation",
+    "batch_path_validation",
+    "broken_reference_detection",
+    "docker_environment_detection",
+    "docker_volume_mount_suggestions",
+    "dynamic_import_resolution",
+    "extended_language_support",
+    "file_existence_validation",
+    "import_path_checking",
+    "path_accessibility_checking",
+    "path_alias_resolution",
+    "permission_checks",
+    "security_boundary_testing",
+    "security_validation",
+    "symbolic_path_breaking",
+    "path_traversal_simulation",
+    "tsconfig_paths_support",
+    "webpack_alias_support",
+    "workspace_root_detection",
+]
+description = "Full validation with security simulation and boundary testing"
+
+# ============================================================================
+# verify_policy_integrity
+# ============================================================================
+
+[community.verify_policy_integrity]
+enabled = true
+capabilities = [
+    "basic_verification",
+]
+description = "Basic policy file verification"
+
+[pro.verify_policy_integrity]
+enabled = true
+capabilities = [
+    "basic_verification",
+    "signature_validation",
+]
+description = "Cryptographic signature validation"
+
+[enterprise.verify_policy_integrity]
+enabled = true
+capabilities = [
+    "audit_logging",
+    "basic_verification",
+    "full_integrity_check",
+    "signature_validation",
+]
+description = "Full integrity with audit logging"

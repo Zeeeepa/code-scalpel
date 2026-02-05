@@ -2,47 +2,29 @@
 Capability Resolver - Resolve tool capabilities by tier and license.
 
 [20260127_FEATURE] Centralized capability resolution system for license-aware testing.
+[20260205_REFACTOR] Removed duplicate file-finding / caching; delegates to config_loader.
 
 This module provides functions to query which capabilities are available at a given
-tier by reading from the .code-scalpel/limits.toml configuration file.
+tier.  All TOML loading and caching is handled by config_loader; this module is a
+thin envelope layer on top.
 
 USAGE:
     from code_scalpel.capabilities import get_tool_capabilities, get_all_capabilities
 
-    # Get capabilities for a specific tool
     caps = get_tool_capabilities("analyze_code", tier="pro")
-    print(caps)  # {'tool_id': 'analyze_code', 'tier': 'pro', 'available': True, 'limits': {...}}
+    # {'tool_id': 'analyze_code', 'tier': 'pro', 'available': True, 'limits': {...}}
 
-    # Get all capabilities for a tier
     all_caps = get_all_capabilities(tier="enterprise")
-    print(len(all_caps))  # 22 tools
-
-DESIGN NOTES:
-- limits.toml is the single source of truth
-- Caching is essential for performance
-- Environment override via CODE_SCALPEL_LIMITS_FILE for CI testing
-- Handles missing tool/tier gracefully (available=False)
-- No dependencies on licensing or tier detection (stateless resolver)
 """
 
 from __future__ import annotations
 
 import logging
-import os
-from pathlib import Path
-from typing import Any, Dict, Optional
-from threading import Lock
+from typing import Any, Dict
 
-try:
-    import tomllib  # Python 3.11+
-except ImportError:
-    import tomli as tomllib  # Fallback for Python 3.10
+from code_scalpel.licensing.config_loader import get_cached_limits, reload_config
 
 logger = logging.getLogger(__name__)
-
-# Global cache and lock for thread-safe access
-_LIMITS_CACHE: Optional[Dict[str, Any]] = None
-_CACHE_LOCK = Lock()
 
 # All 22 tools in Code Scalpel (alphabetical order)
 # Note: These are the tools registered in TOOL_CAPABILITIES
@@ -74,115 +56,6 @@ ALL_TOOLS = [
 
 # All tier names
 TIERS = ["community", "pro", "enterprise"]
-
-
-def _find_limits_file() -> Path:
-    """
-    Find the limits.toml file using the priority order.
-
-    Priority:
-    1. Environment: CODE_SCALPEL_LIMITS_FILE
-    2. Project: .code-scalpel/limits.toml (relative to cwd or up the tree)
-    3. User: ~/.code-scalpel/limits.toml
-    4. System: /etc/code-scalpel/limits.toml
-
-    Returns the path if found, otherwise raises FileNotFoundError.
-    """
-    # 1. Environment variable
-    if env_path := os.environ.get("CODE_SCALPEL_LIMITS_FILE"):
-        path = Path(env_path)
-        if path.exists():
-            logger.debug(f"Found limits.toml via CODE_SCALPEL_LIMITS_FILE: {path}")
-            return path
-        else:
-            logger.warning(
-                f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}"
-            )
-
-    # 2. Project directory (search up tree or use current)
-    project_path = Path.cwd() / ".code-scalpel" / "limits.toml"
-    if project_path.exists():
-        logger.debug(f"Found limits.toml in project: {project_path}")
-        return project_path
-
-    # Try from source directory (when module is installed)
-    # Walk up from this file's location
-    current_file = Path(__file__)
-    for parent in current_file.parents:
-        project_candidate = parent / ".code-scalpel" / "limits.toml"
-        if project_candidate.exists():
-            logger.debug(
-                f"Found limits.toml via source tree search: {project_candidate}"
-            )
-            return project_candidate
-
-    # 3. User home directory
-    user_path = Path.home() / ".code-scalpel" / "limits.toml"
-    if user_path.exists():
-        logger.debug(f"Found limits.toml in user home: {user_path}")
-        return user_path
-
-    # 4. System directory
-    system_path = Path("/etc/code-scalpel/limits.toml")
-    if system_path.exists():
-        logger.debug(f"Found limits.toml in system: {system_path}")
-        return system_path
-
-    # Not found
-    raise FileNotFoundError(
-        "Could not find limits.toml in any of the expected locations:\n"
-        f"  1. CODE_SCALPEL_LIMITS_FILE env var (currently: {os.environ.get('CODE_SCALPEL_LIMITS_FILE', 'not set')})\n"
-        f"  2. .code-scalpel/limits.toml (project)\n"
-        f"  3. ~/.code-scalpel/limits.toml (user)\n"
-        f"  4. /etc/code-scalpel/limits.toml (system)\n"
-        "\nPlease set CODE_SCALPEL_LIMITS_FILE or create .code-scalpel/limits.toml"
-    )
-
-
-def _load_limits_toml() -> Dict[str, Any]:
-    """
-    Load and parse the limits.toml file.
-
-    Returns a dictionary with the parsed TOML content.
-    Raises FileNotFoundError if limits.toml cannot be found.
-    Raises tomllib.TOMLDecodeError if limits.toml is malformed.
-    """
-    limits_file = _find_limits_file()
-    logger.debug(f"Loading limits.toml from: {limits_file}")
-
-    try:
-        with open(limits_file, "rb") as f:
-            return tomllib.load(f)
-    except Exception as e:
-        logger.error(f"Failed to parse limits.toml: {e}")
-        raise
-
-
-def _clear_cache() -> None:
-    """Clear the global limits cache."""
-    global _LIMITS_CACHE
-    with _CACHE_LOCK:
-        _LIMITS_CACHE = None
-
-
-def _get_cached_limits() -> Dict[str, Any]:
-    """
-    Get the cached limits dictionary, loading if necessary.
-
-    Uses thread-safe caching to avoid re-parsing limits.toml on every call.
-    """
-    global _LIMITS_CACHE
-
-    if _LIMITS_CACHE is not None:
-        return _LIMITS_CACHE
-
-    with _CACHE_LOCK:
-        # Double-check after acquiring lock
-        if _LIMITS_CACHE is not None:
-            return _LIMITS_CACHE
-
-        _LIMITS_CACHE = _load_limits_toml()
-        return _LIMITS_CACHE
 
 
 def get_tool_capabilities(tool_id: str, tier: str = "community") -> Dict[str, Any]:
@@ -221,8 +94,8 @@ def get_tool_capabilities(tool_id: str, tier: str = "community") -> Dict[str, An
         logger.warning(f"Invalid tier: {tier_lower}. Valid tiers: {TIERS}")
         tier_lower = "community"
 
-    # Load limits from cache
-    limits = _get_cached_limits()
+    # Load limits from shared config_loader cache
+    limits = get_cached_limits()
 
     # Look for limits[tier][tool_id] (nested dict structure)
     tier_limits = limits.get(tier_lower, {})
@@ -287,11 +160,6 @@ def validate_tier(tier: str) -> bool:
 
 
 def reload_limits_cache() -> None:
-    """
-    Force reload of the limits.toml file.
-
-    Useful in tests or when limits.toml is modified at runtime.
-    """
-    _clear_cache()
-    _get_cached_limits()  # Reload
+    """Force reload of the limits.toml file (delegates to config_loader)."""
+    reload_config()
     logger.info("Limits cache reloaded")

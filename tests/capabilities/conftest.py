@@ -92,12 +92,10 @@ def clear_all_caches():
     os.environ.pop("CODE_SCALPEL_LICENSE_KEY", None)
     os.environ.pop("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", None)
     os.environ.pop("CODE_SCALPEL_TEST_FORCE_TIER", None)
-    os.environ.pop("CODE_SCALPEL_LIMITS_FILE", None)
 
     yield
 
     # Clear after test
-    resolver._LIMITS_CACHE = None
     jwt_validator._LICENSE_VALIDATION_CACHE = None
     config_loader.clear_cache()
     if hasattr(server, "_cached_tier"):
@@ -112,7 +110,6 @@ def clear_all_caches():
     os.environ.pop("CODE_SCALPEL_LICENSE_KEY", None)
     os.environ.pop("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", None)
     os.environ.pop("CODE_SCALPEL_TEST_FORCE_TIER", None)
-    os.environ.pop("CODE_SCALPEL_LIMITS_FILE", None)
 
 
 @pytest.fixture

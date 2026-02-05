@@ -61,8 +61,8 @@ class TestCapabilitiesWithProLicense:
 
             # Pro should have some locked tools (enterprise-only)
             assert len(locked_tools) > 0, "Pro tier should have locked tools"
-            assert len(locked_tools) == 3, (
-                f"Pro tier should lock exactly 3 tools, got {len(locked_tools)}: "
+            assert len(locked_tools) == 2, (
+                f"Pro tier should lock exactly 2 tools, got {len(locked_tools)}: "
                 f"{locked_tools}"
             )
         finally:
@@ -103,13 +103,13 @@ class TestCapabilitiesWithEnterpriseLicense:
             assert capabilities is not None
             assert len(capabilities) > 0
 
-            # Enterprise tier should have all 10 available tools
+            # Enterprise tier should have 14 available tools
             available_tools = sum(
                 1 for tool in capabilities.values() if tool.get("available", False)
             )
             assert (
-                available_tools == 10
-            ), f"Enterprise tier should have 10 available tools, got {available_tools}"
+                available_tools == 14
+            ), f"Enterprise tier should have 14 available tools, got {available_tools}"
         finally:
             os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
 
@@ -131,7 +131,7 @@ class TestCapabilitiesWithEnterpriseLicense:
                 if cap.get("available", False)
             }
 
-            # Enterprise tier has specific tools available
+            # Enterprise tier has specific tools available (14 tools)
             # (The tier structure is not hierarchical - different tiers have different capabilities)
             expected_tools = {
                 "analyze_code",
@@ -141,9 +141,13 @@ class TestCapabilitiesWithEnterpriseLicense:
                 "generate_unit_tests",
                 "get_project_map",
                 "scan_dependencies",
+                "security_scan",
                 "simulate_refactor",
                 "symbolic_execute",
+                "type_evaporation_scan",
+                "unified_sink_detect",
                 "update_symbol",
+                "verify_policy_integrity",
             }
 
             assert enterprise_tools == expected_tools, (

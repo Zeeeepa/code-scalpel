@@ -1,26 +1,19 @@
 """
-Configuration Loader - Load tier limits from TOML files.
+Configuration Loader - Load tier limits from the bundled TOML.
 
 [20251225_FEATURE] v3.3.0 - Centralized configuration for tier limits.
 [20251231_FEATURE] v3.3.1 - Added response_config.json support for output filtering.
+[20260205_REFACTOR] Bundled-only limits: removed all user-override search paths.
 
-This module loads tier-based capability limits from TOML configuration files,
-allowing deployers to tune limits without rebuilding the Python package.
+limits.toml is packaged inside the wheel at code_scalpel/capabilities/limits.toml
+(copied from .code-scalpel/limits.toml at build time via pyproject.toml force-include).
+At runtime the loader reads only that bundled copy.  During development (editable
+install / source checkout) it falls back to .code-scalpel/limits.toml in the repo root.
+No environment-variable or filesystem overrides are honoured for limits — the file is
+owned by the package build.
 
-Architecture:
-    - Searches multiple locations with priority order
-    - Falls back to hardcoded defaults if no config found
-    - Supports environment variable override
-    - Local overrides for development (.local.toml files)
-
-Priority Order:
-    1. CODE_SCALPEL_LIMITS_FILE environment variable
-    2. .code-scalpel/limits.local.toml (gitignored, developer overrides)
-    3. .code-scalpel/limits.toml (project config)
-    4. ~/.code-scalpel/limits.toml (user config)
-    5. /etc/code-scalpel/limits.toml (system config)
-    6. Package default: src/code_scalpel/.code-scalpel/limits.toml
-    7. Hardcoded defaults in features.py
+response_config.json (verbosity / output filtering) retains its existing user-facing
+search behaviour, as that IS intended to be configurable per deployment.
 
 Usage:
     from code_scalpel.licensing.config_loader import load_limits, load_response_config
@@ -61,50 +54,39 @@ else:
 
 def _find_config_file() -> Optional[Path]:
     """
-    Find the configuration file using priority search order.
+    Locate the bundled limits.toml.
+
+    Resolution order (first hit wins):
+        1. Package-bundled copy  – code_scalpel/capabilities/limits.toml
+           (installed via hatch force-include; present in any wheel/sdist install)
+        2. Dev-checkout fallback – <repo-root>/.code-scalpel/limits.toml
+           (only reachable when running from a source checkout / editable install)
+
+    No environment-variable or user-filesystem overrides are honoured.
 
     Returns:
-        Path to config file, or None if not found
+        Path to limits.toml, or None if neither location exists.
     """
-    # Priority 1: Environment variable override
-    env_path = os.environ.get("CODE_SCALPEL_LIMITS_FILE")
-    if env_path:
-        path = Path(env_path).expanduser()
-        if path.exists():
-            logger.info(f"Using limits from CODE_SCALPEL_LIMITS_FILE: {path}")
-            return path
-        else:
-            logger.warning(
-                f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}"
-            )
+    # 1. Bundled copy: sits next to this file's grandparent package dir.
+    #    __file__ = .../code_scalpel/licensing/config_loader.py
+    #    parent.parent = .../code_scalpel/
+    bundled = Path(__file__).resolve().parent.parent / "capabilities" / "limits.toml"
+    if bundled.exists():
+        logger.debug("Using bundled limits.toml: %s", bundled)
+        return bundled
 
-    # Priority 2-6: Standard search locations
-    candidates = [
-        Path.cwd() / ".code-scalpel" / "limits.local.toml",  # Local dev overrides
-        Path.cwd() / ".code-scalpel" / "limits.toml",  # Project config
-        Path.home() / ".code-scalpel" / "limits.toml",  # User config
-        Path("/etc/code-scalpel/limits.toml"),  # System config
-    ]
-
-    # Priority 7: Package default (bundled with distribution)
+    # 2. Dev fallback: four levels up reaches the repo root when the package
+    #    is installed in editable mode or run directly from a checkout.
     try:
-        # Try to find package-bundled config
-        import code_scalpel
-
-        package_root = Path(code_scalpel.__file__).parent.parent.parent
-        package_config = package_root / ".code-scalpel" / "limits.toml"
-        if package_config.exists():
-            candidates.append(package_config)
+        repo_root = Path(__file__).resolve().parent.parent.parent.parent
+        dev_copy = repo_root / ".code-scalpel" / "limits.toml"
+        if dev_copy.exists():
+            logger.debug("Dev mode: using limits.toml from %s", dev_copy)
+            return dev_copy
     except Exception:
         pass
 
-    for path in candidates:
-        expanded = path.expanduser()
-        if expanded.exists():
-            logger.info(f"Loading tier limits from: {expanded}")
-            return expanded
-
-    logger.info("No tier limits config file found, using hardcoded defaults")
+    logger.info("No limits.toml located; hardcoded defaults will be used.")
     return None
 
 
@@ -238,23 +220,152 @@ def get_cached_limits() -> Dict[str, Dict[str, Dict[str, Any]]]:
 
 
 def clear_cache() -> None:
-    """Clear the config cache, forcing reload on next access."""
+    """Clear the limits and features caches, forcing reload on next access."""
     global _config_cache, _config_cache_path, _config_cache_mtime_ns, _config_cache_size
     _config_cache = None
     _config_cache_path = None
     _config_cache_mtime_ns = -1
     _config_cache_size = -1
+    clear_features_cache()
 
 
 def reload_config() -> Dict[str, Dict[str, Dict[str, Any]]]:
     """
-    Force reload of configuration from disk.
+    Force reload of limits and features from disk.
 
     Returns:
-        Freshly loaded config dict
+        Freshly loaded limits config dict
     """
     clear_cache()
     return get_cached_limits()
+
+
+# ============================================================================
+# Features Configuration (features.toml)
+# ============================================================================
+
+
+def _find_features_file() -> Optional[Path]:
+    """
+    Locate the bundled features.toml.
+
+    Resolution order (first hit wins):
+        1. Package-bundled copy  – code_scalpel/capabilities/features.toml
+        2. Dev-checkout fallback – <repo-root>/.code-scalpel/features.toml
+
+    No environment-variable or user-filesystem overrides are honoured.
+
+    Returns:
+        Path to features.toml, or None if neither location exists.
+    """
+    bundled = Path(__file__).resolve().parent.parent / "capabilities" / "features.toml"
+    if bundled.exists():
+        logger.debug("Using bundled features.toml: %s", bundled)
+        return bundled
+
+    try:
+        repo_root = Path(__file__).resolve().parent.parent.parent.parent
+        dev_copy = repo_root / ".code-scalpel" / "features.toml"
+        if dev_copy.exists():
+            logger.debug("Dev mode: using features.toml from %s", dev_copy)
+            return dev_copy
+    except Exception:
+        pass
+
+    logger.info("No features.toml located; hardcoded defaults will be used.")
+    return None
+
+
+def load_features(
+    config_path: Optional[Path] = None,
+) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    """
+    Load feature capabilities from TOML configuration file.
+
+    Args:
+        config_path: Optional explicit path to config file.
+                    If None, searches standard locations.
+
+    Returns:
+        Nested dict: {tier: {tool: {key: value}}}
+        Example: {"pro": {"analyze_code": {"enabled": True, "capabilities": [...], ...}}}
+
+    Raises:
+        No exceptions – falls back to empty dict on any error.
+    """
+    if tomllib is None:
+        logger.debug("tomllib not available, skipping features load")
+        return {}
+
+    if config_path is None:
+        config_path = _find_features_file()
+
+    if config_path is None:
+        return {}
+
+    try:
+        with open(config_path, "rb") as f:
+            config = tomllib.load(f)
+            logger.debug(
+                f"Successfully loaded features.toml with {len(config)} tier sections"
+            )
+            return config
+    except Exception as e:
+        logger.warning(f"Failed to load features from {config_path}: {e}")
+        return {}
+
+
+# Cache variables – same pattern as limits cache.
+_features_cache: Optional[Dict[str, Dict[str, Dict[str, Any]]]] = None
+_features_cache_path: Optional[str] = None
+_features_cache_mtime_ns: int = -1
+_features_cache_size: int = -1
+
+
+def get_cached_features() -> Dict[str, Dict[str, Dict[str, Any]]]:
+    """
+    Get cached features config, loading if stale.
+
+    Returns:
+        Cached features config dict {tier: {tool: {key: value}}}
+    """
+    global _features_cache, _features_cache_path, _features_cache_mtime_ns, _features_cache_size
+
+    config_path = _find_features_file()
+    cache_path = str(config_path) if config_path is not None else None
+
+    mtime_ns = -1
+    size = -1
+    if config_path is not None:
+        try:
+            stat = config_path.stat()
+            mtime_ns = int(stat.st_mtime_ns)
+            size = int(stat.st_size)
+        except Exception:
+            mtime_ns = -2
+            size = -2
+
+    if (
+        _features_cache is None
+        or _features_cache_path != cache_path
+        or _features_cache_mtime_ns != mtime_ns
+        or _features_cache_size != size
+    ):
+        _features_cache = load_features(config_path=config_path)
+        _features_cache_path = cache_path
+        _features_cache_mtime_ns = mtime_ns
+        _features_cache_size = size
+
+    return _features_cache
+
+
+def clear_features_cache() -> None:
+    """Clear the features cache, forcing reload on next access."""
+    global _features_cache, _features_cache_path, _features_cache_mtime_ns, _features_cache_size
+    _features_cache = None
+    _features_cache_path = None
+    _features_cache_mtime_ns = -1
+    _features_cache_size = -1
 
 
 # ============================================================================

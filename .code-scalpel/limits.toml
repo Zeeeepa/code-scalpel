@@ -1,17 +1,20 @@
 # Code Scalpel Tier Limits Configuration
 #
 # This file defines the capability limits for each tool at each tier.
-# It is packaged with MCP server distributions and can be customized
-# without rebuilding the Python package.
 #
-# Override Priority:
-#   1. Environment: CODE_SCALPEL_LIMITS_FILE=/path/to/custom.toml
-#   2. Project: .code-scalpel/limits.toml (this file)
-#   3. User: ~/.code-scalpel/limits.toml
-#   4. System: /etc/code-scalpel/limits.toml
-#   5. Defaults: Hardcoded in features.py
+# SOURCE OF TRUTH — this file is copied into the wheel by hatch
+# force-include and becomes code_scalpel/capabilities/limits.toml.
 #
-# Local overrides: Create .code-scalpel/limits.local.toml (gitignored)
+# Build flow:
+#   .code-scalpel/limits.toml   ──► hatch force-include
+#        (this file)                        │
+#                                          ▼
+#                              code_scalpel/capabilities/limits.toml
+#                                  (bundled in wheel / sdist)
+#
+# At runtime, config_loader._find_config_file() reads only the bundled
+# copy (or, in a source checkout, this file directly).
+# No environment-variable or user-filesystem overrides are honoured.
 
 # ============================================================================
 # GLOBAL SETTINGS (apply to all tiers)
@@ -113,16 +116,19 @@ max_references = 50
 
 [community.crawl_project]
 max_files = 100
+max_depth = 10
 parsing_enabled = false
 complexity_analysis = false
 respect_gitignore = true
 
 [pro.crawl_project]
+# max_files and max_depth unlimited - omit
 parsing_enabled = true
 complexity_analysis = true
 respect_gitignore = true
 
 [enterprise.crawl_project]
+# max_files, max_depth, and max_repos unlimited - omit
 parsing_enabled = true
 complexity_analysis = true
 respect_gitignore = true
@@ -194,9 +200,11 @@ frontend_only = true
 
 [pro.type_evaporation_scan]
 max_files = 500
+frontend_only = false
 
 [enterprise.type_evaporation_scan]
 # max_files unlimited - omit
+frontend_only = false
 
 # ============================================================================
 # GROUP 3: SECURITY & SAFETY
@@ -205,13 +213,16 @@ max_files = 500
 [community.security_scan]
 max_findings = 50
 max_file_size_kb = 500
+vulnerability_types = "owasp_top_10"
 
 [pro.security_scan]
 # max_findings and max_file_size_kb unlimited - omit
+vulnerability_types = "all"
 
 [enterprise.security_scan]
 # All unlimited - omit
 # custom_rules_limit checked as None in Python
+vulnerability_types = "all"
 
 # ----------------------------------------------------------------------------
 
@@ -239,6 +250,7 @@ languages = ["python", "javascript", "typescript", "java"]
 [enterprise.unified_sink_detect]
 # languages = "all" handled in code
 # max_sinks and custom_sinks_limit unlimited
+custom_sinks_limit = -1
 
 # ----------------------------------------------------------------------------
 
@@ -256,12 +268,18 @@ max_paths = 100
 
 [community.verify_policy_integrity]
 max_policy_files = 50
+signature_validation = false
+tamper_detection = false
 
 [pro.verify_policy_integrity]
 max_policy_files = 200
+signature_validation = true
+tamper_detection = true
 
 [enterprise.verify_policy_integrity]
 # max_policy_files unlimited
+signature_validation = true
+tamper_detection = true
 
 # ----------------------------------------------------------------------------
 # Code Policy Check
@@ -301,7 +319,7 @@ max_extraction_size_mb = 10
 
 [enterprise.extract_code]
 include_cross_file_deps = true
-# max_depth unlimited - omit
+max_depth = -1
 max_extraction_size_mb = 100
 
 # ----------------------------------------------------------------------------
@@ -410,23 +428,12 @@ cache_ttl_seconds = 300
 # DEPLOYMENT NOTES
 # ============================================================================
 #
-# For packaged distributions:
-#   - This file is included in the Python package via MANIFEST.in
-#   - Deployers can edit this file to tune limits without recompiling
-#   - Changes take effect on server restart
+# This is the build-time source of truth.  It is copied into the wheel
+# by hatch force-include and read at runtime from that bundled location.
 #
-# For development:
-#   - Create .code-scalpel/limits.local.toml for personal overrides
-#   - Set CODE_SCALPEL_LIMITS_FILE env var to use alternate config
-#   - Use CODE_SCALPEL_TIER=enterprise to test unlimited features
+# Do NOT place a copy in ~/.code-scalpel/, /etc/, or set CODE_SCALPEL_LIMITS_FILE;
+# the runtime loader will ignore those paths.
 #
-# Examples:
-#
-#   # Test with unlimited depth locally
-#   [pro.extract_code]
-#   max_depth = 999
-#
-#   # Increase community limits for demos
-#   [community.security_scan]
-#   max_findings = 100
+# To change limits for a release, edit this file, then rebuild and
+# re-publish the package.
 #

@@ -98,9 +98,10 @@ class TestUpdateSymbolProTier:
         limits = capabilities.get("limits", {}) or {}
         # Now called max_updates_per_call instead of max_updates_per_session
         max_updates = limits.get("max_updates_per_call")
+        # -1 sentinel in limits.toml is converted to None (unlimited) at runtime
         assert (
-            max_updates == -1
-        ), f"Pro should have unlimited (-1) updates, got {max_updates}"
+            max_updates is None
+        ), f"Pro should have unlimited (None) updates, got {max_updates}"
 
     def test_atomic_multi_file_updates_capability(self, pro_tier):
         """Verify atomic multi-file updates for Pro tier."""
@@ -241,7 +242,8 @@ class TestUpdateSymbolCrossTierComparison:
         pro_limit = pro_caps.get("limits", {}).get("max_updates_per_call")
 
         assert comm_limit == 10, "Community should have 10-update per-call limit"
-        assert pro_limit == -1, "Pro should have unlimited (-1) per-call limit"
+        # -1 sentinel in limits.toml is converted to None (unlimited) at runtime
+        assert pro_limit is None, "Pro should have unlimited (None) per-call limit"
 
     def test_community_no_advanced_features_pro_has(self, community_tier, pro_tier):
         """Verify Pro has advanced features that Community lacks."""

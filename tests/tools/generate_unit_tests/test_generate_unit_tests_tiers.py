@@ -205,9 +205,11 @@ test_frameworks = ["pytest"]
         encoding="utf-8",
     )
 
-    monkeypatch.setenv("CODE_SCALPEL_LIMITS_FILE", str(custom))
+    monkeypatch.setattr(
+        "code_scalpel.licensing.config_loader._find_config_file",
+        lambda: custom,
+    )
     clear_cache()
-    monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
     ok = await server.generate_unit_tests(
         code="def f():\n    return 1\n", framework="pytest"

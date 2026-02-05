@@ -169,6 +169,83 @@ Git tags matching `v*.*.*` (e.g., `v1.3.3`)
 |--------|---------|
 | `PYPI_API_TOKEN` | Authenticate PyPI publish |
 
+## Website Release Notes
+
+Release notes on codescalpel.dev are driven by the files in `website/docs/releases/`. This section covers exactly what to touch on each release so nothing falls out of sync.
+
+### Files to update per release
+
+| File | What to do |
+|------|-----------|
+| `CHANGELOG.md` | Add the new `## [X.Y.Z]` block (source of truth) |
+| `website/docs/releases/vX.Y.Z.md` | Create the release page (use any existing vX.Y.Z.md as template) |
+| `website/docs/releases/changelog.md` | Prepend the same Added/Changed/Fixed entries |
+| `website/docs/releases/index.md` | Update "Current Release" card and add row to history table |
+| `website/mkdocs.yml` | Add `- vX.Y.Z: releases/vX.Y.Z.md` to the Release Notes nav |
+
+### Release page template
+
+Every page in `website/docs/releases/` follows the same structure:
+
+```markdown
+---
+title: vX.Y.Z Release Notes
+description: Code Scalpel vX.Y.Z - <one-line summary>
+---
+
+# vX.Y.Z Release Notes
+
+**Release Date:** <date>
+
+## Highlights
+- bullet points (key features only)
+
+## New Features
+### <Feature Name>
+<description, optionally with code block>
+
+## Changes
+<what changed and why>
+
+## Bug Fixes
+- <what was fixed>
+
+## Breaking Changes
+None. / <describe if any>
+
+## Upgrade Guide
+### From vX.Y.(Z-1)
+pip install --upgrade codescalpel
+<any config changes needed>
+
+## Known Issues
+- <carried forward or new>
+
+## Full Changelog
+See the detailed changelog (changelog.md) for all changes.
+```
+
+### Verify before deploying
+
+Run the sync script to catch gaps before they ship:
+
+```bash
+./scripts/sync_release_notes.sh          # human-readable report
+./scripts/sync_release_notes.sh --check  # exits 1 on any gap (use in CI)
+```
+
+### Deployment
+
+The website deploys via rsync to Hostinger. Two paths, same effect:
+
+| When | How |
+|------|-----|
+| Automated (CI) | Push to `main` triggers `website/.github/workflows/deploy.yml` |
+| Manual (Linux / WSL) | `website/deploy.sh` |
+| Manual (Windows) | `website/deploy.ps1` (requires WinSCP or WSL) |
+
+> **Note:** The deploy scripts exclude `*.md` source files — only built HTML and static assets ship. If MkDocs is added as a build step in the future, run `mkdocs build` first and point rsync at the `site/` output directory.
+
 ## Adding New Checks
 
 To add a new check to all tiers consistently:

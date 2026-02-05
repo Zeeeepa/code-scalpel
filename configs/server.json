@@ -7,12 +7,12 @@
     "url": "https://github.com/3D-Tech-Solutions/code-scalpel",
     "source": "github"
   },
-  "version": "1.0.0",
+  "version": "1.3.3",
   "packages": [
     {
       "registryType": "pypi",
-      "identifier": "code-scalpel",
-      "version": "1.0.0",
+      "identifier": "codescalpel",
+      "version": "1.3.3",
       "transport": {
         "type": "stdio"
       }

@@ -79,41 +79,36 @@ def test_merge_limits():
 
 
 def test_get_tool_capabilities_with_config_override(tmp_path, monkeypatch):
-    """Test that get_tool_capabilities merges external config."""
-    # Create a config with overrides
+    """Test that get_tool_capabilities picks up a custom limits file."""
     config_file = tmp_path / "limits.toml"
     config_file.write_text("""
 [pro.extract_code]
 max_depth = 555
+include_cross_file_deps = true
 """)
 
-    # Point loader to our test config
-    monkeypatch.setenv("CODE_SCALPEL_LIMITS_FILE", str(config_file))
-
-    # Clear cache to force reload
+    # Redirect the bundled-file resolver to our test file
+    monkeypatch.setattr(
+        "code_scalpel.licensing.config_loader._find_config_file",
+        lambda: config_file,
+    )
     clear_cache()
 
-    # Get capabilities
     caps = get_tool_capabilities("extract_code", "pro")
 
-    # Should have merged limits
     assert caps["limits"]["max_depth"] == 555
-    # Other limits should be from defaults (using actual key name)
     assert "include_cross_file_deps" in caps["limits"]
 
 
-def test_config_priority_env_var(tmp_path, monkeypatch):
-    """Test that CODE_SCALPEL_LIMITS_FILE env var takes priority."""
+def test_load_limits_explicit_path(tmp_path):
+    """Test that load_limits honours an explicit config_path argument."""
     config_file = tmp_path / "custom.toml"
     config_file.write_text("""
 [community.extract_code]
 max_depth = 777
 """)
 
-    monkeypatch.setenv("CODE_SCALPEL_LIMITS_FILE", str(config_file))
-    clear_cache()
-
-    limits = load_limits()
+    limits = load_limits(config_path=config_file)
 
     assert limits["community"]["extract_code"]["max_depth"] == 777
 
@@ -178,12 +173,11 @@ cross_file_deps = true
     assert "enterprise" in limits
     assert limits["enterprise"]["extract_code"]["cross_file_deps"] is True
 
-    # Now test that when we get tool capabilities with None in defaults,
-    # the merge preserves it
+    # Verify that -1 sentinel in limits.toml is converted to None at runtime.
+    # enterprise.update_symbol has max_updates_per_call = -1 in the bundled file.
     clear_cache()
-    caps = get_tool_capabilities("extract_code", "enterprise")
-    # max_depth should be None from defaults (unlimited)
-    assert caps["limits"]["max_depth"] is None
+    caps = get_tool_capabilities("update_symbol", "enterprise")
+    assert caps["limits"]["max_updates_per_call"] is None
 
 
 def test_array_values_in_config(tmp_path):
@@ -203,21 +197,15 @@ constraint_types = ["int", "bool", "string"]
     ]
 
 
-def test_local_override_precedence(tmp_path, monkeypatch):
-    """Test that .local.toml takes precedence over .toml."""
-    # This test simulates the search path by using env var
-    # In reality, _find_config_file() checks .local.toml first
-
-    local_config = tmp_path / "limits.local.toml"
-    local_config.write_text("""
+def test_load_limits_custom_path(tmp_path):
+    """Test that load_limits reads correctly from an arbitrary path."""
+    custom_config = tmp_path / "custom.toml"
+    custom_config.write_text("""
 [pro.extract_code]
 max_depth = 999
 """)
 
-    monkeypatch.setenv("CODE_SCALPEL_LIMITS_FILE", str(local_config))
-    clear_cache()
-
-    limits = load_limits()
+    limits = load_limits(config_path=custom_config)
 
     assert limits["pro"]["extract_code"]["max_depth"] == 999
 
@@ -226,27 +214,22 @@ max_depth = 999
     "tier,expected_max_depth",
     [
         ("community", 0),
-        ("pro", 2),
-        ("enterprise", None),
+        ("pro", 1),
+        ("enterprise", None),  # -1 sentinel in limits.toml → None
     ],
 )
 def test_default_extract_code_limits(tier, expected_max_depth):
-    """Test that default limits are correct when no config override."""
-    # Get capabilities without any config override
+    """Test that extract_code max_depth matches limits.toml, including -1 sentinel."""
     clear_cache()
     caps = get_tool_capabilities("extract_code", tier)
 
-    # Should have default limits
     limits = caps.get("limits", {})
     assert "max_depth" in limits
-
-    # Note: If external config exists, this might not match
-    # This test verifies the hardcoded defaults in features.py
+    assert limits["max_depth"] == expected_max_depth
 
 
 def test_full_integration_workflow(tmp_path, monkeypatch):
-    """Test full workflow: deploy config, tune limits, tool uses them."""
-    # Simulate deployment: ship limits.toml with package
+    """Test full workflow: custom limits file loaded, tools read correct values."""
     deployed_config = tmp_path / "limits.toml"
     deployed_config.write_text("""
 [pro.extract_code]
@@ -258,19 +241,18 @@ max_extraction_size_mb = 20
 max_findings = 100
 """)
 
-    # Deployer customizes for their environment
-    monkeypatch.setenv("CODE_SCALPEL_LIMITS_FILE", str(deployed_config))
+    monkeypatch.setattr(
+        "code_scalpel.licensing.config_loader._find_config_file",
+        lambda: deployed_config,
+    )
     clear_cache()
 
-    # Tool handler reads config
     caps = get_tool_capabilities("extract_code", "pro")
     limits = caps["limits"]
 
-    # Verify custom limits applied
     assert limits["max_depth"] == 5
     assert limits["cross_file_deps"] is True
     assert limits["max_extraction_size_mb"] == 20
 
-    # Community tier also customized
     community_caps = get_tool_capabilities("security_scan", "community")
     assert community_caps["limits"]["max_findings"] == 100
