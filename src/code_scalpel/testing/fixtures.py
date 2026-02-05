@@ -24,18 +24,15 @@ Tier = Literal["community", "pro", "enterprise"]
 @pytest.fixture
 def clear_all_caches():
     """Clear all tier and capability caches before and after test."""
-    from code_scalpel.capabilities import resolver
     from code_scalpel.licensing import config_loader, jwt_validator
 
     # Clear before test
-    resolver._LIMITS_CACHE = None
     jwt_validator._LICENSE_VALIDATION_CACHE = None
     config_loader.clear_cache()
 
     yield
 
     # Clear after test
-    resolver._LIMITS_CACHE = None
     jwt_validator._LICENSE_VALIDATION_CACHE = None
     config_loader.clear_cache()
 

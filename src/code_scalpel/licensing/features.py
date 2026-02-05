@@ -208,10 +208,12 @@ def get_tool_capabilities(tool_id: str, tier: str) -> Dict[str, Any]:
         }
 
     # ── Assemble envelope ─────────────────────────────────────────────────
-    enabled: bool = features_data.get("enabled", True)
+    enabled_raw = features_data.get("enabled", True)
+    enabled: bool = bool(enabled_raw) if isinstance(enabled_raw, bool) else True
     raw_caps = features_data.get("capabilities", [])
     capabilities: Set[str] = set(raw_caps) if isinstance(raw_caps, list) else set()
-    description: str = features_data.get("description", "")
+    description_raw = features_data.get("description", "")
+    description: str = str(description_raw) if isinstance(description_raw, str) else ""
     limits: Dict[str, Any] = _sanitise_limits(limits_data)
 
     return {
