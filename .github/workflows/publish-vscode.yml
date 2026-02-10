@@ -69,32 +69,39 @@ jobs:
       - name: Install vsce
         run: npm install -g @vscode/vsce
 
-      - name: Verify tag matches extension version
+      - name: Check if extension version matches tag
+        id: version-check
         working-directory: vscode-extension
         run: |
           TAG_VERSION="${TAG_NAME#v}"  # Remove 'v' prefix
           PKG_VERSION=$(node -p "require('./package.json').version")
           if [[ "$TAG_VERSION" != "$PKG_VERSION" ]]; then
-            echo "::error::Tag/version mismatch: tag=$TAG_NAME, package.json=$PKG_VERSION"
-            exit 1
+            echo "::notice::Skipping VS Code publish: tag=$TAG_NAME but package.json=$PKG_VERSION"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "OK: tag matches version: $TAG_NAME"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "OK: tag matches version: $TAG_NAME"
 
       - name: Compile TypeScript
+        if: steps.version-check.outputs.skip != 'true'
         working-directory: vscode-extension
         run: npm run compile || echo "Skipping compile (pre-built extension)"
 
       - name: Package extension
+        if: steps.version-check.outputs.skip != 'true'
         working-directory: vscode-extension
         run: npm run vscode:prepublish 2>/dev/null || true && vsce package --no-dependencies
 
       - name: Publish to VS Code Marketplace
+        if: steps.version-check.outputs.skip != 'true'
         working-directory: vscode-extension
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: vsce publish -p $VSCE_PAT
 
       - name: Upload VSIX artifact
+        if: steps.version-check.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: code-scalpel-vsix
