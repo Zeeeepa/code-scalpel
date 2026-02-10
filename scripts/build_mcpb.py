@@ -298,7 +298,7 @@ def main() -> None:
 
     try:
         mcpb_path = build_mcpb(args.output)
-        print(f"\n🎉 Ready for Claude Desktop installation!")
+        print("\n🎉 Ready for Claude Desktop installation!")
         print(f"   Double-click {mcpb_path.name} to install")
     except Exception as e:
         print(f"\n❌ Build failed: {e}")
