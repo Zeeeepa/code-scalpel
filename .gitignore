@@ -1,5 +1,6 @@
 # Website documentation (built locally, deployed to codescalpel.dev)
-website/
+/docs/website/
+/demos/
 
 # Python
 __pycache__/
@@ -42,6 +43,7 @@ pip-delete-this-directory.txt
 
 # Code Scalpel specific
 .code-scalpel.code-workspace
+/.code-scalpel/
 pdg_visualizations/
 analysis_results/
 # [20260202_CLEANUP] Consolidated caches into .code-scalpel/cache/
@@ -105,10 +107,12 @@ docs/analysis/  # Internal tool validation and verification documents
 
 # Internal documentation (development-only, not for public repo)
 docs/adr/
+docs/archive/  # Archived internal development documentation
 docs/architecture/
 docs/ci_cd/
 docs/compliance/
 docs/configuration/
+docs/demos/  # Demo scripts for marketing/recording (internal preparation)
 docs/deployment/
 docs/features/
 docs/modules/
@@ -267,7 +271,12 @@ smoke_test*.py
 /test_mcp_*.py
 verify_*.py
 stress_test*.sh
+test_results.txt
+testing/  # Manual testing logs and artifacts
 src/code_scalpel/mcp/archive/server.py
+
+# Shell completions (generated at install time)
+completions/
 
 # Internal examples (not for public distribution)
 examples/.internal/

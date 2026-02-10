@@ -10,7 +10,7 @@ Key Modules:
 - integrations: Framework integrations (AutoGen, CrewAI, LangGraph, LangChain)
 
 Installation:
-    pip install code-scalpel[agents]
+    pip install codescalpel[agents]
 
 Usage:
     from codescalpel_agents.agents import CodeReviewAgent

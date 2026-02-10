@@ -10,9 +10,9 @@ import pytest
 try:
     import codescalpel_agents  # noqa: F401
 except ImportError:
-    pytest.skip("Requires pip install code-scalpel[agents]", allow_module_level=True)
+    pytest.skip("Requires pip install codescalpel[agents]", allow_module_level=True)
 
-pytest.importorskip("flask", reason="Requires pip install code-scalpel[web]")
+pytest.importorskip("flask", reason="Requires pip install codescalpel[web]")
 
 from code_scalpel import cli
 

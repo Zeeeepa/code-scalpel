@@ -521,6 +521,15 @@ def start_mcp_server(
             "   Add to your Claude Desktop config or use with MCP Inspector.",
             file=sys.stderr,
         )
+        print("\nIMPORTANT: Do not type commands here!", file=sys.stderr)
+        print(
+            "   This terminal is now a JSON-RPC pipe for MCP communication.",
+            file=sys.stderr,
+        )
+        print(
+            "   Any text you type will be ignored (it's not valid JSON-RPC).",
+            file=sys.stderr,
+        )
         print("\nPress Ctrl+C to stop.\n", file=sys.stderr)
     else:
         print(
@@ -889,6 +898,345 @@ def show_capabilities(
         return 1
 
 
+# [20260205_FEATURE] Phase 1 Pilot: MCP Tool CLI Handlers
+def handle_extract_code(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel extract-code' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool, invoke_tool_with_format
+
+    # Determine target type (function or method)
+    target_type = "method" if args.class_name else "function"
+
+    tool_args = {
+        "target_type": target_type,
+        "target_name": args.target_name,
+        "file_path": args.file_path,
+        "include_cross_file_deps": args.include_cross_file_deps,
+        "include_context": args.include_context,
+    }
+
+    output_format = "json" if args.json else "text"
+    exit_code = invoke_tool_with_format("extract_code", tool_args, output_format)
+
+    # If output file specified, write result
+    if exit_code == 0 and args.output and not args.json:
+        try:
+            with open(args.output, "w") as f:
+                # Re-run to capture output
+                import io
+                import sys
+
+                old_stdout = sys.stdout
+                sys.stdout = io.StringIO()
+                invoke_tool("extract_code", tool_args)
+                output = sys.stdout.getvalue()
+                sys.stdout = old_stdout
+
+                f.write(output)
+                print(f"✓ Extracted code written to {args.output}")
+        except Exception as e:
+            print(f"Error writing output file: {e}", file=sys.stderr)
+            return 1
+
+    return exit_code
+
+
+def handle_get_call_graph(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel get-call-graph' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool, invoke_tool_with_format
+
+    tool_args = {
+        "file_path": args.file_path,
+    }
+
+    output_format = "json" if args.json else args.format
+    exit_code = invoke_tool_with_format("get_call_graph", tool_args, output_format)
+
+    # If output file specified, write result
+    if exit_code == 0 and args.output:
+        try:
+            with open(args.output, "w") as f:
+                import io
+                import sys
+
+                old_stdout = sys.stdout
+                sys.stdout = io.StringIO()
+                invoke_tool("get_call_graph", tool_args)
+                output = sys.stdout.getvalue()
+                sys.stdout = old_stdout
+
+                f.write(output)
+                print(f"✓ Call graph written to {args.output}")
+        except Exception as e:
+            print(f"Error writing output file: {e}", file=sys.stderr)
+            return 1
+
+    return exit_code
+
+
+def handle_rename_symbol(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel rename-symbol' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "file_path": args.file_path,
+        "target_type": args.target_type,
+        "target_name": args.target_name,
+        "new_name": args.new_name,
+        "create_backup": args.create_backup,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("rename_symbol", tool_args, output_format)
+
+
+# [20260205_FEATURE] Phase 2: Analysis Tool Handlers
+def handle_get_file_context(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel get-file-context' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "file_path": args.file_path,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("get_file_context", tool_args, output_format)
+
+
+def handle_get_symbol_references(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel get-symbol-references' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "symbol_name": args.symbol_name,
+        "project_root": args.project_root,
+        "scope_prefix": args.scope_prefix,
+        "include_tests": args.include_tests,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("get_symbol_references", tool_args, output_format)
+
+
+def handle_get_graph_neighborhood(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel get-graph-neighborhood' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "node_id": args.node_id,
+        "project_root": args.project_root,
+        "k": args.k,
+        "direction": args.direction,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("get_graph_neighborhood", tool_args, output_format)
+
+
+def handle_get_project_map(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel get-project-map' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "project_root": args.project_root,
+        "entry_point": args.entry_point,
+        "depth": args.depth,
+    }
+
+    output_format = "json" if args.json else args.format
+    return invoke_tool_with_format("get_project_map", tool_args, output_format)
+
+
+def handle_get_cross_file_dependencies(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel get-cross-file-dependencies' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "file_path": args.file_path,
+        "project_root": args.project_root,
+        "depth": args.depth,
+        "include_external": args.include_external,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format(
+        "get_cross_file_dependencies", tool_args, output_format
+    )
+
+
+def handle_crawl_project(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel crawl-project' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "root_path": args.root_path,
+        "exclude_dirs": args.exclude_dirs,
+        "complexity_threshold": args.complexity_threshold,
+        "include_report": args.include_report,
+        "pattern": args.pattern,
+        "pattern_type": args.pattern_type,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("crawl_project", tool_args, output_format)
+
+
+# [20260205_FEATURE] Phase 3: Security Tool Handlers
+def handle_cross_file_security_scan(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel cross-file-security-scan' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "project_root": args.project_root,
+        "entry_point": args.entry_point,
+        "max_depth": args.max_depth,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("cross_file_security_scan", tool_args, output_format)
+
+
+def handle_type_evaporation_scan(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel type-evaporation-scan' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "frontend_file_path": args.frontend_file,
+        "backend_file_path": args.backend_file,
+        "frontend_code": args.frontend_code,
+        "backend_code": args.backend_code,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("type_evaporation_scan", tool_args, output_format)
+
+
+def handle_unified_sink_detect(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel unified-sink-detect' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "code": args.code,
+        "language": args.language,
+        "confidence_threshold": args.confidence_threshold,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("unified_sink_detect", tool_args, output_format)
+
+
+def handle_symbolic_execute(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel symbolic-execute' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "code": args.code,
+        "max_paths": args.max_paths,
+        "max_depth": args.max_depth,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("symbolic_execute", tool_args, output_format)
+
+
+# [20260205_FEATURE] Phase 4: Refactoring & Testing Tool Handlers
+def handle_update_symbol(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel update-symbol' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "file_path": args.file_path,
+        "target_type": args.target_type,
+        "target_name": args.target_name,
+        "new_body": args.new_body,
+        "create_backup": args.create_backup,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("update_symbol", tool_args, output_format)
+
+
+def handle_simulate_refactor(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel simulate-refactor' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "file_path": args.file_path,
+        "changes": args.changes,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("simulate_refactor", tool_args, output_format)
+
+
+def handle_generate_unit_tests(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel generate-unit-tests' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "file_path": args.file_path,
+        "function": args.function,
+        "framework": args.framework,
+        "coverage_target": args.coverage_target,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("generate_unit_tests", tool_args, output_format)
+
+
+# [20260205_FEATURE] Phase 5: Validation & Policy Tool Handlers
+def handle_validate_paths(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel validate-paths' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "file_path": args.file_path,
+        "fix": args.fix,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("validate_paths", tool_args, output_format)
+
+
+def handle_scan_dependencies(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel scan-dependencies' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "project_root": args.project_root,
+        "include_dev": args.include_dev,
+        "check_security": args.check_security,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("scan_dependencies", tool_args, output_format)
+
+
+def handle_code_policy_check(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel code-policy-check' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "file_path": args.file_path,
+        "policy_dir": args.policy_dir,
+        "strict": args.strict,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("code_policy_check", tool_args, output_format)
+
+
+def handle_verify_policy_integrity(args: argparse.Namespace) -> int:
+    """Handle 'codescalpel verify-policy-integrity' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "policy_dir": args.policy_dir,
+    }
+
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("verify_policy_integrity", tool_args, output_format)
+
+
 def main() -> int:
     """Main CLI entry point."""
     from . import __version__
@@ -943,6 +1291,563 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     scan_parser.add_argument("file", nargs="?", help="Python file to scan")
     scan_parser.add_argument("--code", "-c", help="Code string to scan")
     scan_parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
+
+    # [20260205_FEATURE] Phase 1 Pilot: MCP Tool CLI Access
+    # Extract Code command
+    extract_parser = subparsers.add_parser(
+        "extract-code",
+        help="Surgically extract code with dependencies (MCP tool)",
+    )
+    extract_parser.add_argument("file_path", help="Path to file containing code")
+    extract_parser.add_argument(
+        "--function",
+        "-f",
+        dest="target_name",
+        required=True,
+        help="Function name to extract",
+    )
+    extract_parser.add_argument(
+        "--class",
+        "-c",
+        dest="class_name",
+        help="Class name (if extracting a method)",
+    )
+    extract_parser.add_argument(
+        "--include-deps",
+        action="store_true",
+        dest="include_cross_file_deps",
+        help="Include cross-file dependencies (Pro+ tier)",
+    )
+    extract_parser.add_argument(
+        "--include-context",
+        action="store_true",
+        help="Include surrounding code context",
+    )
+    extract_parser.add_argument(
+        "--output",
+        "-o",
+        help="Output file (default: stdout)",
+    )
+    extract_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Get Call Graph command
+    call_graph_parser = subparsers.add_parser(
+        "get-call-graph",
+        help="Generate function call graph (MCP tool)",
+    )
+    call_graph_parser.add_argument("file_path", help="Path to file to analyze")
+    call_graph_parser.add_argument(
+        "--output",
+        "-o",
+        help="Output file (default: stdout)",
+    )
+    call_graph_parser.add_argument(
+        "--format",
+        choices=["mermaid", "json"],
+        default="mermaid",
+        help="Output format (default: mermaid)",
+    )
+    call_graph_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output full response as JSON",
+    )
+
+    # Rename Symbol command
+    rename_parser = subparsers.add_parser(
+        "rename-symbol",
+        help="Safely rename a function, class, or method (MCP tool)",
+    )
+    rename_parser.add_argument("file_path", help="Path to file containing symbol")
+    rename_parser.add_argument("target_name", help="Current name of the symbol")
+    rename_parser.add_argument("new_name", help="New name for the symbol")
+    rename_parser.add_argument(
+        "--type",
+        dest="target_type",
+        choices=["function", "class", "method"],
+        default="function",
+        help="Type of symbol (default: function)",
+    )
+    rename_parser.add_argument(
+        "--no-backup",
+        action="store_false",
+        dest="create_backup",
+        help="Do not create backup before renaming",
+    )
+    rename_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # [20260205_FEATURE] Phase 2: Analysis Tools
+    # Get File Context command
+    file_context_parser = subparsers.add_parser(
+        "get-file-context",
+        help="Get file overview with structure analysis (MCP tool)",
+    )
+    file_context_parser.add_argument("file_path", help="Path to file to analyze")
+    file_context_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Get Symbol References command
+    symbol_refs_parser = subparsers.add_parser(
+        "get-symbol-references",
+        help="Find all references to a symbol across project (MCP tool)",
+    )
+    symbol_refs_parser.add_argument("symbol_name", help="Symbol name to search for")
+    symbol_refs_parser.add_argument(
+        "--project-root",
+        help="Project root directory (default: current directory)",
+    )
+    symbol_refs_parser.add_argument(
+        "--scope-prefix",
+        help="Optional scope prefix to filter results",
+    )
+    symbol_refs_parser.add_argument(
+        "--no-tests",
+        action="store_false",
+        dest="include_tests",
+        help="Exclude test files from search",
+    )
+    symbol_refs_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Get Graph Neighborhood command
+    graph_neighborhood_parser = subparsers.add_parser(
+        "get-graph-neighborhood",
+        help="Get k-hop neighborhood of a node in call graph (MCP tool)",
+    )
+    graph_neighborhood_parser.add_argument(
+        "node_id",
+        help="Node ID (function name) to analyze",
+    )
+    graph_neighborhood_parser.add_argument(
+        "--project-root",
+        help="Project root directory (default: current directory)",
+    )
+    graph_neighborhood_parser.add_argument(
+        "--k",
+        type=int,
+        default=2,
+        help="Number of hops (default: 2)",
+    )
+    graph_neighborhood_parser.add_argument(
+        "--direction",
+        choices=["incoming", "outgoing", "both"],
+        default="both",
+        help="Direction of edges to follow (default: both)",
+    )
+    graph_neighborhood_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Get Project Map command
+    project_map_parser = subparsers.add_parser(
+        "get-project-map",
+        help="Generate project structure map (MCP tool)",
+    )
+    project_map_parser.add_argument(
+        "--project-root",
+        help="Project root directory (default: current directory)",
+    )
+    project_map_parser.add_argument(
+        "--entry-point",
+        help="Entry point file for analysis",
+    )
+    project_map_parser.add_argument(
+        "--depth",
+        type=int,
+        default=10,
+        help="Maximum depth for analysis (default: 10)",
+    )
+    project_map_parser.add_argument(
+        "--format",
+        choices=["mermaid", "json", "text"],
+        default="text",
+        help="Output format (default: text)",
+    )
+    project_map_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output full response as JSON",
+    )
+
+    # Get Cross-File Dependencies command
+    cross_deps_parser = subparsers.add_parser(
+        "get-cross-file-dependencies",
+        help="Analyze cross-file dependencies (MCP tool)",
+    )
+    cross_deps_parser.add_argument(
+        "file_path",
+        help="File path to analyze",
+    )
+    cross_deps_parser.add_argument(
+        "--project-root",
+        help="Project root directory (default: current directory)",
+    )
+    cross_deps_parser.add_argument(
+        "--depth",
+        type=int,
+        default=3,
+        help="Maximum dependency depth (default: 3)",
+    )
+    cross_deps_parser.add_argument(
+        "--include-external",
+        action="store_true",
+        help="Include external library dependencies",
+    )
+    cross_deps_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Crawl Project command
+    crawl_parser = subparsers.add_parser(
+        "crawl-project",
+        help="Crawl and analyze project directory (MCP tool)",
+    )
+    crawl_parser.add_argument(
+        "--root-path",
+        help="Root directory to crawl (default: current directory)",
+    )
+    crawl_parser.add_argument(
+        "--exclude-dirs",
+        nargs="*",
+        help="Directories to exclude (e.g., node_modules __pycache__)",
+    )
+    crawl_parser.add_argument(
+        "--complexity-threshold",
+        type=int,
+        default=10,
+        help="Complexity threshold for analysis (default: 10)",
+    )
+    crawl_parser.add_argument(
+        "--pattern",
+        help="File pattern to match (regex or glob)",
+    )
+    crawl_parser.add_argument(
+        "--pattern-type",
+        choices=["regex", "glob"],
+        default="regex",
+        help="Pattern type (default: regex)",
+    )
+    crawl_parser.add_argument(
+        "--no-report",
+        action="store_false",
+        dest="include_report",
+        help="Exclude detailed report",
+    )
+    crawl_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # [20260205_FEATURE] Phase 3: Security Tools
+    # Cross-File Security Scan command
+    cross_file_scan_parser = subparsers.add_parser(
+        "cross-file-security-scan",
+        help="Cross-file taint analysis for security vulnerabilities (MCP tool)",
+    )
+    cross_file_scan_parser.add_argument(
+        "--project-root",
+        help="Project root directory (default: current directory)",
+    )
+    cross_file_scan_parser.add_argument(
+        "--entry-point",
+        help="Entry point file for analysis",
+    )
+    cross_file_scan_parser.add_argument(
+        "--max-depth",
+        type=int,
+        default=5,
+        help="Maximum analysis depth (default: 5)",
+    )
+    cross_file_scan_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Type Evaporation Scan command
+    type_evap_parser = subparsers.add_parser(
+        "type-evaporation-scan",
+        help="Detect type system evaporation vulnerabilities (MCP tool)",
+    )
+    type_evap_parser.add_argument(
+        "--frontend-file",
+        help="Frontend TypeScript file path",
+    )
+    type_evap_parser.add_argument(
+        "--backend-file",
+        help="Backend Python file path",
+    )
+    type_evap_parser.add_argument(
+        "--frontend-code",
+        help="Frontend TypeScript code (alternative to file)",
+    )
+    type_evap_parser.add_argument(
+        "--backend-code",
+        help="Backend Python code (alternative to file)",
+    )
+    type_evap_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Unified Sink Detect command
+    sink_detect_parser = subparsers.add_parser(
+        "unified-sink-detect",
+        help="Detect security sinks across multiple languages (MCP tool)",
+    )
+    sink_detect_parser.add_argument(
+        "code",
+        help="Code to analyze",
+    )
+    sink_detect_parser.add_argument(
+        "--language",
+        default="auto",
+        help="Programming language (default: auto-detect)",
+    )
+    sink_detect_parser.add_argument(
+        "--confidence-threshold",
+        type=float,
+        default=0.7,
+        help="Confidence threshold for detections (default: 0.7)",
+    )
+    sink_detect_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Symbolic Execute command
+    symbolic_parser = subparsers.add_parser(
+        "symbolic-execute",
+        help="Perform symbolic execution analysis (MCP tool)",
+    )
+    symbolic_parser.add_argument(
+        "code",
+        help="Python code to analyze symbolically",
+    )
+    symbolic_parser.add_argument(
+        "--max-paths",
+        type=int,
+        help="Maximum paths to explore",
+    )
+    symbolic_parser.add_argument(
+        "--max-depth",
+        type=int,
+        help="Maximum execution depth",
+    )
+    symbolic_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # [20260205_FEATURE] Phase 4: Refactoring & Testing Tools
+    # Update Symbol command
+    update_symbol_parser = subparsers.add_parser(
+        "update-symbol",
+        help="Update symbol implementation (MCP tool)",
+    )
+    update_symbol_parser.add_argument(
+        "file_path", help="Path to file containing symbol"
+    )
+    update_symbol_parser.add_argument("target_name", help="Symbol name to update")
+    update_symbol_parser.add_argument("new_body", help="New implementation body")
+    update_symbol_parser.add_argument(
+        "--type",
+        dest="target_type",
+        choices=["function", "class", "method"],
+        default="function",
+        help="Type of symbol (default: function)",
+    )
+    update_symbol_parser.add_argument(
+        "--no-backup",
+        action="store_false",
+        dest="create_backup",
+        help="Do not create backup before updating",
+    )
+    update_symbol_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Simulate Refactor command
+    sim_refactor_parser = subparsers.add_parser(
+        "simulate-refactor",
+        help="Simulate refactoring impact before applying (MCP tool)",
+    )
+    sim_refactor_parser.add_argument(
+        "file_path",
+        help="Path to file to refactor",
+    )
+    sim_refactor_parser.add_argument(
+        "--changes",
+        required=True,
+        help="Description of changes to simulate",
+    )
+    sim_refactor_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Generate Unit Tests command
+    gen_tests_parser = subparsers.add_parser(
+        "generate-unit-tests",
+        help="AI-powered unit test generation (MCP tool)",
+    )
+    gen_tests_parser.add_argument(
+        "file_path",
+        help="Path to file to generate tests for",
+    )
+    gen_tests_parser.add_argument(
+        "--function",
+        help="Specific function to test",
+    )
+    gen_tests_parser.add_argument(
+        "--framework",
+        choices=["pytest", "unittest", "jest", "mocha"],
+        default="pytest",
+        help="Test framework (default: pytest)",
+    )
+    gen_tests_parser.add_argument(
+        "--coverage-target",
+        type=int,
+        default=80,
+        help="Target coverage percentage (default: 80)",
+    )
+    gen_tests_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # [20260205_FEATURE] Phase 5: Validation & Policy Tools
+    # Validate Paths command
+    validate_paths_parser = subparsers.add_parser(
+        "validate-paths",
+        help="Validate import paths in project (MCP tool)",
+    )
+    validate_paths_parser.add_argument(
+        "file_path",
+        help="Path to file to validate",
+    )
+    validate_paths_parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Auto-fix invalid paths",
+    )
+    validate_paths_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Scan Dependencies command
+    scan_deps_parser = subparsers.add_parser(
+        "scan-dependencies",
+        help="Scan project dependencies for issues (MCP tool)",
+    )
+    scan_deps_parser.add_argument(
+        "--project-root",
+        help="Project root directory (default: current directory)",
+    )
+    scan_deps_parser.add_argument(
+        "--include-dev",
+        action="store_true",
+        help="Include development dependencies",
+    )
+    scan_deps_parser.add_argument(
+        "--check-security",
+        action="store_true",
+        help="Check for security vulnerabilities",
+    )
+    scan_deps_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Code Policy Check command
+    policy_check_parser = subparsers.add_parser(
+        "code-policy-check",
+        help="Check code against policy rules (MCP tool)",
+    )
+    policy_check_parser.add_argument(
+        "file_path",
+        help="Path to file to check",
+    )
+    policy_check_parser.add_argument(
+        "--policy-dir",
+        default=".code-scalpel",
+        help="Policy directory (default: .code-scalpel)",
+    )
+    policy_check_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail on any policy violation",
+    )
+    policy_check_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
+    # Verify Policy Integrity command
+    verify_integrity_parser = subparsers.add_parser(
+        "verify-policy-integrity",
+        help="Verify policy file integrity (MCP tool)",
+    )
+    verify_integrity_parser.add_argument(
+        "--policy-dir",
+        default=".code-scalpel",
+        help="Policy directory (default: .code-scalpel)",
+    )
+    verify_integrity_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
 
     # Init command (Configuration Setup) - [20251219_FEATURE] v3.0.2
     init_parser = subparsers.add_parser(
@@ -1201,6 +2106,71 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         else:
             scan_parser.print_help()
             return 1
+
+    # [20260205_FEATURE] Phase 1 Pilot: MCP Tool CLI Handlers
+    elif args.command == "extract-code":
+        return handle_extract_code(args)
+
+    elif args.command == "get-call-graph":
+        return handle_get_call_graph(args)
+
+    elif args.command == "rename-symbol":
+        return handle_rename_symbol(args)
+
+    # [20260205_FEATURE] Phase 2: Analysis Tool Dispatchers
+    elif args.command == "get-file-context":
+        return handle_get_file_context(args)
+
+    elif args.command == "get-symbol-references":
+        return handle_get_symbol_references(args)
+
+    elif args.command == "get-graph-neighborhood":
+        return handle_get_graph_neighborhood(args)
+
+    elif args.command == "get-project-map":
+        return handle_get_project_map(args)
+
+    elif args.command == "get-cross-file-dependencies":
+        return handle_get_cross_file_dependencies(args)
+
+    elif args.command == "crawl-project":
+        return handle_crawl_project(args)
+
+    # [20260205_FEATURE] Phase 3: Security Tool Dispatchers
+    elif args.command == "cross-file-security-scan":
+        return handle_cross_file_security_scan(args)
+
+    elif args.command == "type-evaporation-scan":
+        return handle_type_evaporation_scan(args)
+
+    elif args.command == "unified-sink-detect":
+        return handle_unified_sink_detect(args)
+
+    elif args.command == "symbolic-execute":
+        return handle_symbolic_execute(args)
+
+    # [20260205_FEATURE] Phase 4: Refactoring & Testing Tool Dispatchers
+    elif args.command == "update-symbol":
+        return handle_update_symbol(args)
+
+    elif args.command == "simulate-refactor":
+        return handle_simulate_refactor(args)
+
+    elif args.command == "generate-unit-tests":
+        return handle_generate_unit_tests(args)
+
+    # [20260205_FEATURE] Phase 5: Validation & Policy Tool Dispatchers
+    elif args.command == "validate-paths":
+        return handle_validate_paths(args)
+
+    elif args.command == "scan-dependencies":
+        return handle_scan_dependencies(args)
+
+    elif args.command == "code-policy-check":
+        return handle_code_policy_check(args)
+
+    elif args.command == "verify-policy-integrity":
+        return handle_verify_policy_integrity(args)
 
     elif args.command == "init":  # [20251219_FEATURE] v3.0.2
         return init_configuration(args.dir, args.force)

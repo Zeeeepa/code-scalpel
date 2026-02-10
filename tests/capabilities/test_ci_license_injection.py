@@ -32,13 +32,13 @@ class TestCapabilitiesWithProLicense:
             assert capabilities is not None
             assert len(capabilities) > 0
 
-            # Pro tier should have more than 10 tools
+            # Pro tier should have all 22 tools (limits/capabilities differ by tier)
             available_tools = sum(
                 1 for tool in capabilities.values() if tool.get("available", False)
             )
             assert (
-                available_tools >= 19
-            ), f"Pro tier should have 19+ available tools, got {available_tools}"
+                available_tools == 22
+            ), f"Pro tier should have all 22 tools, got {available_tools}"
         finally:
             os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
 
@@ -52,17 +52,16 @@ class TestCapabilitiesWithProLicense:
 
             capabilities = get_all_capabilities(tier)
 
-            # Find which tools are locked
+            # All tools should be available at all tiers
             locked_tools = [
                 tool_id
                 for tool_id, cap in capabilities.items()
                 if not cap.get("available", False)
             ]
 
-            # Pro should have some locked tools (enterprise-only)
-            assert len(locked_tools) > 0, "Pro tier should have locked tools"
-            assert len(locked_tools) == 2, (
-                f"Pro tier should lock exactly 2 tools, got {len(locked_tools)}: "
+            # All 22 tools available (limits/capabilities differ)
+            assert len(locked_tools) == 0, (
+                f"Pro tier should have all 22 tools available, but {len(locked_tools)} locked: "
                 f"{locked_tools}"
             )
         finally:
@@ -103,20 +102,18 @@ class TestCapabilitiesWithEnterpriseLicense:
             assert capabilities is not None
             assert len(capabilities) > 0
 
-            # Enterprise tier should have 14 available tools
+            # Enterprise tier should have all 22 tools (limits/capabilities differ by tier)
             available_tools = sum(
                 1 for tool in capabilities.values() if tool.get("available", False)
             )
             assert (
-                available_tools == 14
-            ), f"Enterprise tier should have 14 available tools, got {available_tools}"
+                available_tools == 22
+            ), f"Enterprise tier should have all 22 tools, got {available_tools}"
         finally:
             os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
 
-    def test_enterprise_has_focused_tool_set(
-        self, clear_all_caches, enterprise_license_path
-    ):
-        """Enterprise tier has a focused set of tools (different than Pro, not superset)."""
+    def test_enterprise_has_all_tools(self, clear_all_caches, enterprise_license_path):
+        """Enterprise tier has all 22 tools available (limits/capabilities differ)."""
         os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(enterprise_license_path)
 
         try:
@@ -131,37 +128,18 @@ class TestCapabilitiesWithEnterpriseLicense:
                 if cap.get("available", False)
             }
 
-            # Enterprise tier has specific tools available (14 tools)
-            # (The tier structure is not hierarchical - different tiers have different capabilities)
-            expected_tools = {
-                "analyze_code",
-                "code_policy_check",
-                "crawl_project",
-                "extract_code",
-                "generate_unit_tests",
-                "get_project_map",
-                "scan_dependencies",
-                "security_scan",
-                "simulate_refactor",
-                "symbolic_execute",
-                "type_evaporation_scan",
-                "unified_sink_detect",
-                "update_symbol",
-                "verify_policy_integrity",
-            }
-
-            assert enterprise_tools == expected_tools, (
-                f"Enterprise tools mismatch. "
-                f"Missing: {expected_tools - enterprise_tools}, "
-                f"Extra: {enterprise_tools - expected_tools}"
-            )
+            # Enterprise tier has all 22 tools available
+            # (Limits and capabilities differ by tier, not tool availability)
+            assert (
+                len(enterprise_tools) == 22
+            ), f"Enterprise should have all 22 tools available, got {len(enterprise_tools)}"
         finally:
             os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
 
-    def test_enterprise_has_different_tools_than_pro(
+    def test_all_tiers_have_all_tools_different_limits(
         self, clear_all_caches, pro_license_path, enterprise_license_path
     ):
-        """Enterprise and Pro tiers have different tool sets (not hierarchical)."""
+        """All tiers have all 22 tools - limits and capabilities differ."""
         # Get Pro capabilities
         pro_cap = get_tool_capabilities("get_file_context", "pro")
         enterprise_cap = get_tool_capabilities("get_file_context", "enterprise")
@@ -172,14 +150,13 @@ class TestCapabilitiesWithEnterpriseLicense:
                 "available", False
             ), "Pro tier should have get_file_context available"
 
-            # But Enterprise tier does NOT have get_file_context
-            # (Enterprise has different, more focused tools)
-            assert not enterprise_cap.get("available", False), (
-                "Enterprise tier doesn't have get_file_context "
-                "(tiers have different tools, not hierarchical)"
+            # Enterprise tier ALSO HAS get_file_context (all tools at all tiers)
+            assert enterprise_cap.get("available", False), (
+                "Enterprise tier should have get_file_context available "
+                "(all tools available at all tiers, limits differ)"
             )
 
-            # But Enterprise should have other tools
+            # Both tiers should have analyze_code
             enterprise_analyze = get_tool_capabilities("analyze_code", "enterprise")
             assert enterprise_analyze.get(
                 "available", False

@@ -107,11 +107,6 @@ LICENSE_CRL_PATH_ENV_VAR = "CODE_SCALPEL_LICENSE_CRL_PATH"
 # [20251228_FEATURE] Support explicit license file path override.
 LICENSE_PATH_ENV_VAR = "CODE_SCALPEL_LICENSE_PATH"
 
-# [20251231_TESTABILITY] Disable filesystem license discovery.
-# When set to "1", the validator will not search default locations.
-# Explicit CODE_SCALPEL_LICENSE_PATH is still honored.
-DISABLE_LICENSE_DISCOVERY_ENV_VAR = "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"
-
 # Try to import PyJWT, but make it optional for Community tier
 try:
     import jwt
@@ -360,12 +355,6 @@ BwIDAQAB
                 logger.debug(
                     f"{LICENSE_PATH_ENV_VAR} is set but not a readable file or directory: {path}"
                 )
-
-        if os.getenv(DISABLE_LICENSE_DISCOVERY_ENV_VAR, "0").strip() == "1":
-            logger.debug(
-                f"{DISABLE_LICENSE_DISCOVERY_ENV_VAR}=1; skipping license discovery"
-            )
-            return None
 
         # 1. Check for exact matches in standard locations
         for path_str in self.DEFAULT_LICENSE_PATHS:

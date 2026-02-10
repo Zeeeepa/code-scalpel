@@ -72,7 +72,7 @@ For structured demonstrations and presentations, see the [demos/](../demos/) dir
 
 Most examples require only the base Code Scalpel installation:
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
 
 AI agent examples require additional packages:

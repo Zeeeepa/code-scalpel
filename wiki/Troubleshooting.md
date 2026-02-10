@@ -21,7 +21,7 @@ ModuleNotFoundError: No module named 'code_scalpel'
 2. **Reinstall:**
    ```bash
    pip uninstall code-scalpel
-   pip install code-scalpel
+   pip install codescalpel
    ```
 
 3. **Check Python version:**
@@ -35,7 +35,7 @@ ModuleNotFoundError: No module named 'code_scalpel'
    source venv/bin/activate
    
    # Reinstall
-   pip install code-scalpel
+   pip install codescalpel
    ```
 
 ### ImportError: cannot import name 'tomllib'
@@ -65,7 +65,7 @@ ModuleNotFoundError: No module named 'z3'
 pip install z3-solver
 
 # Or install with all optional dependencies
-pip install code-scalpel[all]
+pip install codescalpel[all]
 ```
 
 ---

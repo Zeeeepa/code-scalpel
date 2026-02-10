@@ -529,3 +529,23 @@ jobs:
       run: |
         mkdir -p "$CODE_SCALPEL_DOC_PROJECT_ROOT"
         python scripts/validate_docs_sync.py
+
+  encoding-validation:
+    name: Unicode Encoding Validation (Windows compatibility)
+    runs-on: ubuntu-latest
+    needs: [smoke]
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Validate write_text/read_text encoding
+      run: |
+        python scripts/validate_encoding.py

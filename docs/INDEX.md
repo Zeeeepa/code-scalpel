@@ -1,5 +1,7 @@
 # Code Scalpel Documentation Index
 
+> [20260207_DOCS] Added regulated enterprise deployment gameplan reference.
+
 **Updated:** February 1, 2026  
 **Version:** 1.3.0
 
@@ -51,6 +53,8 @@
 - [Releasing Guide](RELEASING.md) - Detailed release steps
 - [Pre-Release Pipeline](PRE_RELEASE_PIPELINE.md) - CI/CD validation
 - [Pre-Release Walkthrough](PRE_RELEASE_WALKTHROUGH.md) - Step-by-step guide
+- [Deployment Guides](deployment/DEPLOYMENT_INDEX.md) - Platform and infrastructure deployments
+- [Regulated Enterprise Gameplan](deployment/infrastructure/regulated-enterprise-gameplan.md) - Enterprise tier deployment plan
 
 ### 🧪 Testing
 - [Testing Framework](TESTING_FRAMEWORK.md) - Test organization

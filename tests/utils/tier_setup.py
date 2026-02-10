@@ -92,7 +92,7 @@ def activate_tier(
 ) -> Optional[Path]:
     """Activate a tier by setting environment variables before imports.
 
-    - community: disables license discovery and removes LICENSE_PATH
+    - community: removes LICENSE_PATH (no license = community)
     - pro/enterprise: sets CODE_SCALPEL_LICENSE_PATH to a valid license file path
 
     If skip_if_missing is True and the license file is not found for pro/enterprise,
@@ -117,7 +117,6 @@ def activate_tier(
 
     tier = (tier or "community").lower()  # type: ignore[assignment]
     if tier == "community":
-        _set("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
         _del("CODE_SCALPEL_LICENSE_PATH")
         # Explicit requested tier useful for transparency in some helpers
         _set("CODE_SCALPEL_TIER", tier)
@@ -137,13 +136,11 @@ def activate_tier(
                 raise RuntimeError(f"No valid {tier} license file found for tests")
         else:
             # Fall back to community explicitly
-            _set("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
             _del("CODE_SCALPEL_LICENSE_PATH")
             _set("CODE_SCALPEL_TIER", tier)
             return None
 
     # Set license env before any Code Scalpel imports
-    _del("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY")
     _set("CODE_SCALPEL_LICENSE_PATH", str(license_path))
     # Allow tests to explicitly request the same tier (downgrade only semantics still enforced)
     _set("CODE_SCALPEL_TIER", tier)

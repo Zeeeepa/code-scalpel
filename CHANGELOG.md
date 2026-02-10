@@ -13,6 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.5] - 2026-02-10
+
+### Fixed
+- Windows UnicodeEncodeError on `codescalpel init` — all `write_text()`/`read_text()` calls now specify `encoding='utf-8'`
+- MCP server auto-init now creates full configuration scaffolding (20 files) instead of empty directory
+
+### Changed
+- Enhanced MCP server boot banner: shows license tier, license file path, and visual separators
+- Removed internal `limits.toml` and `features.toml` references from public documentation
+
+### Added
+- Startup update check: non-blocking PyPI version query notifies users of available updates
+- Unicode encoding validation script (`scripts/validate_encoding.py`) and CI job
+- License setup documentation (`docs/LICENSE_SETUP.md`)
+
+---
+
 ## [1.3.4] - 2026-02-05
 
 ### Added

@@ -5,7 +5,7 @@ This module has been moved to the code-scalpel[agents] package (codescalpel_agen
 This shim provides backward compatibility for imports from code_scalpel.integrations.crewai.
 
 Installation:
-    pip install code-scalpel[agents]
+    pip install codescalpel[agents]
 
 New import path:
     from codescalpel_agents.integrations.crewai import CrewAIScalpel
@@ -22,7 +22,7 @@ try:
     warnings.warn(
         "Importing from code_scalpel.integrations.crewai is deprecated. "
         "Use 'from codescalpel_agents.integrations.crewai import ...' instead. "
-        "Install with: pip install code-scalpel[agents]",
+        "Install with: pip install codescalpel[agents]",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -31,5 +31,5 @@ try:
 
 except ImportError as e:
     raise ImportError(
-        "CrewAI integration requires the agents package. Install with: pip install code-scalpel[agents]"
+        "CrewAI integration requires the agents package. Install with: pip install codescalpel[agents]"
     ) from e

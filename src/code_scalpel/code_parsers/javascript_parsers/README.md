@@ -528,7 +528,7 @@ metrics = parser.calculate_metrics(ast)
 # Example: GitHub Actions
 - name: JavaScript Analysis
   run: |
-    pip install code-scalpel
+    pip install codescalpel
     scalpel-analyze --javascript src/
     scalpel-report --format=sarif > analysis.sarif
 ```
@@ -609,7 +609,7 @@ metrics = parser.calculate_metrics(ast)
 
 ```bash
 # Install code-scalpel with javascript_parsers
-pip install code-scalpel[javascript]
+pip install codescalpel[javascript]
 ```
 
 ### Basic Usage

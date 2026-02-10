@@ -149,7 +149,6 @@ def _crawl_project_discovery(
 
     [20251223_FEATURE] v3.2.8 - Community tier discovery crawl.
     """
-    import os
     import re
     from datetime import datetime
     from fnmatch import fnmatch
@@ -1107,11 +1106,6 @@ async def crawl_project(
 
     # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).
     tier = get_current_tier()
-    # [20260119_BUGFIX] Honor explicit tier override for tests without upconverting community
-    if os.environ.get("CODE_SCALPEL_TEST_FORCE_TIER") == "1":
-        forced_tier = os.environ.get("CODE_SCALPEL_TIER")
-        if forced_tier in {"community", "pro", "enterprise"}:
-            tier = forced_tier
 
     caps = get_tool_capabilities("crawl_project", tier)
     capabilities = set(caps.get("capabilities", set()))

@@ -5,7 +5,7 @@ This module has been moved to the code-scalpel[web] package (codescalpel_web.ser
 This shim provides backward compatibility for imports from code_scalpel.integrations.rest_api_server.
 
 Installation:
-    pip install code-scalpel[web]
+    pip install codescalpel[web]
 
 New import path:
     from codescalpel_web.server import create_app, run_server, MCPServerConfig
@@ -27,7 +27,7 @@ try:
     warnings.warn(
         "Importing from code_scalpel.integrations.rest_api_server is deprecated. "
         "Use 'from codescalpel_web.server import ...' instead. "
-        "Install with: pip install code-scalpel[web]",
+        "Install with: pip install codescalpel[web]",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -36,5 +36,5 @@ try:
 
 except ImportError as e:
     raise ImportError(
-        "REST API server requires the web package. Install with: pip install code-scalpel[web]"
+        "REST API server requires the web package. Install with: pip install codescalpel[web]"
     ) from e

@@ -48,46 +48,28 @@ class TestTierAdapter:
         available = adapter.get_available_tools()
         assert len(available) == 22
 
-    def test_pro_has_fewer_tools(self):
-        """Pro tier has fewer tools than community."""
-        community = TierAdapter("community")
+    def test_pro_has_all_tools(self):
+        """Pro tier has all 22 tools available (limits/capabilities differ)."""
         pro = TierAdapter("pro")
-
-        comm_available = len(community.get_available_tools())
         pro_available = len(pro.get_available_tools())
+        assert pro_available == 22
 
-        assert pro_available < comm_available
-        assert pro_available == 19
-
-    def test_enterprise_has_focused_toolset(self):
-        """Enterprise tier has focused toolset."""
+    def test_enterprise_has_all_tools(self):
+        """Enterprise tier has all 22 tools available (limits/capabilities differ)."""
         enterprise = TierAdapter("enterprise")
         available = enterprise.get_available_tools()
-
-        assert len(available) == 10
-        expected_tools = {
-            "analyze_code",
-            "code_policy_check",
-            "crawl_project",
-            "extract_code",
-            "generate_unit_tests",
-            "get_project_map",
-            "scan_dependencies",
-            "simulate_refactor",
-            "symbolic_execute",
-            "update_symbol",
-        }
-        assert available == expected_tools
+        assert len(available) == 22
 
     def test_tool_available_true(self):
         """tool_available returns True for available tools."""
         adapter = TierAdapter("community")
         assert adapter.tool_available("analyze_code")
 
-    def test_tool_available_false(self):
-        """tool_available returns False for locked tools."""
-        adapter = TierAdapter("enterprise")
-        assert not adapter.tool_available("get_file_context")
+    def test_tool_available_all_tiers_method(self):
+        """All tools available at all tiers."""
+        for tier in ["community", "pro", "enterprise"]:
+            adapter = TierAdapter(tier)
+            assert adapter.tool_available("get_file_context")
 
     def test_get_available_tools(self):
         """get_available_tools returns correct set."""
@@ -98,12 +80,10 @@ class TestTierAdapter:
         assert "get_file_context" in available
 
     def test_get_unavailable_tools(self):
-        """get_unavailable_tools returns locked tools."""
+        """get_unavailable_tools returns empty set (all tools available)."""
         adapter = TierAdapter("enterprise")
         unavailable = adapter.get_unavailable_tools()
-
-        assert "get_file_context" in unavailable
-        assert len(unavailable) == 12  # 22 - 10
+        assert len(unavailable) == 0  # All 22 tools available
 
     def test_get_tool_limits(self):
         """get_tool_limits returns tool limits."""
@@ -118,17 +98,19 @@ class TestTierAdapter:
         adapter = TierAdapter("community")
         adapter.assert_tool_available("analyze_code")  # Should not raise
 
-    def test_assert_tool_available_fails(self):
-        """assert_tool_available fails for locked tools."""
-        adapter = TierAdapter("enterprise")
+    def test_assert_tool_available_succeeds_all_tiers(self):
+        """assert_tool_available succeeds for all tools at all tiers."""
+        for tier in ["community", "pro", "enterprise"]:
+            adapter = TierAdapter(tier)
+            adapter.assert_tool_available("get_file_context")  # Should not raise
 
-        with pytest.raises(AssertionError, match="not available"):
-            adapter.assert_tool_available("get_file_context")
-
-    def test_assert_tool_unavailable_passes(self):
-        """assert_tool_unavailable passes for locked tools."""
+    def test_assert_tool_unavailable_fails_when_available(self):
+        """assert_tool_unavailable fails when tool is available."""
         adapter = TierAdapter("enterprise")
-        adapter.assert_tool_unavailable("get_file_context")  # Should not raise
+        with pytest.raises(AssertionError, match="is available"):
+            adapter.assert_tool_unavailable(
+                "get_file_context"
+            )  # All tools available now
 
     def test_assert_tool_unavailable_fails(self):
         """assert_tool_unavailable fails for available tools."""
@@ -149,10 +131,10 @@ class TestAssertToolAvailable:
         """Tool available in pro tier."""
         assert_tool_available("analyze_code", "pro")  # Should not raise
 
-    def test_tool_unavailable_raises(self):
-        """Unavailable tool raises AssertionError."""
-        with pytest.raises(AssertionError, match="not available"):
-            assert_tool_available("get_file_context", "enterprise")
+    def test_tool_available_all_tiers_function(self):
+        """All tools available at all tiers via function."""
+        for tier in ["community", "pro", "enterprise"]:
+            assert_tool_available("get_file_context", tier)  # Should not raise
 
     def test_default_tier_is_community(self):
         """Default tier is community."""
@@ -162,9 +144,12 @@ class TestAssertToolAvailable:
 class TestAssertToolUnavailable:
     """Test assert_tool_unavailable function."""
 
-    def test_tool_locked_enterprise(self):
-        """Tool locked in enterprise tier."""
-        assert_tool_unavailable("get_file_context", "enterprise")  # Should not raise
+    def test_tool_unavailable_raises_when_available(self):
+        """Tool unavailable assertion fails when tool is available."""
+        with pytest.raises(AssertionError, match="is available"):
+            assert_tool_unavailable(
+                "get_file_context", "enterprise"
+            )  # All tools available
 
     def test_tool_not_locked_raises(self):
         """Available tool raises AssertionError."""
@@ -206,13 +191,13 @@ class TestAssertToolCount:
         """Community tier has 22 tools."""
         assert_tool_count("community", 22)  # Should not raise
 
-    def test_pro_has_19_tools(self):
-        """Pro tier has 19 tools."""
-        assert_tool_count("pro", 19)  # Should not raise
+    def test_pro_has_22_tools(self):
+        """Pro tier has all 22 tools."""
+        assert_tool_count("pro", 22)  # Should not raise
 
-    def test_enterprise_has_10_tools(self):
-        """Enterprise tier has 10 tools."""
-        assert_tool_count("enterprise", 10)  # Should not raise
+    def test_enterprise_has_22_tools(self):
+        """Enterprise tier has all 22 tools."""
+        assert_tool_count("enterprise", 22)  # Should not raise
 
     def test_wrong_count_raises(self):
         """Wrong tool count raises AssertionError."""
@@ -244,14 +229,14 @@ class TestAdapterIntegration:
         assert adapters[0].get_tier() == "pro"
         assert adapters[1].get_tier() == "enterprise"
 
-    def test_tool_locked_different_tiers(self):
-        """Same tool locked in different tiers."""
+    def test_tool_available_different_limits_per_tier(self):
+        """All tools available but with different limits per tier."""
         pro_adapter = TierAdapter("pro")
         enterprise_adapter = TierAdapter("enterprise")
 
-        # get_file_context is available in Pro but locked in Enterprise
+        # All tools available at all tiers (limits/capabilities differ)
         assert pro_adapter.tool_available("get_file_context")
-        assert not enterprise_adapter.tool_available("get_file_context")
+        assert enterprise_adapter.tool_available("get_file_context")
 
     def test_tool_available_all_tiers(self):
         """Some tools available in all tiers."""

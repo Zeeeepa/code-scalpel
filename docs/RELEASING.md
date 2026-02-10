@@ -95,6 +95,7 @@ Before releasing, verify:
 
 - [ ] All tests pass locally: `pytest`
 - [ ] Code passes linting: `black --check . && ruff check .`
+- [ ] Unicode encoding validation passes: `python scripts/validate_encoding.py`
 - [ ] No uncommitted changes: `git status`
 - [ ] On `main` branch: `git branch`
 - [ ] Up-to-date with remote: `git pull origin main`
@@ -307,10 +308,10 @@ After release, verify everything succeeded:
 sleep 90
 
 # Verify package appears on PyPI
-pip index versions code-scalpel | head -5
+pip index versions codescalpel | head -5
 
 # Test installation
-pip install --upgrade code-scalpel==X.Y.Z
+pip install --upgrade codescalpel==X.Y.Z
 
 # Verify version
 python -c "import code_scalpel; print(f'Version: {code_scalpel.__version__}')"

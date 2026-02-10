@@ -112,7 +112,7 @@ else
 
         if [[ "$INSTALL_CHOICE" != "n" && "$INSTALL_CHOICE" != "N" ]]; then
             echo "Installing Code Scalpel..."
-            pip install code-scalpel
+            pip install codescalpel
             print_success "Code Scalpel installed successfully"
         else
             print_error "Cannot continue without Code Scalpel installed"
@@ -120,7 +120,7 @@ else
         fi
     else
         echo "Installing Code Scalpel..."
-        pip install code-scalpel
+        pip install codescalpel
         print_success "Code Scalpel installed successfully"
     fi
 fi

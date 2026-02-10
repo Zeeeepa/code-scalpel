@@ -224,7 +224,6 @@ def _get_current_tier() -> str:
         CODE_SCALPEL_TIER: Request a specific tier (downgrade only)
         SCALPEL_TIER: Legacy alias for CODE_SCALPEL_TIER
         CODE_SCALPEL_LICENSE_PATH: Path to JWT license file
-        CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY: Set to "1" to disable auto-discovery
 
     Returns:
         str: One of 'community', 'pro', or 'enterprise'
@@ -232,16 +231,6 @@ def _get_current_tier() -> str:
     global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
 
     requested = _requested_tier_from_env()
-    disable_license_discovery = (
-        os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
-    )
-
-    # When discovery is disabled and no explicit license path is provided, clamp to
-    # Community to avoid silently elevating tier just via env vars.
-    if disable_license_discovery:
-        if not os.environ.get("CODE_SCALPEL_LICENSE_PATH"):
-            return "community"
-
     validator = JWTLicenseValidator()
     license_data = validator.validate()
     licensed = "community"
@@ -3661,70 +3650,11 @@ def _get_call_graph_sync(
         )
 
 
-class NeighborhoodNodeModel(BaseModel):
-    """A node in the neighborhood subgraph."""
-
-    id: str = Field(description="Node ID (language::module::type::name)")
-    depth: int = Field(description="Distance from center node (0 = center)")
-    metadata: dict = Field(default_factory=dict, description="Additional node metadata")
-
-
-class NeighborhoodEdgeModel(BaseModel):
-    """An edge in the neighborhood subgraph."""
-
-    from_id: str = Field(description="Source node ID")
-    to_id: str = Field(description="Target node ID")
-    edge_type: str = Field(description="Type of relationship")
-    confidence: float = Field(description="Confidence score (0.0-1.0)")
-
-
-class GraphNeighborhoodResult(BaseModel):
-    """Result of k-hop neighborhood extraction."""
-
-    success: bool = Field(description="Whether extraction succeeded")
-    server_version: str = Field(default=__version__, description="Code Scalpel version")
-
-    # Center node info
-    center_node_id: str = Field(default="", description="ID of the center node")
-    k: int = Field(default=0, description="Number of hops used")
-
-    # Subgraph
-    nodes: list[NeighborhoodNodeModel] = Field(
-        default_factory=list, description="Nodes in the neighborhood"
-    )
-    edges: list[NeighborhoodEdgeModel] = Field(
-        default_factory=list, description="Edges in the neighborhood"
-    )
-    total_nodes: int = Field(default=0, description="Number of nodes in subgraph")
-    total_edges: int = Field(default=0, description="Number of edges in subgraph")
-
-    # Truncation info
-    max_depth_reached: int = Field(
-        default=0, description="Maximum depth actually reached"
-    )
-    truncated: bool = Field(default=False, description="Whether graph was truncated")
-    truncation_warning: str | None = Field(
-        default=None, description="Warning if truncated"
-    )
-
-    # Mermaid diagram
-    mermaid: str = Field(default="", description="Mermaid diagram of neighborhood")
-
-    error: str | None = Field(default=None, description="Error message if failed")
-
-    # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(
-        default=None, description="AI-generated semantic summary (Pro)"
-    )
-    related_imports: List[str] = Field(
-        default_factory=list, description="Related imports from other files (Pro)"
-    )
-    pii_redacted: bool = Field(
-        default=False, description="Whether PII was redacted (Enterprise)"
-    )
-    access_controlled: bool = Field(
-        default=False, description="Whether access control was applied (Enterprise)"
-    )
+from code_scalpel.mcp.models.graph import (  # noqa: E402
+    GraphNeighborhoodResult,
+    NeighborhoodEdgeModel,
+    NeighborhoodNodeModel,
+)
 
 
 def _generate_neighborhood_mermaid(
@@ -5072,6 +5002,44 @@ def _verify_policy_integrity_sync(
     )
 
 
+def _spawn_update_check(output) -> None:
+    """Spawn a background thread to check PyPI for a newer version.
+
+    [20260210_FEATURE] Non-blocking update notification.
+    - Respects CODE_SCALPEL_UPDATE_CHECK=0 to opt out
+    - 3-second timeout; any failure silently skipped
+    """
+    if os.environ.get("CODE_SCALPEL_UPDATE_CHECK", "1") == "0":
+        return
+
+    import threading
+
+    def _check():
+        try:
+            import json
+            import urllib.request
+            from packaging.version import parse as parse_version
+
+            req = urllib.request.Request(
+                "https://pypi.org/pypi/codescalpel/json",
+                headers={"Accept": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                data = json.loads(resp.read())
+            latest = data["info"]["version"]
+            if parse_version(latest) > parse_version(__version__):
+                print(
+                    f"\nUpdate available: v{__version__} -> v{latest}. "
+                    f"Run: pip install --upgrade codescalpel  "
+                    f"(or: uvx codescalpel@latest)\n",
+                    file=output,
+                )
+        except Exception:
+            pass  # Never block startup
+
+    threading.Thread(target=_check, daemon=True).start()
+
+
 def run_server(
     transport: str = "stdio",
     host: str = "127.0.0.1",
@@ -5197,10 +5165,42 @@ def run_server(
     _debug_print(f"DEBUG: auto_init result={init_result}")
 
     # [20251215_BUGFIX] Print to stderr for stdio transport
+    # [20260210_FEATURE] Enhanced boot display with license information
     output = sys.stderr if transport == "stdio" else sys.stdout
+    print("=" * 60, file=output)
     print(f"Code Scalpel MCP Server v{__version__}", file=output)
+    print("=" * 60, file=output)
     print(f"Project Root: {get_project_root()}", file=output)
-    print(f"Tier: {tier.capitalize()}", file=output)
+
+    # Show tier
+    tier_display = tier.upper()
+    print(f"License Tier: {tier_display}", file=output)
+
+    # Show license source if available
+    validator = JWTLicenseValidator()
+    license_file = validator.find_license_file()
+    if license_file:
+        try:
+            # Show relative path if in project, else show full path
+            try:
+                rel_path = license_file.relative_to(get_project_root())
+                license_display = f"./{rel_path}"
+            except ValueError:
+                license_display = str(license_file)
+            print(f"License File: {license_display}", file=output)
+        except Exception:
+            pass
+    else:
+        if tier == "community":
+            print(
+                "License File: None (Community tier - no license required)",
+                file=output,
+            )
+        else:
+            print("License File: Not found (using environment/fallback)", file=output)
+
+    # [20260210_FEATURE] Non-blocking PyPI update check
+    _spawn_update_check(output)
 
     # [20251215_FEATURE] SSL/HTTPS support for production deployments
     use_https = ssl_certfile and ssl_keyfile

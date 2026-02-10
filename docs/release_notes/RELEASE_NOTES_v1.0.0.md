@@ -73,8 +73,8 @@ pip install codescalpel
 
 ### Quick Start with MCP
 ```bash
-# Start the MCP server (stdio transport)
-code-scalpel mcp --stdio
+# Start the MCP server (stdio transport is default)
+code-scalpel mcp
 
 # Or HTTP (port 8080)
 code-scalpel mcp --http --port 8080
@@ -86,7 +86,7 @@ code-scalpel mcp --http --port 8080
   "mcpServers": {
     "code-scalpel": {
       "command": "code-scalpel",
-      "args": ["mcp", "--stdio"]
+      "args": ["mcp"]
     }
   }
 }

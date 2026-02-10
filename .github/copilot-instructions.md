@@ -275,8 +275,7 @@ Use pytest fixtures from `tests/tools/tiers/conftest.py` to manage license paths
 # From tests/tools/tiers/conftest.py
 @pytest.fixture
 def community_tier(monkeypatch):
-    """Activate Community tier (disable license discovery)."""
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    """Activate Community tier (no license file)."""
     monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
     yield
 
@@ -317,7 +316,7 @@ async def test_pro_depth_limit(tmp_path, pro_tier):
 
 1. **License Path MUST Be Set First**: Set `CODE_SCALPEL_LICENSE_PATH` env var BEFORE importing any Code Scalpel modules
 2. **Monkeypatch Only Works For Downgrading**: You can mock `_get_current_tier()` to downgrade from enterprise→pro or enterprise/pro→community, but you CANNOT upgrade tiers with mocking
-3. **No Env Var Tier Override**: `CODE_SCALPEL_TIER` env var is read-only and only works if no valid license exists; it cannot override a valid license
+3. **Tier Determined by License**: Tier is determined by cryptographic JWT license validation - use real license files for testing
 4. **License Validation is Cryptographic**: Tier detection uses RSA public key authentication (`vault-prod-2026-01.pem`); cannot be bypassed without the corresponding private key
 
 **Why Monkeypatch Fails:**

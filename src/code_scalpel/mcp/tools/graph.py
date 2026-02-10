@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
+from code_scalpel.mcp.models.graph import GraphNeighborhoodResult
 from code_scalpel.mcp.contract import ToolResponseEnvelope, envelop_tool_function
 from code_scalpel.mcp.oracle_middleware import (
     with_oracle_resilience,
@@ -193,6 +194,11 @@ async def _get_graph_neighborhood_tool(
     # Pre-validation: Check node ID format early to fail fast
     import re
 
+    # [20260104_BUGFIX] Ensure input types are strictly typed to prevent TypeErrors
+    # from bubbling up through the contract wrapper as signature mismatches.
+    if not isinstance(center_node_id, str):
+        center_node_id = str(center_node_id)
+
     node_id_pattern = r"^[a-z]+::[^:]+::(function|class|method)::[^:]+$"
     if not re.match(node_id_pattern, center_node_id):
         # Raise ValidationError to trigger oracle suggestions
@@ -204,6 +210,14 @@ async def _get_graph_neighborhood_tool(
         )
 
     # Pre-validation: Check parameter ranges
+    try:
+        k = int(k)
+        max_nodes = int(max_nodes)
+    except (ValueError, TypeError):
+        raise ValueError(
+            "Invalid parameters: 'k' and 'max_nodes' must be valid integers"
+        )
+
     if k < 1:
         raise ValueError("Parameter 'k' must be >= 1")
     if max_nodes < 1:
@@ -234,6 +248,7 @@ get_graph_neighborhood = mcp.tool()(
             tool_id="get_graph_neighborhood",
             tool_version=_pkg_version,
             tier_getter=_tier_getter,
+            legacy_result_type=GraphNeighborhoodResult,
         )
     )
 )

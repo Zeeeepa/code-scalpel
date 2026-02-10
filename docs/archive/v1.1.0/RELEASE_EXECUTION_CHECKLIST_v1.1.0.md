@@ -118,7 +118,7 @@ Expected timelines:
 # https://pypi.org/project/code-scalpel/1.1.0/
 
 # Method 2: Install and verify
-pip install code-scalpel==1.1.0 --upgrade
+pip install codescalpel==1.1.0 --upgrade
 python -c "import code_scalpel; print(code_scalpel.__version__)"
 # Expected output: 1.1.0
 ```
@@ -128,7 +128,7 @@ Checklist:
 - [ ] All files present (wheel + sdist)
 - [ ] Dependencies correctly listed
 - [ ] Package metadata complete
-- [ ] Install works: `pip install code-scalpel==1.1.0`
+- [ ] Install works: `pip install codescalpel==1.1.0`
 
 #### GitHub Release Verification
 

@@ -507,7 +507,7 @@ ast = parser.parse()
 # Example: GitLab CI
 analyze_java:
   script:
-    - pip install code-scalpel
+    - pip install codescalpel
     - scalpel-analyze --java src/
     - scalpel-report --format=json > analysis.json
 ```
@@ -675,7 +675,7 @@ analyze_java:
 
 ```bash
 # Install code-scalpel with java_parsers
-pip install code-scalpel[java]
+pip install codescalpel[java]
 ```
 
 ### Basic Usage

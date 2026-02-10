@@ -73,24 +73,22 @@ def auto_init_config_dir(
                 "target": target,
             }
 
-        # For full mode, delegate to the complete init_config_dir
-        if mode == "full":
-            from code_scalpel.config.init_config import init_config_dir
+        # Always delegate to the complete init_config_dir function
+        # It properly handles both "full" and "templates_only" modes
+        from code_scalpel.config.init_config import init_config_dir
 
-            result = init_config_dir(target_dir=str(base_dir), mode="full")
-            if result.get("success"):
-                return {
-                    "created": True,
-                    "path": result.get("path", str(config_dir)),
-                    "mode": mode,
-                    "tier": tier,
-                    "target": target,
-                    "files_created": result.get("files_created", []),
-                }
-            # Fall through to minimal init if full init fails
-            pass
+        result = init_config_dir(target_dir=str(base_dir), mode=mode)
+        if result.get("success"):
+            return {
+                "created": True,
+                "path": result.get("path", str(config_dir)),
+                "mode": mode,
+                "tier": tier,
+                "target": target,
+                "files_created": result.get("files_created", []),
+            }
 
-        # Minimal scaffolding (templates_only mode or fallback)
+        # Fall back to minimal directory creation if init_config_dir fails
         config_dir.mkdir(parents=True, exist_ok=True)
 
         return {

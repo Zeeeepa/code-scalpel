@@ -28,7 +28,8 @@ For AI agent integrations:
 # [20260202_RELEASE] v1.3.2 - Security hardening and CI alignment
 # [20260202_RELEASE] v1.3.3 - Pipeline solidification and project organization
 # [20260205_RELEASE] v1.3.4 - Bundled-only limits.toml, removed duplicate resolver internals
-__version__ = "1.3.4"
+# [20260210_RELEASE] v1.3.5 - Windows encoding fix, auto-init fix, update check
+__version__ = "1.3.5"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 
@@ -75,7 +76,7 @@ def _get_autonomy_import(name: str):
         return getattr(autonomy_module, name)
     except ImportError as e:
         raise ImportError(
-            "Autonomy features require the agents package. Install with: pip install code-scalpel[agents]"
+            "Autonomy features require the agents package. Install with: pip install codescalpel[agents]"
         ) from e
 
 
@@ -99,7 +100,7 @@ def __getattr__(name: str):
             return getattr(rest_api_server, name)
         except ImportError as e:
             raise ImportError(
-                "REST API server requires Flask. Install with: pip install code-scalpel[web]"
+                "REST API server requires Flask. Install with: pip install codescalpel[web]"
             ) from e
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

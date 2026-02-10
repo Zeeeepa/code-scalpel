@@ -12,10 +12,10 @@ Code Scalpel can be installed via pip or run in Docker. Choose the method that b
 
 ```bash
 # Install from PyPI (when released)
-pip install code-scalpel
+pip install codescalpel
 
 # Or using uv (faster)
-uv pip install code-scalpel
+uv pip install codescalpel
 ```
 
 ## Development Installation
@@ -174,12 +174,12 @@ Code Scalpel requires these core dependencies (automatically installed):
 
 ```bash
 # Install with all optional features
-pip install code-scalpel[all]
+pip install codescalpel[all]
 
 # Or specific features
-pip install code-scalpel[security]  # Enhanced security scanning
-pip install code-scalpel[symbolic]  # Symbolic execution & test generation
-pip install code-scalpel[dev]       # Development tools
+pip install codescalpel[security]  # Enhanced security scanning
+pip install codescalpel[symbolic]  # Symbolic execution & test generation
+pip install codescalpel[dev]       # Development tools
 ```
 
 ## Environment Setup
@@ -244,7 +244,7 @@ Symbolic execution requires Z3. If not installed:
 pip install z3-solver
 
 # Or skip symbolic features
-pip install code-scalpel  # Minimal install
+pip install codescalpel  # Minimal install
 ```
 
 ### Docker Permission Errors

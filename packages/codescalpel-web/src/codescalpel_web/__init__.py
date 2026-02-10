@@ -5,7 +5,7 @@ This package provides web server integrations for Code Scalpel, including
 a Flask REST API server for remote access to Code Scalpel's analysis tools.
 
 Installation:
-    pip install code-scalpel[web]
+    pip install codescalpel[web]
 
 Usage:
     from codescalpel_web.server import create_app, run_server

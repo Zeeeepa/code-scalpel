@@ -253,7 +253,7 @@ python -c "import code_scalpel; print(code_scalpel.__version__)"
 Once GitHub Actions workflows complete, install from PyPI:
 
 ```bash
-pip install code-scalpel==1.1.0
+pip install codescalpel==1.1.0
 ```
 
 ---
@@ -292,7 +292,7 @@ During installation, some dependency version warnings appear:
 2. **Verify Release on PyPI** (after workflow completes)
    - URL: https://pypi.org/project/code-scalpel/1.1.0/
    - Check: Package listed, wheel and sdist available
-   - Test: `pip install code-scalpel==1.1.0`
+   - Test: `pip install codescalpel==1.1.0`
 
 3. **Verify GitHub Release** (after workflow completes)
    - URL: github.com/3D-Tech-Solutions/code-scalpel/releases/tag/v1.1.0
@@ -343,7 +343,7 @@ git tag -a v1.0.3 -m "Hotfix for critical issue"
 git push origin v1.0.3
 
 # Step 3: Notify users to downgrade
-pip install code-scalpel==1.0.3
+pip install codescalpel==1.0.3
 ```
 
 **Note:** Rollback procedures are documented in full detail in `RELEASE_EXECUTION_CHECKLIST_v1.1.0.md`

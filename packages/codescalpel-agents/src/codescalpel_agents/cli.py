@@ -26,7 +26,7 @@ def serve():
             file=sys.stderr,
         )
         print(
-            "Install with: pip install code-scalpel or pip install codescalpel-agents[core]",
+            "Install with: pip install codescalpel or pip install codescalpel-agents[core]",
             file=sys.stderr,
         )
         return 1

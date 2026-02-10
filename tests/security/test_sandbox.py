@@ -8,7 +8,7 @@ with standard test directory layout.
 """
 
 # Re-export all test classes and fixtures from the canonical location in agents package
-# Note: This requires the agents package to be installed (pip install code-scalpel[agents])
+# Note: This requires the agents package to be installed (pip install codescalpel[agents])
 import sys
 import os
 
@@ -25,6 +25,6 @@ except ImportError as e:
     import pytest
 
     pytest.skip(
-        f"This test requires the agents package. Install with: pip install code-scalpel[agents] (Error: {e})",
+        f"This test requires the agents package. Install with: pip install codescalpel[agents] (Error: {e})",
         allow_module_level=True,
     )

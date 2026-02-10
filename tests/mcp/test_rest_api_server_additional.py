@@ -7,7 +7,7 @@ import json
 import pytest
 
 # Skip this entire module if optional packages aren't installed
-pytest.importorskip("flask", reason="Requires pip install code-scalpel[web]")
+pytest.importorskip("flask", reason="Requires pip install codescalpel[web]")
 
 from code_scalpel.integrations.rest_api_server import (
     MCPServerConfig,

@@ -300,7 +300,7 @@ Evidence-based demonstrations proving Code Scalpel's core capabilities.
 ## Quick Start
 
 ```bash
-pip install code-scalpel==1.0.1
+pip install codescalpel==1.0.1
 ```
 
 ## Demo 1: Security - Taint Flow Detection

@@ -7,18 +7,10 @@ management service.
 
 from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
-
-
-_DISABLE_LICENSE_DISCOVERY_ENV_VAR = "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"
-
-
-def _license_discovery_disabled() -> bool:
-    return os.getenv(_DISABLE_LICENSE_DISCOVERY_ENV_VAR, "0").strip() == "1"
 
 
 def compute_effective_tier_for_startup(
@@ -37,11 +29,6 @@ def compute_effective_tier_for_startup(
 
     if requested_tier is not None:
         requested_tier = requested_tier.strip().lower()
-
-    if requested_tier == "community":
-        requested_tier = "community"
-    if requested_tier == "all":
-        requested_tier = "enterprise"
 
     if requested_tier is not None and requested_tier not in {
         "community",
@@ -79,11 +66,6 @@ def compute_effective_tier_for_startup(
                     ent.error if ent is not None else None
                 ) or "Verifier denied"
 
-            if licensed_tier == "community":
-                licensed_tier = "community"
-            if licensed_tier == "all":
-                licensed_tier = "enterprise"
-
             tier_rank = {"community": 0, "pro": 1, "enterprise": 2}
             max_allowed_rank = tier_rank.get(licensed_tier, 0)
 
@@ -97,11 +79,6 @@ def compute_effective_tier_for_startup(
                 if token_present and ("revoked" in (str(ent_error).lower())):
                     return "community", "License revoked. Running in Community mode."
                 if (not token_present) or (not decision_allowed):
-                    # [20260101_TESTABILITY] MCP contract tests set tier via env to
-                    # exercise full tool surfaces without provisioning a license.
-                    # Only permit this when license discovery is explicitly disabled.
-                    if _license_discovery_disabled() and (not token_present):
-                        return requested_tier, None
                     raise SystemExit(
                         "License required: Pro/Enterprise tier requested but no valid license was found. "
                         "Ensure the verifier is reachable and a license is saved to the `.code-scalpel` directory or set CODE_SCALPEL_LICENSE_PATH. "
@@ -139,10 +116,6 @@ def compute_effective_tier_for_startup(
         licensed_tier = "community"
     else:
         licensed_tier = (license_data.tier or "community").strip().lower()
-    if licensed_tier == "community":
-        licensed_tier = "community"
-    if licensed_tier == "all":
-        licensed_tier = "enterprise"
 
     tier_rank = {"community": 0, "pro": 1, "enterprise": 2}
     max_allowed_rank = tier_rank.get(licensed_tier, 0)
@@ -164,13 +137,10 @@ def compute_effective_tier_for_startup(
 
         # All other invalid/missing license cases fail closed for paid tiers.
         if (not token_present) or (not license_data.is_valid):
-            # [20260101_TESTABILITY] Allow tier override without a license when
-            # discovery is explicitly disabled (test harness isolation).
-            if _license_discovery_disabled() and (not token_present):
-                return requested_tier, None
             raise SystemExit(
-                "License required: Pro/Enterprise tier requested but no valid license was found. "
-                "Provide --license-file /path/to/license.jwt or set CODE_SCALPEL_LICENSE_PATH. "
+                f"License required: {requested_tier.title()} tier requested but no valid license was found. "
+                f"Error: {license_data.error_message or 'No license token present'}. "
+                "Ensure a license is saved to the `.code-scalpel` directory or set CODE_SCALPEL_LICENSE_PATH. "
                 "Purchase: http://codescalpel.dev/pricing"
             )
 

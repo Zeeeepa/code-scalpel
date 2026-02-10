@@ -8,7 +8,7 @@ with standard test directory layout.
 """
 
 # Re-export all test classes and fixtures from the canonical location in agents package
-# Note: This requires the agents package to be installed (pip install code-scalpel[agents])
+# Note: This requires the agents package to be installed (pip install codescalpel[agents])
 import sys
 import os
 
@@ -23,5 +23,5 @@ try:
     from autonomy.test_tamper_resistance import *  # noqa: F401, F403
 except ImportError as e:
     raise ImportError(
-        "This test requires the agents package. Install with: pip install code-scalpel[agents]"
+        "This test requires the agents package. Install with: pip install codescalpel[agents]"
     ) from e

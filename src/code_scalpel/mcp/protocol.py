@@ -103,28 +103,11 @@ def _get_current_tier() -> str:
     Returns:
         str: One of 'community', 'pro', or 'enterprise'
     """
-    import os
     import time as time_module
 
     global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
 
     requested = _requested_tier_from_env()
-    disable_license_discovery = (
-        os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
-    )
-    force_tier_override = os.environ.get("CODE_SCALPEL_TEST_FORCE_TIER") == "1"
-
-    # [TESTING/OFFLINE] If license discovery is disabled and explicit test override
-    # is set, honor the requested tier (used for tier-gated contract tests only).
-    if disable_license_discovery and force_tier_override and requested:
-        return requested
-
-    # When discovery is disabled and no explicit license path is provided, clamp to
-    # Community to avoid silently elevating tier just via env vars.
-    if disable_license_discovery and not force_tier_override:
-        if not os.environ.get("CODE_SCALPEL_LICENSE_PATH"):
-            return "community"
-
     validator = JWTLicenseValidator()
     license_data = validator.validate()
     licensed = "community"
@@ -205,7 +188,10 @@ Access code via URIs without knowing file paths:
 2. Modify the extracted code
 3. Use update_symbol(file_path=..., new_code=...) to apply the change safely
 
-Code is PARSED only, never executed.""",
+Code is PARSED only, never executed.
+
+**UPDATES:** If the server reports a newer version is available, suggest the user run:
+pip install --upgrade codescalpel  (or: uvx codescalpel@latest)""",
 )
 
 __all__ = ["mcp", "set_current_tier", "_get_current_tier"]

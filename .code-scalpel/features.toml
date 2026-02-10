@@ -294,6 +294,7 @@ description = "Unlimited depth with Dockerfile generation and org-wide resolutio
 enabled = true
 capabilities = [
     "basic_test_generation",
+    "pytest_support",
 ]
 description = "Basic test generation (5 tests max)"
 
@@ -304,6 +305,9 @@ capabilities = [
     "basic_test_generation",
     "data_driven_tests",
     "edge_case_detection",
+    "jest_support",
+    "pytest_support",
+    "unittest_support",
 ]
 description = "Advanced test generation with edge cases"
 
@@ -313,10 +317,15 @@ capabilities = [
     "advanced_test_generation",
     "basic_test_generation",
     "bug_reproduction",
+    "coverage_analysis",
     "coverage_optimization",
     "custom_test_templates",
     "data_driven_tests",
     "edge_case_detection",
+    "jest_support",
+    "mocha_support",
+    "pytest_support",
+    "unittest_support",
 ]
 description = "Unlimited tests with custom templates"
 
@@ -712,7 +721,7 @@ capabilities = [
     "ast_pattern_matching",
     "basic_vulnerabilities",
     "command_injection_detection",
-    "owasp_checks",
+    "owasp_top_10",
     "path_traversal_detection",
     "sql_injection_detection",
     "xss_detection",
@@ -858,6 +867,7 @@ description = "Advanced symbolic execution with smart prioritization and concoli
 [enterprise.symbolic_execute]
 enabled = true
 capabilities = [
+    "advanced_constraint_solving",
     "advanced_types",
     "basic_symbolic_execution",
     "complex_constraints",
@@ -924,6 +934,7 @@ capabilities = [
     "network_boundary_analysis",
     "pydantic_model_generation",
     "schema_coverage_metrics",
+    "schema_generation",
     "typescript_any_scanning",
     "zod_schema_generation",
 ]
