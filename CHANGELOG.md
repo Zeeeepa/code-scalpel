@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Enhanced MCP server boot banner: shows license tier, license file path, and visual separators
 - Removed internal `limits.toml` and `features.toml` references from public documentation
+- **Architectural refactor:** Moved `limits.toml` and `features.toml` from `.code-scalpel/` to `src/code_scalpel/capabilities/` — packaged automatically, no `force-include` needed
+- Restructured `.gitignore`: selective ignores for `.code-scalpel/` sensitive files instead of blanket directory ignore
+- Untracked private key and runtime audit data from `.code-scalpel/`
 
 ### Added
 - Startup update check: non-blocking PyPI version query notifies users of available updates

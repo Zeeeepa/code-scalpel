@@ -51,6 +51,21 @@ The MCP server now checks PyPI for a newer version on startup:
 - Silently skips on any failure (no network, timeout, parse error)
 - Opt out by setting `CODE_SCALPEL_UPDATE_CHECK=0`
 
+### Architectural Refactor: TOML Config Relocation
+
+Moved `limits.toml` and `features.toml` from `.code-scalpel/` to `src/code_scalpel/capabilities/`:
+- Files now live in the source tree and are packaged automatically into the wheel
+- Removed the `force-include` build hack from `pyproject.toml`
+- Simplified `config_loader.py` by removing dev-only fallback search paths
+- Fixed `-1` sentinel conversion in test helpers for proper "unlimited" handling
+
+### `.gitignore` Restructured
+
+Replaced the blanket `/.code-scalpel/` ignore with selective rules:
+- User-facing config files (`config.json`, `governance.yaml`, `budget.yaml`, etc.) are now properly tracked
+- Sensitive/runtime data (`license/`, `cache/`, `audit.*`, `*.pem`, `*.jwt`) remains ignored
+- Removed tracked private key (`development-2025-01.private.pem`) and runtime audit data
+
 ### Documentation Cleanup
 
 Removed references to internal-only configuration files (`limits.toml`, `features.toml`) from the public website documentation. These files are package-managed and should not be edited by users.
