@@ -120,7 +120,7 @@ class CrossRepoLinker:
         req_file = repo_path / "requirements.txt"
         if req_file.exists():
             try:
-                for line in req_file.read_text().splitlines():
+                for line in req_file.read_text(encoding="utf-8").splitlines():
                     line = line.strip()
                     if line and not line.startswith("#") and not line.startswith("-"):
                         # Parse package==version or package>=version etc.
@@ -142,7 +142,7 @@ class CrossRepoLinker:
         pyproject = repo_path / "pyproject.toml"
         if pyproject.exists():
             try:
-                content = pyproject.read_text()
+                content = pyproject.read_text(encoding="utf-8")
                 # Simple TOML parsing for dependencies
                 in_deps = False
                 for line in content.splitlines():
@@ -186,7 +186,7 @@ class CrossRepoLinker:
         pkg_json = repo_path / "package.json"
         if pkg_json.exists():
             try:
-                pkg = json.loads(pkg_json.read_text())
+                pkg = json.loads(pkg_json.read_text(encoding="utf-8"))
                 for dep_type in ["dependencies", "devDependencies", "peerDependencies"]:
                     for name, version in pkg.get(dep_type, {}).items():
                         deps.append(
@@ -214,7 +214,7 @@ class CrossRepoLinker:
         pom_xml = repo_path / "pom.xml"
         if pom_xml.exists():
             try:
-                content = pom_xml.read_text()
+                content = pom_xml.read_text(encoding="utf-8")
                 # Simple XML parsing for dependencies
                 dep_pattern = re.compile(
                     r"<dependency>\s*<groupId>([^<]+)</groupId>\s*"
@@ -255,7 +255,7 @@ class CrossRepoLinker:
         pkg_json = repo_path / "package.json"
         if pkg_json.exists():
             try:
-                pkg = json.loads(pkg_json.read_text())
+                pkg = json.loads(pkg_json.read_text(encoding="utf-8"))
                 if "name" in pkg:
                     packages.add(pkg["name"])
             except Exception:
@@ -367,7 +367,7 @@ class CrossRepoLinker:
                 continue
 
             try:
-                content = py_file.read_text()
+                content = py_file.read_text(encoding="utf-8")
                 tree = ast.parse(content)
 
                 for node in ast.walk(tree):

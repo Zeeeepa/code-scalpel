@@ -85,7 +85,7 @@ class JArchitectParser:
         Returns:
             JArchitectReport object
         """
-        content = Path(report_file).read_text()
+        content = Path(report_file).read_text(encoding="utf-8")
         if report_file.endswith(".xml"):
             return self.parse_xml(content)
         else:

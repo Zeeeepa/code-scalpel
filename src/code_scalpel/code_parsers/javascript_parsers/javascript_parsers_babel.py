@@ -624,7 +624,7 @@ class BabelParser:
         result = self.transform(code, target)
 
         if output_path and result.transformed_code:
-            Path(output_path).write_text(result.transformed_code)
+            Path(output_path).write_text(result.transformed_code, encoding="utf-8")
 
         return result
 

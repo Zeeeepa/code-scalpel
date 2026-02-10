@@ -101,14 +101,14 @@ class MonorepoDetector:
         # Read nx.json if exists
         if nx_json.exists():
             try:
-                root_config = json.loads(nx_json.read_text())
+                root_config = json.loads(nx_json.read_text(encoding="utf-8"))
             except Exception:
                 pass
 
         # Scan for project.json files (Nx standard)
         for project_json in self.root.rglob("project.json"):
             try:
-                config = json.loads(project_json.read_text())
+                config = json.loads(project_json.read_text(encoding="utf-8"))
                 project_path = str(project_json.parent.relative_to(self.root))
                 projects.append(
                     MonorepoProject(
@@ -165,7 +165,7 @@ class MonorepoDetector:
             return None
 
         try:
-            root_config = json.loads(turbo_json.read_text())
+            root_config = json.loads(turbo_json.read_text(encoding="utf-8"))
         except Exception:
             root_config = {}
 
@@ -193,7 +193,7 @@ class MonorepoDetector:
             return None
 
         try:
-            root_config = json.loads(lerna_json.read_text())
+            root_config = json.loads(lerna_json.read_text(encoding="utf-8"))
         except Exception:
             root_config = {}
 
@@ -222,7 +222,7 @@ class MonorepoDetector:
             return None
 
         try:
-            pkg = json.loads(pkg_json.read_text())
+            pkg = json.loads(pkg_json.read_text(encoding="utf-8"))
             workspaces = pkg.get("workspaces")
             if not workspaces:
                 return None
@@ -260,7 +260,7 @@ class MonorepoDetector:
 
         try:
             # Simple YAML parsing for packages field
-            content = pnpm_workspace.read_text()
+            content = pnpm_workspace.read_text(encoding="utf-8")
             patterns = []
             in_packages = False
             for line in content.splitlines():
@@ -364,7 +364,7 @@ class MonorepoDetector:
             return []
 
         try:
-            pkg = json.loads(pkg_json.read_text())
+            pkg = json.loads(pkg_json.read_text(encoding="utf-8"))
             workspaces = pkg.get("workspaces", [])
             if isinstance(workspaces, dict):
                 workspaces = workspaces.get("packages", [])
@@ -403,7 +403,7 @@ class MonorepoDetector:
     def _read_package_json(self, path: Path) -> Dict[str, Any]:
         """Read and parse a package.json file."""
         try:
-            return json.loads(path.read_text())
+            return json.loads(path.read_text(encoding="utf-8"))
         except Exception:
             return {}
 

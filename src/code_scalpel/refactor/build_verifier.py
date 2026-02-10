@@ -237,7 +237,7 @@ class BuildVerifier:
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 temp_file = Path(tmpdir) / f"{class_name}.java"
-                temp_file.write_text(code)
+                temp_file.write_text(code, encoding="utf-8")
 
                 # Run javac
                 result = subprocess.run(

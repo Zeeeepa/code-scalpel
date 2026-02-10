@@ -973,8 +973,8 @@ def compare_protobuf_files(
     old_path = Path(old_path)
     new_path = Path(new_path)
 
-    old_content = old_path.read_text()
-    new_content = new_path.read_text()
+    old_content = old_path.read_text(encoding="utf-8")
+    new_content = new_path.read_text(encoding="utf-8")
 
     detector = SchemaDriftDetector()
     return detector.compare_protobuf(
@@ -1002,8 +1002,8 @@ def compare_json_schema_files(
     old_path = Path(old_path)
     new_path = Path(new_path)
 
-    old_content = json.loads(old_path.read_text())
-    new_content = json.loads(new_path.read_text())
+    old_content = json.loads(old_path.read_text(encoding="utf-8"))
+    new_content = json.loads(new_path.read_text(encoding="utf-8"))
 
     detector = SchemaDriftDetector()
     return detector.compare_json_schema(

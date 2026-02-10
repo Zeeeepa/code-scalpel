@@ -79,7 +79,7 @@ class RegressionPredictor:
             return
 
         try:
-            self.coverage_data = json.loads(path.read_text())
+            self.coverage_data = json.loads(path.read_text(encoding="utf-8"))
             logger.info(f"Loaded coverage data from {path}")
         except Exception as e:
             logger.error(f"Failed to load coverage data: {e}")

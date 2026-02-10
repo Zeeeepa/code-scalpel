@@ -73,11 +73,11 @@ async def main():
 
         # Create test Python file
         test_py = tmpdir / "test.py"
-        test_py.write_text(TEST_PYTHON_CODE)
+        test_py.write_text(TEST_PYTHON_CODE, encoding="utf-8")
 
         # Create test injection file
         injection_py = tmpdir / "injection.py"
-        injection_py.write_text(TEST_INJECTION_CODE)
+        injection_py.write_text(TEST_INJECTION_CODE, encoding="utf-8")
 
         # Test cases for each tool
         tests = {

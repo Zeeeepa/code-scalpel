@@ -5024,7 +5024,7 @@ def _spawn_update_check(output) -> None:
                 "https://pypi.org/pypi/codescalpel/json",
                 headers={"Accept": "application/json"},
             )
-            with urllib.request.urlopen(req, timeout=3) as resp:
+            with urllib.request.urlopen(req, timeout=3) as resp:  # nosec B310
                 data = json.loads(resp.read())
             latest = data["info"]["version"]
             if parse_version(latest) > parse_version(__version__):

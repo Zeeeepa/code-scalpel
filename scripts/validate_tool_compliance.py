@@ -344,7 +344,7 @@ class ToolComplianceChecker:
             # For unknown, assume registered if in expected
             return tool_name in EXPECTED_TOOLS
         module_import = f"code_scalpel.mcp.tools.{category}"
-        content = init_file.read_text()
+        content = init_file.read_text(encoding="utf-8")
         return module_import in content
 
     def _uses_envelop_wrapper(self, func_node: ast.FunctionDef) -> bool:

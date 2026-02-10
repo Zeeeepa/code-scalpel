@@ -141,7 +141,7 @@ class DeprecatedCodeAnalyzer:
             if py_file == file_path:
                 continue
             try:
-                content = py_file.read_text()
+                content = py_file.read_text(encoding="utf-8")
                 for func_name in func_names:
                     if re.search(rf"\b{func_name}\b", content):
                         callers.append(str(py_file.relative_to(self.repo_root)))

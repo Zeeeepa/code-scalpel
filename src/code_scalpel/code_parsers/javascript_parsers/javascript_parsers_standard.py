@@ -287,7 +287,7 @@ class StandardJSParser:
             )
 
         # Check original state
-        original = Path(file_path).read_text()
+        original = Path(file_path).read_text(encoding="utf-8")
 
         cmd = (
             self._standard_path.split()
@@ -298,7 +298,7 @@ class StandardJSParser:
 
         try:
             subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-            modified = Path(file_path).read_text()
+            modified = Path(file_path).read_text(encoding="utf-8")
             return original != modified
         except subprocess.TimeoutExpired:
             raise TimeoutError(f"StandardJS timed out on {file_path}")
@@ -318,7 +318,7 @@ class StandardJSParser:
 
         try:
             was_modified = self.fix_file(temp_path)
-            fixed_code = Path(temp_path).read_text()
+            fixed_code = Path(temp_path).read_text(encoding="utf-8")
             return fixed_code, was_modified
         finally:
             Path(temp_path).unlink(missing_ok=True)

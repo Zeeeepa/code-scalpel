@@ -72,7 +72,7 @@ class FindSecBugsParser:
         Returns:
             List of SecurityBug objects
         """
-        content = Path(xml_file).read_text()
+        content = Path(xml_file).read_text(encoding="utf-8")
         return self.parse_xml(content)
 
     def parse_xml(self, xml_content: str) -> list[SecurityBug]:

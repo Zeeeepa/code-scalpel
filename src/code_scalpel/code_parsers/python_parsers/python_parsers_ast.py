@@ -1467,7 +1467,7 @@ class PythonASTParser:
 
         source_lines: list[str] = []
         if module.path:
-            source_lines = module.path.read_text().splitlines()
+            source_lines = module.path.read_text(encoding="utf-8").splitlines()
 
         self._extract_symbols(module.ast_tree, module, source_lines)
 

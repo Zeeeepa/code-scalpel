@@ -287,7 +287,7 @@ def git_hook_commit_msg(msg_file: Optional[str] = None) -> int:
     """
     commit_msg = ""
     if msg_file and Path(msg_file).exists():
-        commit_msg = Path(msg_file).read_text().strip()
+        commit_msg = Path(msg_file).read_text(encoding="utf-8").strip()
 
     # Get staged files
     staged_files = _get_staged_files()
@@ -397,7 +397,7 @@ exec code-scalpel git-hook commit-msg "$@"
 
         if hook_path.exists() and not force:
             # Check if it's already our hook
-            existing_content = hook_path.read_text()
+            existing_content = hook_path.read_text(encoding="utf-8")
             if "Code Scalpel" in existing_content:
                 skipped_hooks.append(f"{hook_name} (already installed)")
                 continue
@@ -406,7 +406,7 @@ exec code-scalpel git-hook commit-msg "$@"
                 continue
 
         # Write hook
-        hook_path.write_text(hook_content)
+        hook_path.write_text(hook_content, encoding="utf-8")
         hook_path.chmod(0o755)
         installed_hooks.append(hook_name)
 
@@ -448,7 +448,7 @@ def uninstall_git_hooks(repo_path: Optional[str] = None) -> Tuple[bool, str]:
         hook_path = hooks_dir / hook_name
 
         if hook_path.exists():
-            content = hook_path.read_text()
+            content = hook_path.read_text(encoding="utf-8")
             if "Code Scalpel" in content:
                 hook_path.unlink()
                 removed_hooks.append(hook_name)

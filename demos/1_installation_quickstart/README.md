@@ -33,7 +33,7 @@
 **Commands**:
 ```bash
 # Option A: Using pip
-pip install code-scalpel
+pip install codescalpel
  
 # Option B: Using uvx (recommended for isolated environments)
 uvx code-scalpel --version

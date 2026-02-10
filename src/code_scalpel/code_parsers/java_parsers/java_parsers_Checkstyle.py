@@ -144,5 +144,5 @@ class CheckstyleParser:
         Returns:
             List of violations
         """
-        content = Path(xml_file).read_text()
+        content = Path(xml_file).read_text(encoding="utf-8")
         return self.parse_xml(content)

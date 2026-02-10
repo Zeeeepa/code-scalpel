@@ -394,7 +394,7 @@ Break-even: Day 1
 > "Code Scalpel's Community tier is free forever. No credit card, no trial period, no strings attached. Install it right now:"
 >
 > ```bash
-> pip install code-scalpel
+> pip install codescalpel
 > ```
 >
 > "Within 5 minutes, you'll have all 19 tools running. Go to [GitHub repo link] for installation instructions. Join our Discord for support. Start making your AI assistant smarter today."

@@ -110,7 +110,7 @@ class SmartCrawler:
         if pkg_json.exists():
             markers_found.append("package.json")
             try:
-                content = json.loads(pkg_json.read_text())
+                content = json.loads(pkg_json.read_text(encoding="utf-8"))
                 # Higher confidence if it has dependencies
                 has_deps = bool(
                     content.get("dependencies") or content.get("devDependencies")

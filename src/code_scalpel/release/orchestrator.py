@@ -47,7 +47,7 @@ class ReleaseOrchestrator:
                 f"pyproject.toml not found at {self.pyproject_path}"
             )
 
-        content = pyproject.read_text()
+        content = pyproject.read_text(encoding="utf-8")
         match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
 
         if not match:
@@ -62,7 +62,7 @@ class ReleaseOrchestrator:
             version: New version string
         """
         pyproject = Path(self.pyproject_path)
-        content = pyproject.read_text()
+        content = pyproject.read_text(encoding="utf-8")
 
         # Replace version
         new_content = re.sub(
@@ -71,7 +71,7 @@ class ReleaseOrchestrator:
             content,
         )
 
-        pyproject.write_text(new_content)
+        pyproject.write_text(new_content, encoding="utf-8")
 
     def should_release(self) -> bool:
         """Check if a release should be performed.

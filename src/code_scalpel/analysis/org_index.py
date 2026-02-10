@@ -657,7 +657,7 @@ class OrganizationIndex:
     ) -> Optional[IndexedFile]:
         """Index a single file."""
         try:
-            content = file_path.read_text(errors="replace")
+            content = file_path.read_text(encoding="utf-8", errors="replace")
         except Exception:
             return None
 

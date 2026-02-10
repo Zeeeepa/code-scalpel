@@ -809,7 +809,7 @@ class TypeScriptParser:
             dts_path = Path(tempfile.gettempdir()) / dts_path.name
 
             if dts_path.exists():
-                return dts_path.read_text()
+                return dts_path.read_text(encoding="utf-8")
             return ""
         finally:
             Path(temp_path).unlink(missing_ok=True)

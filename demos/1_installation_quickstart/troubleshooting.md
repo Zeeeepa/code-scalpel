@@ -114,7 +114,7 @@ Location: /path/to/site-packages
 **If not installed**:
 ```bash
 # Reinstall with explicit pip
-python -m pip install code-scalpel
+python -m pip install codescalpel
  
 # Or use pip3
 pip3 install code-scalpel
@@ -160,7 +160,7 @@ source code-scalpel-env/bin/activate
 code-scalpel-env\Scripts\activate
  
 # Install in virtual environment
-pip install code-scalpel
+pip install codescalpel
  
 # Update config with venv python path
 {
@@ -255,7 +255,7 @@ python -m code_scalpel.mcp
  
 **If it crashes immediately**, check error message:
 - Python version too old? (need 3.10+)
-- Missing dependencies? Run `pip install code-scalpel[all]`
+- Missing dependencies? Run `pip install codescalpel[all]`
 - Port already in use? (if using HTTP transport)
  
 ### Solution 2: Increase Timeout
@@ -426,7 +426,7 @@ python -c "import code_scalpel; print('OK')"
  
 ```bash
 # Install with specific Python
-python3.11 -m pip install code-scalpel
+python3.11 -m pip install codescalpel
  
 # Update config to match
 {

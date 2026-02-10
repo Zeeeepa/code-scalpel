@@ -21,7 +21,7 @@ Use this checklist to ensure successful Code Scalpel installation and configurat
  
 - [ ] Install Code Scalpel
   ```bash
-  pip install code-scalpel
+  pip install codescalpel
   ```
  
 - [ ] Verify installation

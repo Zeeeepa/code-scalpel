@@ -205,7 +205,7 @@ class SpotBugsParser:
         Returns:
             List of bugs
         """
-        content = Path(xml_file).read_text()
+        content = Path(xml_file).read_text(encoding="utf-8")
         return self.parse_xml(content)
 
     def get_high_rank_bugs(

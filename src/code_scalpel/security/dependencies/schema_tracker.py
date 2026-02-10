@@ -715,7 +715,7 @@ class GraphQLSchemaTracker:
         Returns:
             GraphQLSchema object
         """
-        content = Path(path).read_text()
+        content = Path(path).read_text(encoding="utf-8")
         return self.parse(content)
 
     def compare(
@@ -1236,8 +1236,8 @@ def compare_graphql_files(
     Returns:
         GraphQLSchemaDrift with detected changes
     """
-    old_content = Path(old_path).read_text()
-    new_content = Path(new_path).read_text()
+    old_content = Path(old_path).read_text(encoding="utf-8")
+    new_content = Path(new_path).read_text(encoding="utf-8")
 
     return compare_graphql_schemas(
         old_content,

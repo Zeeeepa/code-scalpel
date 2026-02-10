@@ -229,7 +229,7 @@ def main():
     if args.whitelist and args.whitelist.exists():
         whitelist = [
             line.strip()
-            for line in args.whitelist.read_text().split("\n")
+            for line in args.whitelist.read_text(encoding="utf-8").split("\n")
             if line.strip()
         ]
 

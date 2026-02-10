@@ -113,7 +113,7 @@ All without executing code (AST-based analysis).
 ## Installation
  
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
  
 Add to Claude Desktop config:
@@ -196,7 +196,7 @@ def get_user(user_id: str):
 ## Installation
  
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
  
 Then configure your MCP client (Claude Desktop, VS Code, etc.)
@@ -298,7 +298,7 @@ I open-sourced it under MIT license.
  
 Installation:
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
  
 Repo: https://github.com/3D-Tech-Solutions/code-scalpel

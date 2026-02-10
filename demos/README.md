@@ -78,7 +78,7 @@ demos/
 **Difficulty**: Beginner
  
 **What You'll Show**:
-1. Install Code Scalpel (`pip install code-scalpel`)
+1. Install Code Scalpel (`pip install codescalpel`)
 2. Configure MCP server in Claude Desktop
 3. Make first tool call (extract a function)
 4. See token efficiency in action (200x reduction)

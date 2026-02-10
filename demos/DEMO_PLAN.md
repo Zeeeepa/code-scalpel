@@ -14,7 +14,7 @@ This document outlines a comprehensive demo strategy for showcasing Code Scalpel
 **Goal**: Get from zero to running MCP server in minutes
  
 **What to show**:
-- Installation via `pip install code-scalpel`
+- Installation via `pip install codescalpel`
 - MCP server configuration in Claude Desktop
 - First tool call: `extract_code` to get a function
 - Token efficiency showcase (50 tokens vs 10,000)
@@ -184,7 +184,7 @@ Pro Tier:
  
 **What to show**:
 1. **Onboarding a new developer**
-   - Install via `pip install code-scalpel`
+   - Install via `pip install codescalpel`
    - Configure MCP in Claude Desktop
    - Ask Claude: "Map out the authentication system"
    - Use `get_call_graph` and `get_project_map`

@@ -205,7 +205,7 @@ class JWTLicenseValidator:
                 # Find the most recent .pem file (sorted by name, which includes date)
                 pem_files = sorted(public_key_dir.glob("*.pem"), reverse=True)
                 if pem_files:
-                    latest_key = pem_files[0].read_text().strip()
+                    latest_key = pem_files[0].read_text(encoding="utf-8").strip()
                     logger.debug(f"Loaded public key from {pem_files[0].name}")
                     return latest_key
         except Exception as e:
@@ -400,7 +400,7 @@ BwIDAQAB
         license_file = self.find_license_file()
         if license_file:
             try:
-                token = license_file.read_text().strip()
+                token = license_file.read_text(encoding="utf-8").strip()
                 logger.debug(f"Loaded license from file: {license_file}")
                 return token
             except Exception as e:
@@ -437,7 +437,9 @@ BwIDAQAB
         key_path = os.getenv(LICENSE_PUBLIC_KEYS_PATH_ENV_VAR)
         if key_path:
             try:
-                content = Path(key_path).expanduser().read_text().strip()
+                content = (
+                    Path(key_path).expanduser().read_text(encoding="utf-8").strip()
+                )
                 parsed = json.loads(content)
                 if isinstance(parsed, dict):
                     return {
@@ -476,7 +478,7 @@ BwIDAQAB
         path = os.getenv(LICENSE_CRL_PATH_ENV_VAR)
         if path:
             try:
-                return Path(path).expanduser().read_text().strip()
+                return Path(path).expanduser().read_text(encoding="utf-8").strip()
             except Exception as e:
                 logger.warning(f"Failed to read CRL token from {path}: {e}")
                 return None
@@ -989,7 +991,7 @@ BwIDAQAB
             return cache.result
 
         try:
-            token = license_file.read_text().strip()
+            token = license_file.read_text(encoding="utf-8").strip()
         except Exception as e:
             logger.error(f"Failed to read license file {license_file}: {e}")
             return self._create_invalid_license(f"Failed to read license file: {e}")

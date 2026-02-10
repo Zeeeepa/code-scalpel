@@ -346,7 +346,7 @@ And 15 more tools...
  
 ```bash
 # Install via pip
-pip install code-scalpel
+pip install codescalpel
  
 # Configure MCP client (Claude Desktop example)
 # Add to ~/.claude_desktop_config.json:
@@ -652,7 +652,7 @@ MIT licensed, free forever tier. GitHub stars appreciated! 🙏
  
 **Try It:**
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
  
 **Questions I'll Answer:**

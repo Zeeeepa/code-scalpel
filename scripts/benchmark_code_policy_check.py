@@ -45,7 +45,9 @@ def _cpu_model() -> str:
     cpuinfo = Path("/proc/cpuinfo")
     if cpuinfo.exists():
         try:
-            for line in cpuinfo.read_text(errors="ignore").splitlines():
+            for line in cpuinfo.read_text(
+                encoding="utf-8", errors="ignore"
+            ).splitlines():
                 if line.lower().startswith("model name"):
                     return line.split(":", 1)[1].strip()
         except Exception:

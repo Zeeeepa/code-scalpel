@@ -266,7 +266,7 @@ class PrettierFormatter:
         if not path.exists():
             raise FileNotFoundError(f"Prettier config not found: {config_path}")
 
-        content = path.read_text()
+        content = path.read_text(encoding="utf-8")
 
         # Handle different config formats
         if path.suffix in [".json", ""] or path.name == ".prettierrc":
@@ -459,7 +459,7 @@ class PrettierFormatter:
         if not path.exists():
             raise FileNotFoundError(f"File not found: {file_path}")
 
-        original_code = path.read_text()
+        original_code = path.read_text(encoding="utf-8")
 
         cmd = (
             self._prettier_path.split()
@@ -475,7 +475,7 @@ class PrettierFormatter:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
             if write:
-                formatted_code = path.read_text()
+                formatted_code = path.read_text(encoding="utf-8")
             else:
                 formatted_code = result.stdout
 

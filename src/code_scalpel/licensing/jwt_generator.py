@@ -304,7 +304,7 @@ def main():
     private_key = None
     if args.private_key:
         try:
-            private_key = Path(args.private_key).read_text()
+            private_key = Path(args.private_key).read_text(encoding="utf-8")
         except Exception as e:
             print(f"ERROR: Failed to read private key: {e}", file=sys.stderr)
             sys.exit(1)
@@ -332,7 +332,7 @@ def main():
             print(token)
         else:
             output_path = Path(args.output)
-            output_path.write_text(token)
+            output_path.write_text(token, encoding="utf-8")
             print(f"License written to: {output_path.absolute()}")
 
             # Print summary

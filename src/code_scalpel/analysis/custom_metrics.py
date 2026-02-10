@@ -475,7 +475,7 @@ class MetricsCollector:
                 continue
 
             try:
-                content = file_path.read_text(errors="replace")
+                content = file_path.read_text(encoding="utf-8", errors="replace")
             except Exception:
                 continue
 

@@ -90,7 +90,7 @@ def _validate_paths_sync(
                 tsconfig_path = PathLib(project_root) / "tsconfig.json"
                 if tsconfig_path.exists():
                     try:
-                        tsconfig = json.loads(tsconfig_path.read_text())
+                        tsconfig = json.loads(tsconfig_path.read_text(encoding="utf-8"))
                         compiler_options = tsconfig.get("compilerOptions", {})
                         paths_config = compiler_options.get("paths", {})
                         base_url = compiler_options.get("baseUrl", ".")
@@ -116,7 +116,7 @@ def _validate_paths_sync(
                 webpack_path = PathLib(project_root) / "webpack.config.js"
                 if webpack_path.exists():
                     try:
-                        content = webpack_path.read_text()
+                        content = webpack_path.read_text(encoding="utf-8")
                         alias_pattern = r"[\"'](@[^\"']+)[\"']\s*:\s*"
                         matches = re.findall(alias_pattern, content)
                         for alias in matches:
@@ -139,7 +139,7 @@ def _validate_paths_sync(
             for apath in accessible:
                 if apath.endswith((".js", ".ts", ".jsx", ".tsx")):
                     try:
-                        content = PathLib(apath).read_text()
+                        content = PathLib(apath).read_text(encoding="utf-8")
                         if "import(" in content:
                             dynamic_imports.append(
                                 {
@@ -374,7 +374,7 @@ def _verify_policy_integrity_sync(
             files_failed = []
             for pf in policy_files:
                 try:
-                    content = pf.read_text()
+                    content = pf.read_text(encoding="utf-8")
                     if pf.suffix == ".json":
                         json.loads(content)
                     else:

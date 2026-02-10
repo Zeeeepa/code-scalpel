@@ -2892,7 +2892,7 @@ def _cross_file_security_scan_sync(
                 }:
                     continue
                 try:
-                    content = file_path.read_text(errors="ignore")
+                    content = file_path.read_text(encoding="utf-8", errors="ignore")
                 except Exception:
                     continue
                 scanned += 1

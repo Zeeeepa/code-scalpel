@@ -83,7 +83,7 @@ Tweet 7/7 (CTA):
 Install in 2 minutes:
  
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
  
 Free tier includes everything.
@@ -158,7 +158,7 @@ Tweet 6/6:
 Try it (free):
  
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
  
 Saved my team from 3 critical bugs this week.
@@ -262,7 +262,7 @@ Tweet 8/8:
 Try it:
  
 ```bash
-pip install code-scalpel
+pip install codescalpel
 ```
  
 Repo: [link]

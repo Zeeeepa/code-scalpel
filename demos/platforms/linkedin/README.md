@@ -328,7 +328,7 @@ Cost: $0 (open source)
 ```
 TRY IT FREE
  
-1. Install: pip install code-scalpel
+1. Install: pip install codescalpel
 2. Configure MCP client
 3. Start saving
  

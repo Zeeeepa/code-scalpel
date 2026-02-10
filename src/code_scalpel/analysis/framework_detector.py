@@ -105,7 +105,7 @@ class FrameworkDetector:
         try:
             import json
 
-            content = json.loads(pkg_file.read_text())
+            content = json.loads(pkg_file.read_text(encoding="utf-8"))
             if "next" not in content.get(
                 "dependencies", {}
             ) and "next" not in content.get("devDependencies", {}):

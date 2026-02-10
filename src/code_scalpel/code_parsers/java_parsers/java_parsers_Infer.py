@@ -89,7 +89,7 @@ class InferParser:
         """
         report_path = Path(self.infer_out_dir) / "report.json"
         if report_path.exists():
-            return self.parse_json(report_path.read_text())
+            return self.parse_json(report_path.read_text(encoding="utf-8"))
         return []
 
     def run_infer(self, compile_command: list[str]) -> Optional[str]:

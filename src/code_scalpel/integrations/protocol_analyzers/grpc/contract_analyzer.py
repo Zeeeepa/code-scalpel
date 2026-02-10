@@ -325,7 +325,7 @@ class GrpcContractAnalyzer:
             GrpcContract with all extracted information
         """
         path = Path(proto_path)
-        content = path.read_text()
+        content = path.read_text(encoding="utf-8")
         return self.analyze(content, source_file=str(path))
 
     def validate(self, contract: GrpcContract) -> List[ContractIssue]:
