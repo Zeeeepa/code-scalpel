@@ -71,7 +71,7 @@ Code Scalpel uses **three complementary policy systems**:
 - `config.json` - **Master Configuration:** Defines blast radius, critical paths, and active governance profile.
 - `governance.yaml` - **Behavior Policies:** Rules for AI agent workflows (e.g., "Always add READMEs", "No direct commits to main"). (Formerly `dev-governance.yaml`)
 - `policy.yaml` - **Security Policies:** OPA/Rego rules for code analysis (allow/deny logic).
-- `limits.toml` - **Tier Limits:** Defines tool capabilities (file sizes, depth) for Community/Pro/Enterprise tiers.
+- ~~`limits.toml`~~ — **Moved** to `src/code_scalpel/capabilities/limits.toml` (internal, not user-editable).
 
 **Operational/Validation**
 - `budget.yaml` - **Change Budget:** Persists the current session's usage against defined limits (max lines/files changed).
@@ -98,7 +98,7 @@ Code Scalpel uses **three complementary policy systems**:
 - Usage examples and reference configurations (e.g., `profiles/config.ci-cd.json`, `policies/test_policy.yaml`).
 
 **`templates/`**
-- Copy-ready templates for new projects (e.g., `limits.toml`, `policy.yaml`).
+- Copy-ready templates for new projects (e.g., `policy.yaml`).
 
 **`policies/`**
 - Reusable Rego policy packs referenced by `policy.yaml` (e.g., `architecture/`, `devops/`).
@@ -120,7 +120,7 @@ Code Scalpel uses **three complementary policy systems**:
 ├── policy.yaml                # Policy engine configuration (OPA/Rego)
 ├── policies/                  # Rego packs referenced by policy.yaml
 ├── policy.manifest.json       # Policy integrity manifest (optional)
-├── limits.toml                # Tier/tool limits (project-level)
+├── # limits.toml moved to src/code_scalpel/capabilities/ (internal)
 ├── response_config.json       # MCP response shaping
 ├── response_config.schema.json
 ├── project-structure.yaml     # Project structure expectations

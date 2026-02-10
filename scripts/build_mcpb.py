@@ -242,8 +242,14 @@ def build_mcpb(output_path: Path | None = None) -> Path:
     print("  ✓ Copying configuration files")
     config_dir = build_dir / ".code-scalpel"
     config_dir.mkdir()
-    shutil.copy(ROOT / ".code-scalpel" / "limits.toml", config_dir / "limits.toml")
-    shutil.copy(ROOT / ".code-scalpel" / "features.toml", config_dir / "features.toml")
+    shutil.copy(
+        ROOT / "src" / "code_scalpel" / "capabilities" / "limits.toml",
+        config_dir / "limits.toml",
+    )
+    shutil.copy(
+        ROOT / "src" / "code_scalpel" / "capabilities" / "features.toml",
+        config_dir / "features.toml",
+    )
 
     # 5. Copy README and LICENSE
     print("  ✓ Copying README and LICENSE")

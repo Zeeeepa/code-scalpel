@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Canonical tool-ID list (22 tools).  Kept here as a single source of truth
 # for iteration / validation.  The capability and limit data itself lives in
-# .code-scalpel/features.toml and .code-scalpel/limits.toml respectively.
+# src/code_scalpel/capabilities/features.toml and limits.toml respectively.
 # ---------------------------------------------------------------------------
 ALL_TOOLS: List[str] = [
     "analyze_code",

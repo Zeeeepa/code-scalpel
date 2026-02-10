@@ -31,7 +31,9 @@ else:
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-LIMITS_TOML_PATH = PROJECT_ROOT / ".code-scalpel" / "limits.toml"
+LIMITS_TOML_PATH = (
+    PROJECT_ROOT / "src" / "code_scalpel" / "capabilities" / "limits.toml"
+)
 FEATURES_PY_PATH = PROJECT_ROOT / "src" / "code_scalpel" / "licensing" / "features.py"
 RESPONSE_CONFIG_PATH = PROJECT_ROOT / ".code-scalpel" / "response_config.json"
 
@@ -99,18 +101,31 @@ def get_tier_limit(tool: str, tier: str, limit_key: str) -> Any:
         limit_key: Limit key (e.g., "max_depth", "max_files")
 
     Returns:
-        The limit value, or None if omitted (indicating unlimited).
+        The limit value, or None if omitted or -1 (indicating unlimited).
     """
     limits = load_limits_toml()
 
     if tier not in limits or tool not in limits[tier]:
         return None
 
-    return limits[tier][tool].get(limit_key)
+    value = limits[tier][tool].get(limit_key)
+    # Convert -1 sentinel to None (unlimited), matching features.py convention
+    if isinstance(value, int) and value == -1:
+        return None
+    return value
+
+
+def _convert_sentinel(value: Any) -> Any:
+    """Convert -1 sentinel to None (unlimited), matching features.py convention."""
+    if isinstance(value, int) and value == -1:
+        return None
+    return value
 
 
 def get_all_tier_limits(tool: str) -> Dict[str, Dict[str, Any]]:
     """Get all limits for a tool across all tiers.
+
+    Applies -1 -> None sentinel conversion on all numeric values.
 
     Returns:
         Dictionary with structure:
@@ -125,7 +140,9 @@ def get_all_tier_limits(tool: str) -> Dict[str, Dict[str, Any]]:
 
     for tier in ["community", "pro", "enterprise"]:
         if tier in limits and tool in limits[tier]:
-            result[tier] = limits[tier][tool]
+            result[tier] = {
+                k: _convert_sentinel(v) for k, v in limits[tier][tool].items()
+            }
         else:
             result[tier] = {}
 

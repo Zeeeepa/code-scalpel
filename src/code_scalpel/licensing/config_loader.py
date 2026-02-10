@@ -5,12 +5,11 @@ Configuration Loader - Load tier limits from the bundled TOML.
 [20251231_FEATURE] v3.3.1 - Added response_config.json support for output filtering.
 [20260205_REFACTOR] Bundled-only limits: removed all user-override search paths.
 
-limits.toml is packaged inside the wheel at code_scalpel/capabilities/limits.toml
-(copied from .code-scalpel/limits.toml at build time via pyproject.toml force-include).
-At runtime the loader reads only that bundled copy.  During development (editable
-install / source checkout) it falls back to .code-scalpel/limits.toml in the repo root.
-No environment-variable or filesystem overrides are honoured for limits — the file is
-owned by the package build.
+limits.toml lives in the source tree at src/code_scalpel/capabilities/limits.toml
+and is packaged automatically into the wheel.  At runtime the loader resolves it
+relative to this module's location (code_scalpel/capabilities/limits.toml).
+No environment-variable or filesystem overrides are honoured — the file is
+owned by the package.
 
 response_config.json (verbosity / output filtering) retains its existing user-facing
 search behaviour, as that IS intended to be configurable per deployment.
@@ -54,39 +53,24 @@ else:
 
 def _find_config_file() -> Optional[Path]:
     """
-    Locate the bundled limits.toml.
+    Locate limits.toml in the package's capabilities/ directory.
 
-    Resolution order (first hit wins):
-        1. Package-bundled copy  – code_scalpel/capabilities/limits.toml
-           (installed via hatch force-include; present in any wheel/sdist install)
-        2. Dev-checkout fallback – <repo-root>/.code-scalpel/limits.toml
-           (only reachable when running from a source checkout / editable install)
-
-    No environment-variable or user-filesystem overrides are honoured.
+    The file lives at src/code_scalpel/capabilities/limits.toml in the source
+    tree and is packaged automatically into the wheel.
 
     Returns:
-        Path to limits.toml, or None if neither location exists.
+        Path to limits.toml, or None if not found.
     """
-    # 1. Bundled copy: sits next to this file's grandparent package dir.
     #    __file__ = .../code_scalpel/licensing/config_loader.py
     #    parent.parent = .../code_scalpel/
-    bundled = Path(__file__).resolve().parent.parent / "capabilities" / "limits.toml"
-    if bundled.exists():
-        logger.debug("Using bundled limits.toml: %s", bundled)
-        return bundled
+    path = Path(__file__).resolve().parent.parent / "capabilities" / "limits.toml"
+    if path.exists():
+        logger.debug("Using limits.toml: %s", path)
+        return path
 
-    # 2. Dev fallback: four levels up reaches the repo root when the package
-    #    is installed in editable mode or run directly from a checkout.
-    try:
-        repo_root = Path(__file__).resolve().parent.parent.parent.parent
-        dev_copy = repo_root / ".code-scalpel" / "limits.toml"
-        if dev_copy.exists():
-            logger.debug("Dev mode: using limits.toml from %s", dev_copy)
-            return dev_copy
-    except Exception:
-        pass
-
-    logger.info("No limits.toml located; hardcoded defaults will be used.")
+    logger.warning(
+        "limits.toml not found at %s; hardcoded defaults will be used.", path
+    )
     return None
 
 
@@ -247,32 +231,22 @@ def reload_config() -> Dict[str, Dict[str, Dict[str, Any]]]:
 
 def _find_features_file() -> Optional[Path]:
     """
-    Locate the bundled features.toml.
+    Locate features.toml in the package's capabilities/ directory.
 
-    Resolution order (first hit wins):
-        1. Package-bundled copy  – code_scalpel/capabilities/features.toml
-        2. Dev-checkout fallback – <repo-root>/.code-scalpel/features.toml
-
-    No environment-variable or user-filesystem overrides are honoured.
+    The file lives at src/code_scalpel/capabilities/features.toml in the source
+    tree and is packaged automatically into the wheel.
 
     Returns:
-        Path to features.toml, or None if neither location exists.
+        Path to features.toml, or None if not found.
     """
-    bundled = Path(__file__).resolve().parent.parent / "capabilities" / "features.toml"
-    if bundled.exists():
-        logger.debug("Using bundled features.toml: %s", bundled)
-        return bundled
+    path = Path(__file__).resolve().parent.parent / "capabilities" / "features.toml"
+    if path.exists():
+        logger.debug("Using features.toml: %s", path)
+        return path
 
-    try:
-        repo_root = Path(__file__).resolve().parent.parent.parent.parent
-        dev_copy = repo_root / ".code-scalpel" / "features.toml"
-        if dev_copy.exists():
-            logger.debug("Dev mode: using features.toml from %s", dev_copy)
-            return dev_copy
-    except Exception:
-        pass
-
-    logger.info("No features.toml located; hardcoded defaults will be used.")
+    logger.warning(
+        "features.toml not found at %s; hardcoded defaults will be used.", path
+    )
     return None
 
 

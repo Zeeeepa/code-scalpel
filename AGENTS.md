@@ -107,7 +107,7 @@ async def tool_name(param1: str, param2: int) -> ToolResponseEnvelope:
 - Example: `# [20260129_FEATURE] New async context tool for faster analysis`
 
 ### Tier-Aware Development
-- Tier limits defined in `.code-scalpel/limits.toml`
+- Tier limits defined in `src/code_scalpel/capabilities/limits.toml`
 - Tools must enforce tier limits in their implementation
 - Use `get_tool_capabilities()` to check tier at runtime
 - Document tier differences explicitly in tool docstrings
@@ -206,7 +206,7 @@ Before committing code, ensure:
 ### Tier-Aware Capabilities
 - 24 total MCP tools across 9 modules
 - Each tool supports 3 tiers: Community (free), Pro, Enterprise
-- Limits enforced per `.code-scalpel/limits.toml`
+- Limits enforced per `src/code_scalpel/capabilities/limits.toml`
 - Tools return metadata: `tier_applied`, `duration_ms`
 
 ### Performance & Efficiency
@@ -221,7 +221,7 @@ Before committing code, ensure:
 |------|---------|
 | `pyproject.toml` | Project metadata, dependencies, build config, tool configs |
 | `pytest.ini` | Pytest configuration, test paths, markers, timeout |
-| `.code-scalpel/limits.toml` | Tier-specific limits for each MCP tool |
+| `src/code_scalpel/capabilities/limits.toml` | Tier-specific limits for each MCP tool |
 | `.github/copilot-instructions.md` | Comprehensive agent development guidelines |
 | `docs/INDEX.md` | Master documentation index |
 

@@ -193,7 +193,7 @@ Capabilities are now:
 
 1. **Update Configuration**
    ```toml
-   # .code-scalpel/limits.toml
+   # src/code_scalpel/capabilities/limits.toml
    [my_tool.free]
    max_files = 100
    
@@ -309,7 +309,7 @@ pytest tests/tier_enforcement/ -v
 |------|---------|
 | `docs/PRE_RELEASE_PIPELINE.md` | Full specification (read this for details) |
 | `src/code_scalpel/capabilities/resolver.py` | Get capabilities by tier |
-| `.code-scalpel/limits.toml` | Central config for all tier limits |
+| `src/code_scalpel/capabilities/limits.toml` | Central config for all tier limits |
 | `capabilities/community.json` | Golden file for COMMUNITY tier (auto-generated) |
 | `capabilities/pro.json` | Golden file for PRO tier (auto-generated) |
 | `capabilities/enterprise.json` | Golden file for ENTERPRISE tier (auto-generated) |

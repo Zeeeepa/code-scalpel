@@ -1,7 +1,7 @@
 """Tier boundary enforcement tests (MCP stdio integration).
 
 [20251228_TEST] Parametrized tests prove community/pro tiers enforce limits
-from .code-scalpel/limits.toml at the MCP boundary.
+from capabilities/limits.toml at the MCP boundary.
 
 These tests intentionally exercise the real MCP stdio transport, since that is
 what customers run.

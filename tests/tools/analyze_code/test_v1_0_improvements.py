@@ -136,7 +136,11 @@ class TestConfigurationAlignment:
 
         # Load limits.toml
         limits_path = (
-            Path(__file__).parent.parent.parent.parent / ".code-scalpel" / "limits.toml"
+            Path(__file__).parent.parent.parent.parent
+            / "src"
+            / "code_scalpel"
+            / "capabilities"
+            / "limits.toml"
         )
         with open(limits_path, "rb") as f:
             limits = tomli.load(f)
@@ -164,7 +168,11 @@ class TestConfigurationAlignment:
         import tomli
 
         limits_path = (
-            Path(__file__).parent.parent.parent.parent / ".code-scalpel" / "limits.toml"
+            Path(__file__).parent.parent.parent.parent
+            / "src"
+            / "code_scalpel"
+            / "capabilities"
+            / "limits.toml"
         )
         with open(limits_path, "rb") as f:
             limits = tomli.load(f)

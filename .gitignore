@@ -43,22 +43,14 @@ pip-delete-this-directory.txt
 
 # Code Scalpel specific
 .code-scalpel.code-workspace
-/.code-scalpel/
 pdg_visualizations/
 analysis_results/
 # [20260202_CLEANUP] Consolidated caches into .code-scalpel/cache/
 .scalpel_cache/            # Legacy cache dir (migrated)
 .code_scalpel_cache/       # Legacy cache dir (migrated)
 .scalpel_ast_cache/        # Legacy cache dir (migrated)
-.code-scalpel/cache/       # Consolidated cache directory
-.code-scalpel/runtime/     # Runtime state files
-.code-scalpel/logs/        # Application logs
-.code-scalpel/licenses/    # License JWTs (injected via GitHub Secrets in CI)
 .ruff_cache/
 compliance_reports/
-.code-scalpel/autonomy_audit/  # Autonomy audit trail runtime files
-.code-scalpel/audit.log  # Policy engine audit log
-.code-scalpel/limits.local.toml  # [20251225_CONFIG] Local tier limit overrides
 certs/  # Certificate and private key files for signing/encryption
 code_scalpel_community/
 local_pipeline/
@@ -69,12 +61,43 @@ local_pipeline/
 .tmp_tier_comm/
 .tmp_tier_fallback/  # [20260202_CLEANUP] Migrated to .code-scalpel/runtime/
 
-# [20251228_TEST] Local remote-verifier integration artifacts (never commit)
+# ===== .CODE-SCALPEL/ PROJECT CONFIG DIRECTORY [20260210_REFACTOR] =====
+# User-facing config files (config.json, governance.yaml, etc.) ARE tracked.
+# Sensitive credentials, runtime data, and internal-only files are excluded.
+
+# Runtime / ephemeral data
+.code-scalpel/cache/
+.code-scalpel/runtime/
+.code-scalpel/logs/
+.code-scalpel/autonomy_audit/
+.code-scalpel/audit.log
+.code-scalpel/audit.jsonl
+.code-scalpel/audit_filter.log
+.code-scalpel/complexity_history.json
+
+# License credentials (injected via GitHub Secrets in CI)
+.code-scalpel/license/
+.code-scalpel/licenses/
 .code-scalpel/license.jwt
 .code-scalpel/license*.jwt
 .code-scalpel/**/*.jwt
 .code-scalpel/license_cache.json
 .code-scalpel/*.jwk.json
+
+# Private keys (NEVER commit)
+.code-scalpel/*.pem
+.code-scalpel/*.key
+
+# Local overrides (per-deployment, not shared)
+.code-scalpel/limits.local.toml
+.code-scalpel/config.local.json
+.code-scalpel/config.local.yaml
+
+# Internal TOML configs (canonical copies live in src/code_scalpel/capabilities/)
+.code-scalpel/limits.toml
+.code-scalpel/features.toml
+
+# Test artifacts
 .code-scalpel/test_write.json
 
 # [20250101_TEST] Test license files - valid JWT licenses for tier testing
@@ -82,12 +105,10 @@ local_pipeline/
 tests/licenses/*.jwt
 tests/licenses/**/*.jwt
 
-# License management (separate repo, ignore if checked out locally)
-.code-scalpel/license/  # License directory contains JWT license files
-.code-scalpel/archive/  # Archived license files (potentially sensitive)
-keys/  # Private keys should never be in this repo
-*.pem  # Private key files
-*.key  # Key files
+# Private keys should never be in this repo
+keys/
+*.pem
+*.key
 
 # Internal development archives
 .archive/

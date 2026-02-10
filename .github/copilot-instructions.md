@@ -306,7 +306,7 @@ async def test_pro_depth_limit(tmp_path, pro_tier):
     from code_scalpel.mcp.server import get_call_graph
     result = await get_call_graph(project_root=str(tmp_path), depth=100)
     
-    # Verify tier and limits from .code-scalpel/limits.toml [pro.get_call_graph]
+    # Verify tier and limits from capabilities/limits.toml [pro.get_call_graph]
     assert result.tier_applied == "pro"
     assert result.max_depth_applied == 50  # from limits.toml
     assert result.max_nodes_applied == 500  # from limits.toml
@@ -331,7 +331,7 @@ Monkeypatching `_get_current_tier()` only affects the function in the module whe
 
 **Metadata Fields in Results:**
 
-All MCP tool results must populate tier and limit metadata (see `.code-scalpel/limits.toml` for expected values):
+All MCP tool results must populate tier and limit metadata (see `src/code_scalpel/capabilities/limits.toml` for expected values):
 
 ```python
 # Result from get_call_graph with Pro tier active
@@ -370,7 +370,7 @@ Test licenses stored in `tests/licenses/` (git-ignored):
 - Tier detection works identically in CI and local environments
 
 **Tier Limit Reference:**
-All tier limits are centralized in `.code-scalpel/limits.toml`. Tier tests must verify that:
+All tier limits are centralized in `src/code_scalpel/capabilities/limits.toml`. Tier tests must verify that:
 1. Results populate `tier_applied` (e.g., "pro", "enterprise")
 2. Results populate `*_applied` fields (e.g., `max_depth_applied`, `max_nodes_applied`)
 3. `*_applied` values match corresponding section in limits.toml
@@ -500,7 +500,7 @@ source .env && python -m twine upload dist/* -u __token__ -p "$PYPI_TOKEN"
 
 **Configuration Files:**
 - `.code-scalpel/config.json` - Standard balanced governance profile
-- `.code-scalpel/limits.toml` - **Tier-based capability limits** (Community/Pro/Enterprise) - SOURCE OF TRUTH for tier tests
+- `src/code_scalpel/capabilities/limits.toml` - **Tier-based capability limits** (Community/Pro/Enterprise) - SOURCE OF TRUTH for tier tests
 - `.code-scalpel/response_config.json` - Response verbosity & token efficiency profiles
 - `.code-scalpel/architecture.toml` - Dependency rules & architectural boundaries
 - `.code-scalpel/budget.yaml` - Agent operation budgets (max files, tokens, API calls)

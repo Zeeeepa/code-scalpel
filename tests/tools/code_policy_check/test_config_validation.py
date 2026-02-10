@@ -161,19 +161,18 @@ class TestConfigurationLoading:
         ), "Enterprise tier should have compliance_enabled=true"
 
     def test_config_file_exists(self):
-        """Verify .code-scalpel/limits.toml exists in project."""
-        # Try common locations
+        """Verify limits.toml exists in the capabilities package."""
+        # Canonical location: src/code_scalpel/capabilities/limits.toml
         possible_paths = [
-            Path.cwd() / ".code-scalpel" / "limits.toml",
             Path(__file__).parent.parent.parent.parent
-            / ".code-scalpel"
+            / "src"
+            / "code_scalpel"
+            / "capabilities"
             / "limits.toml",
         ]
 
         exists = any(p.exists() for p in possible_paths)
-        assert (
-            exists
-        ), f".code-scalpel/limits.toml not found in: {[str(p) for p in possible_paths]}"
+        assert exists, f"limits.toml not found in: {[str(p) for p in possible_paths]}"
 
 
 if __name__ == "__main__":

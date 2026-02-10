@@ -130,20 +130,8 @@ ignore-vcs = true
 [tool.hatch.build.targets.wheel]
 packages = ["src/code_scalpel"]
 
-[tool.hatch.build.targets.wheel.force-include]
-# Ship the canonical config TOML files inside the wheel so the runtime
-# loader can find them without any filesystem search.  Source of truth
-# at build time is .code-scalpel/; they land at the paths the loader
-# expects: code_scalpel/capabilities/{limits,features}.toml
-".code-scalpel/limits.toml" = "code_scalpel/capabilities/limits.toml"
-".code-scalpel/features.toml" = "code_scalpel/capabilities/features.toml"
-
-
-[tool.hatch.build.targets.sdist.force-include]
-# Ensure config TOMLs survive the sdist so that a wheel built from
-# the sdist can honour the wheel force-include above.
-".code-scalpel/limits.toml" = ".code-scalpel/limits.toml"
-".code-scalpel/features.toml" = ".code-scalpel/features.toml"
+# limits.toml and features.toml live in src/code_scalpel/capabilities/
+# and are packaged automatically — no force-include needed.
 
 [tool.hatch.build.targets.sdist]
 only-include = [

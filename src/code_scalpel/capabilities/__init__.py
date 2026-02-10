@@ -27,7 +27,8 @@ USAGE:
     print(get_tier_names())  # ["community", "pro", "enterprise"]
 
 DESIGN:
-- Single source of truth: .code-scalpel/limits.toml
+- Single source of truth: src/code_scalpel/capabilities/limits.toml
+- Packaged automatically into the wheel (no force-include needed)
 - Thread-safe caching to avoid re-parsing
 - Stateless resolver (no external dependencies)
 - Forward-compatible schema for future features

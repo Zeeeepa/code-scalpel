@@ -13,7 +13,7 @@ except FileNotFoundError:
     # Handle case where working directory no longer exists
     original_cwd = Path(__file__).parent.parent
 
-limits_path = original_cwd / ".code-scalpel" / "limits.toml"
+limits_path = original_cwd / "src" / "code_scalpel" / "capabilities" / "limits.toml"
 backup_path = limits_path.with_suffix(".toml.backup")
 
 print("=" * 80)

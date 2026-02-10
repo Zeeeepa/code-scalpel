@@ -1,20 +1,13 @@
 # Code Scalpel Feature Capabilities
 #
-# SOURCE OF TRUTH — this file is copied into the wheel by hatch
-# force-include and becomes code_scalpel/capabilities/features.toml.
+# SOURCE OF TRUTH — lives in src/code_scalpel/capabilities/features.toml
+# and is packaged automatically into the wheel (no force-include needed).
 #
 # This file owns: enabled flag, capability lists, descriptions.
 # Limits (numeric thresholds, flags, string tunables) live in limits.toml.
 #
 # Capabilities are arrays of strings.  The runtime loader converts
 # them to sets for O(1) membership checks.
-#
-# Build flow:
-#   .code-scalpel/features.toml  ──► hatch force-include
-#        (this file)                        │
-#                                          ▼
-#                              code_scalpel/capabilities/features.toml
-#                                  (bundled in wheel / sdist)
 
 # ============================================================================
 # analyze_code
