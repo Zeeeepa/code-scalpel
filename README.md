@@ -55,7 +55,7 @@ Code Scalpel serves 4 primary user types:
 ### 👤 **Individual Developers** (Cost Reduction Focus)
 **You're spending $50-450/month on Claude API and want to cut costs 95%.**
 
-- ✅ Real example: $450/mo → $22/mo (Sarah, freelance dev)
+- ✅ Real example: $450/mo → $22/mo
 - ✅ 2-minute installation, zero maintenance
 - ✅ Works with Claude Desktop, GitHub Copilot, Cursor
 
@@ -64,7 +64,7 @@ Code Scalpel serves 4 primary user types:
 ### 👥 **Team Leads** (Team ROI Focus)  
 **You manage 8-15 developers and need to reduce team AI costs 40%+.**
 
-- ✅ Real example: $3,000/mo → $1,800/mo = $14,400/year saved (David, 10-person team)
+- ✅ Real example: $3,000/mo → $1,800/mo = $14,400/year saved
 - ✅ 1-hour team rollout with templates and playbooks
 - ✅ Usage analytics and ROI tracking included
 
@@ -89,47 +89,6 @@ Code Scalpel serves 4 primary user types:
 - ✅ Runs locally (no code sent to cloud)
 
 **→ [Enterprise Guide](docs/website/docs/guides/enterprise.md)**
-
----
-
-## Real Savings (Actual Users)
-
-### Sarah - Freelance Developer
-**Before Code Scalpel:**
-- Claude API bill: **$450/month**
-- 150 queries/day × 8,500 tokens avg
-- 15% of monthly income going to AI
-
-**After Code Scalpel (Month 1):**
-- Claude API bill: **$22/month**
-- Same 150 queries/day × 420 tokens avg
-- **$428/month saved ($5,136/year)**
-
-> "I thought the billing was broken. My Claude bill went from $450 to $22. This tool paid for itself in the first hour."
-> 
-> **— Sarah Chen, Freelance Developer**
-
-**→ [See how Sarah did it](docs/website/docs/guides/cost-optimization.md)**
-
----
-
-### David - Engineering Manager (10-Person Team)
-**Before Code Scalpel:**
-- Team size: 10 developers
-- Average cost: $300/dev/month
-- **Total: $3,000/month ($36,000/year)**
-
-**After Code Scalpel (Month 3):**
-- 80% team adoption (8/10 devs using daily)
-- Average cost: $180/dev/month (40% reduction)
-- **Total: $1,800/month ($21,600/year)**
-- **Savings: $1,200/month ($14,400/year)**
-
-> "Installation took 45 minutes for the whole team. We saved $1,200 in the first month. The CFO stopped asking about AI costs."
-> 
-> **— David Park, Engineering Manager**
-
-**→ [Team ROI Calculator](docs/website/docs/guides/teams/team-quickstart.md#roi-calculator)**
 
 ---
 

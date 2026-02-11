@@ -13,6 +13,17 @@ on:
         description: 'Docker registry (ghcr.io or docker.io)'
         required: false
         default: 'ghcr.io'
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Tag name to publish'
+        required: true
+        type: string
+      registry:
+        description: 'Docker registry'
+        required: false
+        default: 'ghcr.io'
+        type: string
 
 permissions:
   packages: write
@@ -34,7 +45,7 @@ jobs:
         id: config
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event_name }}" == "workflow_call" ]]; then
             TAG="${{ inputs.tag }}"
             REGISTRY="${{ inputs.registry }}"
           else

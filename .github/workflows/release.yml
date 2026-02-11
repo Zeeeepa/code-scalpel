@@ -24,6 +24,10 @@ on:
         description: 'Skip Docker image publishing'
         required: false
         default: 'false'
+      skip_vscode:
+        description: 'Skip VS Code extension publishing'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write
@@ -154,6 +158,8 @@ jobs:
       needs.detect-release.outputs.is_release == 'true' &&
       github.event.inputs.skip_pypi != 'true'
     uses: ./.github/workflows/publish-pypi.yml
+    with:
+      tag: ${{ needs.detect-release.outputs.tag }}
     secrets: inherit
 
   # Create GitHub release
@@ -164,6 +170,8 @@ jobs:
       needs.detect-release.outputs.is_release == 'true' &&
       github.event.inputs.skip_github != 'true'
     uses: ./.github/workflows/publish-github-release.yml
+    with:
+      tag: ${{ needs.detect-release.outputs.tag }}
     secrets: inherit
 
   # Build and publish Docker images
@@ -174,6 +182,8 @@ jobs:
       needs.detect-release.outputs.is_release == 'true' &&
       github.event.inputs.skip_docker != 'true'
     uses: ./.github/workflows/publish-docker.yml
+    with:
+      tag: ${{ needs.detect-release.outputs.tag }}
     secrets: inherit
 
   # Publish VS Code extension
@@ -184,6 +194,8 @@ jobs:
       needs.detect-release.outputs.is_release == 'true' &&
       github.event.inputs.skip_vscode != 'true'
     uses: ./.github/workflows/publish-vscode.yml
+    with:
+      tag: ${{ needs.detect-release.outputs.tag }}
     secrets: inherit
 
   # Summary
