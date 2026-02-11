@@ -15,7 +15,7 @@ Code Scalpel can be installed via pip or run in Docker. Choose the method that b
 pip install codescalpel
 
 # Or using uv (faster)
-uv pip install codescalpel
+uvx codescalpel
 ```
 
 ## Development Installation

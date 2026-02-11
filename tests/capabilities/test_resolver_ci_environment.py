@@ -26,7 +26,8 @@ class TestResolverLimitsFileOverride:
     ):
         """Resolver should pick up a limits file returned by _find_config_file."""
         custom_limits = tmp_path / "custom_limits.toml"
-        custom_limits.write_text("""
+        custom_limits.write_text(
+            """
 [community]
 get_file_context = { available = true, max_lines = 999 }
 
@@ -35,7 +36,8 @@ get_file_context = { available = true, max_lines = 1999 }
 
 [enterprise]
 get_file_context = { available = true, max_lines = 9999 }
-""")
+"""
+        )
 
         monkeypatch.setattr(
             "code_scalpel.licensing.config_loader._find_config_file",
@@ -52,7 +54,8 @@ get_file_context = { available = true, max_lines = 9999 }
     ):
         """Resolver cache invalidates when the resolved file changes."""
         limits_v1 = tmp_path / "limits_v1.toml"
-        limits_v1.write_text("""
+        limits_v1.write_text(
+            """
 [community]
 get_file_context = { available = true, max_lines = 100 }
 
@@ -61,7 +64,8 @@ get_file_context = { available = true, max_lines = 100 }
 
 [enterprise]
 get_file_context = { available = true, max_lines = 100 }
-""")
+"""
+        )
 
         monkeypatch.setattr(
             "code_scalpel.licensing.config_loader._find_config_file",
@@ -73,7 +77,8 @@ get_file_context = { available = true, max_lines = 100 }
 
         # Swap to a new file — cache must pick it up after reload
         limits_v2 = tmp_path / "limits_v2.toml"
-        limits_v2.write_text("""
+        limits_v2.write_text(
+            """
 [community]
 get_file_context = { available = true, max_lines = 200 }
 
@@ -82,7 +87,8 @@ get_file_context = { available = true, max_lines = 200 }
 
 [enterprise]
 get_file_context = { available = true, max_lines = 200 }
-""")
+"""
+        )
 
         monkeypatch.setattr(
             "code_scalpel.licensing.config_loader._find_config_file",
@@ -131,7 +137,8 @@ class TestResolverCustomConfigFlowThrough:
     ):
         """Custom file loaded via _find_config_file should be visible at every tier."""
         custom_limits = tmp_path / "override_limits.toml"
-        custom_limits.write_text("""
+        custom_limits.write_text(
+            """
 [community]
 get_file_context = { available = true, max_lines = 12345 }
 
@@ -140,7 +147,8 @@ get_file_context = { available = true, max_lines = 12345 }
 
 [enterprise]
 get_file_context = { available = true, max_lines = 12345 }
-""")
+"""
+        )
 
         monkeypatch.setattr(
             "code_scalpel.licensing.config_loader._find_config_file",

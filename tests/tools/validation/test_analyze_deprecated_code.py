@@ -12,14 +12,16 @@ class TestAnalyzeDeprecatedCode:
         """Test detection of deprecation marker comments."""
         # Create test file with deprecation marker
         test_file = tmp_path / "deprecated.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 # [20260120_DEPRECATED] This function is deprecated
 def old_function():
     pass
 
 def new_function():
     pass
-""")
+"""
+        )
 
         analyzer = DeprecatedCodeAnalyzer(tmp_path)
         results = analyzer.analyze_file(test_file)
@@ -34,16 +36,20 @@ def new_function():
         """Test AST-based import counting."""
         # Create files with imports
         module_file = tmp_path / "module.py"
-        module_file.write_text("""
+        module_file.write_text(
+            """
 import os
 from pathlib import Path
-""")
+"""
+        )
 
         importer_file = tmp_path / "importer.py"
-        importer_file.write_text("""
+        importer_file.write_text(
+            """
 import module
 from module import os
-""")
+"""
+        )
 
         analyzer = DeprecatedCodeAnalyzer(tmp_path)
         results = analyzer.analyze_file(importer_file)
@@ -54,14 +60,16 @@ from module import os
     def test_detects_legacy_functions(self, tmp_path):
         """Test detection of legacy function definitions."""
         test_file = tmp_path / "legacy.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 # Legacy function without modern patterns
 def old_style_function(arg1, arg2):
     return arg1 + arg2
 
 def modern_function(arg1: int, arg2: int) -> int:
     return arg1 + arg2
-""")
+"""
+        )
 
         analyzer = DeprecatedCodeAnalyzer(tmp_path)
         results = analyzer.analyze_file(test_file)
@@ -72,7 +80,8 @@ def modern_function(arg1: int, arg2: int) -> int:
     def test_datetime_now_detection(self, tmp_path):
         """Test detection of datetime.now() without timezone."""
         test_file = tmp_path / "datetime_usage.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 import datetime
 
 # Bad: no timezone
@@ -80,7 +89,8 @@ now = datetime.datetime.now()
 
 # Good: with timezone
 utc_now = datetime.datetime.now(datetime.timezone.utc)
-""")
+"""
+        )
 
         analyzer = DeprecatedCodeAnalyzer(tmp_path)
         results = analyzer.analyze_file(test_file)
@@ -113,12 +123,14 @@ utc_now = datetime.datetime.now(datetime.timezone.utc)
         low_import_file.write_text("import os")
 
         high_import_file = tmp_path / "high.py"
-        high_import_file.write_text("""
+        high_import_file.write_text(
+            """
 import os
 import sys
 import pathlib
 from datetime import datetime
-""")
+"""
+        )
 
         analyzer = DeprecatedCodeAnalyzer(tmp_path, min_import_threshold=3)
         inventory = analyzer.build_inventory()
@@ -132,18 +144,22 @@ from datetime import datetime
         """Test detection of callers to deprecated functions."""
         # Create deprecated function
         deprecated_file = tmp_path / "deprecated.py"
-        deprecated_file.write_text("""
+        deprecated_file.write_text(
+            """
 def deprecated_func():
     pass
-""")
+"""
+        )
 
         # Create caller
         caller_file = tmp_path / "caller.py"
-        caller_file.write_text("""
+        caller_file.write_text(
+            """
 from deprecated import deprecated_func
 
 deprecated_func()
-""")
+"""
+        )
 
         analyzer = DeprecatedCodeAnalyzer(tmp_path)
         results = analyzer.analyze_file(deprecated_file)
@@ -154,12 +170,14 @@ deprecated_func()
     def test_migration_guidance_detection(self, tmp_path):
         """Test detection of migration guidance strings."""
         test_file = tmp_path / "migration.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 # TODO: migrate to new_function
 # Migration: use new_module.new_function instead
 def old_function():
     pass
-""")
+"""
+        )
 
         analyzer = DeprecatedCodeAnalyzer(tmp_path)
         results = analyzer.analyze_file(test_file)

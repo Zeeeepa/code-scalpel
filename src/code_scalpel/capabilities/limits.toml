@@ -312,9 +312,8 @@ test_frameworks = "all"
 cache_ttl_seconds = 300
 
 [enterprise.security_scan]
-max_findings = 50
-max_file_size_kb = 500
-vulnerability_types = "owasp_top_10"
+# Enterprise has no limits
+vulnerability_types = "all"
 
 [enterprise.type_evaporation_scan]
 max_files = -1

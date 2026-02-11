@@ -155,7 +155,8 @@ class TestGetFileContextProTier:
         [20260121_ASSERTION] Pro tier enables documentation_coverage
         """
         test_file = tmp_path / "module.py"
-        test_file.write_text('''"""Module docstring."""
+        test_file.write_text(
+            '''"""Module docstring."""
 
 import json
 from typing import Dict, List
@@ -170,7 +171,8 @@ def process(data: Dict) -> List:
         Processed list
     """
     return [v for v in data.values()]
-''')
+'''
+        )
 
         result = _get_file_context_sync(str(test_file), tier="pro")
 
@@ -279,10 +281,12 @@ async def test_get_file_context_async_interface(community_tier, tmp_path: Path):
     [20260121_TEST] Verify async wrapper works with tier detection
     """
     test_file = tmp_path / "test.py"
-    test_file.write_text("""def simple_function():
+    test_file.write_text(
+        """def simple_function():
     '''Does something simple.'''
     return True
-""")
+"""
+    )
 
     result = await server.get_file_context(str(test_file))
 

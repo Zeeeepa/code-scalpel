@@ -289,16 +289,30 @@ def disable_health_server(monkeypatch):
 
 # [20251227_BUGFIX] Do not collect Ninja Warrior torture-tests by default
 def pytest_ignore_collect(collection_path, config):
-    """Skip opt-in Ninja Warrior torture-tests unless explicitly enabled.
+    """Skip directories that should not be collected in standard CI runs.
 
-    These torture-tests are designed for manual/contract validation and can
-    include intentionally duplicated basenames (e.g., multiple test_edge_cases.py)
-    and framework-specific harness imports.
-
-    Enable collection by setting RUN_NINJA_WARRIOR=1.
+    Excluded:
+    - tests/Code-Scalpel-Ninja-Warrior: opt-in torture-tests (RUN_NINJA_WARRIOR=1)
+    - tests/coverage/: coverage-boost tests excluded from CI (norecursedirs
+      does not work for Python packages with __init__.py)
+    - tests/mcp_tool_verification/: MCP verification tests excluded from CI
     """
 
     path_str = str(collection_path)
+
+    # [20260210_FIX] Exclude coverage and mcp_tool_verification packages.
+    # These have __init__.py files which makes norecursedirs ineffective.
+    if "/tests/coverage/" in path_str or path_str.endswith("/tests/coverage"):
+        return True
+    if "/tests/mcp_tool_verification/" in path_str or path_str.endswith(
+        "/tests/mcp_tool_verification"
+    ):
+        return True
+
+    # [20260210_FIX] Exclude v1.5.1 integration test (requires MCP server fixtures)
+    if path_str.endswith("test_v151_integration.py"):
+        return True
+
     if "tests/Code-Scalpel-Ninja-Warrior" in path_str:
         return os.environ.get("RUN_NINJA_WARRIOR") not in {
             "1",

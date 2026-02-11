@@ -80,9 +80,11 @@ async def test_update_symbol_fault_injection_returns_internal_error(tmp_path):
 
     # Try to update a symbol with invalid/conflicting parameters
     sample_file = tmp_path / "sample.py"
-    sample_file.write_text("""def foo():
+    sample_file.write_text(
+        """def foo():
     return 0
-""")
+"""
+    )
 
     # Invalid operation: empty new_code should fail validation
     args = {
@@ -128,9 +130,11 @@ async def test_update_symbol_respects_timeout_budget(monkeypatch, tmp_path):
     # Create file within project root (security requirement)
     project_root = Path("/mnt/k/backup/Develop/code-scalpel")
     sample_file = project_root / "test_timeout_sample_temp.py"
-    sample_file.write_text("""def foo():
+    sample_file.write_text(
+        """def foo():
     return 0
-""")
+"""
+    )
 
     try:
         args = {
@@ -183,9 +187,11 @@ async def test_update_symbol_async_calls_do_not_block_event_loop(monkeypatch, tm
         # [20260121_FEATURE] Files must be within project root to avoid path sandbox rejection
         project_root = Path("/mnt/k/backup/Develop/code-scalpel")
         sample_file = project_root / f"test_async_{i}_temp.py"
-        sample_file.write_text("""def foo():
+        sample_file.write_text(
+            """def foo():
     return 0
-""")
+"""
+        )
 
         try:
             args = {
@@ -236,9 +242,11 @@ async def test_update_symbol_memory_error_returns_structured_envelope(
 
     project_root = Path("/mnt/k/backup/Develop/code-scalpel")
     sample_file = project_root / "test_oom_sample_temp.py"
-    sample_file.write_text("""def foo():
+    sample_file.write_text(
+        """def foo():
     return 0
-""")
+"""
+    )
 
     # Inject MemoryError in the patcher
     def mock_from_file(*args, **kwargs):
@@ -299,9 +307,11 @@ async def test_update_symbol_redacts_pii_from_error_details(
 
     project_root = Path("/mnt/k/backup/Develop/code-scalpel")
     sample_file = project_root / "test_pii_sample_temp.py"
-    sample_file.write_text("""def foo():
+    sample_file.write_text(
+        """def foo():
     return 0
-""")
+"""
+    )
 
     secret_string = "sk_live_51AbC123XyZ456SECRET789"
     args = {

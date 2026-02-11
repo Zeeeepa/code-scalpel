@@ -16,12 +16,15 @@ async def test_community_tier_output_metadata(
     import code_scalpel.mcp.tools.context as server
 
     project = make_project(
-        {f"src/file_{i}.py": """
+        {
+            f"src/file_{i}.py": """
 from shared.target import target
 
 def use():
     return target()
-""" for i in range(5)}
+"""
+            for i in range(5)
+        }
         | {
             "shared/target.py": """
 def target():

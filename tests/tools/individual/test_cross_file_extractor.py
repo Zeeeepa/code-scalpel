@@ -37,7 +37,8 @@ def temp_project():
 def simple_project(temp_project):
     """Create a simple project with imports between files."""
     # utils.py - base utilities
-    (temp_project / "utils.py").write_text("""
+    (temp_project / "utils.py").write_text(
+        """
 def format_string(s):
     \"\"\"Format a string.\"\"\"
     return s.strip().upper()
@@ -49,10 +50,12 @@ def validate(data):
 class Formatter:
     def format(self, value):
         return str(value)
-""")
+"""
+    )
 
     # models.py - uses utils
-    (temp_project / "models.py").write_text("""
+    (temp_project / "models.py").write_text(
+        """
 from utils import format_string, validate
 
 class User:
@@ -61,10 +64,12 @@ class User:
     
     def is_valid(self):
         return validate(self.name)
-""")
+"""
+    )
 
     # views.py - uses both
-    (temp_project / "views.py").write_text("""
+    (temp_project / "views.py").write_text(
+        """
 from models import User
 from utils import Formatter
 
@@ -78,7 +83,8 @@ def create_user(name):
 def format_output(user):
     formatter = Formatter()
     return formatter.format(user.name)
-""")
+"""
+    )
 
     return temp_project
 
@@ -87,34 +93,42 @@ def format_output(user):
 def deep_project(temp_project):
     """Create a project with deep import chains."""
     # level0.py
-    (temp_project / "level0.py").write_text("""
+    (temp_project / "level0.py").write_text(
+        """
 def base_func():
     return "base"
-""")
+"""
+    )
 
     # level1.py
-    (temp_project / "level1.py").write_text("""
+    (temp_project / "level1.py").write_text(
+        """
 from level0 import base_func
 
 def level1_func():
     return base_func() + "_level1"
-""")
+"""
+    )
 
     # level2.py
-    (temp_project / "level2.py").write_text("""
+    (temp_project / "level2.py").write_text(
+        """
 from level1 import level1_func
 
 def level2_func():
     return level1_func() + "_level2"
-""")
+"""
+    )
 
     # level3.py
-    (temp_project / "level3.py").write_text("""
+    (temp_project / "level3.py").write_text(
+        """
 from level2 import level2_func
 
 def level3_func():
     return level2_func() + "_level3"
-""")
+"""
+    )
 
     return temp_project
 
@@ -128,28 +142,34 @@ def package_project(temp_project):
     (pkg / "__init__.py").write_text("")
 
     # myapp/core.py
-    (pkg / "core.py").write_text("""
+    (pkg / "core.py").write_text(
+        """
 def process(data):
     return data.upper()
-""")
+"""
+    )
 
     # myapp/services.py
-    (pkg / "services.py").write_text("""
+    (pkg / "services.py").write_text(
+        """
 from .core import process
 
 class DataService:
     def handle(self, data):
         return process(data)
-""")
+"""
+    )
 
     # main.py
-    (temp_project / "main.py").write_text("""
+    (temp_project / "main.py").write_text(
+        """
 from myapp.services import DataService
 
 def run():
     service = DataService()
     return service.handle("test")
-""")
+"""
+    )
 
     return temp_project
 
@@ -451,16 +471,20 @@ class TestEdgeCases:
 
     def test_circular_imports(self, temp_project):
         """Test handling of circular imports."""
-        (temp_project / "a.py").write_text("""
+        (temp_project / "a.py").write_text(
+            """
 from b import func_b
 def func_a():
     return func_b()
-""")
-        (temp_project / "b.py").write_text("""
+"""
+        )
+        (temp_project / "b.py").write_text(
+            """
 from a import func_a
 def func_b():
     return 1
-""")
+"""
+        )
 
         extractor = CrossFileExtractor(temp_project)
         result = extractor.extract("a.py", "func_a", depth=5)
@@ -470,12 +494,14 @@ def func_b():
 
     def test_builtin_dependencies_filtered(self, temp_project):
         """Test that builtin names aren't treated as dependencies."""
-        (temp_project / "test.py").write_text("""
+        (temp_project / "test.py").write_text(
+            """
 def test_func():
     x = len([1, 2, 3])
     y = str(x)
     return print(y)
-""")
+"""
+        )
 
         extractor = CrossFileExtractor(temp_project)
         result = extractor.extract("test.py", "test_func", depth=1)
@@ -615,13 +641,15 @@ class TestIntegration:
         extractor.build()
 
         # Modify a file
-        (simple_project / "utils.py").write_text("""
+        (simple_project / "utils.py").write_text(
+            """
 def format_string(s):
     return s.lower()  # Changed behavior
 
 def new_function():
     return "new"
-""")
+"""
+        )
 
         # Rebuild and extract
         extractor.build()

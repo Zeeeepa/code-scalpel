@@ -738,7 +738,8 @@ def double(x: int) -> int:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a mini project structure
-            (Path(tmpdir) / "main.py").write_text('''
+            (Path(tmpdir) / "main.py").write_text(
+                '''
 def main():
     """Main entry point."""
     from utils import helper
@@ -746,8 +747,10 @@ def main():
 
 if __name__ == "__main__":
     main()
-''')
-            (Path(tmpdir) / "utils.py").write_text('''
+'''
+            )
+            (Path(tmpdir) / "utils.py").write_text(
+                '''
 def helper():
     """Helper function."""
     return 42
@@ -755,8 +758,10 @@ def helper():
 def unused_func():
     """This function is never called."""
     pass
-''')
-            (Path(tmpdir) / "models.py").write_text('''
+'''
+            )
+            (Path(tmpdir) / "models.py").write_text(
+                '''
 class User:
     """User model."""
     def __init__(self, name: str):
@@ -764,7 +769,8 @@ class User:
     
     def greet(self) -> str:
         return f"Hello, {self.name}"
-''')
+'''
+            )
 
             # Test project crawling (underlying functionality of get_project_map)
             crawler = ProjectCrawler(tmpdir)
@@ -820,18 +826,22 @@ def complex_function(a, b, c, d, e):
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create circular import structure
-            (Path(tmpdir) / "module_a.py").write_text("""
+            (Path(tmpdir) / "module_a.py").write_text(
+                """
 from module_b import func_b
 
 def func_a():
     return func_b()
-""")
-            (Path(tmpdir) / "module_b.py").write_text("""
+"""
+            )
+            (Path(tmpdir) / "module_b.py").write_text(
+                """
 from module_a import func_a
 
 def func_b():
     return func_a()
-""")
+"""
+            )
 
             builder = CallGraphBuilder(Path(tmpdir))
             circular_imports = builder.detect_circular_imports()
@@ -847,19 +857,23 @@ def func_b():
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create inter-dependent files
-            (Path(tmpdir) / "models.py").write_text('''
+            (Path(tmpdir) / "models.py").write_text(
+                '''
 class TaxRate:
     """Tax rate configuration."""
     STANDARD = 0.2
     REDUCED = 0.05
-''')
-            (Path(tmpdir) / "calculator.py").write_text('''
+'''
+            )
+            (Path(tmpdir) / "calculator.py").write_text(
+                '''
 from models import TaxRate
 
 def calculate_tax(amount: float) -> float:
     """Calculate tax using standard rate."""
     return amount * TaxRate.STANDARD
-''')
+'''
+            )
 
             # Extract with cross-file dependencies
             extractor = SurgicalExtractor.from_file(str(Path(tmpdir) / "calculator.py"))
@@ -898,7 +912,8 @@ def calculate_tax(amount: float) -> float:
         from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            (Path(tmpdir) / "app.py").write_text("""
+            (Path(tmpdir) / "app.py").write_text(
+                """
 from db import get_user
 from cache import check_cache
 
@@ -907,15 +922,20 @@ def handle_request(user_id):
     if cached:
         return cached
     return get_user(user_id)
-""")
-            (Path(tmpdir) / "db.py").write_text("""
+"""
+            )
+            (Path(tmpdir) / "db.py").write_text(
+                """
 def get_user(user_id):
     return {"id": user_id}
-""")
-            (Path(tmpdir) / "cache.py").write_text("""
+"""
+            )
+            (Path(tmpdir) / "cache.py").write_text(
+                """
 def check_cache(key):
     return None
-""")
+"""
+            )
 
             builder = CallGraphBuilder(Path(tmpdir))
             result = builder.build_with_details(entry_point="handle_request", depth=5)

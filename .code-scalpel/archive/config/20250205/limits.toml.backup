@@ -1,0 +1,439 @@
+# Code Scalpel Tier Limits Configuration
+#
+# This file defines the capability limits for each tool at each tier.
+#
+# SOURCE OF TRUTH — this file is copied into the wheel by hatch
+# force-include and becomes code_scalpel/capabilities/limits.toml.
+#
+# Build flow:
+#   .code-scalpel/limits.toml   ──► hatch force-include
+#        (this file)                        │
+#                                          ▼
+#                              code_scalpel/capabilities/limits.toml
+#                                  (bundled in wheel / sdist)
+#
+# At runtime, config_loader._find_config_file() reads only the bundled
+# copy (or, in a source checkout, this file directly).
+# No environment-variable or user-filesystem overrides are honoured.
+
+# ============================================================================
+# GLOBAL SETTINGS (apply to all tiers)
+# ============================================================================
+
+[global]
+default_timeout_seconds = 120  # Generous safeguard for all tiers
+
+# ============================================================================
+# SCANNER CONFIGURATION (Tier-Based Data Volume Limits)
+# ============================================================================
+# Universal scanner limits that apply to ALL crawling tools.
+# These limits define the "perception layer" for each tier:
+# - Community: Can see shallow context (good for local refactoring)
+# - Pro: Can see project-wide context (good for safe refactoring)
+# - Enterprise: Can see everything (good for large monoliths)
+#
+# These limits are inherited by:
+# - ProjectCrawler (for project discovery)
+# - Oracle tools (write_perfect_code, enforce_topology, predict_regression_risk)
+# - Any tool that needs to understand project context
+
+[community.scanner]
+max_files = 50        # Stop after 50 files
+max_depth = 2         # Only follow imports 2 levels deep
+max_symbol_count = 1000
+
+[pro.scanner]
+# Good for: Cross-file refactoring, architecture changes, confident decisions
+max_files = 2000      # Up to 2000 files
+max_depth = 10        # Follow imports 10 levels deep
+max_symbol_count = 50000
+
+[enterprise.scanner]
+# Enterprise tier: Unlimited visibility
+# Good for: Large monoliths, complete safety with zero blindspots
+# (Limits are omitted to indicate "unlimited" per [global] processing)
+max_files = 100000
+max_depth = 50
+max_symbol_count = 1000000
+
+# ============================================================================
+# GROUP 1: ANALYSIS & DISCOVERY
+# ============================================================================
+
+[community.analyze_code]
+max_file_size_mb = 1
+languages = ["python", "javascript", "typescript", "java"]
+
+[pro.analyze_code]
+max_file_size_mb = 10
+languages = ["python", "javascript", "typescript", "java"]
+
+[enterprise.analyze_code]
+max_file_size_mb = 100
+# languages unlimited - all languages supported
+
+# ----------------------------------------------------------------------------
+
+[community.get_file_context]
+max_context_lines = 500
+
+[pro.get_file_context]
+max_context_lines = 2000
+
+[enterprise.get_file_context]
+# max_context_lines unlimited
+
+# ----------------------------------------------------------------------------
+
+[community.get_project_map]
+max_files = 100
+max_modules = 50
+detail_level = "basic"
+
+[pro.get_project_map]
+max_files = 1000
+max_modules = 200
+detail_level = "detailed"
+
+[enterprise.get_project_map]
+# max_files unlimited
+max_modules = 1000
+detail_level = "comprehensive"
+
+# ----------------------------------------------------------------------------
+
+[community.get_symbol_references]
+max_files_searched = 10
+max_references = 50
+
+[pro.get_symbol_references]
+# max_files and max_references unlimited - omit
+
+[enterprise.get_symbol_references]
+# All limits unlimited - omit
+
+# ----------------------------------------------------------------------------
+
+[community.crawl_project]
+max_files = 100
+max_depth = 10
+parsing_enabled = false
+complexity_analysis = false
+respect_gitignore = true
+
+[pro.crawl_project]
+# max_files and max_depth unlimited - omit
+parsing_enabled = true
+complexity_analysis = true
+respect_gitignore = true
+
+[enterprise.crawl_project]
+# max_files, max_depth, and max_repos unlimited - omit
+parsing_enabled = true
+complexity_analysis = true
+respect_gitignore = true
+
+# ============================================================================
+# GROUP 2: GRAPH & DEPENDENCIES
+# ============================================================================
+
+[community.get_call_graph]
+max_depth = 3
+max_nodes = 50
+
+[pro.get_call_graph]
+max_depth = 50
+max_nodes = 500
+
+[enterprise.get_call_graph]
+# max_depth and max_nodes unlimited
+
+# ----------------------------------------------------------------------------
+
+[community.get_cross_file_dependencies]
+max_depth = 1
+max_files = 50
+# timeout_seconds inherited from [global] - NOT a tier limit
+
+[pro.get_cross_file_dependencies]
+max_depth = 5
+max_files = 500
+# timeout_seconds inherited from [global] - NOT a tier limit
+
+[enterprise.get_cross_file_dependencies]
+# max_depth and max_files unlimited - omit
+# timeout_seconds inherited from [global] - NOT a tier limit
+
+# ----------------------------------------------------------------------------
+
+[community.get_graph_neighborhood]
+max_k = 1
+max_nodes = 20
+
+[pro.get_graph_neighborhood]
+max_k = 5
+max_nodes = 100
+
+[enterprise.get_graph_neighborhood]
+# max_k and max_nodes unlimited - omit
+
+# ----------------------------------------------------------------------------
+
+[community.scan_dependencies]
+max_dependencies = 50
+osv_lookup = true
+
+[pro.scan_dependencies]
+# max_dependencies unlimited - omit
+osv_lookup = true
+
+[enterprise.scan_dependencies]
+# All unlimited - omit
+osv_lookup = true
+
+# ----------------------------------------------------------------------------
+# Type Evaporation Scan
+
+[community.type_evaporation_scan]
+max_files = 50
+frontend_only = true
+
+[pro.type_evaporation_scan]
+max_files = 500
+frontend_only = false
+
+[enterprise.type_evaporation_scan]
+# max_files unlimited - omit
+frontend_only = false
+
+# ============================================================================
+# GROUP 3: SECURITY & SAFETY
+# ============================================================================
+
+[community.security_scan]
+max_findings = 50
+max_file_size_kb = 500
+vulnerability_types = "owasp_top_10"
+
+[pro.security_scan]
+# max_findings and max_file_size_kb unlimited - omit
+vulnerability_types = "all"
+
+[enterprise.security_scan]
+# All unlimited - omit
+# custom_rules_limit checked as None in Python
+vulnerability_types = "all"
+
+# ----------------------------------------------------------------------------
+
+[community.cross_file_security_scan]
+max_modules = 10
+max_depth = 3
+
+[pro.cross_file_security_scan]
+max_modules = 100
+max_depth = 10
+
+[enterprise.cross_file_security_scan]
+# max_modules and max_depth unlimited - omit
+
+# ----------------------------------------------------------------------------
+
+[community.unified_sink_detect]
+languages = ["python", "javascript", "typescript", "java"]
+max_sinks = 50
+
+[pro.unified_sink_detect]
+languages = ["python", "javascript", "typescript", "java"]
+# max_sinks unlimited
+
+[enterprise.unified_sink_detect]
+# languages = "all" handled in code
+# max_sinks and custom_sinks_limit unlimited
+custom_sinks_limit = -1
+
+# ----------------------------------------------------------------------------
+
+[community.validate_paths]
+max_paths = 100
+
+[pro.validate_paths]
+# max_paths unlimited - omit
+
+[enterprise.validate_paths]
+# max_paths unlimited - omit
+
+# ----------------------------------------------------------------------------
+# Policy Integrity Verification
+
+[community.verify_policy_integrity]
+max_policy_files = 50
+signature_validation = false
+tamper_detection = false
+
+[pro.verify_policy_integrity]
+max_policy_files = 200
+signature_validation = true
+tamper_detection = true
+
+[enterprise.verify_policy_integrity]
+# max_policy_files unlimited
+signature_validation = true
+tamper_detection = true
+
+# ----------------------------------------------------------------------------
+# Code Policy Check
+
+[community.code_policy_check]
+max_files = 100
+max_rules = 50
+compliance_enabled = false
+custom_rules_enabled = false
+
+[pro.code_policy_check]
+max_files = 1000
+max_rules = 200
+compliance_enabled = false
+custom_rules_enabled = true
+
+[enterprise.code_policy_check]
+# max_files and max_rules unlimited - omit
+compliance_enabled = true
+custom_rules_enabled = true
+audit_trail_enabled = true
+pdf_reports_enabled = true
+
+# ============================================================================
+# GROUP 4: SURGICAL REFACTORING & VERIFICATION
+# ============================================================================
+
+[community.extract_code]
+include_cross_file_deps = false
+max_depth = 0
+max_extraction_size_mb = 1
+
+[pro.extract_code]
+include_cross_file_deps = true
+max_depth = 1
+max_extraction_size_mb = 10
+
+[enterprise.extract_code]
+include_cross_file_deps = true
+max_depth = -1
+max_extraction_size_mb = 100
+
+# ----------------------------------------------------------------------------
+
+[community.update_symbol]
+backup_enabled = true
+validation_level = "syntax"
+max_updates_per_call = 10
+
+[pro.update_symbol]
+backup_enabled = true
+validation_level = "semantic"
+max_updates_per_call = -1
+
+[enterprise.update_symbol]
+backup_enabled = true
+validation_level = "full"
+max_updates_per_call = -1
+
+# ----------------------------------------------------------------------------
+
+[community.rename_symbol]
+max_files_searched = 0
+max_files_updated = 0
+
+[pro.rename_symbol]
+# Pro: cross-file rename with bounded scope
+max_files_searched = 500
+max_files_updated = 200
+
+[enterprise.rename_symbol]
+# Enterprise: unlimited by omission (no max_files_* keys)
+
+# ----------------------------------------------------------------------------
+
+[community.simulate_refactor]
+max_file_size_mb = 1
+analysis_depth = "basic"
+
+[pro.simulate_refactor]
+max_file_size_mb = 10
+analysis_depth = "advanced"
+
+[enterprise.simulate_refactor]
+max_file_size_mb = 100
+analysis_depth = "deep"
+
+# ----------------------------------------------------------------------------
+
+[community.symbolic_execute]
+max_paths = 50
+max_depth = 10
+constraint_types = ["int", "bool", "string", "float"]
+
+[pro.symbolic_execute]
+# max_paths unlimited per roadmap v1.0
+max_depth = 100  # Deeper loop unrolling
+constraint_types = ["int", "bool", "string", "float", "list", "dict"]
+
+[enterprise.symbolic_execute]
+# max_paths and max_depth unlimited - omit
+constraint_types = "all"
+
+# ----------------------------------------------------------------------------
+
+[community.generate_unit_tests]
+max_test_cases = 5
+test_frameworks = ["pytest"]
+
+[pro.generate_unit_tests]
+max_test_cases = 20
+test_frameworks = ["pytest", "unittest"]
+# NOTE: limits.toml controls *limits/tunables* only.
+# Capabilities like data-driven tests / bug reproduction remain code-defined and license-gated.
+
+[enterprise.generate_unit_tests]
+# max_test_cases unlimited - omit
+test_frameworks = "all"
+
+# ============================================================================
+# GROUP 5: ORACLE TOOLS (AI-ASSISTED CODE GENERATION)
+# ============================================================================
+# Oracle tools are tier-agnostic - all tiers can use them.
+# The tier-based limits come implicitly from the scanner limits above:
+# - Community: Sees shallow context (50 files, depth 2) → safer but less informed specs
+# - Pro: Sees project context (2000 files, depth 10) → full architectural insights
+# - Enterprise: Sees everything (100k files, depth 50) → complete safety for large monoliths
+#
+# This design implements "Safety is not an Upsell":
+# All users get accurate constraint specs, just with tiered visibility depth.
+#
+# NOTE: Do NOT add [community.write_perfect_code] with allow_use=false.
+# That is explicit feature gating. We use implicit tiering via scanner limits instead.
+
+[pro.write_perfect_code]
+# Pro tier: Full Oracle with project-wide visibility
+# Inherits: max_files=2000, max_depth=10 from [pro.scanner]
+cache_ttl_seconds = 300
+
+[enterprise.write_perfect_code]
+# Enterprise tier: Oracle with complete visibility
+# Inherits: max_files=100000, max_depth=50 from [enterprise.scanner]
+cache_ttl_seconds = 300
+
+# ============================================================================
+# DEPLOYMENT NOTES
+# ============================================================================
+#
+# This is the build-time source of truth.  It is copied into the wheel
+# by hatch force-include and read at runtime from that bundled location.
+#
+# Do NOT place a copy in ~/.code-scalpel/, /etc/, or set CODE_SCALPEL_LIMITS_FILE;
+# the runtime loader will ignore those paths.
+#
+# To change limits for a release, edit this file, then rebuild and
+# re-publish the package.
+#

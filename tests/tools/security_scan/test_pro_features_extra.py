@@ -63,12 +63,14 @@ def _use_pro_license(monkeypatch: pytest.MonkeyPatch) -> Path:
 
 async def test_nosql_injection_detection(monkeypatch: pytest.MonkeyPatch):
     _use_pro_license(monkeypatch)
-    code = textwrap.dedent("""
+    code = textwrap.dedent(
+        """
         from flask import request
         def find_docs(collection):
             qv = request.args.get('q')
             return collection.find(qv)
-        """)
+        """
+    )
     from code_scalpel.mcp.server import security_scan
 
     result = await security_scan(code=code)
@@ -129,11 +131,13 @@ async def test_remediation_suggestions_pro_tier(monkeypatch: pytest.MonkeyPatch)
     import uuid
 
     unique_id = uuid.uuid4().hex[:8]
-    code = textwrap.dedent(f"""
+    code = textwrap.dedent(
+        f"""
         import subprocess
         def run_cmd_{unique_id}(user_input):
             subprocess.run(f"ls {{user_input}}", shell=True)  # CWE-78
-        """)
+        """
+    )
 
     # Import fresh to pick up license changes
     import sys
@@ -172,11 +176,13 @@ async def test_remediation_suggestions_community_none(monkeypatch: pytest.Monkey
     import uuid
 
     unique_id = uuid.uuid4().hex[:8]
-    code = textwrap.dedent(f"""
+    code = textwrap.dedent(
+        f"""
         import subprocess
         def run_cmd_{unique_id}(user_input):
             subprocess.run(f"ls {{user_input}}", shell=True)
-        """)
+        """
+    )
 
     # Import fresh to pick up license changes
     import sys

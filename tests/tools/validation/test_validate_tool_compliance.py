@@ -22,7 +22,8 @@ def minimal_repo(tmp_path):
     # tools/__init__.py with register_tools
     tools_init = mcp_dir / "tools" / "__init__.py"
     tools_init.parent.mkdir()
-    tools_init.write_text("""
+    tools_init.write_text(
+        """
 from .analyze import analyze_code
 from .security import security_scan
 
@@ -30,42 +31,51 @@ TOOLS = [analyze_code, security_scan]
 
 def register_tools():
     pass  # Mock registration
-""")
+"""
+    )
 
     # Good tool: tools/analyze.py
     analyze_py = mcp_dir / "tools" / "analyze.py"
-    analyze_py.write_text("""
+    analyze_py.write_text(
+        """
 from code_scalpel.mcp.protocol import mcp
 from code_scalpel.mcp.helpers.analyze_helpers import _analyze_code_sync
 
 @mcp.tool()
 async def analyze_code(code: str, language: str) -> dict:
     return await asyncio.to_thread(_analyze_code_sync, code, language)
-""")
+"""
+    )
 
     # Good helper: helpers/analyze_helpers.py
     helpers_analyze = mcp_dir / "helpers" / "analyze_helpers.py"
     helpers_analyze.parent.mkdir()
-    helpers_analyze.write_text("""
+    helpers_analyze.write_text(
+        """
 def _analyze_code_sync(code: str, language: str) -> dict:
     return {"result": "analyzed"}
-""")
+"""
+    )
 
     # Bad tool: missing decorator
     bad_tool = mcp_dir / "tools" / "bad_tool.py"
-    bad_tool.write_text("""
+    bad_tool.write_text(
+        """
 from code_scalpel.mcp.helpers.bad_helpers import _bad_sync
 
 async def bad_tool(code: str) -> dict:
     return await asyncio.to_thread(_bad_sync, code)
-""")
+"""
+    )
 
     # Bad helper: async instead of sync
     bad_helper = mcp_dir / "helpers" / "bad_helpers.py"
-    bad_helper.write_text("""
+    bad_helper.write_text(
+        """
 async def _bad_sync(code: str) -> dict:
     return {"result": "bad"}
-""")
+"""
+    )
 
     return tmp_path
 

@@ -101,11 +101,13 @@ class TestOraclePipelineBasicExecution:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a simple Python file
             test_file = Path(tmpdir) / "test.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 def hello(name):
     '''Say hello.'''
     return f"Hello, {name}!"
-""")
+"""
+            )
 
             pipeline = OraclePipeline(tmpdir, tier="community")
             spec = pipeline.generate_constraint_spec(
@@ -163,11 +165,13 @@ class TestOraclePipelinePerformance:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a simple Python file
             test_file = Path(tmpdir) / "test.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 def add(a, b):
     '''Add two numbers.'''
     return a + b
-""")
+"""
+            )
 
             pipeline = OraclePipeline(tmpdir, tier="community")
 
