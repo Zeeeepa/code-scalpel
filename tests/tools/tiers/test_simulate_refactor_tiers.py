@@ -2,7 +2,7 @@
 
 [20260121_TEST] Validates all 18 checklist items across Community, Pro, Enterprise tiers.
 Focus: capability matrix verification and tier-based limits.
-- Community (6 items): basic simulation, structural diff, 1MB limit, basic analysis depth
+- Community (6 items): basic simulation, structural diff, 5MB limit, basic analysis depth
 - Pro (6 items): all Community + advanced simulation, behavior preservation, type checking
 - Enterprise (6 items): all Pro + regression prediction, compliance validation, deep analysis
 """
@@ -55,16 +55,16 @@ class TestSimulateRefactorCommunityTier:
         assert (
             analysis_depth == "basic"
         ), f"Community should have basic analysis, got {analysis_depth}"
-        assert max_size == 1, f"Community should have 1MB limit, got {max_size}"
+        assert max_size == 5, f"Community should have 5MB limit, got {max_size}"
 
     def test_community_max_file_size_limit(self, community_tier):
-        """Verify Community tier enforces 1MB max file size."""
+        """Verify Community tier enforces 5MB max file size."""
         capabilities = get_tool_capabilities("simulate_refactor", "community") or {}
         limits = capabilities.get("limits", {}) or {}
         max_size = limits.get("max_file_size_mb")
         assert (
-            max_size == 1
-        ), f"Community should have max_file_size_mb=1, got {max_size}"
+            max_size == 5
+        ), f"Community should have max_file_size_mb=5, got {max_size}"
 
 
 class TestSimulateRefactorProTier:
@@ -116,14 +116,14 @@ class TestSimulateRefactorProTier:
         assert (
             analysis_depth == "advanced"
         ), f"Pro should have advanced analysis, got {analysis_depth}"
-        assert max_size == 10, f"Pro should have 10MB limit, got {max_size}"
+        assert max_size == 100, f"Pro should have 100MB limit, got {max_size}"
 
     def test_pro_max_file_size_limit(self, pro_tier):
-        """Verify Pro tier enforces 10MB max file size."""
+        """Verify Pro tier enforces 100MB max file size."""
         capabilities = get_tool_capabilities("simulate_refactor", "pro") or {}
         limits = capabilities.get("limits", {}) or {}
         max_size = limits.get("max_file_size_mb")
-        assert max_size == 10, f"Pro should have max_file_size_mb=10, got {max_size}"
+        assert max_size == 100, f"Pro should have max_file_size_mb=100, got {max_size}"
 
 
 class TestSimulateRefactorEnterpriseTier:
@@ -226,8 +226,8 @@ class TestSimulateRefactorCrossTierComparison:
         pro_limit = pro_caps.get("limits", {}).get("max_file_size_mb")
         ent_limit = ent_caps.get("limits", {}).get("max_file_size_mb")
 
-        assert comm_limit == 1
-        assert pro_limit == 10
+        assert comm_limit == 5
+        assert pro_limit == 100
         assert ent_limit == 100
 
 

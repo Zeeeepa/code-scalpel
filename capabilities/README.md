@@ -103,16 +103,24 @@ All 23 tools are available in all tiers (Community, Pro, Enterprise). The tiers 
 
 ```
 Tool: extract_code
-├── Community: max_depth=0, max_context_lines=100, include_cross_file_deps=False
-├── Pro: max_depth=1, max_context_lines=500, include_cross_file_deps=True
-└── Enterprise: max_depth=unlimited, max_context_lines=unlimited, include_cross_file_deps=True
+├── Community: max_depth=1, include_cross_file_deps=False
+├── Pro: max_depth=unlimited, include_cross_file_deps=True
+└── Enterprise: max_depth=unlimited, include_cross_file_deps=True (+ governance)
 
-Tool: validate_paths (System Tool - NO TIER GATING)
-└── All tiers: max_paths=100 (identical limits across all tiers)
+Tool: get_call_graph
+├── Community: max_depth=10, max_nodes=200
+├── Pro: unlimited
+└── Enterprise: unlimited (+ governance)
+
+Tool: validate_paths (System Tool)
+├── Community: max_paths=100
+├── Pro: unlimited
+└── Enterprise: unlimited
 ```
 
 | Category | Community | Pro | Enterprise |
 |----------|-----------|-----|------------|
-| Development Tools (20) | ✓ Limited | ✓ Expanded | ✓ Unlimited |
+| Development Tools (20) | ✓ Solo dev limits (≤500 files) | ✓ Unlimited | ✓ Unlimited + Governance |
 | System Tools (3) | ✓ Standard | ✓ Standard | ✓ Standard |
 | **Total Tools** | **23** | **23** | **23** |
+| **Unique Capabilities** | 78 | 217 | 356 (139 governance-only) |

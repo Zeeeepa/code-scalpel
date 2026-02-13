@@ -49,10 +49,11 @@ class TestLimitsTOMLLoading:
         for tier in required_tiers:
             assert tier in limits, f"limits.toml should have [{tier}.*] sections"
 
-    def test_all_22_tools_documented(self):
-        """All 22 tools should be defined in limits.toml."""
+    def test_all_24_tools_documented(self):
+        """All 24 tools should be defined in limits.toml."""
         tools = get_all_tool_names()
 
+        # [20260212_TEST] Updated: scanner and write_perfect_code added to limits.toml
         expected_tools = {
             "analyze_code",
             "get_file_context",
@@ -66,6 +67,7 @@ class TestLimitsTOMLLoading:
             "get_cross_file_dependencies",
             "get_graph_neighborhood",
             "scan_dependencies",
+            "scanner",
             "security_scan",
             "cross_file_security_scan",
             "unified_sink_detect",
@@ -76,6 +78,7 @@ class TestLimitsTOMLLoading:
             "generate_unit_tests",
             "verify_policy_integrity",
             "validate_paths",
+            "write_perfect_code",
         }
 
         assert set(tools) == expected_tools, (
@@ -100,7 +103,8 @@ class TestTierLimitProgression:
         enterprise = get_tier_limit("analyze_code", "enterprise", "max_file_size_mb")
 
         assert community == 1, "Community analyze_code: max_file_size_mb should be 1"
-        assert pro == 10, "Pro analyze_code: max_file_size_mb should be 10"
+        # [20260212_TEST] Updated to match rebalanced limits.toml: Pro matches Enterprise
+        assert pro == 100, "Pro analyze_code: max_file_size_mb should be 100"
         assert (
             enterprise == 100
         ), "Enterprise analyze_code: max_file_size_mb should be 100"
@@ -113,8 +117,9 @@ class TestTierLimitProgression:
             "get_file_context", "enterprise", "max_context_lines"
         )
 
-        assert community == 500, "Community: max_context_lines should be 500"
-        assert pro == 2000, "Pro: max_context_lines should be 2000"
+        # [20260212_TEST] Updated to match rebalanced limits.toml
+        assert community == 2000, "Community: max_context_lines should be 2000"
+        assert pro is None, "Pro: max_context_lines should be unlimited (None)"
         assert (
             enterprise is None
         ), "Enterprise: max_context_lines should be unlimited (None)"
@@ -125,8 +130,9 @@ class TestTierLimitProgression:
         pro = get_tier_limit("get_project_map", "pro", "max_files")
         enterprise = get_tier_limit("get_project_map", "enterprise", "max_files")
 
-        assert community == 100, "Community: max_files should be 100"
-        assert pro == 1000, "Pro: max_files should be 1000"
+        # [20260212_TEST] Updated to match rebalanced limits.toml
+        assert community == 500, "Community: max_files should be 500"
+        assert pro is None, "Pro: max_files should be unlimited (None)"
         assert enterprise is None, "Enterprise: max_files should be unlimited (None)"
 
 

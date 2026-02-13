@@ -1,10 +1,24 @@
+# [20260201_REFACTOR] Tier limits rebalanced per data-driven calibration
+# See docs/architecture/tier_limit_justification.md for methodology
+#
+# Design Principles:
+#   Community: Covers solo dev projects ≤500 files (performance budget: <5s)
+#   Pro: Matches Enterprise limits (value = advanced features, not scale caps)
+#   Enterprise: Same limits as Pro + 139 governance capabilities (see features.toml)
+#
+# Limit derivation: f(project_size, performance_target, user_persona)
+
 [global]
 default_timeout_seconds = 120
 
+# ─── COMMUNITY TIER ────────────────────────────────────────────────────
+# Target: Solo developers, small projects ≤500 files
+# Natural breakpoint: 500 files covers 100% of solo dev projects
+
 [community.scanner]
-max_files = 50
-max_depth = 2
-max_symbol_count = 1000
+max_files = 500              # Covers Flask, FastAPI, CLIs, libraries
+max_depth = 10               # Practical import chain depth
+max_symbol_count = 25000     # ~500 files × ~50 symbols/file
 
 [community.analyze_code]
 max_file_size_mb = 1
@@ -16,35 +30,35 @@ languages = [
 ]
 
 [community.get_file_context]
-max_context_lines = 500
+max_context_lines = 2000     # Typical large module
 
 [community.get_project_map]
-max_files = 100
-max_modules = 50
+max_files = 500              # Match scanner
+max_modules = 100            # ~500 files ÷ 5 files/module
 detail_level = "basic"
 
 [community.get_symbol_references]
-max_files_searched = 10
-max_references = 50
+max_files_searched = 200     # Useful within a 500-file project
+max_references = 200
 
 [community.crawl_project]
-max_files = 100
+max_files = 500              # Match scanner
 max_depth = 10
 parsing_enabled = false
 complexity_analysis = false
 respect_gitignore = true
 
 [community.get_call_graph]
-max_depth = 3
-max_nodes = 50
+max_depth = 10               # Covers real A→B→C→D chains
+max_nodes = 200              # Meaningful graph for 500-file project
 
 [community.get_cross_file_dependencies]
-max_depth = 1
-max_files = 50
+max_depth = 3                # A→B→C import chains
+max_files = 200
 
 [community.get_graph_neighborhood]
-max_k = 1
-max_nodes = 20
+max_k = 2                    # 2-hop shows meaningful context
+max_nodes = 100
 
 [community.scan_dependencies]
 max_dependencies = 50
@@ -55,13 +69,13 @@ max_files = 50
 frontend_only = true
 
 [community.security_scan]
-max_findings = 50
+max_findings = 100           # Actionable finding count
 max_file_size_kb = 500
 vulnerability_types = "owasp_top_10"
 
 [community.cross_file_security_scan]
-max_modules = 10
-max_depth = 3
+max_modules = 50             # Covers small apps
+max_depth = 5                # Catches indirect taint
 
 [community.unified_sink_detect]
 languages = [
@@ -88,7 +102,7 @@ custom_rules_enabled = false
 
 [community.extract_code]
 include_cross_file_deps = false
-max_depth = 0
+max_depth = 1                # Immediate imports included
 max_extraction_size_mb = 1
 
 [community.update_symbol]
@@ -101,11 +115,11 @@ max_files_searched = 0
 max_files_updated = 0
 
 [community.simulate_refactor]
-max_file_size_mb = 1
+max_file_size_mb = 5         # Covers most source files
 analysis_depth = "basic"
 
 [community.symbolic_execute]
-max_paths = 50
+max_paths = 100              # Practical for most functions
 max_depth = 10
 constraint_types = [
     "int",
@@ -115,18 +129,22 @@ constraint_types = [
 ]
 
 [community.generate_unit_tests]
-max_test_cases = 5
+max_test_cases = 10          # Practical minimum
 test_frameworks = [
     "pytest",
 ]
 
+# ─── PRO TIER ────────────────────────────────────────────────────────
+# Target: Teams, professional use, any project size
+# Limits match Enterprise — value = advanced features (see features.toml)
+
 [pro.scanner]
-max_files = 2000
-max_depth = 10
-max_symbol_count = 50000
+max_files = 100000           # Match Enterprise
+max_depth = 50               # Match Enterprise
+max_symbol_count = 1000000   # Match Enterprise
 
 [pro.analyze_code]
-max_file_size_mb = 10
+max_file_size_mb = 100       # Match Enterprise
 languages = [
     "python",
     "javascript",
@@ -135,11 +153,11 @@ languages = [
 ]
 
 [pro.get_file_context]
-max_context_lines = 2000
+max_context_lines = -1       # Unlimited (match Enterprise)
 
 [pro.get_project_map]
-max_files = 1000
-max_modules = 200
+max_files = -1               # Unlimited (match Enterprise)
+max_modules = 1000           # Match Enterprise
 detail_level = "detailed"
 
 [pro.get_symbol_references]
@@ -151,18 +169,18 @@ complexity_analysis = true
 respect_gitignore = true
 
 [pro.get_call_graph]
-max_depth = 50
-max_nodes = 500
+max_depth = -1               # Unlimited (match Enterprise)
+max_nodes = -1               # Unlimited (match Enterprise)
 
 [pro.get_cross_file_dependencies]
-max_depth = 5
-max_files = 500
+max_depth = -1               # Unlimited (match Enterprise)
+max_files = -1               # Unlimited (match Enterprise)
 
 [pro.scan_dependencies]
 osv_lookup = true
 
 [pro.type_evaporation_scan]
-max_files = 500
+max_files = -1               # Unlimited (match Enterprise)
 frontend_only = false
 
 [pro.security_scan]
@@ -175,25 +193,26 @@ languages = [
     "typescript",
     "java",
 ]
+max_sinks = -1               # Unlimited (match Enterprise)
 
 [pro.validate_paths]
 enabled = true
 
 [pro.verify_policy_integrity]
-max_policy_files = 200
+max_policy_files = -1        # Unlimited (match Enterprise)
 signature_validation = true
 tamper_detection = true
 
 [pro.code_policy_check]
-max_files = 1000
-max_rules = 200
+max_files = -1               # Unlimited (match Enterprise)
+max_rules = -1               # Unlimited (match Enterprise)
 compliance_enabled = false
 custom_rules_enabled = true
 
 [pro.extract_code]
 include_cross_file_deps = true
-max_depth = 1
-max_extraction_size_mb = 10
+max_depth = -1               # Unlimited (match Enterprise)
+max_extraction_size_mb = 100 # Match Enterprise
 
 [pro.update_symbol]
 backup_enabled = true
@@ -201,15 +220,15 @@ validation_level = "semantic"
 max_updates_per_call = -1
 
 [pro.rename_symbol]
-max_files_searched = 500
-max_files_updated = 200
+max_files_searched = -1      # Unlimited (match Enterprise)
+max_files_updated = -1       # Unlimited (match Enterprise)
 
 [pro.simulate_refactor]
-max_file_size_mb = 10
+max_file_size_mb = 100       # Match Enterprise
 analysis_depth = "advanced"
 
 [pro.symbolic_execute]
-max_depth = 100
+max_depth = -1               # Unlimited (match Enterprise)
 constraint_types = [
     "int",
     "bool",
@@ -220,7 +239,7 @@ constraint_types = [
 ]
 
 [pro.generate_unit_tests]
-max_test_cases = 20
+max_test_cases = -1          # Unlimited (match Enterprise)
 test_frameworks = [
     "pytest",
     "unittest",
@@ -230,12 +249,17 @@ test_frameworks = [
 cache_ttl_seconds = 300
 
 [pro.cross_file_security_scan]
-max_modules = 100
-max_depth = 10
+max_modules = -1             # Unlimited (match Enterprise)
+max_depth = -1               # Unlimited (match Enterprise)
 
 [pro.get_graph_neighborhood]
-max_k = 5
-max_nodes = 100
+max_k = -1                   # Unlimited (match Enterprise)
+max_nodes = -1               # Unlimited (match Enterprise)
+
+# ─── ENTERPRISE TIER ──────────────────────────────────────────────────
+# Target: Regulated industries, compliance-driven organizations
+# Same limits as Pro — value = 139 governance capabilities (see features.toml)
+# Includes: HIPAA, SOC2, PCI-DSS, GDPR, signed audit trails, PDF certs
 
 [enterprise.scanner]
 max_files = 100000
@@ -327,7 +351,7 @@ languages = [
     "typescript",
     "java",
 ]
-max_sinks = 50
+max_sinks = -1               # Fixed: was 50 (same as Community)
 
 [enterprise.verify_policy_integrity]
 max_policy_files = -1

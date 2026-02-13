@@ -15,8 +15,9 @@ from code_scalpel.licensing.features import get_tool_capabilities, has_capabilit
 from code_scalpel.mcp.path_resolver import resolve_path
 from code_scalpel.parsing import ParsingError, parse_python_code
 
-# [20260201_BUGFIX] Use JWT-aware get_current_tier for proper license validation
-from code_scalpel.licensing.jwt_validator import get_current_tier
+# [20260213_BUGFIX] Use protocol._get_current_tier which honors CODE_SCALPEL_TIER env var
+# (jwt_validator.get_current_tier bypasses env-var downgrade logic)
+from code_scalpel.mcp.protocol import _get_current_tier as get_current_tier
 from code_scalpel.mcp.helpers.session import (
     # [20260121_REFACTOR] Removed get_session_update_count and increment_session_update_count
     # Per-call model no longer needs stateful session tracking

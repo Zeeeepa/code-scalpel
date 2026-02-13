@@ -16,11 +16,16 @@ from code_scalpel.licensing.features import get_tool_capabilities
 class TestLicenseFallback:
     """Test invalid/expired license fallback behavior."""
 
-    @patch("code_scalpel.licensing.jwt_validator.get_current_tier")
-    def test_expired_license_fallback_to_community(self, mock_tier):
+    # [20260213_BUGFIX] Mock the correct function in the call chain
+    @patch("code_scalpel.mcp.helpers.analyze_helpers.get_current_tier_from_license")
+    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    def test_expired_license_fallback_to_community(
+        self, mock_server_tier, mock_helper_tier
+    ):
         """Expired license should fallback to Community tier."""
         # Simulate expired license detection returning Community
-        mock_tier.return_value = "community"
+        mock_server_tier.return_value = "community"
+        mock_helper_tier.return_value = "community"
 
         from code_scalpel.mcp.server import _analyze_code_sync
 
@@ -42,11 +47,16 @@ def test_function():
         assert result.code_smells is None or result.code_smells == []
         assert result.halstead_metrics is None or result.halstead_metrics == {}
 
-    @patch("code_scalpel.licensing.jwt_validator.get_current_tier")
-    def test_invalid_license_fallback_to_community(self, mock_tier):
+    # [20260213_BUGFIX] Mock the correct function in the call chain
+    @patch("code_scalpel.mcp.helpers.analyze_helpers.get_current_tier_from_license")
+    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    def test_invalid_license_fallback_to_community(
+        self, mock_server_tier, mock_helper_tier
+    ):
         """Invalid license should fallback to Community tier."""
         # Simulate invalid license detection returning Community
-        mock_tier.return_value = "community"
+        mock_server_tier.return_value = "community"
+        mock_helper_tier.return_value = "community"
 
         from code_scalpel.mcp.server import _analyze_code_sync
 
@@ -66,11 +76,16 @@ class TestClass:
         assert result.cognitive_complexity is None or result.cognitive_complexity == 0
         assert result.code_smells is None or result.code_smells == []
 
-    @patch("code_scalpel.licensing.jwt_validator.get_current_tier")
-    def test_missing_license_defaults_to_community(self, mock_tier):
+    # [20260213_BUGFIX] Mock the correct function in the call chain
+    @patch("code_scalpel.mcp.helpers.analyze_helpers.get_current_tier_from_license")
+    @patch("code_scalpel.mcp.server.get_current_tier_from_license")
+    def test_missing_license_defaults_to_community(
+        self, mock_server_tier, mock_helper_tier
+    ):
         """Missing license (None) should default to Community tier."""
         # Simulate no license
-        mock_tier.return_value = "community"
+        mock_server_tier.return_value = "community"
+        mock_helper_tier.return_value = "community"
 
         from code_scalpel.mcp.server import _analyze_code_sync
 

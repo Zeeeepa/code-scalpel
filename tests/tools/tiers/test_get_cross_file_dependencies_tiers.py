@@ -2,8 +2,8 @@
 Tier-based validation tests for get_cross_file_dependencies MCP tool.
 
 Tests verify that dependency depth is correctly enforced by tier:
-- Community: max_depth = 1 (direct imports only)
-- Pro: max_depth = 5 (deeper transitive deps)
+- Community: max_depth = 3 (shallow transitive deps)
+- Pro: unlimited depth (full transitive deps)
 - Enterprise: unlimited depth (full transitive closure)
 """
 
@@ -94,7 +94,7 @@ def process_order(order_id, amount):
 
 
 class TestGetCrossFileDependenciesCommunityTier:
-    """Community tier: max_depth = 1 (direct imports only)."""
+    """Community tier: max_depth = 3 (shallow transitive deps)."""
 
     def test_tier_gating_enforced(
         self, temp_project_with_dependencies, community_tier, tier_limits
@@ -121,7 +121,7 @@ class TestGetCrossFileDependenciesCommunityTier:
     def test_direct_imports_only(
         self, temp_project_with_dependencies, community_tier, tier_limits
     ):
-        """Verify only direct dependencies analyzed (depth 1)."""
+        """Verify shallow transitive dependencies analyzed (depth 3)."""
         max_depth_limit = tier_limits["community"]["get_cross_file_dependencies"][
             "max_depth"
         ]
@@ -193,7 +193,7 @@ class TestGetCrossFileDependenciesCommunityTier:
 
 
 class TestGetCrossFileDependenciesProTier:
-    """Pro tier: max_depth = 5 (deeper transitive dependencies)."""
+    """Pro tier: unlimited depth (full transitive dependencies)."""
 
     def test_depth_limit_from_config(
         self, temp_project_with_dependencies, pro_tier, tier_limits
@@ -205,27 +205,30 @@ class TestGetCrossFileDependenciesProTier:
             target_file="main.py",
             target_symbol="process_order",
             project_root=str(temp_project_with_dependencies),
-            max_depth=100,  # User requests high, pro limits to configured max_depth
+            max_depth=100,  # User requests high, pro allows unlimited
             include_code=True,
             include_diagram=True,
             confidence_decay_factor=0.9,
             tier="pro",
         )
         assert result.success is True
-        # Pro tier max_depth is enforced from limits.toml
-        assert result.transitive_depth <= max_depth_limit
+        # Pro tier has unlimited depth (max_depth=None)
+        if max_depth_limit is not None:
+            assert result.transitive_depth <= max_depth_limit
+        # Regardless, analysis should succeed
+        assert result.total_dependencies >= 0
 
     def test_transitive_deps_analyzed(
         self, temp_project_with_dependencies, pro_tier, tier_limits
     ):
-        """Verify transitive dependencies up to tier limit are analyzed."""
+        """Verify transitive dependencies are fully analyzed at Pro tier."""
         max_depth_limit = tier_limits["pro"]["get_cross_file_dependencies"]["max_depth"]
 
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
             target_symbol="process_order",
             project_root=str(temp_project_with_dependencies),
-            max_depth=max_depth_limit,
+            max_depth=max_depth_limit if max_depth_limit is not None else 100,
             include_code=True,
             include_diagram=True,
             confidence_decay_factor=0.9,
@@ -252,8 +255,9 @@ class TestGetCrossFileDependenciesProTier:
             tier="pro",
         )
         assert result.success is True
-        # Files analyzed should be within pro limit
-        assert result.files_analyzed <= max_files_limit
+        # Pro has unlimited files (max_files=None)
+        if max_files_limit is not None:
+            assert result.files_analyzed <= max_files_limit
 
     def test_confidence_decay_deep(
         self, temp_project_with_dependencies, pro_tier, tier_limits
@@ -265,7 +269,7 @@ class TestGetCrossFileDependenciesProTier:
             target_file="main.py",
             target_symbol="process_order",
             project_root=str(temp_project_with_dependencies),
-            max_depth=max_depth_limit,
+            max_depth=max_depth_limit if max_depth_limit is not None else 100,
             include_code=True,
             include_diagram=True,
             confidence_decay_factor=0.9,

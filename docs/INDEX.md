@@ -47,6 +47,16 @@
 ### 🔒 Security & Compliance
 - [App Security Methodology](app_sec_star_methodology.md) - Security analysis approach
 - [GitHub Secrets](GITHUB_SECRETS.md) - Secret management
+- **Enterprise Compliance (NEW in v1.3.0):** ⭐
+  - **[📦 Complete Documentation Package](COMPLIANCE_DOCUMENTATION_DELIVERABLES.md)** - All deliverables index
+  - [For CTOs](guides/ENTERPRISE_COMPLIANCE_FOR_CTOS.md) - Business value & ROI
+  - [For Engineers](guides/ENTERPRISE_COMPLIANCE_FOR_ENGINEERS.md) - Technical implementation
+  - [Quick Start Examples](guides/COMPLIANCE_QUICK_START_EXAMPLES.md) - Practical examples & code samples ⭐
+  - [Capability Matrix](guides/COMPLIANCE_CAPABILITY_MATRIX.md) - Feature comparison table
+  - [Verification Report](testing/COMPLIANCE_VERIFICATION_REPORT.md) - 100% test coverage proof ✅
+  - **Marketing Materials:**
+    - [One-Pager](marketing/COMPLIANCE_ONE_PAGER.md) - Sales & demo material
+    - [Comparison vs Alternatives](marketing/COMPLIANCE_COMPARISON.md) - Feature & cost comparison
 
 ### 📦 Release & Deployment
 - [Release Process](RELEASE_PROCESS.md) - How to release
@@ -60,15 +70,19 @@
 - [Testing Framework](TESTING_FRAMEWORK.md) - Test organization
 - [Testing Guide](TESTING.md) - How to run tests
 - [Stress Testing](stress_test.md) - Performance testing
+- [Compliance Testing Strategy](testing/COMPLIANCE_TESTING_STRATEGY.md) - Two-tier compliance testing approach (NEW)
+- [Compliance Verification Report](testing/COMPLIANCE_VERIFICATION_REPORT.md) - Enterprise compliance testing (NEW)
 
 ### 📁 Subdirectories
 - `archive/` - Historical documentation
 - `getting_started/` - Onboarding materials
 - `guides/` - How-to guides
+- `marketing/` - Marketing materials and sales collateral (NEW)
 - `oracle/` - Oracle middleware documentation (NEW)
 - `reference/` - API and specification docs
 - `release_automation/` - Release tooling docs
 - `release_notes/` - Version release notes
+- `testing/` - Testing documentation and verification reports
 - `roadmap/` - Future plans
 - `tools/` - Tool-specific documentation
 

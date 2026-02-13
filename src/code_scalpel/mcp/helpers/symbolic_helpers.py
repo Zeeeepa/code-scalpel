@@ -18,8 +18,9 @@ from code_scalpel.mcp.models.core import (
     TestGenerationResult,
 )
 
-# [20260201_BUGFIX] Use JWT-aware get_current_tier for proper license validation
-from code_scalpel.licensing.jwt_validator import get_current_tier as _get_current_tier
+# [20260213_BUGFIX] Use protocol._get_current_tier which honors CODE_SCALPEL_TIER env var
+# (jwt_validator.get_current_tier bypasses env-var downgrade logic)
+from code_scalpel.mcp.protocol import _get_current_tier
 from code_scalpel.parsing import ParsingError, parse_python_code
 
 logger = logging.getLogger(__name__)

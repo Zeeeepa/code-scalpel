@@ -2,7 +2,7 @@
 
 Tests verify that verify_policy_integrity respects tier-based limits:
 - Community: basic verification only, max 50 policy files
-- Pro: signature validation enabled, max 200 policy files
+- Pro: signature validation enabled, unlimited policy files
 - Enterprise: full integrity check with audit logging, unlimited files
 
 Also verifies feature availability across tiers (tamper detection, audit logging, etc).
@@ -67,13 +67,15 @@ async def test_verify_policy_integrity_community_file_limit(community_tier):
 
 @pytest.mark.asyncio
 async def test_verify_policy_integrity_pro_file_limit(pro_tier):
-    """Pro tier increases file limit to 200."""
+    """Pro tier has unlimited policy files."""
     from code_scalpel.licensing.features import get_tool_capabilities
 
     caps = get_tool_capabilities("verify_policy_integrity", "pro")
     limits = caps.get("limits", {})
 
-    assert limits.get("max_policy_files") == 200, "Pro should allow 200 policy files"
+    assert (
+        limits.get("max_policy_files") is None
+    ), "Pro should have unlimited policy files"
 
 
 @pytest.mark.asyncio

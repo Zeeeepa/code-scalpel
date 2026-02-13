@@ -269,13 +269,16 @@ description = "Cross-file extraction with variable promotion"
 enabled = true
 capabilities = [
     "basic_symbols",
-    "cross_file_deps",
+    "closure_detection",
     "context_extraction",
+    "cross_file_deps",
     "custom_extraction_patterns",
+    "dependency_injection_suggestions",
     "dockerfile_generation",
     "org_wide_resolution",
     "service_boundaries",
     "single_file_extraction",
+    "variable_promotion",
 ]
 description = "Unlimited depth with Dockerfile generation and org-wide resolution"
 
@@ -551,6 +554,7 @@ capabilities = [
     "basic_mermaid_diagram",
     "bug_hotspot_heatmap",
     "code_churn_visualization",
+    "code_ownership_mapping",
     "compliance_overlay",
     "coupling_analysis",
     "file_count_statistics",

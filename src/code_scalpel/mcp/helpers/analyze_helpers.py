@@ -11,9 +11,10 @@ import time
 from typing import Any
 
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
-from code_scalpel.licensing.jwt_validator import (
-    get_current_tier as get_current_tier_from_license,
-)
+
+# [20260213_BUGFIX] Use protocol._get_current_tier which honors CODE_SCALPEL_TIER env var
+# (jwt_validator.get_current_tier bypasses env-var downgrade logic)
+from code_scalpel.mcp.protocol import _get_current_tier as get_current_tier_from_license
 from code_scalpel.mcp.models.core import AnalysisResult, ClassInfo, FunctionInfo
 from code_scalpel.parsing import ParsingError, parse_python_code
 
@@ -47,7 +48,15 @@ __all__ = [
 
 
 def _get_cache():
-    """Get the analysis cache (lazy initialization)."""
+    """Get the analysis cache (lazy initialization).
+
+    [20260213_BUGFIX] Check SCALPEL_CACHE_ENABLED dynamically so test fixtures
+    that set the env var at runtime are respected.
+    """
+    if os.environ.get("SCALPEL_CACHE_ENABLED", "1") == "0":
+        return None
+    if os.environ.get("SCALPEL_NO_CACHE", "0") == "1":
+        return None
     if not CACHE_ENABLED:
         return None
     try:

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Tier limit rebalancing:** Data-driven recalibration of all tier limits
+  - Community: Raised to cover solo dev projects ≤500 files (scanner 50→500, get_call_graph depth 3→10/nodes 50→200, get_file_context lines 500→2000, symbolic_execute paths 50→100, extract_code depth 0→1, generate_unit_tests cases 5→10, cross_file_security_scan depth 3→5/modules 20→50, code_policy_check files 50→100/rules 20→50)
+  - Pro: All numeric limits now unlimited (match Enterprise) — Pro differentiates on features not scale caps
+  - Enterprise: Fixed unified_sink_detect.max_sinks bug (was 50, same as Community → now unlimited)
+- Updated 25+ tier test files across 8 test directories to reflect new limit values
+- Updated capabilities/README.md tier comparison table with accurate limit values
+
+### Added
+- `tests/tier_validation/` — Scientific tier validation test suite (71 tests)
+  - Monotonicity: Community ≤ Pro ≤ Enterprise for all numeric limits
+  - Parity: Pro numeric limits = Enterprise numeric limits
+  - Superset: Enterprise capabilities ⊃ Pro capabilities (139 unique)
+  - Persona coverage: Community limits accommodate all solo dev project types
+  - Regression: Specific limit values match documented strategy
+- `docs/guides/tier_philosophy.md` — Tier design principles and philosophy
+- `docs/architecture/tier_limit_justification.md` — Scientific methodology for limit derivation
+- `TIER_STRATEGY_OPTIONS.md` — Comprehensive tier strategy with proposed limits and benchmarks
+
+### Fixed
+- `features.toml`: Added 3 missing Pro capabilities to Enterprise (closure_detection, dependency_injection_suggestions, variable_promotion in extract_code; code_ownership_mapping in get_project_map)
+- `limits.toml`: Enterprise unified_sink_detect.max_sinks was incorrectly 50 (same as Community), now unlimited
+- Pre-existing `max_updates_per_session` → `max_updates_per_call` key mismatch in integration tests
+
 ### Planned
 - Custom language profile support (unified LanguageProfile abstraction; Phase 2 parser registries for Go, C#, C++, Ruby, Swift)
 - Language Server Protocol (LSP) integration

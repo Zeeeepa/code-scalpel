@@ -110,7 +110,7 @@ async def test_expired_license_falls_back_to_community(community_tier, monkeypat
 
     assert result.success is True
     assert calls
-    assert calls[-1]["max_test_cases"] == 5  # Community limit
+    assert calls[-1]["max_test_cases"] == 10  # Community limit
 
 
 @pytest.mark.asyncio
@@ -154,9 +154,9 @@ async def test_missing_license_defaults_to_community(community_tier, monkeypatch
 
     assert result.success is True
     assert calls
-    # Should enforce Community limits: pytest only, max 5 tests
+    # Should enforce Community limits: pytest only, max 10 tests
     assert calls[-1]["framework"] == "pytest"
-    assert calls[-1]["max_test_cases"] == 5
+    assert calls[-1]["max_test_cases"] == 10
 
 
 @pytest.mark.asyncio
@@ -273,7 +273,7 @@ async def test_license_fallback_preserves_community_features(
     assert result.success is True
     assert calls
     assert calls[-1]["framework"] == "pytest"
-    assert calls[-1]["max_test_cases"] == 5
+    assert calls[-1]["max_test_cases"] == 10
     assert result.test_count == 3
     assert len(result.test_cases) == 3
 

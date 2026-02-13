@@ -69,9 +69,10 @@ from code_scalpel.mcp.models.policy import (
 
 # [20260116_FEATURE] License-gated tier system restored from archive
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
-from code_scalpel.licensing.tier_detector import (  # noqa: F401
-    get_current_tier as get_current_tier_from_license,  # Re-exported for test mocking
-)
+
+# [20260213_BUGFIX] Use protocol._get_current_tier for consistent tier detection
+# (tier_detector.get_current_tier bypasses JWT validation downgrade logic)
+from code_scalpel.mcp.protocol import _get_current_tier as get_current_tier_from_license
 
 # [20260119_REFACTOR] get_current_tier_from_license is re-exported for tests that mock it.
 # server.py has its own _get_current_tier() that does full license validation with env var support.
@@ -578,8 +579,16 @@ async def _fetch_and_cache_roots(ctx: Context | None) -> list[Path]:
 
 
 def _get_cache():
-    """Get the analysis cache (lazy initialization)."""
+    """Get the analysis cache (lazy initialization).
+
+    [20260213_BUGFIX] Check SCALPEL_CACHE_ENABLED dynamically instead of relying
+    on module-level CACHE_ENABLED, so test fixtures that set the env var at
+    runtime are respected.
+    """
+    if os.environ.get("SCALPEL_CACHE_ENABLED", "1") == "0":
+        return None
     if not CACHE_ENABLED:
+        return None
         return None
     try:
         # [20251223_CONSOLIDATION] Import from unified cache

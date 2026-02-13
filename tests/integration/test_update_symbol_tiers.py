@@ -370,12 +370,12 @@ class TestTierCapabilities:
     def test_community_tier_has_session_limit(self):
         """Test Community tier has session limit."""
         caps = get_tool_capabilities("update_symbol", "community")
-        assert caps["limits"]["max_updates_per_session"] == 10
+        assert caps["limits"]["max_updates_per_call"] == 10
 
     def test_pro_tier_is_unlimited(self):
         """Test Pro tier has unlimited updates."""
         caps = get_tool_capabilities("update_symbol", "pro")
-        assert caps["limits"]["max_updates_per_session"] == -1
+        assert caps["limits"]["max_updates_per_call"] is None  # -1 in TOML → None
 
     def test_pro_tier_has_hooks(self):
         """Test Pro tier has pre/post hooks."""
