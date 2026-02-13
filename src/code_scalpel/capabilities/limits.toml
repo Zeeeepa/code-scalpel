@@ -1,146 +1,117 @@
+# Code Scalpel Feature Limits
+#
+# [20260213_FEATURE] TIER UNIFICATION: All tiers now have enterprise-level limits.
+# Community and Pro sections have been updated to match Enterprise capabilities.
+#
+
 [global]
 default_timeout_seconds = 120
 
 [community.scanner]
-max_files = 50
-max_depth = 2
-max_symbol_count = 1000
+max_files = 100000
+max_depth = 50
+max_symbol_count = 1000000
 
 [community.analyze_code]
-max_file_size_mb = 1
-languages = [
-    "python",
-    "javascript",
-    "typescript",
-    "java",
-]
+max_file_size_mb = 100
 
 [community.get_file_context]
-max_context_lines = 500
+enabled = true
 
 [community.get_project_map]
-max_files = 100
-max_modules = 50
-detail_level = "basic"
+max_modules = 1000
+detail_level = "comprehensive"
 
 [community.get_symbol_references]
-max_files_searched = 10
-max_references = 50
+enabled = true
 
 [community.crawl_project]
-max_files = 100
-max_depth = 10
-parsing_enabled = false
-complexity_analysis = false
+parsing_enabled = true
+complexity_analysis = true
 respect_gitignore = true
 
 [community.get_call_graph]
-max_depth = 3
-max_nodes = 50
+enabled = true
 
 [community.get_cross_file_dependencies]
-max_depth = 1
-max_files = 50
+enabled = true
 
 [community.get_graph_neighborhood]
-max_k = 1
-max_nodes = 20
+max_k = -1
+max_nodes = -1
 
 [community.scan_dependencies]
-max_dependencies = 50
 osv_lookup = true
 
 [community.type_evaporation_scan]
-max_files = 50
-frontend_only = true
+max_files = -1
+frontend_only = false
+schema_generation = true
 
 [community.security_scan]
-max_findings = 50
-max_file_size_kb = 500
-vulnerability_types = "owasp_top_10"
+vulnerability_types = "all"
 
 [community.cross_file_security_scan]
-max_modules = 10
-max_depth = 3
+enabled = true
 
 [community.unified_sink_detect]
-languages = [
-    "python",
-    "javascript",
-    "typescript",
-    "java",
-]
+languages = [ "python", "javascript", "typescript", "java",]
 max_sinks = 50
 
 [community.validate_paths]
-max_paths = 100
+enabled = true
 
 [community.verify_policy_integrity]
-max_policy_files = 50
-signature_validation = false
-tamper_detection = false
+max_policy_files = -1
+signature_validation = true
+tamper_detection = true
 
 [community.code_policy_check]
-max_files = 100
-max_rules = 50
-compliance_enabled = false
-custom_rules_enabled = false
+compliance_enabled = true
+custom_rules_enabled = true
+audit_trail_enabled = true
+pdf_reports_enabled = true
 
 [community.extract_code]
-include_cross_file_deps = false
-max_depth = 0
-max_extraction_size_mb = 1
+include_cross_file_deps = true
+max_depth = -1
+max_extraction_size_mb = 100
 
 [community.update_symbol]
 backup_enabled = true
-validation_level = "syntax"
-max_updates_per_call = 10
+validation_level = "full"
+max_updates_per_call = -1
 
 [community.rename_symbol]
-max_files_searched = 0
-max_files_updated = 0
+enabled = true
 
 [community.simulate_refactor]
-max_file_size_mb = 1
-analysis_depth = "basic"
+max_file_size_mb = 100
+analysis_depth = "deep"
 
 [community.symbolic_execute]
-max_paths = 50
-max_depth = 10
-constraint_types = [
-    "int",
-    "bool",
-    "string",
-    "float",
-]
+constraint_types = "all"
 
 [community.generate_unit_tests]
-max_test_cases = 5
-test_frameworks = [
-    "pytest",
-]
+test_frameworks = "all"
+
+[community.write_perfect_code]
+cache_ttl_seconds = 300
 
 [pro.scanner]
-max_files = 2000
-max_depth = 10
-max_symbol_count = 50000
+max_files = 100000
+max_depth = 50
+max_symbol_count = 1000000
 
 [pro.analyze_code]
-max_file_size_mb = 10
-languages = [
-    "python",
-    "javascript",
-    "typescript",
-    "java",
-]
+max_file_size_mb = 100
 
 [pro.get_file_context]
-max_context_lines = 2000
+enabled = true
 
 [pro.get_project_map]
-max_files = 1000
-max_modules = 200
-detail_level = "detailed"
+max_modules = 1000
+detail_level = "comprehensive"
 
 [pro.get_symbol_references]
 enabled = true
@@ -151,91 +122,72 @@ complexity_analysis = true
 respect_gitignore = true
 
 [pro.get_call_graph]
-max_depth = 50
-max_nodes = 500
+enabled = true
 
 [pro.get_cross_file_dependencies]
-max_depth = 5
-max_files = 500
+enabled = true
 
 [pro.scan_dependencies]
 osv_lookup = true
 
 [pro.type_evaporation_scan]
-max_files = 500
+max_files = -1
 frontend_only = false
+schema_generation = true
 
 [pro.security_scan]
 vulnerability_types = "all"
 
 [pro.unified_sink_detect]
-languages = [
-    "python",
-    "javascript",
-    "typescript",
-    "java",
-]
+languages = [ "python", "javascript", "typescript", "java",]
+max_sinks = 50
 
 [pro.validate_paths]
 enabled = true
 
 [pro.verify_policy_integrity]
-max_policy_files = 200
+max_policy_files = -1
 signature_validation = true
 tamper_detection = true
 
 [pro.code_policy_check]
-max_files = 1000
-max_rules = 200
-compliance_enabled = false
+compliance_enabled = true
 custom_rules_enabled = true
+audit_trail_enabled = true
+pdf_reports_enabled = true
 
 [pro.extract_code]
 include_cross_file_deps = true
-max_depth = 1
-max_extraction_size_mb = 10
+max_depth = -1
+max_extraction_size_mb = 100
 
 [pro.update_symbol]
 backup_enabled = true
-validation_level = "semantic"
+validation_level = "full"
 max_updates_per_call = -1
 
 [pro.rename_symbol]
-max_files_searched = 500
-max_files_updated = 200
+enabled = true
 
 [pro.simulate_refactor]
-max_file_size_mb = 10
-analysis_depth = "advanced"
+max_file_size_mb = 100
+analysis_depth = "deep"
 
 [pro.symbolic_execute]
-max_depth = 100
-constraint_types = [
-    "int",
-    "bool",
-    "string",
-    "float",
-    "list",
-    "dict",
-]
+constraint_types = "all"
 
 [pro.generate_unit_tests]
-max_test_cases = 20
-test_frameworks = [
-    "pytest",
-    "unittest",
-]
+test_frameworks = "all"
 
 [pro.write_perfect_code]
 cache_ttl_seconds = 300
 
 [pro.cross_file_security_scan]
-max_modules = 100
-max_depth = 10
+enabled = true
 
 [pro.get_graph_neighborhood]
-max_k = 5
-max_nodes = 100
+max_k = -1
+max_nodes = -1
 
 [enterprise.scanner]
 max_files = 100000
@@ -312,7 +264,6 @@ test_frameworks = "all"
 cache_ttl_seconds = 300
 
 [enterprise.security_scan]
-# Enterprise has no limits
 vulnerability_types = "all"
 
 [enterprise.type_evaporation_scan]
@@ -321,12 +272,7 @@ frontend_only = false
 schema_generation = true
 
 [enterprise.unified_sink_detect]
-languages = [
-    "python",
-    "javascript",
-    "typescript",
-    "java",
-]
+languages = [ "python", "javascript", "typescript", "java",]
 max_sinks = 50
 
 [enterprise.verify_policy_integrity]

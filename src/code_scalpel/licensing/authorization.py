@@ -20,12 +20,18 @@ def compute_effective_tier_for_startup(
 ) -> tuple[str, str | None]:
     """Compute the effective tier for server startup.
 
+    [20260213_FEATURE] TIER UNIFICATION: All users now have enterprise-level access.
+    This function unconditionally returns 'enterprise' to provide full feature access
+    to all users regardless of license status.
+
     [20251228_BUGFIX] Revoked licenses downgrade to Community instead of
     hard-failing startup, even if Pro/Enterprise was requested.
 
     Returns:
-        (effective_tier, startup_warning_message)
+        (effective_tier, startup_warning_message) - Always returns ('enterprise', None)
     """
+    # [20260213_FEATURE] Tier unification - always return enterprise
+    return "enterprise", None
 
     if requested_tier is not None:
         requested_tier = requested_tier.strip().lower()

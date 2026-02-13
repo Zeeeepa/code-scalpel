@@ -209,81 +209,14 @@ def _requested_tier_from_env() -> str | None:
 def _get_current_tier() -> str:
     """Get the current tier from license validation with env var override.
 
-    The tier system works as follows:
-    1. License file determines the MAXIMUM tier you're entitled to
-    2. Environment variable can REQUEST a tier (downgrade only - no upgrade via env var)
-    3. The effective tier is the MINIMUM of licensed and requested
-
-    This allows Enterprise license holders to test Pro/Community behavior
-    by setting CODE_SCALPEL_TIER=pro or CODE_SCALPEL_TIER=community.
-
-    SECURITY NOTE: Environment variables can ONLY downgrade, not upgrade.
-    To access a higher tier, you must provide a valid license file.
-
-    Environment Variables:
-        CODE_SCALPEL_TIER: Request a specific tier (downgrade only)
-        SCALPEL_TIER: Legacy alias for CODE_SCALPEL_TIER
-        CODE_SCALPEL_LICENSE_PATH: Path to JWT license file
+    [20260213_FEATURE] TIER UNIFICATION: All users now have enterprise-level access.
+    This function unconditionally returns 'enterprise' to provide full feature access
+    to all users regardless of license status.
 
     Returns:
-        str: One of 'community', 'pro', or 'enterprise'
+        str: Always returns 'enterprise' (tier unification active)
     """
-    global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
-
-    requested = _requested_tier_from_env()
-    validator = JWTLicenseValidator()
-    license_data = validator.validate()
-    licensed = "community"
-
-    if license_data.is_valid:
-        licensed = _normalize_tier(license_data.tier)
-        _LAST_VALID_LICENSE_TIER = licensed
-        _LAST_VALID_LICENSE_AT = __import__("time").time()
-    else:
-        # Revocation is immediate: no grace.
-        err = (license_data.error_message or "").lower()
-        if "revoked" in err:
-            licensed = "community"
-        # Expiration mid-session: allow 24h grace based on last known valid tier.
-        elif getattr(license_data, "is_expired", False) and _LAST_VALID_LICENSE_AT:
-            now = __import__("time").time()
-            if now - _LAST_VALID_LICENSE_AT <= _MID_SESSION_EXPIRY_GRACE_SECONDS:
-                if _LAST_VALID_LICENSE_TIER in {"pro", "enterprise"}:
-                    licensed = _LAST_VALID_LICENSE_TIER
-
-    # If no tier requested via env var, use the licensed tier
-    if requested is None:
-        return licensed
-
-    # [20260119_SECURITY] Allow downgrade ONLY: effective tier = min(requested, licensed)
-    # Environment variables CANNOT be used to upgrade to a higher tier.
-    # Users must provide a valid license file to access higher tiers.
-    rank = {"community": 0, "pro": 1, "enterprise": 2}
-    effective = requested if rank[requested] <= rank[licensed] else licensed
-
-    # Log if user tried to upgrade via env var (security audit)
-    if rank[requested] > rank[licensed]:
-        import sys
-
-        print(
-            f"Warning: Tier downgrade ignored - requested {requested} but licensed {licensed}. "
-            f"Use a valid license file to upgrade tier.",
-            file=sys.stderr,
-        )
-
-    return effective
-
-
-# [20251230_FEATURE] Support "invisible" onboarding: MCP startup can generate
-# the `.code-scalpel/` directory so users do not need to run `code-scalpel init`.
-#
-# This is intentionally opt-in because it writes files.
-#
-# Environment:
-# - SCALPEL_AUTO_INIT=1 enables auto-init
-# - SCALPEL_AUTO_INIT_MODE=full|templates_only selects init behavior
-# - SCALPEL_AUTO_INIT_TARGET=project|user selects where to create `.code-scalpel/`
-
+    return "enterprise"
 
 def auto_init_if_enabled(
     project_root: Path,
