@@ -12,6 +12,12 @@ from code_scalpel import __version__
 # [20260116_FEATURE] Import license validator for tier determination
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
+# [20260214_FEATURE] TIER UNIFICATION: When True, all users get enterprise-level
+# access regardless of license status. Set to False to restore the original
+# license-based tier detection. The features.toml structure is preserved intact
+# so that tier-specific capabilities remain documented and maintainable.
+_FORCE_ENTERPRISE_MODE = True
+
 # Current tier for response envelope metadata.
 # Initialized to "community" (community tier) by default.
 # Can be overridden via CODE_SCALPEL_TIER environment variable.
@@ -93,51 +99,55 @@ def _requested_tier_from_env() -> str | None:
 def _get_current_tier() -> str:
     """Get the current tier from license validation with env var override.
 
-    [20260213_FEATURE] TIER UNIFICATION: All users now have enterprise-level access.
-    This function unconditionally returns 'enterprise' to provide full feature access
-    to all users regardless of license status.
+    [20260214_FEATURE] When _FORCE_ENTERPRISE_MODE is True, returns 'enterprise'
+    unconditionally so all users get full feature access. Enterprise tier is a
+    superset of Pro and Community, so all lower-tier capabilities are included.
 
-    The tier infrastructure is preserved for potential future use, but currently
-    all enforcement is bypassed to enable enterprise features for everyone.
-
-    Original tier detection logic preserved below for reference:
-    ---
-    [20260116_FEATURE] Updated to do full license validation, not just env var check.
-
-    The tier system works as follows:
+    [20260116_FEATURE] Original license-based tier detection (active when
+    _FORCE_ENTERPRISE_MODE is False):
     1. License file determines the MAXIMUM tier you're entitled to
     2. Environment variable can REQUEST a tier (for testing/downgrade)
     3. The effective tier is the MINIMUM of licensed and requested
 
     Returns:
-        str: Always returns 'enterprise' (tier unification active)
-    
-    # Original implementation (preserved for reference):
-    # import time as time_module
-    # global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
-    # requested = _requested_tier_from_env()
-    # validator = JWTLicenseValidator()
-    # license_data = validator.validate()
-    # licensed = "community"
-    # if license_data.is_valid:
-    #     licensed = _normalize_tier(license_data.tier)
-    #     _LAST_VALID_LICENSE_TIER = licensed
-    #     _LAST_VALID_LICENSE_AT = time_module.time()
-    # else:
-    #     err = (license_data.error_message or "").lower()
-    #     if "revoked" in err:
-    #         licensed = "community"
-    #     elif getattr(license_data, "is_expired", False) and _LAST_VALID_LICENSE_AT:
-    #         now = time_module.time()
-    #         if now - _LAST_VALID_LICENSE_AT <= _MID_SESSION_EXPIRY_GRACE_SECONDS:
-    #             if _LAST_VALID_LICENSE_TIER in {"pro", "enterprise"}:
-    #                 licensed = _LAST_VALID_LICENSE_TIER
-    # if requested is None:
-    #     return licensed
-    # rank = {"community": 0, "pro": 1, "enterprise": 2}
-    # return requested if rank[requested] <= rank[licensed] else licensed
+        str: One of 'community', 'pro', or 'enterprise'
     """
-    return "enterprise"
+    # [20260214_FEATURE] Tier unification: enterprise mode for all users
+    if _FORCE_ENTERPRISE_MODE:
+        return "enterprise"
+
+    import time as time_module
+
+    global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
+
+    requested = _requested_tier_from_env()
+    validator = JWTLicenseValidator()
+    license_data = validator.validate()
+    licensed = "community"
+
+    if license_data.is_valid:
+        licensed = _normalize_tier(license_data.tier)
+        _LAST_VALID_LICENSE_TIER = licensed
+        _LAST_VALID_LICENSE_AT = time_module.time()
+    else:
+        # Revocation is immediate: no grace.
+        err = (license_data.error_message or "").lower()
+        if "revoked" in err:
+            licensed = "community"
+        # Expiration mid-session: allow 24h grace based on last known valid tier.
+        elif getattr(license_data, "is_expired", False) and _LAST_VALID_LICENSE_AT:
+            now = time_module.time()
+            if now - _LAST_VALID_LICENSE_AT <= _MID_SESSION_EXPIRY_GRACE_SECONDS:
+                if _LAST_VALID_LICENSE_TIER in {"pro", "enterprise"}:
+                    licensed = _LAST_VALID_LICENSE_TIER
+
+    # If no tier requested via env var, use the licensed tier
+    if requested is None:
+        return licensed
+
+    # Allow downgrade only: effective tier = min(requested, licensed)
+    rank = {"community": 0, "pro": 1, "enterprise": 2}
+    return requested if rank[requested] <= rank[licensed] else licensed
 
 
 def set_current_tier(tier: str) -> None:
