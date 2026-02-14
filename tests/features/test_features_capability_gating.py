@@ -154,8 +154,9 @@ class TestSymbolicExecutionGating:
         caps = get_tool_capabilities("symbolic_execute", "community")
         limits = caps.get("limits", {})
 
+        # [20260212_TEST] Updated to match rebalanced limits.toml
         # Community has strict path and depth limits
-        assert limits.get("max_paths") == 50
+        assert limits.get("max_paths") == 100
         assert limits.get("max_depth") == 10
 
     def test_symbolic_execute_community_no_advanced(self, community_tier):
@@ -190,9 +191,10 @@ class TestGenerateUnitTestsGating:
         caps = get_tool_capabilities("generate_unit_tests", "community")
         limits = caps.get("limits", {})
 
+        # [20260212_TEST] Updated to match rebalanced limits.toml
         assert (
-            limits.get("max_test_cases") == 5
-        ), "Community should generate max 5 test cases"
+            limits.get("max_test_cases") == 10
+        ), "Community should generate max 10 test cases"
 
     def test_generate_unit_tests_community_no_data_driven(self, community_tier):
         """Community should not have data-driven test generation."""

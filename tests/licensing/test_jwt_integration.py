@@ -86,8 +86,8 @@ class TestToolCapabilitiesByTier:
                 assert caps is not None
                 assert "capabilities" in caps
                 assert "limits" in caps
-                # [20251227_FIX] Updated to match limits.toml: community has 50 max findings
-                assert caps.get("limits", {}).get("max_findings") == 50
+                # [20260212_TEST] Updated to match rebalanced limits.toml: community has 100 max findings
+                assert caps.get("limits", {}).get("max_findings") == 100
 
             finally:
                 os.chdir(original_cwd)
@@ -184,9 +184,9 @@ class TestToolHandlerIntegration:
                 result = mock_security_scan("test code")
 
                 assert result["tier"] == "community"
-                # [20251227_FIX] Updated to match limits.toml: community has 50 max findings
-                assert result["applied_limit"] == 50
-                # We're simulating 15 findings, so all 15 should be returned (under the 50 limit)
+                # [20260212_TEST] Updated to match rebalanced limits.toml: community has 100 max findings
+                assert result["applied_limit"] == 100
+                # We're simulating 15 findings, so all 15 should be returned (under the 100 limit)
                 assert len(result["findings"]) == 15
 
             finally:

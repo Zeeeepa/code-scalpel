@@ -32,10 +32,10 @@ class TestCommunityTierLimits:
 
         # Should succeed but with Community limits
         assert result.success is True
-        # Depth should be clamped to Community limit (1)
+        # Depth should be clamped to Community limit (3)
         assert (
-            result.transitive_depth <= 1
-        ), f"Community tier should clamp depth to 1, got {result.transitive_depth}"
+            result.transitive_depth <= 3
+        ), f"Community tier should clamp depth to 3, got {result.transitive_depth}"
 
     @pytest.mark.asyncio
     async def test_community_tier_file_limit(

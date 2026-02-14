@@ -2,7 +2,7 @@
 
 Tests verify that code_policy_check respects tier-based limits:
 - Community: max 100 files, max 50 rules
-- Pro: max 1000 files, max 200 rules
+- Pro: unlimited files, unlimited rules
 - Enterprise: unlimited files and rules
 
 Also verifies compliance framework availability across tiers.
@@ -28,13 +28,13 @@ async def test_code_policy_check_community_file_limit(community_tier):
 
 @pytest.mark.asyncio
 async def test_code_policy_check_pro_file_limit(pro_tier):
-    """Pro tier increases file limit to 1000."""
+    """Pro tier has unlimited file limit."""
     from code_scalpel.licensing.features import get_tool_capabilities
 
     caps = get_tool_capabilities("code_policy_check", "pro")
     limits = caps.get("limits", {})
 
-    assert limits.get("max_files") == 1000, "Pro should allow 1000 files"
+    assert limits.get("max_files") is None, "Pro should have unlimited files"
 
 
 @pytest.mark.asyncio
@@ -61,13 +61,13 @@ async def test_code_policy_check_community_rule_limit(community_tier):
 
 @pytest.mark.asyncio
 async def test_code_policy_check_pro_rule_limit(pro_tier):
-    """Pro tier increases rule limit to 200."""
+    """Pro tier has unlimited rule limit."""
     from code_scalpel.licensing.features import get_tool_capabilities
 
     caps = get_tool_capabilities("code_policy_check", "pro")
     limits = caps.get("limits", {})
 
-    assert limits.get("max_rules") == 200, "Pro should allow 200 rules"
+    assert limits.get("max_rules") is None, "Pro should have unlimited rules"
 
 
 @pytest.mark.asyncio

@@ -155,8 +155,8 @@ class TestProTierFeatures:
         assert "def process_items" in result.target_code
 
     @pytest.mark.asyncio
-    async def test_pro_tier_depth_clamping(self, monkeypatch, tmp_path: Path):
-        """Pro tier clamps context_depth to max_depth=10."""
+    async def test_pro_tier_depth_unlimited(self, monkeypatch, tmp_path: Path):
+        """Pro tier has unlimited context_depth (max_depth=None)."""
         from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
 
@@ -174,17 +174,17 @@ class TestProTierFeatures:
         (tmp_path / "c.py").write_text("from b import b\n\ndef c():\n    b()\n")
         (tmp_path / "d.py").write_text("from c import c\n\ndef d():\n    c()\n")
 
-        # Request depth=20, should be clamped to Pro max of 10
+        # Request depth=20, Pro is unlimited so it should pass through
         result = await extraction.extract_code(
             target_type="function",
             target_name="d",
             file_path=str(tmp_path / "d.py"),
             include_cross_file_deps=True,
-            context_depth=20,  # Pro tier should clamp to 10
+            context_depth=20,  # Pro tier is unlimited — no clamping
         )
 
         assert result.success is True
-        # Should include some dependencies but respect the Pro tier limit
+        # Should include some dependencies
         assert len(result.context_items) > 0
 
 
@@ -501,7 +501,7 @@ class TestFeatureGating:
 
     @pytest.mark.asyncio
     async def test_pro_tier_file_size_limit(self, monkeypatch, tmp_path: Path):
-        """Pro tier enforces 10MB file size limit."""
+        """Pro tier enforces 100MB file size limit."""
         from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
 
@@ -513,7 +513,7 @@ class TestFeatureGating:
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
-        # Create file at Pro limit (10MB)
+        # Create file well within Pro limit (100MB)
         large_code = (
             "# " + "x" * (1024 * 1024 * 10 - 100) + "\ndef target():\n    pass\n"
         )

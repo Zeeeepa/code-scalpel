@@ -54,16 +54,16 @@ def helper():
 
         assert result.success is True
         # max_depth_applied should reflect tier limits
-        # Enterprise has None (unlimited), Pro has 50, Community has 3
+        # Enterprise has None (unlimited), Pro has None (unlimited), Community has 10
         if result.tier_applied == "enterprise":
             assert result.max_depth_applied is None
             assert result.max_nodes_applied is None
         elif result.tier_applied == "pro":
-            assert result.max_depth_applied == 50
-            assert result.max_nodes_applied == 500
+            assert result.max_depth_applied is None
+            assert result.max_nodes_applied is None
         else:  # community
-            assert result.max_depth_applied == 3
-            assert result.max_nodes_applied == 50
+            assert result.max_depth_applied == 10
+            assert result.max_nodes_applied == 200
 
 
 class TestMetadataFieldTypes:
@@ -116,7 +116,7 @@ class TestTierEnforcement:
 
     @pytest.mark.asyncio
     async def test_community_tier_depth_limit(self, tmp_path, community_tier):
-        """Community tier should enforce max_depth=3."""
+        """Community tier should enforce max_depth=10."""
         # Create a deeply nested call chain
         main_file = tmp_path / "main.py"
         main_file.write_text(
@@ -145,8 +145,8 @@ def level_5():
 
         assert result.success is True
         assert result.tier_applied == "community"
-        assert result.max_depth_applied == 3  # Community limit
-        # Depth should be clamped to 3 even if requested 10
+        assert result.max_depth_applied == 10  # Community limit
+        # Depth should be clamped to 10 even if requested 10
 
     @pytest.mark.asyncio
     async def test_pro_tier_higher_limits(self, tmp_path, pro_tier):
@@ -159,8 +159,8 @@ def level_5():
 
         assert result.success is True
         assert result.tier_applied == "pro"
-        assert result.max_depth_applied == 50  # Pro limit
-        assert result.max_nodes_applied == 500  # Pro limit
+        assert result.max_depth_applied is None  # Pro unlimited
+        assert result.max_nodes_applied is None  # Pro unlimited
 
     @pytest.mark.asyncio
     async def test_enterprise_tier_unlimited(self, tmp_path, enterprise_tier):
@@ -263,10 +263,10 @@ def bar():
         self, tmp_path, community_tier
     ):
         """When node count exceeds Community limits, truncation flags should be set."""
-        # Build more than 60 functions chained to exceed the 50-node cap
+        # Build more than 210 functions chained to exceed the 200-node cap
         chain = []
-        for i in range(65):
-            if i == 64:
+        for i in range(215):
+            if i == 214:
                 chain.append(f"def f{i}():\n    return {i}\n")
             else:
                 chain.append(f"def f{i}():\n    return f{i+1}()\n")
@@ -282,7 +282,7 @@ def bar():
 
     @pytest.mark.asyncio
     async def test_pro_truncation_when_exceeding_max_nodes(self, tmp_path, pro_tier):
-        """[20260121_TEST] Pro tier should truncate when max_nodes=500 is exceeded."""
+        """[20260121_TEST] Pro tier is unlimited, so no truncation expected."""
         chain = []
         for i in range(520):
             if i == 519:
@@ -295,9 +295,7 @@ def bar():
 
         assert result.success is True
         assert result.tier_applied == "pro"
-        assert result.max_nodes_applied == 500
-        assert result.nodes_truncated is True
-        assert result.truncation_warning is not None
+        assert result.max_nodes_applied is None  # Pro is unlimited
 
 
 class TestEntryPointDetection:

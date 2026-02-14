@@ -50,7 +50,10 @@ from code_scalpel.mcp.models.security import (
     SecurityResult,
     TypeEvaporationResultModel,
 )
-from code_scalpel.licensing.tier_detector import get_current_tier
+
+# [20260213_BUGFIX] Use protocol._get_current_tier which honors CODE_SCALPEL_TIER env var
+# (tier_detector.get_current_tier bypasses JWT validation downgrade logic)
+from code_scalpel.mcp.protocol import _get_current_tier as _protocol_get_current_tier
 from code_scalpel.licensing.features import get_tool_capabilities
 from code_scalpel.security.analyzers import SecurityAnalyzer, UnifiedSinkDetector
 from code_scalpel.security.analyzers.policy_engine import PolicyEngine
@@ -88,10 +91,13 @@ def _get_project_root() -> Path:
 
 
 def _get_current_tier() -> str:
-    """Return the current licensing tier, defaulting to community on failure."""
+    """Return the current licensing tier, defaulting to community on failure.
 
+    [20260213_BUGFIX] Delegate to protocol._get_current_tier for consistent
+    JWT validation with env-var downgrade logic.
+    """
     try:
-        return get_current_tier()
+        return _protocol_get_current_tier()
     except Exception:
         return "community"
 
@@ -2195,7 +2201,7 @@ async def _unified_sink_detect_impl(
         UnifiedSinkResult with detected sinks, CWE mappings, and coverage summary
     """
 
-    tier = get_current_tier()
+    tier = _get_current_tier()
     capabilities = get_tool_capabilities("unified_sink_detect", tier)
     return await asyncio.to_thread(
         _unified_sink_detect_sync,
@@ -2255,7 +2261,7 @@ async def _type_evaporation_scan_impl(
         TypeEvaporationResultModel with frontend, backend, and cross-file vulnerabilities.
     """
     # [20251226_FEATURE] Tier-aware feature enablement
-    tier = get_current_tier()
+    tier = _get_current_tier()
     caps = get_tool_capabilities("type_evaporation_scan", tier) or {}
     cap_set = set(caps.get("capabilities", []))
     limits = caps.get("limits", {}) or {}
@@ -2345,7 +2351,7 @@ async def _scan_dependencies_impl(
     resolved_path = path or project_root or str(_get_project_root())
 
     # [20251229_FEATURE] v3.3.1 - Get tier and capabilities
-    tier = get_current_tier()
+    tier = _get_current_tier()
     caps = get_tool_capabilities("scan_dependencies", tier)
 
     # [20251220_FEATURE] v3.0.5 - Progress reporting

@@ -20,26 +20,30 @@ class TestParameterClamping:
     """Test that parameters are clamped to tier limits."""
 
     def test_extract_code_depth_clamping_community(self, community_tier):
-        """extract_code should clamp context_depth to 0 in Community tier."""
+        """extract_code should clamp context_depth to 1 in Community tier."""
         from code_scalpel.licensing.features import get_tool_capabilities
 
         caps = get_tool_capabilities("extract_code", "community")
         limits = caps.get("limits", {})
 
-        # Community tier should not allow cross-file deps (depth=0)
+        # [20260212_TEST] Updated to match rebalanced limits.toml
+        # Community tier allows immediate imports (depth=1)
         assert (
-            limits.get("max_depth") == 0
-        ), "Community extract_code should have max_depth=0 (no cross-file deps)"
+            limits.get("max_depth") == 1
+        ), "Community extract_code should have max_depth=1 (immediate imports)"
 
     def test_extract_code_depth_clamping_pro(self, pro_tier):
-        """extract_code should allow depth=1 in Pro tier."""
+        """extract_code should allow unlimited depth in Pro tier."""
         from code_scalpel.licensing.features import get_tool_capabilities
 
         caps = get_tool_capabilities("extract_code", "pro")
         limits = caps.get("limits", {})
 
-        # Pro tier allows limited cross-file deps
-        assert limits.get("max_depth") == 1, "Pro extract_code should have max_depth=1"
+        # [20260212_TEST] Updated to match rebalanced limits.toml
+        # Pro tier allows unlimited cross-file deps (matches Enterprise)
+        assert (
+            limits.get("max_depth") is None
+        ), "Pro extract_code should have unlimited depth"
 
     def test_extract_code_depth_clamping_enterprise(self, enterprise_tier):
         """extract_code should allow unlimited depth in Enterprise tier."""
@@ -54,22 +58,24 @@ class TestParameterClamping:
         ), "Enterprise extract_code should have unlimited depth"
 
     def test_get_call_graph_depth_clamping_community(self, community_tier):
-        """get_call_graph should clamp depth to 3 in Community tier."""
+        """get_call_graph should clamp depth to 10 in Community tier."""
         from code_scalpel.licensing.features import get_tool_capabilities
 
         caps = get_tool_capabilities("get_call_graph", "community")
         limits = caps.get("limits", {})
 
-        assert limits.get("max_depth") == 3, "Community: max_depth should be 3"
+        # [20260212_TEST] Updated to match rebalanced limits.toml
+        assert limits.get("max_depth") == 10, "Community: max_depth should be 10"
 
     def test_get_call_graph_depth_clamping_pro(self, pro_tier):
-        """get_call_graph should allow depth=50 in Pro tier."""
+        """get_call_graph should allow unlimited depth in Pro tier."""
         from code_scalpel.licensing.features import get_tool_capabilities
 
         caps = get_tool_capabilities("get_call_graph", "pro")
         limits = caps.get("limits", {})
 
-        assert limits.get("max_depth") == 50, "Pro: max_depth should be 50"
+        # [20260212_TEST] Updated to match rebalanced limits.toml
+        assert limits.get("max_depth") is None, "Pro: max_depth should be unlimited"
 
     def test_get_call_graph_depth_clamping_enterprise(self, enterprise_tier):
         """get_call_graph should allow unlimited depth in Enterprise tier."""

@@ -1,8 +1,8 @@
 """Tier behavior tests for get_file_context.
 
 These tests validate tier-specific limits and output fields:
-- Community: Truncated context (500 lines), definitions only
-- Pro: Extended context (2,000 lines), includes docstrings/imports
+- Community: Truncated context (2,000 lines), definitions only
+- Pro: Unlimited context, includes docstrings/imports
 - Enterprise: Unlimited context with PII/Secret probability scores
 
 [20260121_TEST] Validate get_file_context tier outputs systematically.
@@ -34,10 +34,10 @@ class TestGetFileContextCommunityTier:
         assert result.success is True
         assert result.tier_applied == "community"
 
-    def test_max_context_lines_applied_is_500(self, community_tier, tmp_path):
-        """Community tier should limit context to 500 lines.
+    def test_max_context_lines_applied_is_2000(self, community_tier, tmp_path):
+        """Community tier should limit context to 2,000 lines.
 
-        [20260121_ASSERTION] Community max_context_lines = 500
+        [20260121_ASSERTION] Community max_context_lines = 2000
         """
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
@@ -45,8 +45,8 @@ class TestGetFileContextCommunityTier:
         result = _get_file_context_sync(str(test_file), tier="community")
 
         assert result.success is True
-        # max_context_lines_applied should be 500 or None (handled by limits.toml)
-        assert result.max_context_lines_applied in (500, None)
+        # max_context_lines_applied should be 2000 or None (handled by limits.toml)
+        assert result.max_context_lines_applied in (2000, None)
 
     def test_pro_features_enabled_is_false(self, community_tier, tmp_path):
         """Community tier reports pro_features_enabled=False."""
@@ -68,14 +68,14 @@ class TestGetFileContextCommunityTier:
         assert result.success is True
         assert result.enterprise_features_enabled is False
 
-    def test_community_file_exceeds_500_lines_fails(self, community_tier, tmp_path):
-        """Community tier returns error when file exceeds 500 lines.
+    def test_community_file_exceeds_2000_lines_fails(self, community_tier, tmp_path):
+        """Community tier returns error when file exceeds 2,000 lines.
 
         [20260121_ASSERTION] Community enforces max_context_lines limit
         """
-        # Create a file with 600 lines
+        # Create a file with 2100 lines
         test_file = tmp_path / "large.py"
-        lines = ["# Line " + str(i) for i in range(600)]
+        lines = ["# Line " + str(i) for i in range(2100)]
         test_file.write_text("\n".join(lines))
 
         result = _get_file_context_sync(str(test_file), tier="community")
@@ -83,7 +83,7 @@ class TestGetFileContextCommunityTier:
         # Should fail because file exceeds limit
         assert result.success is False
         assert "exceeds" in (result.error or "").lower()
-        assert result.line_count == 600
+        assert result.line_count == 2100
 
 
 class TestGetFileContextProTier:
@@ -99,10 +99,10 @@ class TestGetFileContextProTier:
         assert result.success is True
         assert result.tier_applied == "pro"
 
-    def test_max_context_lines_applied_is_2000(self, pro_tier, tmp_path):
-        """Pro tier should allow up to 2,000 lines.
+    def test_max_context_lines_applied_is_none(self, pro_tier, tmp_path):
+        """Pro tier should have unlimited context lines.
 
-        [20260121_ASSERTION] Pro max_context_lines = 2,000
+        [20260121_ASSERTION] Pro max_context_lines = None (unlimited)
         """
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
@@ -110,8 +110,8 @@ class TestGetFileContextProTier:
         result = _get_file_context_sync(str(test_file), tier="pro")
 
         assert result.success is True
-        # max_context_lines_applied should be 2000 or None
-        assert result.max_context_lines_applied in (2000, None)
+        # max_context_lines_applied should be None (unlimited)
+        assert result.max_context_lines_applied is None
 
     def test_pro_features_enabled_is_true(self, pro_tier, tmp_path):
         """Pro tier reports pro_features_enabled=True."""
@@ -134,9 +134,9 @@ class TestGetFileContextProTier:
         assert result.enterprise_features_enabled is False
 
     def test_pro_file_with_1500_lines_succeeds(self, pro_tier, tmp_path):
-        """Pro tier accepts files up to 2,000 lines.
+        """Pro tier accepts unlimited file sizes.
 
-        [20260121_ASSERTION] Pro tier allows larger context than Community
+        [20260121_ASSERTION] Pro tier has unlimited context lines
         """
         # Create a file with 1,500 lines
         test_file = tmp_path / "large.py"

@@ -99,7 +99,7 @@ class TestValidLicenseDetection:
     """Test detection and validation of valid licenses."""
 
     def test_no_license_defaults_to_community(self, use_community_tier):
-        """No license file should default to Community tier (k=1, nodes=20)."""
+        """No license file should default to Community tier (k=2, nodes=100)."""
         tier = _get_current_tier()
         assert (
             tier == "community"
@@ -107,18 +107,18 @@ class TestValidLicenseDetection:
 
         # Verify Community tier capabilities
         caps = get_tool_capabilities("get_graph_neighborhood", "community")
-        assert caps["limits"]["max_k"] == 1
-        assert caps["limits"]["max_nodes"] == 20
+        assert caps["limits"]["max_k"] == 2
+        assert caps["limits"]["max_nodes"] == 100
 
     def test_valid_pro_license_detected(self, use_pro_tier):
-        """Valid Pro license should be detected and allow k=5, nodes=100."""
+        """Valid Pro license should be detected and allow unlimited k and nodes."""
         tier = _get_current_tier()
         assert tier == "pro", f"Expected pro tier from license, got {tier}"
 
         # Verify Pro tier capabilities
         caps = get_tool_capabilities("get_graph_neighborhood", "pro")
-        assert caps["limits"]["max_k"] == 5
-        assert caps["limits"]["max_nodes"] == 100
+        assert caps["limits"]["max_k"] is None  # Unlimited
+        assert caps["limits"]["max_nodes"] is None  # Unlimited
 
     def test_valid_enterprise_license_detected(self, use_enterprise_tier):
         """Valid Enterprise license should be detected and allow unlimited k and nodes."""
@@ -190,27 +190,27 @@ class TestTierLimitEnforcement:
         )
 
         assert result.success
-        # Should be clamped to k=1, limiting traversal depth
-        # Verify by checking that node count doesn't exceed what k=1 would give
-        assert len(result.subgraph.nodes) <= 20  # Community max_nodes
+        # Should be clamped to k=2, limiting traversal depth
+        # Verify by checking that node count doesn't exceed what k=2 would give
+        assert len(result.subgraph.nodes) <= 100  # Community max_nodes
 
     def test_community_limits_defined(self, use_community_tier):
-        """Community tier should have k=1, max_nodes=20 limits."""
+        """Community tier should have k=2, max_nodes=100 limits."""
         tier = _get_current_tier()
         assert tier == "community"
 
         caps = get_tool_capabilities("get_graph_neighborhood", "community")
-        assert caps["limits"]["max_k"] == 1
-        assert caps["limits"]["max_nodes"] == 20
+        assert caps["limits"]["max_k"] == 2
+        assert caps["limits"]["max_nodes"] == 100
 
     def test_pro_limits_defined(self, use_pro_tier):
-        """Pro tier should have k=5, max_nodes=100 limits."""
+        """Pro tier should have unlimited k and nodes limits."""
         tier = _get_current_tier()
         assert tier == "pro"
 
         caps = get_tool_capabilities("get_graph_neighborhood", "pro")
-        assert caps["limits"]["max_k"] == 5
-        assert caps["limits"]["max_nodes"] == 100
+        assert caps["limits"]["max_k"] is None  # Unlimited
+        assert caps["limits"]["max_nodes"] is None  # Unlimited
 
     def test_enterprise_unlimited(self, use_enterprise_tier):
         """Enterprise tier should have unlimited/very high limits."""

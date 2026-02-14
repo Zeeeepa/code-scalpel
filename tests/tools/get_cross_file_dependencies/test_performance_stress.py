@@ -83,14 +83,14 @@ class TestLargeProjectAnalysis:
         assert result.success is True
         # Should complete reasonably fast
         assert elapsed < 10.0, f"Community tier took {elapsed:.2f}s, expected <10s"
-        # Depth should be clamped to 1 for Community tier
-        assert result.transitive_depth <= 1
+        # Depth should be clamped to 3 for Community tier
+        assert result.transitive_depth <= 3
 
     @pytest.mark.asyncio
     async def test_pro_tier_handles_large_project_within_limits(
         self, tmp_path, pro_server
     ):
-        """Pro should limit analysis to 500 files max."""
+        """Pro should handle large projects with unlimited depth/files."""
         main_file = self.create_large_project(tmp_path, num_files=600)
 
         start_time = time.time()
@@ -103,14 +103,11 @@ class TestLargeProjectAnalysis:
         elapsed = time.time() - start_time
 
         assert result.success is True
-        # Should clamp to 500 files
-        assert (
-            result.files_analyzed <= 500
-        ), f"Pro should limit to 500 files, analyzed {result.files_analyzed}"
+        # Pro has unlimited files — just verify completion
         # Pro should complete within reasonable time
         assert elapsed < 30.0, f"Pro tier took {elapsed:.2f}s, expected <30s"
-        # Depth should be clamped to 5
-        assert result.transitive_depth <= 5
+        # Pro has unlimited depth — requested depth should pass through
+        assert result.transitive_depth <= 10
 
     @pytest.mark.asyncio
     async def test_enterprise_tier_handles_large_project_no_file_limit(
@@ -157,11 +154,11 @@ class TestDepthLimitEnforcement:
         return main_file
 
     @pytest.mark.asyncio
-    async def test_community_depth_clamped_to_1(self, tmp_path, community_server):
-        """Community max_depth should be clamped to 1 regardless of request."""
+    async def test_community_depth_clamped_to_3(self, tmp_path, community_server):
+        """Community max_depth should be clamped to 3 regardless of request."""
         main_file = self.create_deep_chain(tmp_path, depth=10)
 
-        # Request depth=10, should be clamped to 1
+        # Request depth=10, should be clamped to 3
         result = await community_server.get_cross_file_dependencies(
             target_file=str(main_file),
             target_symbol="main",
@@ -171,12 +168,12 @@ class TestDepthLimitEnforcement:
 
         assert result.success is True
         assert (
-            result.transitive_depth <= 1
-        ), f"Community should clamp depth to 1, got {result.transitive_depth}"
+            result.transitive_depth <= 3
+        ), f"Community should clamp depth to 3, got {result.transitive_depth}"
 
     @pytest.mark.asyncio
-    async def test_pro_depth_clamped_to_5(self, tmp_path, pro_server):
-        """Pro max_depth should be clamped to 5."""
+    async def test_pro_depth_unlimited(self, tmp_path, pro_server):
+        """Pro max_depth is unlimited — requested depth should pass through."""
         main_file = self.create_deep_chain(tmp_path, depth=10)
 
         result = await pro_server.get_cross_file_dependencies(
@@ -188,8 +185,8 @@ class TestDepthLimitEnforcement:
 
         assert result.success is True
         assert (
-            result.transitive_depth <= 5
-        ), f"Pro should clamp depth to 5, got {result.transitive_depth}"
+            result.transitive_depth <= 10
+        ), f"Pro unlimited — requested depth 10 should be honored, got {result.transitive_depth}"
 
     @pytest.mark.asyncio
     async def test_enterprise_respects_requested_depth(
@@ -227,8 +224,8 @@ class TestTruncationBehavior:
         return main_file
 
     @pytest.mark.asyncio
-    async def test_community_truncates_at_50_files(self, tmp_path, community_server):
-        """Community should truncate analysis when >50 files encountered."""
+    async def test_community_truncates_at_200_files(self, tmp_path, community_server):
+        """Community should truncate analysis when >200 files encountered."""
         main_file = self.create_wide_project(tmp_path, width=100)
 
         result = await community_server.get_cross_file_dependencies(
@@ -238,7 +235,7 @@ class TestTruncationBehavior:
         assert result.success is True
         # Should indicate truncation
         if result.truncated:
-            assert result.files_analyzed <= 50
+            assert result.files_analyzed <= 200
 
     @pytest.mark.asyncio
     async def test_pro_truncates_at_500_files(self, tmp_path, pro_server):

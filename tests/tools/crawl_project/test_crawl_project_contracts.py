@@ -19,8 +19,8 @@ async def test_community_enforces_limit_and_discovery_mode(
     assert result.success is True
 
     # Community limit should cap analyzed files
-    assert result.summary.total_files <= 100
-    assert len(result.files) <= 100
+    assert result.summary.total_files <= 500
+    assert len(result.files) <= 500
 
     # Discovery mode should not include deep function/class details
     assert result.summary.total_functions == 0
@@ -96,5 +96,5 @@ async def test_invalid_tier_env_falls_back_to_community_limits(
     assert result.success is True
 
     # Fallback should enforce community limits when license invalid/missing
-    assert result.summary.total_files <= 100
-    assert len(result.files) <= 100
+    assert result.summary.total_files <= 500
+    assert len(result.files) <= 500

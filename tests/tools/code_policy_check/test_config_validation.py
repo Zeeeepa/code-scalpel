@@ -49,9 +49,12 @@ class TestConfigurationLoading:
         assert "limits" in enterprise_caps, "limits not in Enterprise capabilities"
 
         # Verify tier progression (limits increase or become unlimited)
-        assert community_caps["limits"]["max_files"] < pro_caps["limits"].get(
-            "max_files", float("inf")
-        ), "Pro max_files should be higher than Community"
+        community_max = community_caps["limits"]["max_files"]
+        pro_max = pro_caps["limits"].get("max_files")
+        # Pro should have unlimited (None/-1) or higher than Community
+        assert (
+            pro_max is None or pro_max == -1 or pro_max > community_max
+        ), f"Pro max_files should be unlimited or > Community ({community_max}), got {pro_max}"
 
     def test_community_max_files_100_from_config(self):
         """
@@ -81,35 +84,41 @@ class TestConfigurationLoading:
             caps["limits"]["max_rules"] == 50
         ), f"Community max_rules should be 50 (from limits.toml), got {caps['limits'].get('max_rules')}"
 
-    def test_pro_max_files_1000_from_config(self):
+    def test_pro_max_files_unlimited_from_config(self):
         """
-        Verify Pro tier max_files = 1000 (NOT unlimited) per .code-scalpel/limits.toml.
+        Verify Pro tier has unlimited files per .code-scalpel/limits.toml.
 
-        Configuration source: .code-scalpel/limits.toml:250-254
+        Configuration source: .code-scalpel/limits.toml:206-209
         [pro.code_policy_check]
-        max_files = 1000
+        max_files = -1  # Unlimited
 
-        CRITICAL: Pro is NOT unlimited - it has a 1000 file cap.
+        UPDATED [20260212]: Pro now has unlimited limits (matches Enterprise scale).
+        Value = advanced features, not scale caps.
         """
         caps = get_tool_capabilities("code_policy_check", "pro")
+        max_files = caps["limits"].get("max_files")
 
         assert (
-            caps["limits"]["max_files"] == 1000
-        ), f"Pro max_files should be 1000 (from limits.toml), got {caps['limits'].get('max_files')}"
+            max_files is None or max_files == -1
+        ), f"Pro max_files should be unlimited (None or -1), got {max_files}"
 
-    def test_pro_max_rules_200_from_config(self):
+    def test_pro_max_rules_unlimited_from_config(self):
         """
-        Verify Pro tier max_rules = 200 per .code-scalpel/limits.toml.
+        Verify Pro tier has unlimited rules per .code-scalpel/limits.toml.
 
-        Configuration source: .code-scalpel/limits.toml:250-254
+        Configuration source: .code-scalpel/limits.toml:206-209
         [pro.code_policy_check]
-        max_rules = 200
+        max_rules = -1  # Unlimited
+
+        UPDATED [20260212]: Pro now has unlimited limits (matches Enterprise scale).
+        Value = advanced features, not scale caps.
         """
         caps = get_tool_capabilities("code_policy_check", "pro")
+        max_rules = caps["limits"].get("max_rules")
 
         assert (
-            caps["limits"]["max_rules"] == 200
-        ), f"Pro max_rules should be 200 (from limits.toml), got {caps['limits'].get('max_rules')}"
+            max_rules is None or max_rules == -1
+        ), f"Pro max_rules should be unlimited (None or -1), got {max_rules}"
 
     def test_pro_compliance_disabled_from_config(self):
         """

@@ -18,17 +18,17 @@ class TestTierTransitions:
     async def test_community_to_pro_upgrade(
         self, community_server, pro_server, project_120_files
     ):
-        """Upgrade Community→Pro: file limit increases from 100→1000."""
-        # Community: Should be limited to 100 files
+        """Upgrade Community→Pro: file limit increases from 500→unlimited."""
+        # Community: Should be limited to 500 files
         com_result = await community_server.get_project_map(
             project_root=str(project_120_files), include_complexity=False
         )
 
         assert (
-            com_result.total_files <= 100
-        ), f"Community should limit to 100 files, got {com_result.total_files}"
+            com_result.total_files <= 500
+        ), f"Community should limit to 500 files, got {com_result.total_files}"
 
-        # Pro: Should handle all 120 files (under 1000 limit)
+        # Pro: Should handle all 120 files (unlimited)
         pro_result = await pro_server.get_project_map(
             project_root=str(project_120_files), include_complexity=False
         )
@@ -123,12 +123,12 @@ class TestTierTransitions:
 
     @pytest.mark.asyncio
     async def test_tier_limits_from_license(self, pro_server, project_120_files):
-        """Tier limits read from license: Pro allows 1000 files."""
+        """Tier limits read from license: Pro allows unlimited files."""
         result = await pro_server.get_project_map(
             project_root=str(project_120_files), include_complexity=False
         )
 
-        # Pro allows up to 1000 files, so all 120 should be counted
+        # Pro allows unlimited files, so all 120 should be counted
         assert (
             result.total_files >= 100
-        ), f"Pro tier should count all 120 files (limit 1000), got {result.total_files}"
+        ), f"Pro tier should count all 120 files (unlimited), got {result.total_files}"

@@ -105,17 +105,17 @@ class TestRenameSymbolProTier:
         assert "import_rename" in cap_set, "Pro should have import_rename capability"
 
     def test_cross_file_search_limits_pro(self, pro_tier):
-        """Verify Pro tier has bounded cross-file search limits."""
+        """Verify Pro tier has unlimited cross-file search limits."""
         capabilities = get_tool_capabilities("rename_symbol", "pro") or {}
         limits = capabilities.get("limits", {}) or {}
         max_searched = limits.get("max_files_searched")
         max_updated = limits.get("max_files_updated")
         assert (
-            max_searched == 500
-        ), f"Pro should have max_files_searched=500, got {max_searched}"
+            max_searched is None
+        ), f"Pro should have unlimited max_files_searched, got {max_searched}"
         assert (
-            max_updated == 200
-        ), f"Pro should have max_files_updated=200, got {max_updated}"
+            max_updated is None
+        ), f"Pro should have unlimited max_files_updated, got {max_updated}"
 
     def test_backup_and_rollback_support_pro(self, pro_tier):
         """Verify backup and rollback support for Pro tier."""
@@ -203,21 +203,21 @@ class TestRenameSymbolCrossTierComparison:
         assert comm_limits.get("max_files_searched") == 0
         assert comm_limits.get("max_files_updated") == 0
 
-        # Pro: bounded cross-file
-        assert pro_limits.get("max_files_searched") == 500
-        assert pro_limits.get("max_files_updated") == 200
+        # Pro: unlimited cross-file
+        assert pro_limits.get("max_files_searched") is None
+        assert pro_limits.get("max_files_updated") is None
 
     def test_pro_vs_enterprise_cross_file_limits(self, pro_tier, enterprise_tier):
-        """Verify Pro has bounded cross-file limits vs Enterprise has unlimited."""
+        """Verify Pro and Enterprise both have unlimited cross-file limits."""
         pro_caps = get_tool_capabilities("rename_symbol", "pro") or {}
         ent_caps = get_tool_capabilities("rename_symbol", "enterprise") or {}
 
         pro_limits = pro_caps.get("limits", {}) or {}
         ent_limits = ent_caps.get("limits", {}) or {}
 
-        # Pro: bounded
-        assert pro_limits.get("max_files_searched") == 500
-        assert pro_limits.get("max_files_updated") == 200
+        # Pro: unlimited
+        assert pro_limits.get("max_files_searched") is None
+        assert pro_limits.get("max_files_updated") is None
 
         # Enterprise: unlimited
         assert ent_limits.get("max_files_searched") is None

@@ -44,7 +44,7 @@ def community_server():
     """MCP server with Community tier license (properly mocked).
 
     [20260111_FIX] Uses patch to mock _get_current_tier() so tier limits
-    are actually enforced (max_depth=1, max_files=50).
+    are actually enforced (max_depth=3, max_files=200).
     [20260113_FIX] Cleans up tier state after use to prevent pollution.
     """
     from code_scalpel.mcp.server import get_cross_file_dependencies
@@ -75,7 +75,7 @@ def pro_server():
     """MCP server with Pro tier license (properly mocked).
 
     [20260111_FIX] Uses patch to mock _get_current_tier() so tier limits
-    are actually enforced (max_depth=5, max_files=500).
+    are actually enforced (max_depth=unlimited, max_files=unlimited).
     [20260113_FIX] Cleans up tier state after use to prevent pollution.
     """
     from code_scalpel.mcp.server import get_cross_file_dependencies
