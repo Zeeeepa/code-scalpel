@@ -148,7 +148,7 @@ class TestAnalyzeCodeProTier:
             "decorator_analysis",
         }
         assert expected.issubset(self.cap_set)
-        assert self.limit_mb == 10
+        assert self.limit_mb == 100
 
     def test_python_advanced_metrics(self):
         code = _python_sample() + "\n" + _python_sample()
@@ -300,7 +300,7 @@ class TestAnalyzeCodeConfigurationAlignment:
 
     def test_limits_match_config_pro(self):
         limits = get_tool_capabilities("analyze_code", "pro")["limits"]
-        assert limits["max_file_size_mb"] == 10
+        assert limits["max_file_size_mb"] == 100
 
     def test_limits_match_config_enterprise(self):
         limits = get_tool_capabilities("analyze_code", "enterprise")["limits"]

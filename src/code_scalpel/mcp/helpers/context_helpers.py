@@ -13,7 +13,9 @@ from typing import Any, cast
 from mcp.server.fastmcp import Context
 
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
-from code_scalpel.licensing import get_current_tier
+
+# [20260213_BUGFIX] Use protocol._get_current_tier which honors CODE_SCALPEL_TIER env var
+from code_scalpel.mcp.protocol import _get_current_tier as get_current_tier
 from code_scalpel.utilities.source_sanitizer import sanitize_python_source
 from code_scalpel.parsing.unified_parser import (
     parse_python_code,

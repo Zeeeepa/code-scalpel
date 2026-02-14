@@ -17,6 +17,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from tests.utils.tier_setup import activate_tier, clear_tier_caches
+
 # Register pytest plugins at root level (Pytest 9.0+ requires this to be in root conftest)
 pytest_plugins = ["tests.tools.rename_symbol.governance_profiles"]
 
@@ -100,6 +102,84 @@ def set_default_license_path():
             os.environ.setdefault("CODE_SCALPEL_LICENSE_PATH", str(candidate))
             os.environ.pop("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", None)
             break
+
+
+# ---------------------------------------------------------------------------
+# [20260213_FEATURE] Global tier cache clearing and tier fixtures
+# ---------------------------------------------------------------------------
+# Previously these only existed in tests/tools/tiers/conftest.py, causing
+# cache leakage for tests in other directories.  Now all tests get automatic
+# cache clearing and access to community_tier / pro_tier / enterprise_tier.
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def _clear_tier_cache_globally():
+    """Clear tier detection caches before AND after every test.
+
+    This prevents cross-test tier leakage due to module-level caches in:
+    - jwt_validator._LICENSE_VALIDATION_CACHE (24h TTL process-global cache)
+    - config_loader._config_cache (keyed on file mtime)
+    - protocol._LAST_VALID_LICENSE_TIER (grace-period variable)
+    - server._cached_tier (server-level cached tier)
+    """
+    clear_tier_caches()
+    yield
+    clear_tier_caches()
+
+
+@pytest.fixture
+def community_tier(monkeypatch):
+    """Activate Community tier for this test.
+
+    Removes any license path and sets CODE_SCALPEL_TIER=community.
+    Works reliably because:
+    1. Cache is cleared by autouse _clear_tier_cache_globally
+    2. protocol._get_current_tier() does min(requested, licensed) = community
+    """
+    activate_tier("community", monkeypatch=monkeypatch)
+    yield {"tier": "community", "license_path": None, "is_mocked": False}
+    clear_tier_caches()
+
+
+@pytest.fixture
+def pro_tier(monkeypatch):
+    """Activate Pro tier for this test using a real license from tests/licenses/.
+
+    Falls back to monkeypatch mock if no Pro license file is available.
+    """
+    license_path = activate_tier("pro", skip_if_missing=False, monkeypatch=monkeypatch)
+    if license_path is None:
+        monkeypatch.setattr(
+            "code_scalpel.mcp.protocol._get_current_tier", lambda: "pro"
+        )
+    yield {
+        "tier": "pro",
+        "license_path": license_path,
+        "is_mocked": license_path is None,
+    }
+    clear_tier_caches()
+
+
+@pytest.fixture
+def enterprise_tier(monkeypatch):
+    """Activate Enterprise tier for this test using a real license from tests/licenses/.
+
+    Falls back to monkeypatch mock if no Enterprise license file is available.
+    """
+    license_path = activate_tier(
+        "enterprise", skip_if_missing=False, monkeypatch=monkeypatch
+    )
+    if license_path is None:
+        monkeypatch.setattr(
+            "code_scalpel.mcp.protocol._get_current_tier", lambda: "enterprise"
+        )
+    yield {
+        "tier": "enterprise",
+        "license_path": license_path,
+        "is_mocked": license_path is None,
+    }
+    clear_tier_caches()
 
 
 # [20251214_FEATURE] v1.5.3 - Ensure osv_client is imported early
@@ -509,3 +589,82 @@ def use_license(monkeypatch, hs256_license_state_paths, set_hs256_license_env):
         set_hs256_license_env(license_path=str(path))
 
     return _apply
+
+
+# =====================================================================
+# Tier Fixtures (Moved from tests/tools/tiers/conftest.py)
+# =====================================================================
+# [20260212_REFACTOR] Centralized tier fixtures for integration testing access.
+
+
+@pytest.fixture(autouse=True)
+def clear_tier_cache():
+    """
+    Clear tier detection cache before and after each test.
+
+    This ensures that tier environment variable changes or mocked tier
+    functions work correctly across sequential tests without cache leakage.
+    """
+    # Clear the JWT validation cache BEFORE test
+    from code_scalpel.licensing import jwt_validator
+
+    jwt_validator._LICENSE_VALIDATION_CACHE = None
+
+    # Clear the config loader cache BEFORE test
+    from code_scalpel.licensing import config_loader
+
+    config_loader.clear_cache()
+
+    yield
+
+    # Cleanup AFTER test
+    jwt_validator._LICENSE_VALIDATION_CACHE = None
+    config_loader.clear_cache()
+
+
+@pytest.fixture
+def tier_limits():
+    """
+    Fixture that loads tier limits from configuration (limits.toml).
+
+    Provides a mapping of tier -> tool -> limits dict.
+    This ensures tests read from the actual configuration, not hardcoded values.
+    """
+    from code_scalpel.licensing.features import get_tool_capabilities
+
+    tiers = ["community", "pro", "enterprise"]
+    # All 22 tools from limits.toml
+    tools = [
+        "analyze_code",
+        "code_policy_check",
+        "crawl_project",
+        "cross_file_security_scan",
+        "extract_code",
+        "generate_unit_tests",
+        "get_call_graph",
+        "get_cross_file_dependencies",
+        "get_file_context",
+        "get_graph_neighborhood",
+        "get_project_map",
+        "get_symbol_references",
+        "rename_symbol",
+        "scan_dependencies",
+        "security_scan",
+        "simulate_refactor",
+        "symbolic_execute",
+        "type_evaporation_scan",
+        "unified_sink_detect",
+        "update_symbol",
+        "validate_paths",
+        "verify_policy_integrity",
+    ]
+
+    limits_dict = {}
+    for tier in tiers:
+        limits_dict[tier] = {}
+        for tool in tools:
+            capabilities = get_tool_capabilities(tool, tier) or {}
+            limits = capabilities.get("limits", {}) or {}
+            limits_dict[tier][tool] = limits
+
+    return limits_dict

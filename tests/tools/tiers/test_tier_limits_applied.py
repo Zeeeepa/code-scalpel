@@ -10,8 +10,8 @@ from code_scalpel.licensing.features import get_tool_capabilities
 @pytest.mark.parametrize(
     "tier,expected_max_k,expected_max_nodes",
     [
-        ("community", 1, 20),
-        ("pro", 5, 100),  # Pro has higher limits
+        ("community", 2, 100),
+        ("pro", None, None),  # Pro is unlimited
         ("enterprise", None, None),  # Enterprise is unlimited
     ],
 )

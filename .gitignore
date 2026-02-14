@@ -1,7 +1,7 @@
 # Website documentation (built locally, deployed to codescalpel.dev)
 /docs/website/
 /demos/
-
+/website/
 # Python
 __pycache__/
 *.py[cod]

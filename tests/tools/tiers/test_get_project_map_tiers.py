@@ -72,8 +72,8 @@ class TestOutputMetadataFieldsCommunity:
         assert result.success is True
         assert result.tier_applied == "community"
 
-    def test_max_files_applied_is_100(self, temp_project_dir):
-        """Community tier: max_files_applied should be 100."""
+    def test_max_files_applied_is_500(self, temp_project_dir):
+        """Community tier: max_files_applied should be 500."""
         result = _get_project_map_sync(
             project_root=temp_project_dir,
             include_complexity=True,
@@ -82,10 +82,10 @@ class TestOutputMetadataFieldsCommunity:
             tier="community",
         )
         assert result.success is True
-        assert result.max_files_applied == 100
+        assert result.max_files_applied == 500
 
-    def test_max_modules_applied_is_50(self, temp_project_dir):
-        """Community tier: max_modules_applied should be 50."""
+    def test_max_modules_applied_is_100(self, temp_project_dir):
+        """Community tier: max_modules_applied should be 100."""
         result = _get_project_map_sync(
             project_root=temp_project_dir,
             include_complexity=True,
@@ -94,7 +94,7 @@ class TestOutputMetadataFieldsCommunity:
             tier="community",
         )
         assert result.success is True
-        assert result.max_modules_applied == 50
+        assert result.max_modules_applied == 100
 
     def test_pro_features_enabled_is_false(self, temp_project_dir):
         """Community tier: pro_features_enabled should be False."""
@@ -152,8 +152,8 @@ class TestOutputMetadataFieldsPro:
         assert result.success is True
         assert result.tier_applied == "pro"
 
-    def test_max_files_applied_is_1000(self, temp_project_dir):
-        """Pro tier: max_files_applied should be 1000."""
+    def test_max_files_applied_is_none(self, temp_project_dir):
+        """Pro tier: max_files_applied should be None (unlimited)."""
         result = _get_project_map_sync(
             project_root=temp_project_dir,
             include_complexity=True,
@@ -162,10 +162,10 @@ class TestOutputMetadataFieldsPro:
             tier="pro",
         )
         assert result.success is True
-        assert result.max_files_applied == 1000
+        assert result.max_files_applied is None
 
-    def test_max_modules_applied_is_200(self, temp_project_dir):
-        """Pro tier: max_modules_applied should be 200."""
+    def test_max_modules_applied_is_1000(self, temp_project_dir):
+        """Pro tier: max_modules_applied should be 1000."""
         result = _get_project_map_sync(
             project_root=temp_project_dir,
             include_complexity=True,
@@ -174,7 +174,7 @@ class TestOutputMetadataFieldsPro:
             tier="pro",
         )
         assert result.success is True
-        assert result.max_modules_applied == 200
+        assert result.max_modules_applied == 1000
 
     def test_pro_features_enabled_is_true(self, temp_project_dir):
         """Pro tier: pro_features_enabled should be True."""

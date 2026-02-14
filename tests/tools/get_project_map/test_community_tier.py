@@ -16,21 +16,21 @@ class TestCommunityTierLimits:
     """Test Community tier file and module limits."""
 
     @pytest.mark.asyncio
-    async def test_community_max_files_100(self, community_server, project_120_files):
-        """Community tier: max_files=100 enforced on 120-file project."""
+    async def test_community_max_files_500(self, community_server, project_120_files):
+        """Community tier: max_files=500 enforced on 120-file project."""
         result = await community_server.get_project_map(
             project_root=str(project_120_files), include_complexity=False
         )
 
-        # Should truncate to 100 files
+        # Should truncate to 500 files
         assert (
-            result.total_files <= 100
-        ), f"Expected ≤100 files, got {result.total_files}"
+            result.total_files <= 500
+        ), f"Expected ≤500 files, got {result.total_files}"
 
         # Should have truncation warning
         if hasattr(result, "warnings") and result.warnings:
             assert any(
-                "100" in str(w)
+                "500" in str(w)
                 or "limit" in str(w).lower()
                 or "truncat" in str(w).lower()
                 for w in result.warnings

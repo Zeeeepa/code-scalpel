@@ -1,11 +1,13 @@
 """
 [20251214_TEST] REST API server endpoint coverage.
 [20260201_BUGFIX] Skip entire module if codescalpel_web not installed.
+[20260212_BUGFIX] Skip module before imports to avoid collection errors.
 """
 
 import pytest
 
 # Skip this entire module if optional packages aren't installed
+pytest.importorskip("codescalpel_web", reason="Requires pip install codescalpel[web]")
 pytest.importorskip("flask", reason="Requires pip install codescalpel[web]")
 
 import json

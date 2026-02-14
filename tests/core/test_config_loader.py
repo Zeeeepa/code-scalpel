@@ -227,8 +227,8 @@ max_depth = 999
 @pytest.mark.parametrize(
     "tier,expected_max_depth",
     [
-        ("community", 0),
-        ("pro", 1),
+        ("community", 1),
+        ("pro", None),  # -1 sentinel in limits.toml → None
         ("enterprise", None),  # -1 sentinel in limits.toml → None
     ],
 )

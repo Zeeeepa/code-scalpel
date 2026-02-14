@@ -1,13 +1,14 @@
 """Pro tier tests for get_project_map.
 
 Validates:
-- max_files=1000 limit enforced
-- max_modules=200 limit enforced
+- max_files=unlimited (None) - no file truncation
+- max_modules=1000 limit enforced
 - detail_level='detailed' with advanced fields
 - Pro features accessible
 - Enterprise features not available
 
 [20260103_TEST] v3.3.1 - Pro tier enforcement and features
+[20260212_BUGFIX] Updated max_files from 1000 to unlimited per limits.toml
 """
 
 import pytest
@@ -17,22 +18,22 @@ class TestProTierLimits:
     """Test Pro tier file and module limits."""
 
     @pytest.mark.asyncio
-    async def test_pro_max_files_1000(self, pro_server, project_1200_files):
-        """Pro tier: max_files=1000 enforced on 1200-file project."""
+    async def test_pro_max_files_unlimited(self, pro_server, project_1200_files):
+        """Pro tier: max_files=unlimited (None), no truncation."""
         result = await pro_server.get_project_map(
             project_root=str(project_1200_files), include_complexity=False
         )
 
-        # Should truncate to 1000 files
+        # Pro tier has unlimited files — all 1200 should be included
         assert (
-            result.total_files <= 1000
-        ), f"Expected ≤1000 files, got {result.total_files}"
+            result.total_files >= 1200
+        ), f"Expected ≥1200 files (unlimited), got {result.total_files}"
 
-        # Should have truncation warning
+        # Should NOT have truncation warning
         if hasattr(result, "warnings") and result.warnings:
-            assert any(
-                "1000" in str(w) or "limit" in str(w).lower() for w in result.warnings
-            ), f"Expected file limit warning in: {result.warnings}"
+            assert not any(
+                "truncat" in str(w).lower() for w in result.warnings
+            ), f"Pro unlimited should not truncate, got warnings: {result.warnings}"
 
     @pytest.mark.asyncio
     async def test_pro_max_modules_200(self, pro_server, project_250_modules):

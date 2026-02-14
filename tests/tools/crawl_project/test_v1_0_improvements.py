@@ -103,7 +103,8 @@ class TestConfigAlignment:
 
         pro_caps = TOOL_CAPABILITIES["crawl_project"]["pro"]
         # max_files should be None (unlimited) for Pro tier
-        assert pro_caps["limits"]["max_files"] is None
+        # Pro crawl_project in limits.toml omits max_files (unlimited)
+        assert pro_caps["limits"].get("max_files") is None
 
     def test_enterprise_tier_unlimited_files_in_features(self):
         """Enterprise tier should have unlimited max_files in features.py."""
@@ -111,15 +112,16 @@ class TestConfigAlignment:
 
         enterprise_caps = TOOL_CAPABILITIES["crawl_project"]["enterprise"]
         # max_files should be None (unlimited) for Enterprise tier
-        assert enterprise_caps["limits"]["max_files"] is None
+        # Enterprise crawl_project in limits.toml omits max_files (unlimited)
+        assert enterprise_caps["limits"].get("max_files") is None
 
     def test_community_tier_has_file_limit_in_features(self):
         """Community tier should have max_files limit in features.py."""
         from code_scalpel.licensing.features import TOOL_CAPABILITIES
 
         community_caps = TOOL_CAPABILITIES["crawl_project"]["community"]
-        # Community should have a limit (100)
-        assert community_caps["limits"]["max_files"] == 100
+        # Community should have a limit (500)
+        assert community_caps["limits"]["max_files"] == 500
 
     def test_limits_toml_pro_tier_no_max_files(self):
         """Pro tier in limits.toml should NOT have max_files (removed in v1.0 fix)."""
@@ -264,7 +266,7 @@ class TestModelSchema:
             ),
             tier_applied="community",
             crawl_mode="discovery",
-            files_limit_applied=100,
+            files_limit_applied=500,
         )
 
         # Should serialize without error

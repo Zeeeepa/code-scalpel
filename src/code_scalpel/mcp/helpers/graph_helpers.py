@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Any, TYPE_CHECKING, Set, cast
 
 from code_scalpel.licensing.features import get_tool_capabilities
-from code_scalpel.licensing.tier_detector import (
-    get_current_tier as _get_current_tier,
-)
+
+# [20260213_BUGFIX] Use protocol._get_current_tier which honors CODE_SCALPEL_TIER env var
+# (tier_detector.get_current_tier bypasses JWT validation downgrade logic)
+from code_scalpel.mcp.protocol import _get_current_tier
 from code_scalpel.parsing import ParsingError, parse_python_code
 from code_scalpel.mcp.models.graph import (
     AliasResolutionModel,

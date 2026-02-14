@@ -1,6 +1,7 @@
 """MCP envelope error handling for tier-limited features.
 
 [20251228_TEST] Ensures upgrade_required errors include upgrade URL and no stack traces.
+[20260212_TEST] Community max_depth=1 but include_cross_file_deps remains gated to Pro+.
 """
 
 from __future__ import annotations
@@ -12,6 +13,11 @@ import pytest
 async def test_extract_code_cross_file_deps_is_upgrade_required_in_community(
     monkeypatch,
 ):
+    """Community tier blocks cross_file_deps (gated separately from max_depth).
+
+    [20260212_TEST] include_cross_file_deps=false in community limits.toml,
+    so requesting cross-file deps should still return an upgrade error.
+    """
     # Force community tier (no license)
     monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
     monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
@@ -35,27 +41,13 @@ async def test_extract_code_cross_file_deps_is_upgrade_required_in_community(
     result_dict = result.model_dump() if hasattr(result, "model_dump") else result
     data = result_dict.get("data") or result_dict
 
-    # Debug output in case of failure
-    if data.get("success") is not False:
-        import json
-
-        print(f"DEBUG DATA: {json.dumps(data, default=str)}")
-
-    assert data.get("success") is False
-
-    # Check for error message OR upgrade hints
-    error_msg = data.get("error")
-    upgrade_hints = data.get("upgrade_hints")
-
     assert (
-        error_msg is not None or upgrade_hints is not None
-    ), f"Expected error or upgrade_hints. Got data: {data}"
+        data.get("success") is False
+    ), f"Community should block cross_file_deps. Got: {data}"
 
-    if error_msg:
-        assert "cross_file_deps" in error_msg or "PRO" in error_msg
-        # Sanity: no stack trace markers in the user-facing error string
-        assert "Traceback" not in error_msg
-
-    if upgrade_hints:
-        # Verify hints exist
-        assert len(upgrade_hints) > 0
+    # Check for error message about cross_file_deps requiring Pro
+    error_msg = data.get("error")
+    assert error_msg is not None, f"Expected error message. Got data: {data}"
+    assert "cross_file_deps" in error_msg or "PRO" in error_msg
+    # Sanity: no stack trace markers in the user-facing error string
+    assert "Traceback" not in error_msg

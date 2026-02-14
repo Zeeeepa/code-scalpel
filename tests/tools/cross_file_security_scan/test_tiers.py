@@ -4,8 +4,8 @@ Tier System Tests for Cross-File Security Scan.
 [20260103_TEST] v3.1.0+ - Comprehensive tier enforcement testing
 
 Tests validate:
-    ✅ Community tier: max_depth=3, max_modules=10 enforced
-    ✅ Pro tier: max_depth=10, max_modules=100 enforced
+    ✅ Community tier: max_depth=5, max_modules=50 enforced
+    ✅ Pro tier: unlimited depth/modules
     ✅ Enterprise tier: unlimited depth/modules
     ✅ Feature gating: Pro/Enterprise tier features properly gated
     ✅ Invalid license fallback: Falls back to Community tier
@@ -92,10 +92,10 @@ async def test_cross_file_security_scan_community_enforces_depth_cap(
     tmp_path: Path, monkeypatch
 ):
     """
-    [20260103_TEST] Community tier enforces strict depth cap of 3.
+    [20260103_TEST] Community tier enforces strict depth cap of 5.
 
     Scenario: Deep call chain (5 hops) with SQL injection
-    Expected: Community tier clamps max_depth to 3, preventing detection
+    Expected: Community tier clamps max_depth to 5
     """
     monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
@@ -136,18 +136,18 @@ async def test_cross_file_security_scan_community_enforces_depth_cap(
     # Verify Community tier clamped the limits
     assert r.success is True
     assert (
-        state["effective_max_depth"] == 3
-    ), "Community tier should enforce max_depth=3"
+        state["effective_max_depth"] == 5
+    ), "Community tier should enforce max_depth=5"
     assert (
-        state["effective_max_modules"] == 10
-    ), "Community tier should enforce max_modules=10"
+        state["effective_max_modules"] == 50
+    ), "Community tier should enforce max_modules=50"
 
 
 async def test_community_tier_cannot_detect_deep_chain_vuln(
     tmp_path: Path, monkeypatch
 ):
     """
-    [20260103_TEST] Community tier may detect vulnerabilities despite depth=3 cap.
+    [20260103_TEST] Community tier may detect vulnerabilities despite depth=5 cap.
 
     Note: Current implementation may report vulnerabilities regardless of depth cap,
     but the depth cap is enforced in the analyzer's max_depth parameter.
@@ -185,8 +185,8 @@ async def test_community_tier_cannot_detect_deep_chain_vuln(
     # Verify Community tier enforces depth cap in analyzer
     assert r.success is True
     assert (
-        state["effective_max_depth"] == 3
-    ), "Community tier should enforce max_depth=3"
+        state["effective_max_depth"] == 5
+    ), "Community tier should enforce max_depth=5"
     # Note: Tool may still report vulnerabilities even with depth cap
     # The important thing is that the depth parameter is clamped
 
@@ -303,10 +303,12 @@ async def test_cross_file_security_scan_pro_clamps_limits(tmp_path: Path, monkey
     )
 
     assert r.success is True
-    assert state["effective_max_depth"] == 10, "Pro tier should enforce max_depth=10"
     assert (
-        state["effective_max_modules"] == 100
-    ), "Pro tier should enforce max_modules=100"
+        state["effective_max_depth"] == 50
+    ), "Pro tier should pass through requested max_depth (unlimited)"
+    assert (
+        state["effective_max_modules"] == 999
+    ), "Pro tier should pass through requested max_modules (unlimited)"
 
 
 async def test_pro_tier_confidence_scoring_available(tmp_path: Path, monkeypatch):

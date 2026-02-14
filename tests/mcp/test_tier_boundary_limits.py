@@ -237,7 +237,7 @@ async def test_get_call_graph_depth_is_clamped_at_community_but_not_pro(
     project_root = tmp_path / "proj"
     _write_fixture_project(project_root)
 
-    # Community: depth is clamped to 3 per limits.toml.
+    # [20260212_TEST] Community: depth is clamped to 10 per rebalanced limits.toml.
     async with _stdio_session(project_root=project_root) as session:
         payload = await session.call_tool(
             "get_call_graph",
@@ -255,7 +255,7 @@ async def test_get_call_graph_depth_is_clamped_at_community_but_not_pro(
         assert data is not None
         assert data.get("success") is True
         # CallGraphResultModel exposes depth_limit.
-        assert data.get("depth_limit") == 3
+        assert data.get("depth_limit") == 10
 
     # Pro: depth should not be clamped for these values (pro max_depth=50 in limits.toml).
     license_path = write_hs256_license_jwt(
@@ -287,8 +287,8 @@ async def test_get_call_graph_depth_is_clamped_at_community_but_not_pro(
         _assert_tier(env_json, "pro")
         assert data is not None
         assert data.get("success") is True
-        # Pro is not clamped at 10; 999 is clamped to 50 in tool logic.
-        expected = requested_depth if requested_depth <= 50 else 50
+        # [20260212_TEST] Pro has unlimited depth (-1 in limits.toml); no clamping.
+        expected = requested_depth
         assert data.get("depth_limit") == expected
 
 
@@ -626,17 +626,18 @@ def _write_large_project(root: Path, num_functions: int) -> None:
     )
 
 
-async def test_get_call_graph_community_50_node_limit(
+async def test_get_call_graph_community_200_node_limit(
     tmp_path: Path,
     hs256_test_secret,
     write_hs256_license_jwt,
 ):
-    """Community tier enforces 50-node limit for get_call_graph."""
-    # Create project with 75 functions (exceeds Community limit of 50)
+    """Community tier enforces 200-node limit for get_call_graph."""
+    # [20260212_TEST] Updated to match rebalanced limits.toml (200 nodes)
+    # Create project with 250 functions (exceeds Community limit of 200)
     project_root = tmp_path / "large_proj"
-    _write_large_project(project_root, num_functions=75)
+    _write_large_project(project_root, num_functions=250)
 
-    # Community: should truncate to 50 nodes
+    # [20260212_TEST] Community: should truncate to 200 nodes per rebalanced limits.toml
     async with _stdio_session(project_root=project_root) as session:
         payload = await session.call_tool(
             "get_call_graph",
@@ -657,20 +658,22 @@ async def test_get_call_graph_community_50_node_limit(
         # Verify node truncation
         assert (
             data.get("nodes_truncated") is True
-        ), "Community should truncate at 50 nodes"
+        ), "Community should truncate at 200 nodes"
 
-        # Verify nodes list is capped at 50
+        # Verify nodes list is capped at 200
         nodes = data.get("nodes", [])
-        assert len(nodes) <= 50, f"Community exceeded 50-node limit: {len(nodes)} nodes"
         assert (
-            len(nodes) == 50
-        ), f"Community should return exactly 50 nodes when truncated, got {len(nodes)}"
+            len(nodes) <= 200
+        ), f"Community exceeded 200-node limit: {len(nodes)} nodes"
+        assert (
+            len(nodes) == 200
+        ), f"Community should return exactly 200 nodes when truncated, got {len(nodes)}"
 
         # Verify truncation warning
         assert "truncation_warning" in data, "Should include truncation warning"
         warning = data["truncation_warning"]
         assert (
-            "50" in warning or "node" in warning.lower() or "limit" in warning.lower()
+            "200" in warning or "node" in warning.lower() or "limit" in warning.lower()
         ), f"Warning should mention limit: {warning}"
 
 
@@ -993,9 +996,10 @@ async def test_get_call_graph_invalid_license_fallback_to_community(
             f"Invalid license should fallback to Community, got {env_json.get('tier')}"
         )
 
+        # [20260212_TEST] Updated to match rebalanced limits.toml
         # Should apply Community limits
         assert (
-            data.get("depth_limit") == 3
+            data.get("depth_limit") == 10
         ), "Invalid license should enforce Community depth limit"
         assert data.get("success") is True
 

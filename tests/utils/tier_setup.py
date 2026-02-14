@@ -68,6 +68,9 @@ def clear_tier_caches() -> None:
     """Clear tier detection caches to ensure fresh evaluation per test.
 
     Safe to call before and after tests. Avoids cross-test leakage.
+
+    [20260213_BUGFIX] Also clears _LAST_VALID_LICENSE_TIER in protocol.py
+    to prevent grace-period tier leakage across tests.
     """
     try:
         from code_scalpel.licensing import jwt_validator, config_loader  # type: ignore
@@ -83,6 +86,14 @@ def clear_tier_caches() -> None:
 
         if hasattr(server, "_cached_tier"):
             setattr(server, "_cached_tier", None)
+    except Exception:
+        pass
+    try:
+        # [20260213_BUGFIX] Reset protocol-level license grace state
+        from code_scalpel.mcp import protocol  # type: ignore
+
+        protocol._LAST_VALID_LICENSE_TIER = None  # type: ignore[attr-defined]
+        protocol._LAST_VALID_LICENSE_AT = None  # type: ignore[attr-defined]
     except Exception:
         pass
 

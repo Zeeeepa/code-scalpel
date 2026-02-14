@@ -11,11 +11,11 @@ from code_scalpel.mcp.server import get_graph_neighborhood
 
 
 class TestCommunityTierLimits:
-    """Test Community tier limits: k=1 max, nodes=20 max."""
+    """Test Community tier limits: k=2 max, nodes=100 max."""
 
     @pytest.mark.asyncio
     async def test_community_k_limit_enforced(self, tmp_path, community_tier):
-        """Community tier should enforce max_k=1 limit from limits.toml."""
+        """Community tier should enforce max_k=2 limit from limits.toml."""
         # Create test project
         main_file = tmp_path / "main.py"
         main_file.write_text(
@@ -34,27 +34,27 @@ def core():
 """
         )
 
-        # Request k=5 (beyond Community's limit of k=1)
+        # Request k=5 (beyond Community's limit of k=2)
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
             k=5,
-            max_nodes=50,
+            max_nodes=200,
             project_root=str(tmp_path),
         )
 
-        # Should succeed, but limited to k=1
+        # Should succeed, but limited to k=2
         assert result.success is True
-        # Community should limit depth to 1
+        # Community should limit depth to 2
         if result.nodes:
             max_depth = max((n.depth for n in result.nodes), default=0)
-            # Community k=1 means max depth should be 1
+            # Community k=2 means max depth should be 2
             assert (
-                max_depth <= 1
-            ), f"Community limited k should keep max depth ≤ 1, got {max_depth}"
+                max_depth <= 2
+            ), f"Community limited k should keep max depth ≤ 2, got {max_depth}"
 
     @pytest.mark.asyncio
     async def test_community_nodes_limit_enforced(self, tmp_path, community_tier):
-        """Community tier should enforce max_nodes=20 limit."""
+        """Community tier should enforce max_nodes=100 limit."""
         main_file = tmp_path / "main.py"
         main_file.write_text(
             """
@@ -73,15 +73,15 @@ def func_c(): pass
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
             k=2,
-            max_nodes=100,  # Request more than Community allows
+            max_nodes=200,  # Request more than Community allows
             project_root=str(tmp_path),
         )
 
-        # Should truncate to 20 nodes max for Community
+        # Should truncate to 100 nodes max for Community
         if result.nodes is not None:
             assert (
-                len(result.nodes) <= 20
-            ), f"Community max_nodes is 20, got {len(result.nodes)}"
+                len(result.nodes) <= 100
+            ), f"Community max_nodes is 100, got {len(result.nodes)}"
 
     @pytest.mark.asyncio
     async def test_community_lacks_semantic_neighbors(self, tmp_path, community_tier):
@@ -92,7 +92,7 @@ def func_c(): pass
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::func",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             project_root=str(tmp_path),
         )
 
@@ -115,7 +115,7 @@ def func_c(): pass
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::func",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             project_root=str(tmp_path),
         )
 
@@ -143,7 +143,7 @@ def helper():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             project_root=str(tmp_path),
         )
 
@@ -163,7 +163,7 @@ def helper():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::func",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             project_root=str(tmp_path),
         )
 
@@ -174,11 +174,11 @@ def helper():
 
 
 class TestProTierCapabilities:
-    """Test Pro tier capabilities: k=5 max, nodes=100 max, semantic neighbors, logical relationships."""
+    """Test Pro tier capabilities: unlimited k, unlimited nodes, semantic neighbors, logical relationships."""
 
     @pytest.mark.asyncio
     async def test_pro_k_limit_extended(self, tmp_path, pro_tier):
-        """Pro tier should support k=5 (vs Community k=1)."""
+        """Pro tier should support unlimited k depth."""
         main_file = tmp_path / "main.py"
         main_file.write_text(
             """
@@ -205,20 +205,20 @@ def depth5():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
             k=5,
-            max_nodes=100,
+            max_nodes=500,
             project_root=str(tmp_path),
         )
 
         assert result.success is True
-        # Pro allows k=5, should have deeper nodes
+        # Pro allows unlimited k, should have deeper nodes
         if result.nodes:
             max_depth = max((n.depth for n in result.nodes), default=0)
-            # Pro k=5 should support depth up to 5
-            assert max_depth <= 5, f"Pro k=5 should support depth ≤ 5, got {max_depth}"
+            # Pro unlimited k should support depth up to 5
+            assert max_depth <= 5, f"Pro should support depth ≤ 5, got {max_depth}"
 
     @pytest.mark.asyncio
     async def test_pro_nodes_limit_extended(self, tmp_path, pro_tier):
-        """Pro tier should support max_nodes=100 (vs Community 20)."""
+        """Pro tier should support unlimited nodes."""
         main_file = tmp_path / "main.py"
         main_file.write_text(
             """
@@ -232,15 +232,14 @@ def func_a(): pass
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
             k=2,
-            max_nodes=100,
+            max_nodes=500,
             project_root=str(tmp_path),
         )
 
-        # Pro allows up to 100 nodes
+        # Pro allows unlimited nodes
         if result.nodes is not None:
-            assert (
-                len(result.nodes) <= 100
-            ), f"Pro max_nodes is 100, got {len(result.nodes)}"
+            # No specific limit to check, just verify it works
+            assert len(result.nodes) >= 0
 
     @pytest.mark.asyncio
     async def test_pro_has_advanced_neighborhood_capability(self, tmp_path, pro_tier):
@@ -251,7 +250,7 @@ def func_a(): pass
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::func",
             k=1,
-            max_nodes=50,
+            max_nodes=500,
             project_root=str(tmp_path),
         )
 
@@ -279,7 +278,7 @@ def process_user():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::process_order",
             k=1,
-            max_nodes=50,
+            max_nodes=500,
             project_root=str(tmp_path),
         )
 
@@ -303,7 +302,7 @@ def check_stock():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::validate_order",
             k=1,
-            max_nodes=50,
+            max_nodes=500,
             project_root=str(tmp_path),
         )
 
@@ -327,7 +326,7 @@ def helper():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
             k=1,
-            max_nodes=50,
+            max_nodes=500,
             project_root=str(tmp_path),
         )
 
@@ -528,7 +527,7 @@ class TestCrossTierComparison:
 
     @pytest.mark.asyncio
     async def test_community_vs_pro_k_limit_difference(self, tmp_path):
-        """Compare Community k=1 vs Pro k=5 on same graph."""
+        """Compare Community k=2 vs Pro unlimited k on same graph."""
         main_file = tmp_path / "main.py"
         main_file.write_text(
             """
@@ -575,8 +574,8 @@ def d5(): pass
             ), "Pro should have deeper nodes than Community"
 
     @pytest.mark.asyncio
-    async def test_community_truncation_at_20_nodes(self, tmp_path, community_tier):
-        """Community tier should truncate at max_nodes=20."""
+    async def test_community_truncation_at_100_nodes(self, tmp_path, community_tier):
+        """Community tier should truncate at max_nodes=100."""
         main_file = tmp_path / "main.py"
         main_file.write_text(
             """
@@ -599,7 +598,7 @@ def f3(): pass
         )
 
         assert result.success is True
-        if result.nodes is not None and len(result.nodes) > 20:
+        if result.nodes is not None and len(result.nodes) > 100:
             # Should be truncated
             assert result.truncated is True
             assert result.truncation_warning is not None
@@ -627,7 +626,7 @@ def compute():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::calculate",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             project_root=str(tmp_path),
         )
 
@@ -657,7 +656,7 @@ def verify():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::validate",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             project_root=str(tmp_path),
         )
 
@@ -679,7 +678,7 @@ def verify():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::func",
             k=1,
-            max_nodes=50,
+            max_nodes=500,
             project_root=str(tmp_path),
         )
 
@@ -697,7 +696,7 @@ def verify():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::func",
             k=1,
-            max_nodes=50,
+            max_nodes=500,
             project_root=str(tmp_path),
         )
 
@@ -729,7 +728,7 @@ def callee():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::target",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             direction="both",
             project_root=str(tmp_path),
         )
@@ -739,7 +738,7 @@ def callee():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::target",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             direction="outgoing",
             project_root=str(tmp_path),
         )
@@ -766,7 +765,7 @@ def high_conf():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             min_confidence=0.5,
             project_root=str(tmp_path),
         )
@@ -800,7 +799,7 @@ def helper():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::main",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             project_root=str(tmp_path),
         )
 
@@ -859,7 +858,7 @@ def level1():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             project_root=str(tmp_path),
         )
 
@@ -891,7 +890,7 @@ def target():
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::caller",
             k=1,
-            max_nodes=20,
+            max_nodes=100,
             project_root=str(tmp_path),
         )
 
@@ -909,7 +908,7 @@ class TestTruncationProtection:
 
     @pytest.mark.asyncio
     async def test_truncation_warning_community(self, tmp_path, community_tier):
-        """Community should warn when truncated at max_nodes=20."""
+        """Community should warn when truncated at max_nodes=100."""
         main_file = tmp_path / "main.py"
         main_file.write_text(
             """
@@ -929,11 +928,11 @@ def d(): pass
         result = await get_graph_neighborhood(
             center_node_id="python::main::function::center",
             k=2,
-            max_nodes=100,  # Request beyond Community's 20-node limit
+            max_nodes=200,  # Request beyond Community's 100-node limit
             project_root=str(tmp_path),
         )
 
-        if result.nodes and len(result.nodes) > 20:
+        if result.nodes and len(result.nodes) > 100:
             # Should be truncated
             assert result.truncated is True
             assert result.truncation_warning is not None

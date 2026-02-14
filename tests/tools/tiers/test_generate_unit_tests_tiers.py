@@ -79,7 +79,7 @@ async def test_generate_unit_tests_community_limits_and_framework(
     )
     assert ok.success is True
     assert calls, "sync path should be invoked for allowed request"
-    assert calls[-1]["max_test_cases"] == 5
+    assert calls[-1]["max_test_cases"] == 10
 
 
 @pytest.mark.asyncio
@@ -133,7 +133,7 @@ async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(
 
     assert ok.success is True
     assert calls
-    assert calls[-1]["max_test_cases"] == 20
+    assert calls[-1]["max_test_cases"] is None
     assert calls[-1]["framework"] == "unittest"
     assert calls[-1]["data_driven"] is True
 

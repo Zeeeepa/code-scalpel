@@ -23,10 +23,10 @@ class TestLicenseFallback:
             project_root=str(project_120_files), include_complexity=False
         )
 
-        # Should fallback to Community limits (max 100 files)
+        # Should fallback to Community limits (max 500 files)
         assert (
-            result.total_files <= 100
-        ), f"Expired license should fallback to Community (100 files), got {result.total_files}"
+            result.total_files <= 500
+        ), f"Expired license should fallback to Community (500 files), got {result.total_files}"
 
         # Should have warning about expired license
         assert (
@@ -48,8 +48,8 @@ class TestLicenseFallback:
 
         # Should fallback to Community limits
         assert (
-            result.total_files <= 100
-        ), f"Invalid license should fallback to Community (100 files), got {result.total_files}"
+            result.total_files <= 500
+        ), f"Invalid license should fallback to Community (500 files), got {result.total_files}"
 
         # Should have warning about invalid license
         assert (
@@ -69,10 +69,10 @@ class TestLicenseFallback:
             project_root=str(project_120_files), include_complexity=False
         )
 
-        # Should default to Community limits (max 100 files)
+        # Should default to Community limits (max 500 files)
         assert (
-            result.total_files <= 100
-        ), f"Missing license should default to Community (100 files), got {result.total_files}"
+            result.total_files <= 500
+        ), f"Missing license should default to Community (500 files), got {result.total_files}"
 
     @pytest.mark.asyncio
     async def test_valid_pro_license_unlocks_features(

@@ -2,8 +2,8 @@
 Tier validation tests for cross_file_security_scan MCP tool.
 
 Tests validate Community/Pro/Enterprise tier functionality per PRE_RELEASE_CHECKLIST.md:
-- Community: max depth=3, 10 modules, Python taint tracking, Mermaid diagram, bounded tracing
-- Pro: depth=10, 100 modules, enhanced Python taint with DI hints, confidence_scores, framework contexts
+- Community: max depth=5, 50 modules, Python taint tracking, Mermaid diagram, bounded tracing
+- Pro: unlimited depth/modules, enhanced Python taint with DI hints, confidence_scores, framework contexts
 - Enterprise: unlimited depth/modules, repository-wide scan, global flow hints, microservice boundaries
 """
 
@@ -173,42 +173,42 @@ def calculate(x, y):
 class TestCrossFileSecurityScanCommunityTier:
     """Validate Community tier limits and basic functionality."""
 
-    def test_max_depth_3_enforced(
+    def test_max_depth_5_enforced(
         self, community_tier, multi_file_sql_injection_project
     ):
-        """Verify max_depth=3 enforced for Community tier."""
+        """Verify max_depth=5 enforced for Community tier."""
         result = _cross_file_security_scan_sync(
             project_root=str(multi_file_sql_injection_project),
             entry_points=None,
-            max_depth=10,  # Request 10, should be limited to 3
+            max_depth=10,  # Request 10, should be limited to 5
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=50,  # Request 50, should be limited to 10
+            max_modules=100,  # Request 100, should be limited to 50
             tier="community",
         )
         assert result.success is True
         assert result.tier_applied == "community"
         assert (
-            result.max_depth_applied == 3
-        ), f"Expected max_depth=3, got {result.max_depth_applied}"
+            result.max_depth_applied == 5
+        ), f"Expected max_depth=5, got {result.max_depth_applied}"
 
-    def test_max_modules_10_enforced(
+    def test_max_modules_50_enforced(
         self, community_tier, multi_file_sql_injection_project
     ):
-        """Verify max_modules=10 enforced for Community tier."""
+        """Verify max_modules=50 enforced for Community tier."""
         result = _cross_file_security_scan_sync(
             project_root=str(multi_file_sql_injection_project),
             entry_points=None,
-            max_depth=3,
+            max_depth=5,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=100,  # Request 100, should be limited to 10
+            max_modules=100,  # Request 100, should be limited to 50
             tier="community",
         )
         assert result.success is True
         assert (
-            result.max_modules_applied == 10
-        ), f"Expected max_modules=10, got {result.max_modules_applied}"
+            result.max_modules_applied == 50
+        ), f"Expected max_modules=50, got {result.max_modules_applied}"
 
     def test_python_taint_tracking_enabled(
         self, community_tier, multi_file_sql_injection_project
@@ -217,10 +217,10 @@ class TestCrossFileSecurityScanCommunityTier:
         result = _cross_file_security_scan_sync(
             project_root=str(multi_file_sql_injection_project),
             entry_points=["routes.py:get_user"],
-            max_depth=3,
+            max_depth=5,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=10,
+            max_modules=50,
             tier="community",
         )
         assert result.success is True
@@ -236,10 +236,10 @@ class TestCrossFileSecurityScanCommunityTier:
         result = _cross_file_security_scan_sync(
             project_root=str(multi_file_sql_injection_project),
             entry_points=None,
-            max_depth=3,
+            max_depth=5,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=10,
+            max_modules=50,
             tier="community",
         )
         assert result.success is True
@@ -253,14 +253,14 @@ class TestCrossFileSecurityScanCommunityTier:
         result = _cross_file_security_scan_sync(
             project_root=str(multi_file_sql_injection_project),
             entry_points=None,
-            max_depth=3,
+            max_depth=5,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=10,
+            max_modules=50,
             tier="community",
         )
         assert result.success is True
-        # With depth=3, longer flows should be truncated
+        # With depth=5, longer flows should be truncated
         if result.taint_flows:
             for flow in result.taint_flows:
                 # Flow path length should be reasonable given depth limit
@@ -275,38 +275,38 @@ class TestCrossFileSecurityScanCommunityTier:
 class TestCrossFileSecurityScanProTier:
     """Validate Pro tier enhancements."""
 
-    def test_max_depth_10_applied(self, pro_tier, multi_file_sql_injection_project):
-        """Verify max_depth=10 for Pro tier."""
+    def test_max_depth_unlimited(self, pro_tier, multi_file_sql_injection_project):
+        """Verify unlimited max_depth for Pro tier."""
         result = _cross_file_security_scan_sync(
             project_root=str(multi_file_sql_injection_project),
             entry_points=None,
-            max_depth=100,  # Request 100, should be limited to 10
+            max_depth=100,  # Request 100, should be unlimited (None)
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=500,  # Request unlimited-like, should be limited to 100
+            max_modules=500,  # Request 500, should be unlimited (None)
             tier="pro",
         )
         assert result.success is True
         assert result.tier_applied == "pro"
         assert (
-            result.max_depth_applied == 10
-        ), f"Expected max_depth=10, got {result.max_depth_applied}"
+            result.max_depth_applied is None
+        ), f"Expected max_depth=None (unlimited), got {result.max_depth_applied}"
 
-    def test_max_modules_100_applied(self, pro_tier, multi_file_sql_injection_project):
-        """Verify max_modules=100 for Pro tier."""
+    def test_max_modules_unlimited(self, pro_tier, multi_file_sql_injection_project):
+        """Verify unlimited max_modules for Pro tier."""
         result = _cross_file_security_scan_sync(
             project_root=str(multi_file_sql_injection_project),
             entry_points=None,
             max_depth=10,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=500,  # Request 500, should be limited to 100
+            max_modules=500,  # Request 500, should be unlimited (None)
             tier="pro",
         )
         assert result.success is True
         assert (
-            result.max_modules_applied == 100
-        ), f"Expected max_modules=100, got {result.max_modules_applied}"
+            result.max_modules_applied is None
+        ), f"Expected max_modules=None (unlimited), got {result.max_modules_applied}"
 
     def test_enhanced_taint_tracking_with_di_hints(
         self, pro_tier, multi_file_sql_injection_project
@@ -318,7 +318,7 @@ class TestCrossFileSecurityScanProTier:
             max_depth=10,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=100,
+            max_modules=500,
             tier="pro",
         )
         assert result.success is True
@@ -337,7 +337,7 @@ class TestCrossFileSecurityScanProTier:
             max_depth=10,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=100,
+            max_modules=500,
             tier="pro",
         )
         assert result.success is True
@@ -363,7 +363,7 @@ class TestCrossFileSecurityScanProTier:
             max_depth=10,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=100,
+            max_modules=500,
             tier="pro",
         )
         assert result.success is True
@@ -538,7 +538,7 @@ class TestCrossFileSecurityScanCrossTierComparison:
             max_depth=10,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=10,
+            max_modules=50,
             tier="community",
         )
         pro_result = _cross_file_security_scan_sync(
@@ -547,14 +547,14 @@ class TestCrossFileSecurityScanCrossTierComparison:
             max_depth=10,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=10,
+            max_modules=50,
             tier="pro",
         )
         assert comm_result.success is True
         assert pro_result.success is True
-        # Community should be limited to depth=3, Pro to depth=10
-        assert comm_result.max_depth_applied == 3
-        assert pro_result.max_depth_applied == 10
+        # Community should be limited to depth=5, Pro is unlimited
+        assert comm_result.max_depth_applied == 5
+        assert pro_result.max_depth_applied is None
 
     def test_community_no_confidence_scores_pro_has(
         self, community_tier, pro_tier, multi_file_sql_injection_project
@@ -563,10 +563,10 @@ class TestCrossFileSecurityScanCrossTierComparison:
         comm_result = _cross_file_security_scan_sync(
             project_root=str(multi_file_sql_injection_project),
             entry_points=None,
-            max_depth=3,
+            max_depth=5,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=10,
+            max_modules=50,
             tier="community",
         )
         pro_result = _cross_file_security_scan_sync(
@@ -575,7 +575,7 @@ class TestCrossFileSecurityScanCrossTierComparison:
             max_depth=10,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=100,
+            max_modules=500,
             tier="pro",
         )
         assert comm_result.success is True
@@ -598,7 +598,7 @@ class TestCrossFileSecurityScanCrossTierComparison:
             max_depth=10,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=100,
+            max_modules=500,
             tier="pro",
         )
         ent_result = _cross_file_security_scan_sync(
@@ -629,10 +629,10 @@ class TestCrossFileSecurityScanEdgeCases:
         result = _cross_file_security_scan_sync(
             project_root=str(tmp_path),
             entry_points=None,
-            max_depth=3,
+            max_depth=5,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=10,
+            max_modules=50,
             tier="community",
         )
         # Should succeed but with no vulnerabilities
@@ -647,10 +647,10 @@ class TestCrossFileSecurityScanEdgeCases:
         result = _cross_file_security_scan_sync(
             project_root=str(benign_multi_file_project),
             entry_points=None,
-            max_depth=3,
+            max_depth=5,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=10,
+            max_modules=50,
             tier="community",
         )
         assert result.success is True
@@ -664,10 +664,10 @@ class TestCrossFileSecurityScanEdgeCases:
         result = _cross_file_security_scan_sync(
             project_root="/nonexistent/path/to/project",
             entry_points=None,
-            max_depth=3,
+            max_depth=5,
             include_diagram=True,
             timeout_seconds=30,
-            max_modules=10,
+            max_modules=50,
             tier="community",
         )
         assert result.success is False

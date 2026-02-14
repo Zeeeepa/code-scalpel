@@ -1,5 +1,6 @@
 """
 [20260201_BUGFIX] Skip entire module if codescalpel_web not installed.
+[20260212_BUGFIX] Skip module before imports to avoid collection errors.
 """
 
 import json
@@ -7,6 +8,7 @@ import json
 import pytest
 
 # Skip this entire module if optional packages aren't installed
+pytest.importorskip("codescalpel_web", reason="Requires pip install codescalpel[web]")
 pytest.importorskip("flask", reason="Requires pip install codescalpel[web]")
 
 from code_scalpel.integrations.rest_api_server import (

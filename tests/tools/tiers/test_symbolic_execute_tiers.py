@@ -48,7 +48,7 @@ class TestSymbolicExecuteCommunityTier:
         assert self.limits.get("max_depth") == 10
 
     def test_max_paths_limit_community(self) -> None:
-        assert self.limits.get("max_paths") == 50
+        assert self.limits.get("max_paths") == 100
         result = _symbolic_execute_sync(
             _branchy_python_code(),
             max_paths=self.limits["max_paths"],
@@ -57,7 +57,7 @@ class TestSymbolicExecuteCommunityTier:
             tier="community",
             capabilities=self.caps,
         )
-        assert result.paths_explored <= 50
+        assert result.paths_explored <= 100
 
     def test_python_language_support(self) -> None:
         result = _symbolic_execute_sync(
@@ -79,7 +79,7 @@ class TestSymbolicExecuteProTier:
 
     def test_unlimited_paths_and_deeper_loops(self) -> None:
         assert self.limits.get("max_paths") is None
-        assert self.limits.get("max_depth") == 100
+        assert self.limits.get("max_depth") is None
 
     def test_pro_capabilities_present(self) -> None:
         expected = {
