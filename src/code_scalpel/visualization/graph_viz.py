@@ -1,5 +1,5 @@
 from codegen.extensions.graph.create_graph import create_codebase_graph
-from codegen.extensions.graph.neo4j_exporter import Neo4jExporter
+# from codegen.extensions.graph.neo4j_exporter import Neo4jExporter  # TODO: Implement
 from code_scalpel.core.codebase import Codebase
 
 

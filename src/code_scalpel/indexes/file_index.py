@@ -15,7 +15,7 @@ from code_scalpel.core.codebase import Codebase
 from code_scalpel.core.file import File
 from codegen.shared.logging.get_logger import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class FileIndex(CodeIndex):
