@@ -45,6 +45,11 @@ from typing import Dict, Optional, Set
 
 logger = logging.getLogger(__name__)
 
+# [20260214_FEATURE] TIER UNIFICATION: When True, all users get enterprise-level
+# access regardless of license status. Set to False to restore the original
+# license-based tier detection. The features.toml structure is preserved intact
+# so that tier-specific capabilities remain documented and maintainable.
+_FORCE_ENTERPRISE_MODE = True
 
 # [20251228_FEATURE] Runtime license validation cache.
 # This is a process-local optimization to avoid re-parsing/verifying the same
@@ -1049,9 +1054,17 @@ def get_current_tier() -> str:
 
     This is the primary function tool handlers should use to determine tier.
 
+    [20260214_FEATURE] When _FORCE_ENTERPRISE_MODE is True, returns 'enterprise'
+    for all users regardless of license status. Enterprise tier is a
+    superset of Pro and Community, so all lower-tier capabilities are included.
+
     Returns:
         Tier string: "community", "pro", or "enterprise"
     """
+    # [20260214_FEATURE] Enterprise mode override
+    if _FORCE_ENTERPRISE_MODE:
+        return "enterprise"
+    
     validator = JWTLicenseValidator()
 
     # [20251229_BUGFIX] In Beta/Prod, the remote verifier is authoritative when configured.
