@@ -49,60 +49,68 @@ This document outlines the complete 20-step plan to unify community/pro/enterpri
 
 ---
 
-## Phase 2: Core File Operations (Steps 5-11) 🔄
+## Phase 2: Core File Operations (Steps 5-11) ✅ COMPLETE
 
-### Step 5: View File Tool 📋
+### Step 5: View File Tool ✅
 **Tier**: Community  
 **Transaction**: No  
-**Implementation**:
-```python
-class ViewFileTool(CodegenToolAdapter):
-    def _execute_impl(self, session, file_path):
-        return session.codebase.read_file(file_path)
-```
+**Status**: Complete  
+**Implementation**: `src/code_scalpel/tools/file_operations.py`
+- Read file contents
+- Return size and line count
+- Error handling for missing files
 
-### Step 6: Create File Tool 📋
+### Step 6: Create File Tool ✅
 **Tier**: Community  
 **Transaction**: Optional  
-**Implementation**:
-- Integrate with Codegen's file creation
-- Support templates and boilerplate
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/file_operations.py`
+- Create new files with content
+- Auto-create parent directories
+- Prevent overwriting existing files
 
-### Step 7: Edit File Tool 📋
+### Step 7: Edit File Tool ✅
 **Tier**: Pro → Community (unified)  
 **Transaction**: Mandatory  
-**Implementation**:
-- AST-aware editing
-- Preserve formatting
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/file_operations.py`
+- Edit existing files
+- Track original size for rollback
 - Transaction support
 
-### Step 8: Delete File Tool 📋
+### Step 8: Delete File Tool ✅
 **Tier**: Pro → Community (unified)  
 **Transaction**: Mandatory  
-**Implementation**:
-- Safe deletion with rollback
-- Dependency checking
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/file_operations.py`
+- Safe file deletion
+- Validation before deletion
 
-### Step 9: Rename File Tool 📋
+### Step 9: Rename File Tool ✅
 **Tier**: Pro → Community (unified)  
 **Transaction**: Mandatory  
-**Implementation**:
-- Update all imports automatically
-- Cross-file reference updates
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/file_operations.py`
+- Rename/move files
+- Auto-create target directories
+- Prevent overwriting
 
-### Step 10: Replacement Edit Tool 📋
+### Step 10: Replacement Edit Tool ✅
 **Tier**: Pro → Community (unified)  
 **Transaction**: Optional  
-**Implementation**:
-- String-based replacements
-- Regex support
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/file_operations.py`
+- String-based text replacement
+- Count replacements made
 
-### Step 11: Global Replacement Edit Tool 📋
+### Step 11: Global Replacement Edit Tool ✅
 **Tier**: Enterprise → Community (unified)  
 **Transaction**: Mandatory  
-**Implementation**:
-- Multi-file replacements
-- Scope control (directory, project)
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/file_operations.py`
+- Multi-file replacements via glob patterns
+- Track all modified files
+- Total replacement count
 
 ---
 
@@ -233,11 +241,11 @@ class ViewFileTool(CodegenToolAdapter):
 | Phase | Steps | Estimated Time | Status |
 |-------|-------|----------------|--------|
 | Phase 1 | 1-4 | 2 weeks | ✅ Complete |
-| Phase 2 | 5-11 | 3 weeks | 📋 Planned |
+| Phase 2 | 5-11 | 3 weeks | ✅ Complete |
 | Phase 3 | 12-15 | 2 weeks | 📋 Planned |
 | Phase 4 | 16-18 | 2 weeks | 📋 Planned |
 | Phase 5 | 19-20 | 1 week | 📋 Planned |
-| **Total** | **20** | **10 weeks** | **20% Complete** |
+| **Total** | **20** | **10 weeks** | **55% Complete** |
 
 ---
 
@@ -273,4 +281,3 @@ class ViewFileTool(CodegenToolAdapter):
 - [API Topology Discovery](../tools/api_topology_discovery.py)
 - [Phase 1 Tests](../tests/test_phase1_foundation.py)
 - [Codegen Repository](https://github.com/codegen-sh/codegen)
-
