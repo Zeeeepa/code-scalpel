@@ -12,6 +12,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
+# [20260214_FEATURE] TIER UNIFICATION: When True, all users get enterprise-level
+# access regardless of license status. Set to False to restore the original
+# license-based tier detection. The features.toml structure is preserved intact
+# so that tier-specific capabilities remain documented and maintainable.
+_FORCE_ENTERPRISE_MODE = True
+
 
 def compute_effective_tier_for_startup(
     *,
@@ -20,12 +26,18 @@ def compute_effective_tier_for_startup(
 ) -> tuple[str, str | None]:
     """Compute the effective tier for server startup.
 
+    [20260214_FEATURE] When _FORCE_ENTERPRISE_MODE is True, returns 'enterprise'
+    unconditionally so all users get full feature access at startup.
+
     [20251228_BUGFIX] Revoked licenses downgrade to Community instead of
     hard-failing startup, even if Pro/Enterprise was requested.
 
     Returns:
         (effective_tier, startup_warning_message)
     """
+    # [20260214_FEATURE] Tier unification: enterprise mode for all users
+    if _FORCE_ENTERPRISE_MODE:
+        return "enterprise", None
 
     if requested_tier is not None:
         requested_tier = requested_tier.strip().lower()

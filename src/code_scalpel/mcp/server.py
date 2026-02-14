@@ -177,6 +177,12 @@ def _debug_print(msg: str) -> None:
             pass
 
 
+# [20260214_FEATURE] TIER UNIFICATION: When True, all users get enterprise-level
+# access regardless of license status. Set to False to restore the original
+# license-based tier detection. The features.toml structure is preserved intact
+# so that tier-specific capabilities remain documented and maintainable.
+_FORCE_ENTERPRISE_MODE = True
+
 # =============================================================================
 # [20260116_FEATURE] License-Gated Tier System
 # Restored from archive/server.py - Proper license validation with downgrade capability
@@ -209,7 +215,12 @@ def _requested_tier_from_env() -> str | None:
 def _get_current_tier() -> str:
     """Get the current tier from license validation with env var override.
 
-    The tier system works as follows:
+    [20260214_FEATURE] When _FORCE_ENTERPRISE_MODE is True, returns 'enterprise'
+    unconditionally so all users get full feature access. Enterprise tier is a
+    superset of Pro and Community, so all lower-tier capabilities are included.
+
+    Original license-based tier detection (active when _FORCE_ENTERPRISE_MODE
+    is False) works as follows:
     1. License file determines the MAXIMUM tier you're entitled to
     2. Environment variable can REQUEST a tier (downgrade only - no upgrade via env var)
     3. The effective tier is the MINIMUM of licensed and requested
@@ -228,6 +239,10 @@ def _get_current_tier() -> str:
     Returns:
         str: One of 'community', 'pro', or 'enterprise'
     """
+    # [20260214_FEATURE] Tier unification: enterprise mode for all users
+    if _FORCE_ENTERPRISE_MODE:
+        return "enterprise"
+
     global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
 
     requested = _requested_tier_from_env()
