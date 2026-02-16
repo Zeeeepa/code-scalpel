@@ -3,8 +3,11 @@ Codegen Adapters
 
 This module provides clean adapters to Codegen SDK functionality.
 All imports are from the official Codegen SDK - no reimplementation.
+
+All functionality is unified to Community tier - no Pro/Enterprise gates.
 """
 
+# Analysis functions
 from .codegen_codebase_analysis import (
     get_codebase_summary,
     get_file_summary,
@@ -13,9 +16,11 @@ from .codegen_codebase_analysis import (
     get_symbol_summary
 )
 
+# Core classes
 from .codegen_codebase import Codebase
 from .codegen_parser import Parser
 
+# Tools
 from .codegen_tools import (
     commit,
     create_file,
@@ -39,6 +44,7 @@ from .codegen_tools import (
     view_pr
 )
 
+# MCP functionality
 from .codegen_mcp import (
     query_codebase,
     split_files_by_function,
@@ -50,6 +56,47 @@ from .codegen_mcp import (
     ask_codegen_sdk,
     generate_codemod,
     improve_codemod
+)
+
+# Graph analysis
+from .codegen_graph import (
+    create_codebase_graph,
+    visualize_codebase
+)
+
+# Indexing and LangChain tools
+from .codegen_index import (
+    CodeIndex,
+    FileIndex,
+    SymbolIndex,
+    create_langchain_tools,
+    ViewFileTool,
+    ListDirectoryTool,
+    RipGrepTool,
+    EditFileTool,
+    CreateFileTool,
+    DeleteFileTool,
+    RenameFileTool,
+    MoveSymbolTool,
+    RevealSymbolTool,
+    SemanticEditTool,
+    ReplacementEditTool,
+    GlobalReplacementEditTool,
+    ReflectionTool,
+    SearchFilesByNameTool,
+)
+
+# LSP modules
+from . import codegen_lsp as lsp
+
+# SWE-bench modules
+from . import codegen_swebench as swebench
+
+# Document functions example
+from .codegen_document_functions import (
+    hop_through_imports,
+    get_extended_context,
+    document_functions
 )
 
 __all__ = [
@@ -97,5 +144,41 @@ __all__ = [
     'ask_codegen_sdk',
     'generate_codemod',
     'improve_codemod',
+    
+    # Graph
+    'create_codebase_graph',
+    'visualize_codebase',
+    
+    # Index
+    'CodeIndex',
+    'FileIndex',
+    'SymbolIndex',
+    'create_langchain_tools',
+    
+    # LangChain Tools
+    'ViewFileTool',
+    'ListDirectoryTool',
+    'RipGrepTool',
+    'EditFileTool',
+    'CreateFileTool',
+    'DeleteFileTool',
+    'RenameFileTool',
+    'MoveSymbolTool',
+    'RevealSymbolTool',
+    'SemanticEditTool',
+    'ReplacementEditTool',
+    'GlobalReplacementEditTool',
+    'ReflectionTool',
+    'SearchFilesByNameTool',
+    
+    # LSP
+    'lsp',
+    
+    # SWE-bench
+    'swebench',
+    
+    # Document Functions
+    'hop_through_imports',
+    'get_extended_context',
+    'document_functions',
 ]
-
