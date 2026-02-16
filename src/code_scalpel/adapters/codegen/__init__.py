@@ -99,6 +99,69 @@ from .codegen_document_functions import (
     document_functions
 )
 
+# Core symbol classes
+from .codegen_symbols import (
+    Symbol,
+    Function,
+    Class,
+    Assignment,
+    Export,
+    TypeAlias,
+    Interface,
+    SymbolGroup,
+    Directory,
+    File,
+    SourceFile,
+    ExternalModule,
+    CodeOwner,
+    Import,
+    ImportResolution,
+    WildcardImport,
+    ExternalImportResolver,
+)
+
+# Transaction system
+from .codegen_transactions import (
+    TransactionManager,
+    Transaction,
+    validate_codebase,
+    ValidationError,
+    generate_diff,
+    DiffResult,
+    ResolutionStack,
+)
+
+# AI features
+from .codegen_ai import (
+    generate_system_prompt,
+    generate_flag_system_prompt,
+    generate_context,
+    generate_tools,
+    generate_flag_tools,
+)
+
+# Progress tracking
+from .codegen_progress import (
+    Progress,
+    Task,
+    StubProgress,
+    StubTask,
+)
+
+# Advanced graph
+from .codegen_multigraph import (
+    MultiGraph,
+)
+
+# Configuration
+from .codegen_config import (
+    Config,
+    parse_config,
+    ConfigParser,
+    CodebaseFactory,
+    get_session,
+)
+
 __all__ = [
     # Analysis
     'get_codebase_summary',
@@ -181,4 +244,55 @@ __all__ = [
     'hop_through_imports',
     'get_extended_context',
     'document_functions',
+    
+    # Core Symbol Classes
+    'Symbol',
+    'Function',
+    'Class',
+    'Assignment',
+    'Export',
+    'TypeAlias',
+    'Interface',
+    'SymbolGroup',
+    'Directory',
+    'File',
+    'SourceFile',
+    'ExternalModule',
+    'CodeOwner',
+    'Import',
+    'ImportResolution',
+    'WildcardImport',
+    'ExternalImportResolver',
+    
+    # Transaction System
+    'TransactionManager',
+    'Transaction',
+    'validate_codebase',
+    'ValidationError',
+    'generate_diff',
+    'DiffResult',
+    'ResolutionStack',
+    
+    # AI Features
+    'generate_system_prompt',
+    'generate_flag_system_prompt',
+    'generate_context',
+    'generate_tools',
+    'generate_flag_tools',
+    
+    # Progress Tracking
+    'Progress',
+    'Task',
+    'StubProgress',
+    'StubTask',
+    
+    # Advanced Graph
+    'MultiGraph',
+    
+    # Configuration
+    'Config',
+    'parse_config',
+    'ConfigParser',
+    'CodebaseFactory',
+    'get_session',
 ]
