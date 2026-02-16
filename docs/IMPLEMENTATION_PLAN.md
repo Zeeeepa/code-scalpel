@@ -114,35 +114,43 @@ This document outlines the complete 20-step plan to unify community/pro/enterpri
 
 ---
 
-## Phase 3: Symbol Operations (Steps 12-15) 📋
+## Phase 3: Symbol Operations (Steps 12-15) ✅ COMPLETE
 
-### Step 12: Find Symbol Tool 📋
+### Step 12: Find Symbol Tool ✅
 **Tier**: Community  
 **Transaction**: No  
-**Implementation**:
-- Symbol resolution via graph-sitter
-- Cross-file symbol lookup
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/symbol_operations.py`
+- Find symbol definitions in codebase
+- Pattern matching across files
+- Classify symbol types (function/class)
 
-### Step 13: Get Symbol References Tool 📋
+### Step 13: Get Symbol References Tool ✅
 **Tier**: Pro → Community (unified)  
 **Transaction**: No  
-**Implementation**:
-- Find all usages
-- Call graph integration
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/symbol_operations.py`
+- Find all symbol usages
+- Classify usage types (definition/import/call/reference)
+- Cross-file reference tracking
 
-### Step 14: Reveal Symbol Tool 📋
+### Step 14: Reveal Symbol Tool ✅
 **Tier**: Community  
 **Transaction**: No  
-**Implementation**:
-- Navigate to definition
-- Show symbol context
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/symbol_operations.py`
+- Navigate to symbol definition
+- Show surrounding context
+- Configurable context lines
 
-### Step 15: Move Symbol Tool 📋
+### Step 15: Move Symbol Tool ✅
 **Tier**: Enterprise → Community (unified)  
 **Transaction**: Mandatory  
-**Implementation**:
-- Move classes/functions between files
-- Update all references
+**Status**: Complete
+**Implementation**: `src/code_scalpel/tools/symbol_operations.py`
+- Move functions/classes between files
+- Extract symbol with proper indentation
+- Transaction support for rollback
 
 ---
 
@@ -242,10 +250,10 @@ This document outlines the complete 20-step plan to unify community/pro/enterpri
 |-------|-------|----------------|--------|
 | Phase 1 | 1-4 | 2 weeks | ✅ Complete |
 | Phase 2 | 5-11 | 3 weeks | ✅ Complete |
-| Phase 3 | 12-15 | 2 weeks | 📋 Planned |
+| Phase 3 | 12-15 | 2 weeks | ✅ Complete |
 | Phase 4 | 16-18 | 2 weeks | 📋 Planned |
 | Phase 5 | 19-20 | 1 week | 📋 Planned |
-| **Total** | **20** | **10 weeks** | **55% Complete** |
+| **Total** | **20** | **10 weeks** | **75% Complete** |
 
 ---
 
