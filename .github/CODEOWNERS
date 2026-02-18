@@ -1,0 +1,29 @@
+# [20260218_FEATURE] CODEOWNERS — maps repo paths to required reviewers.
+# GitHub uses this file to auto-assign reviewers on PRs when those paths
+# are modified. Requires branch protection "Require review from Code Owners"
+# to be enabled in repo settings.
+#
+# Syntax: <pattern>  @<owner-or-team>
+# Patterns are evaluated last-match-wins (like .gitignore).
+
+# Default: catch-all owner for everything not matched below
+*                          @tescolopio
+
+# Core library source — requires careful review
+/src/                      @tescolopio
+
+# CI/CD and release automation — sensitive, always require review
+/.github/                  @tescolopio
+/scripts/                  @tescolopio
+/pyproject.toml            @tescolopio
+
+# Security-sensitive files
+/SECURITY.md               @tescolopio
+/src/code_scalpel/mcp/tools/security*.py  @tescolopio
+
+# Website content — content accuracy matters
+/website/                  @tescolopio
+/docs/                     @tescolopio
+
+# License
+/LICENSE                   @tescolopio
