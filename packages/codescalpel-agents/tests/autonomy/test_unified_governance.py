@@ -129,15 +129,13 @@ class TestUnifiedGovernanceBudgetIntegration:
         """Test that budget violations are detected in unified evaluation."""
         # Create a budget config
         budget_config = tmp_path / "budget.yaml"
-        budget_config.write_text(
-            """
+        budget_config.write_text("""
 budgets:
   default:
     max_files: 1
     max_lines_per_file: 10
     max_total_lines: 20
-"""
-        )
+""")
 
         gov = UnifiedGovernance(str(tmp_path))
 
@@ -159,15 +157,13 @@ budgets:
     def test_budget_within_limits_allowed(self, tmp_path):
         """Test that operations within budget limits are allowed."""
         budget_config = tmp_path / "budget.yaml"
-        budget_config.write_text(
-            """
+        budget_config.write_text("""
 budgets:
   default:
     max_files: 5
     max_lines_per_file: 100
     max_total_lines: 300
-"""
-        )
+""")
 
         gov = UnifiedGovernance(str(tmp_path))
 

@@ -2370,11 +2370,9 @@ CMD ["uvicorn", "service:app", "--host", "{host}", "--port", "{port}"]
         docstring = func_result.docstring or f"Execute {function_name} function"
         param_specs = []
         for param in params:
-            param_specs.append(
-                f"""          {param}:
+            param_specs.append(f"""          {param}:
             type: {param_types[param]}
-            description: Parameter {param}"""
-            )
+            description: Parameter {param}""")
 
         param_spec_str = (
             "\n".join(param_specs) if param_specs else "          # No parameters"

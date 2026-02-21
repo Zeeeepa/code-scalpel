@@ -22,9 +22,7 @@ def _write_budget_yaml(policy_dir: Path, *, max_total_lines: int = 0) -> None:
     max_complexity_increase: 100
     allowed_file_patterns: ["*.py"]
     forbidden_paths: [".git/", "node_modules/", "__pycache__/"]
-""".format(
-            max_total_lines=max_total_lines
-        ),
+""".format(max_total_lines=max_total_lines),
         encoding="utf-8",
     )
 

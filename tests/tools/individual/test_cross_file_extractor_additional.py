@@ -8,22 +8,18 @@ from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 def test_extract_with_dependencies(tmp_path):
     project = tmp_path
     (project / "__init__.py").write_text("\n")
-    (project / "b.py").write_text(
-        """
+    (project / "b.py").write_text("""
 CONST = 7
 
 def helper():
     return CONST
-"""
-    )
-    (project / "a.py").write_text(
-        """
+""")
+    (project / "a.py").write_text("""
 from b import helper
 
 def foo():
     return helper()
-"""
-    )
+""")
 
     extractor = CrossFileExtractor(str(project))
     result = extractor.extract("a.py", "foo", depth=1)

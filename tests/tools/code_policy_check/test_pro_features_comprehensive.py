@@ -53,8 +53,7 @@ class TestProBestPractices:
     ):
         """Verify Pro tier returns best_practices_violations."""
         test_file = tmp_path / "anti_patterns.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 # Anti-pattern: bare except
 try:
     risky_operation()
@@ -72,8 +71,7 @@ global_counter = 0
 def increment():
     global global_counter
     global_counter += 1
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -93,14 +91,12 @@ def increment():
     async def test_best_practices_not_in_community(self, tmp_path, community_license):
         """Verify Community tier does NOT return best_practices_violations."""
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 try:
     pass
 except:
     pass
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -119,8 +115,7 @@ except:
     async def test_detect_mutable_default_argument(self, tmp_path, pro_license):
         """Detect best practice violation: mutable default argument."""
         test_file = tmp_path / "mutable_default.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def add_item(item, items=[]):
     '''Dangerous: mutable default argument.'''
     items.append(item)
@@ -131,8 +126,7 @@ def process_data(data, cache={}):
     if 'key' not in cache:
         cache['key'] = expensive_computation(data)
     return cache['key']
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -152,8 +146,7 @@ def process_data(data, cache={}):
     async def test_detect_bare_except(self, tmp_path, pro_license):
         """Detect best practice violation: bare except clause."""
         test_file = tmp_path / "bare_except.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def risky_function():
     try:
         dangerous_operation()
@@ -165,8 +158,7 @@ def another_risky():
         something()
     except Exception:  # Better but still broad
         pass
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -185,15 +177,13 @@ def another_risky():
     async def test_detect_star_imports(self, tmp_path, pro_license):
         """Detect best practice violation: star imports."""
         test_file = tmp_path / "star_import.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 from os import *  # Bad: pollutes namespace
 from sys import *  # Bad: unclear what's imported
 
 def main():
     result = path.join("a", "b")  # Which module is 'path' from?
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -212,15 +202,13 @@ class TestProSecurityPatterns:
     async def test_security_warnings_available_in_pro(self, tmp_path, pro_license):
         """Verify Pro tier returns security_warnings."""
         test_file = tmp_path / "security_issues.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import subprocess
 
 def run_command(user_input):
     # Security issue: command injection risk
     subprocess.call(user_input, shell=True)
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -235,8 +223,7 @@ def run_command(user_input):
     async def test_detect_sql_injection_pattern(self, tmp_path, pro_license):
         """Detect security pattern: SQL injection risk."""
         test_file = tmp_path / "sql_injection.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import sqlite3
 
 def get_user(username):
@@ -246,8 +233,7 @@ def get_user(username):
     query = f"SELECT * FROM users WHERE username = '{username}'"
     cursor.execute(query)
     return cursor.fetchone()
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -262,8 +248,7 @@ def get_user(username):
     async def test_detect_hardcoded_secrets(self, tmp_path, pro_license):
         """Detect security pattern: hardcoded secrets."""
         test_file = tmp_path / "secrets.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 # Security issues: hardcoded secrets
 AWS_SECRET_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 API_TOKEN = "ghp_1234567890abcdefghijklmnopqrstuvwxyz"
@@ -271,8 +256,7 @@ PASSWORD = "SuperSecret123!"
 
 def connect():
     return database.connect(password=PASSWORD)
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -287,8 +271,7 @@ def connect():
     async def test_detect_eval_usage(self, tmp_path, pro_license):
         """Detect security pattern: dangerous eval usage."""
         test_file = tmp_path / "eval_usage.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def calculate(expression):
     # Dangerous: eval with user input
     result = eval(expression)
@@ -297,8 +280,7 @@ def calculate(expression):
 def execute_code(code_string):
     # Dangerous: exec with user input
     exec(code_string)
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -349,8 +331,7 @@ class TestProAsyncErrorPatterns:
     async def test_detect_missing_await(self, tmp_path, pro_license):
         """Detect async error: missing await on coroutine."""
         test_file = tmp_path / "async_errors.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 async def fetch_data():
     return {"data": "value"}
 
@@ -358,8 +339,7 @@ async def process():
     # Error: missing await
     result = fetch_data()
     print(result)  # Will print coroutine object, not data
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -374,16 +354,14 @@ async def process():
     async def test_detect_sync_in_async_context(self, tmp_path, pro_license):
         """Detect async error: synchronous blocking call in async function."""
         test_file = tmp_path / "blocking_in_async.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import time
 
 async def slow_handler():
     # Bad: blocking sleep in async function
     time.sleep(5)
     return "done"
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -427,16 +405,14 @@ class TestProVsCommunityComparison:
     async def test_community_limited_analysis(self, tmp_path, community_license):
         """Verify Community tier only provides basic violations."""
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import subprocess
 
 try:
     subprocess.call(user_input, shell=True)
 except:
     pass
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -457,16 +433,14 @@ except:
     async def test_pro_enhanced_analysis(self, tmp_path, pro_license):
         """Verify Pro tier provides enhanced analysis."""
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import subprocess
 
 try:
     subprocess.call(user_input, shell=True)
 except:
     pass
-"""
-        )
+""")
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -561,8 +535,7 @@ class TestProPerformance:
         # Create realistic code structure
         for i in range(50):
             test_file = tmp_path / f"module_{i}.py"
-            test_file.write_text(
-                f"""
+            test_file.write_text(f"""
 import logging
 
 logger = logging.getLogger(__name__)
@@ -582,8 +555,7 @@ class Service{i}:
     
     def _validate(self, item):
         return item is not None
-"""
-            )
+""")
 
         result = await code_policy_check(paths=[str(tmp_path)])
 

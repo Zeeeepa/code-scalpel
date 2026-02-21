@@ -47,16 +47,14 @@ class TestCryptographicPolicyVerifier:
 
         # Create sample policy file
         policy_file = policy_path / "policy.yaml"
-        policy_file.write_text(
-            """
+        policy_file.write_text("""
 policies:
   - name: no_sql_injection
     description: Prevent SQL injection
     rule: |
       package scalpel.security
       deny[msg] { msg := "SQL injection detected" }
-"""
-        )
+""")
 
         return policy_path
 

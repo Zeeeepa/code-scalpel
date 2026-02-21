@@ -109,13 +109,11 @@ class TestSQLInjectionDetection:
         reachable via the calibrated confidence path.
         """
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             import sqlite3
             user_input = input()
             cursor.execute("SELECT * FROM users WHERE id=" + user_input)
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=0.5)
 
@@ -132,12 +130,10 @@ class TestSQLInjectionDetection:
         taint flow the sink is present but at base confidence.
         """
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             from sqlalchemy import create_engine
             session.execute("SELECT * FROM users")
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=0.5)
 
@@ -153,12 +149,10 @@ class TestSQLInjectionDetection:
         detection uses the registry value directly.
         """
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             const query = "SELECT * FROM users WHERE id=" + userId;
             connection.query(query);
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "typescript", min_confidence=0.5)
 
@@ -355,13 +349,11 @@ class TestMinimumConfidenceFiltering:
         (0.5) sinks.
         """
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             user_input = input()
             cursor.execute("SELECT " + user_input)
             open(filename)
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=0.9)
 
@@ -371,13 +363,11 @@ class TestMinimumConfidenceFiltering:
     def test_medium_confidence_filter(self):
         """Filtering at 0.5 should include all detected sinks."""
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             cursor.execute(query)
             open(filename)
             session.execute(query)
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=0.5)
 
@@ -562,8 +552,7 @@ class TestFalsePositiveRate:
     def test_clean_python_code_no_false_positives(self):
         """Clean Python code should not trigger false positives."""
         detector = UnifiedSinkDetector()
-        code = textwrap.dedent(
-            """
+        code = textwrap.dedent("""
             def calculate_total(items):
                 total = 0
                 for item in items:
@@ -572,8 +561,7 @@ class TestFalsePositiveRate:
             
             def format_name(first, last):
                 return f"{first} {last}"
-        """
-        )
+        """)
 
         sinks = detector.detect_sinks(code, "python", min_confidence=0.8)
 

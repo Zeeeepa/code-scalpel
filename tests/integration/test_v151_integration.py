@@ -19,8 +19,7 @@ class TestCrossFileWorkflow:
         """Create a realistic Flask project structure."""
         # app.py - main application entry point
         app_file = tmp_path / "app.py"
-        app_file.write_text(
-            """
+        app_file.write_text("""
 from flask import Flask
 from routes import register_routes
 
@@ -29,13 +28,11 @@ register_routes(app)
 
 if __name__ == "__main__":
     app.run(debug=True)
-"""
-        )
+""")
 
         # routes.py - route definitions
         routes_file = tmp_path / "routes.py"
-        routes_file.write_text(
-            """
+        routes_file.write_text("""
 from flask import request, jsonify
 from services import user_service
 from db import database
@@ -51,15 +48,13 @@ def register_routes(app):
     def get_user(user_id):
         user = database.get_user(user_id)
         return jsonify(user)
-"""
-        )
+""")
 
         # services/user_service.py
         services_dir = tmp_path / "services"
         services_dir.mkdir()
         (services_dir / "__init__.py").write_text("")
-        (services_dir / "user_service.py").write_text(
-            '''
+        (services_dir / "user_service.py").write_text('''
 from db import database
 
 def search_users(query):
@@ -69,13 +64,11 @@ def search_users(query):
 def get_user_by_id(user_id):
     """Get user by ID - safe parameterized query."""
     return database.get_user(user_id)
-'''
-        )
+''')
 
         # db.py - database module
         db_file = tmp_path / "db.py"
-        db_file.write_text(
-            '''
+        db_file.write_text('''
 import sqlite3
 
 class Database:
@@ -95,8 +88,7 @@ class Database:
         return cursor.fetchone()
 
 database = Database()
-'''
-        )
+''')
 
         return tmp_path
 
@@ -196,15 +188,12 @@ class TestLargeProjectScalability:
             if i > 1:
                 imports.append(f"from module_{i-2} import func_{i-2}")
 
-            code = (
-                "\n".join(imports)
-                + f"""
+            code = "\n".join(imports) + f"""
 
 def func_{i}(x):
     '''Function in module {i}.'''
     result = x * {i+1}
 """
-            )
             # Add calls to imported functions
             if i > 0:
                 code += f"    result += func_{i-1}(x)\n"
@@ -249,19 +238,16 @@ class TestCircularImportHandling:
         """Create a project with circular imports."""
         # a.py imports from b.py
         a_file = tmp_path / "a.py"
-        a_file.write_text(
-            """
+        a_file.write_text("""
 from b import func_b
 
 def func_a():
     return func_b() + 1
-"""
-        )
+""")
 
         # b.py imports from a.py (circular!)
         b_file = tmp_path / "b.py"
-        b_file.write_text(
-            """
+        b_file.write_text("""
 from a import func_a
 
 def func_b():
@@ -269,8 +255,7 @@ def func_b():
 
 def other_func():
     return func_a()
-"""
-        )
+""")
 
         return tmp_path
 
@@ -311,24 +296,20 @@ class TestMCPToolConsistency:
     def simple_project(self, tmp_path):
         """Create a simple two-file project."""
         utils_file = tmp_path / "utils.py"
-        utils_file.write_text(
-            '''
+        utils_file.write_text('''
 def helper(x):
     """A helper function."""
     return x + 1
-'''
-        )
+''')
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            '''
+        main_file.write_text('''
 from utils import helper
 
 def process(x):
     """Process data using helper."""
     return helper(x) * 2
-'''
-        )
+''')
 
         return tmp_path
 
@@ -383,62 +364,50 @@ class TestConfidenceDecay:
     def deep_dependency_project(self, tmp_path):
         """Create a project with deep dependency chain for testing confidence decay."""
         # level_0.py - entry point
-        (tmp_path / "level_0.py").write_text(
-            """
+        (tmp_path / "level_0.py").write_text("""
 from level_1 import func_1
 
 def entry_point():
     return func_1()
-"""
-        )
+""")
 
         # level_1.py
-        (tmp_path / "level_1.py").write_text(
-            """
+        (tmp_path / "level_1.py").write_text("""
 from level_2 import func_2
 
 def func_1():
     return func_2() + 1
-"""
-        )
+""")
 
         # level_2.py
-        (tmp_path / "level_2.py").write_text(
-            """
+        (tmp_path / "level_2.py").write_text("""
 from level_3 import func_3
 
 def func_2():
     return func_3() + 2
-"""
-        )
+""")
 
         # level_3.py
-        (tmp_path / "level_3.py").write_text(
-            """
+        (tmp_path / "level_3.py").write_text("""
 from level_4 import func_4
 
 def func_3():
     return func_4() + 3
-"""
-        )
+""")
 
         # level_4.py
-        (tmp_path / "level_4.py").write_text(
-            """
+        (tmp_path / "level_4.py").write_text("""
 from level_5 import func_5
 
 def func_4():
     return func_5() + 4
-"""
-        )
+""")
 
         # level_5.py (leaf node)
-        (tmp_path / "level_5.py").write_text(
-            """
+        (tmp_path / "level_5.py").write_text("""
 def func_5():
     return 5
-"""
-        )
+""")
 
         return tmp_path
 
@@ -891,8 +860,7 @@ def test_mcp_tool_graph_neighborhood(tmp_path):
     from code_scalpel.mcp.server import get_graph_neighborhood
 
     # Create a simple test project
-    (tmp_path / "main.py").write_text(
-        """
+    (tmp_path / "main.py").write_text("""
 def entry_point():
     helper()
     
@@ -901,8 +869,7 @@ def helper():
     
 def util():
     pass
-"""
-    )
+""")
 
     async def run_test():
         # Use the actual project - it has a call graph

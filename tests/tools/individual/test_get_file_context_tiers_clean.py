@@ -21,16 +21,12 @@ async def test_async_get_file_context_pro(monkeypatch, tmp_path):
     helper.write_text("CONST = 1\n")
 
     target = tmp_path / "target.py"
-    target.write_text(
-        textwrap.dedent(
-            """
+    target.write_text(textwrap.dedent("""
             import helper
 
             def calc(x):
                 return helper.CONST + x
-            """
-        )
-    )
+            """))
 
     # [20260220_BUGFIX] Patch module-level tier functions directly (both context tool and helpers)
     from code_scalpel.mcp.tools import context as context_module

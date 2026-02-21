@@ -417,16 +417,14 @@ class TestEdgeConstructs:
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "decorated.py"
-        target_file.write_text(
-            """
+        target_file.write_text("""
 def decorator(f):
     return f
 
 @decorator
 def target():
     return 1
-"""
-        )
+""")
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -439,12 +437,10 @@ def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "async_func.py"
-        target_file.write_text(
-            """
+        target_file.write_text("""
 async def target():
     return 1
-"""
-        )
+""")
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -457,14 +453,12 @@ async def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "nested.py"
-        target_file.write_text(
-            """
+        target_file.write_text("""
 class Outer:
     class Inner:
         def method(self):
             return 1
-"""
-        )
+""")
 
         result = await _invoke_tool(tool, tmp_path, target_file, "Outer")
 
@@ -476,13 +470,11 @@ class Outer:
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "lambda_func.py"
-        target_file.write_text(
-            """
+        target_file.write_text("""
 def target():
     f = lambda x: x + 1
     return f(10)
-"""
-        )
+""")
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -497,13 +489,11 @@ def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "docstring.py"
-        target_file.write_text(
-            '''
+        target_file.write_text('''
 def target():
     """This is a docstring."""
     return 1
-'''
-        )
+''')
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -516,16 +506,14 @@ def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "multiline.py"
-        target_file.write_text(
-            """
+        target_file.write_text("""
 def target():
     result = (
         1 + 2 + 3 +
         4 + 5 + 6
     )
     return result
-"""
-        )
+""")
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -538,13 +526,11 @@ def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "indented.py"
-        target_file.write_text(
-            """
+        target_file.write_text("""
 def target():
         x = 1  # Extra indentation
         return x
-"""
-        )
+""")
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -716,13 +702,11 @@ class TestSecurityAndPrivacy:
         secret = "sk_prod_987_REDACT_ME"
 
         target_file = tmp_path / "secret_code.py"
-        target_file.write_text(
-            f"""
+        target_file.write_text(f"""
 def target():
     api_key = "{secret}"
     return api_key
-"""
-        )
+""")
 
         # Request with include_code=True and force error by wrong symbol
         raw = await tool.run(
@@ -749,13 +733,11 @@ def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "partial.py"
-        target_file.write_text(
-            """
+        target_file.write_text("""
 def target():
     x = 1
 # Missing closing of something, but syntactically valid so far
-"""
-        )
+""")
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 

@@ -91,12 +91,9 @@ async def test_pro_block_mode_denies_update_symbol_when_policy_denies(
     assert result["error"]["error_code"] == "forbidden"
 
     # Ensure file was not modified.
-    assert (
-        target_file.read_text(encoding="utf-8")
-        == """def f():
+    assert target_file.read_text(encoding="utf-8") == """def f():
     return 1
 """
-    )
 
 
 @pytest.mark.skip(
@@ -330,9 +327,6 @@ async def test_pro_block_mode_denies_when_policy_yaml_missing(
     assert result["error"]["error_code"] == "forbidden"
 
     # Ensure file was not modified.
-    assert (
-        target_file.read_text(encoding="utf-8")
-        == """def f():
+    assert target_file.read_text(encoding="utf-8") == """def f():
     return 1
 """
-    )

@@ -29,13 +29,11 @@ async def test_get_symbol_references_community_limits(monkeypatch, tmp_path: Pat
 
     # Create multiple files that reference the same symbol.
     for idx in range(10):
-        (tmp_path / f"m{idx}.py").write_text(
-            """def target():
+        (tmp_path / f"m{idx}.py").write_text("""def target():
     return 1
 
 x = target()
-"""
-        )
+""")
 
     monkeypatch.setattr(
         code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"
@@ -126,11 +124,9 @@ async def test_update_symbol_community_forces_backup(monkeypatch, tmp_path: Path
     mcp_server.set_project_root(tmp_path)
 
     test_file = tmp_path / "mod.py"
-    test_file.write_text(
-        """def target():
+    test_file.write_text("""def target():
     return 1
-"""
-    )
+""")
 
     monkeypatch.setattr(
         code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"

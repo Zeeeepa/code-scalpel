@@ -33,8 +33,7 @@ class TestComplianceDetection:
     ):
         """HIPAA/SOC2/GDPR/PCI rules should appear in compliance_reports."""
         test_file = tmp_path / "compliance_targets.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import logging
 import requests
 
@@ -46,8 +45,7 @@ def get_records(request):
     email = request.json["email"]  # GDPR001
     requests.post("http://payments.example.com/checkout", data={"card": "4111111111111111"})  # PCI003
     return email
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -78,8 +76,7 @@ def get_records(request):
     async def test_generate_pdf_report_and_score(self, tmp_path, enterprise_license):
         """Enterprise generate_report should set pdf_report and compliance_score."""
         test_file = tmp_path / "compliance_pdf.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import logging
 
 logger = logging.getLogger(__name__)
@@ -88,8 +85,7 @@ logger = logging.getLogger(__name__)
 def process(card):
     logger.info("card number: %s", card)  # PCI001
     return card
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],

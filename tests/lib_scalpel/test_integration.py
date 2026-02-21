@@ -19,8 +19,7 @@ class TestLibScalpelIntegration:
 
         # Create auth module with function and class
         auth_file = src_dir / "auth.py"
-        auth_file.write_text(
-            '''"""Authentication module."""
+        auth_file.write_text('''"""Authentication module."""
 
 def authenticate(username: str, password: str) -> bool:
     """Validate user credentials."""
@@ -41,13 +40,11 @@ class AuthService:
 
 import json
 from typing import Dict
-'''
-        )
+''')
 
         # Create database module
         db_file = src_dir / "database.py"
-        db_file.write_text(
-            '''"""Database module."""
+        db_file.write_text('''"""Database module."""
 
 def get_connection():
     """Get database connection."""
@@ -60,8 +57,7 @@ class DatabaseConnection:
     def verify_user(self, username: str, password: str) -> bool:
         """Verify user credentials."""
         return True
-'''
-        )
+''')
 
         # Step 1: Scan project
         scanner = ProjectScanner(
@@ -110,27 +106,23 @@ class DatabaseConnection:
 
         # Create a view file
         view_file = views_dir / "dashboard.py"
-        view_file.write_text(
-            '''"""Dashboard view."""
+        view_file.write_text('''"""Dashboard view."""
 
 def render_dashboard():
     """Render dashboard."""
     from src.utils.helpers import format_data
     data = format_data()
     return {"data": data}
-'''
-        )
+''')
 
         # Create utilities file
         utils_file = utils_dir / "helpers.py"
-        utils_file.write_text(
-            '''"""Utility helpers."""
+        utils_file.write_text('''"""Utility helpers."""
 
 def format_data():
     """Format data."""
     return {}
-'''
-        )
+''')
 
         # Scan project
         scanner = ProjectScanner(
@@ -183,27 +175,23 @@ def format_data():
 
         # File A imports B
         file_a = src_dir / "module_a.py"
-        file_a.write_text(
-            '''"""Module A."""
+        file_a.write_text('''"""Module A."""
 
 def func_a():
     """Function in A."""
     from module_b import func_b
     return func_b()
-'''
-        )
+''')
 
         # File B imports A
         file_b = src_dir / "module_b.py"
-        file_b.write_text(
-            '''"""Module B."""
+        file_b.write_text('''"""Module B."""
 
 def func_b():
     """Function in B."""
     from module_a import func_a
     return func_a()
-'''
-        )
+''')
 
         # Scan
         scanner = ProjectScanner(
@@ -237,25 +225,21 @@ def func_b():
 
         # Create a valid file
         valid_file = src_dir / "valid.py"
-        valid_file.write_text(
-            '''"""Valid module."""
+        valid_file.write_text('''"""Valid module."""
 
 def valid_function():
     """Valid function."""
     return True
-'''
-        )
+''')
 
         # Create an invalid file (syntax error)
         invalid_file = src_dir / "invalid.py"
-        invalid_file.write_text(
-            '''"""Invalid module."""
+        invalid_file.write_text('''"""Invalid module."""
 
 def invalid_function(
     # Missing closing parenthesis
     return True
-'''
-        )
+''')
 
         # Scan should handle errors gracefully
         scanner = ProjectScanner(
@@ -287,8 +271,7 @@ def invalid_function(
 
         # Create a file with rich symbol information
         rich_file = src_dir / "models.py"
-        rich_file.write_text(
-            '''"""Data models."""
+        rich_file.write_text('''"""Data models."""
 
 from typing import Optional, List
 from dataclasses import dataclass
@@ -328,8 +311,7 @@ class Repository:
 def create_user(name: str, email: Optional[str] = None) -> User:
     """Create a new user."""
     return User(id=1, name=name, email=email)
-'''
-        )
+''')
 
         # Scan with symbol extraction
         scanner = ProjectScanner(
