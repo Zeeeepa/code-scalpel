@@ -136,7 +136,9 @@ async def _get_call_graph_tool(
     return result
 
 
-get_call_graph = mcp.tool()(
+get_call_graph = mcp.tool(
+    description="Generate a call graph showing function relationships, entry points, and circular imports."
+)(
     with_oracle_resilience(tool_id="get_call_graph", strategy=PathStrategy)(
         envelop_tool_function(
             _get_call_graph_tool,
@@ -239,7 +241,9 @@ async def _get_graph_neighborhood_tool(
     )
 
 
-get_graph_neighborhood = mcp.tool()(
+get_graph_neighborhood = mcp.tool(
+    description="Extract the k-hop subgraph around a center node from the project's call graph."
+)(
     with_oracle_resilience(
         tool_id="get_graph_neighborhood", strategy=NodeIdFormatStrategy
     )(
@@ -387,7 +391,9 @@ async def _get_project_map_tool(
     return result
 
 
-get_project_map = mcp.tool()(
+get_project_map = mcp.tool(
+    description="Produce a high-level project structure map with package hierarchy and complexity hotspots."
+)(
     with_oracle_resilience(tool_id="get_project_map", strategy=PathStrategy)(
         envelop_tool_function(
             _get_project_map_tool,
@@ -487,7 +493,9 @@ async def _get_cross_file_dependencies_tool(
     return result
 
 
-get_cross_file_dependencies = mcp.tool()(
+get_cross_file_dependencies = mcp.tool(
+    description="Trace cross-file dependency chains for a symbol with confidence scoring."
+)(
     with_oracle_resilience(
         tool_id="get_cross_file_dependencies", strategy=PathStrategy
     )(
@@ -598,7 +606,9 @@ async def _cross_file_security_scan_tool(
     return result
 
 
-cross_file_security_scan = mcp.tool()(
+cross_file_security_scan = mcp.tool(
+    description="Detect security vulnerabilities spanning module boundaries via cross-file taint tracking."
+)(
     with_oracle_resilience(tool_id="cross_file_security_scan", strategy=PathStrategy)(
         envelop_tool_function(
             _cross_file_security_scan_tool,

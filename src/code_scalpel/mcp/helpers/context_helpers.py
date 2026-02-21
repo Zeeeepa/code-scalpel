@@ -412,7 +412,8 @@ def _crawl_project_sync(
         incremental_mode = capabilities and "incremental_indexing" in capabilities
 
         if incremental_mode:
-            cache_dir = Path(root_path) / ".code-scalpel" / "cache"
+            # [20260218_BUGFIX] Use .scalpel_cache (contract path) — single-level dir, no parents needed
+            cache_dir = Path(root_path) / ".scalpel_cache"
             cache_dir.mkdir(exist_ok=True)
             cache_file = cache_dir / "crawl_cache.json"
 

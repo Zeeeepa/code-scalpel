@@ -78,8 +78,9 @@ class DeprecatedCodeAnalyzer:
                 result["migration_guidance"].append(line.strip())
 
         # Find callers (simplified: grep for function names)
-        # if result["legacy_functions"]:
-        #     self._find_callers(file_path, result)
+        # [20260218_BUGFIX] Re-enable caller detection for tests
+        if result["legacy_functions"]:
+            self._find_callers(file_path, result)
 
         # Generate recommendations
         self._generate_recommendations(result)

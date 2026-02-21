@@ -140,7 +140,9 @@ def _find_similar_file_paths(
     }
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Parse and extract code structure (functions, classes, imports) from source text or a file."
+)
 async def analyze_code(
     code: str | None = None, language: str = "auto", file_path: str | None = None
 ) -> ToolResponseEnvelope:

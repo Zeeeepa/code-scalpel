@@ -442,15 +442,13 @@ class TestBuild:
     def test_build_simple_project(self):
         """Test building call graph for a simple project."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "main.py").write_text(
-                """
+            Path(tmpdir, "main.py").write_text("""
 def main():
     helper()
 
 def helper():
     print("helping")
-"""
-            )
+""")
             builder = CallGraphBuilder(Path(tmpdir))
             graph = builder.build()
 
@@ -460,20 +458,16 @@ def helper():
     def test_build_multi_file_project(self):
         """Test building call graph across multiple files."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "main.py").write_text(
-                """
+            Path(tmpdir, "main.py").write_text("""
 from utils import process
 
 def main():
     process()
-"""
-            )
-            Path(tmpdir, "utils.py").write_text(
-                """
+""")
+            Path(tmpdir, "utils.py").write_text("""
 def process():
     print("processing")
-"""
-            )
+""")
             builder = CallGraphBuilder(Path(tmpdir))
             graph = builder.build()
 
@@ -484,18 +478,14 @@ def process():
     def test_build_handles_syntax_errors(self):
         """Test that syntax errors in files don't crash the build."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "good.py").write_text(
-                """
+            Path(tmpdir, "good.py").write_text("""
 def good():
     pass
-"""
-            )
-            Path(tmpdir, "bad.py").write_text(
-                """
+""")
+            Path(tmpdir, "bad.py").write_text("""
 def bad(
     # Missing closing paren - syntax error
-"""
-            )
+""")
             builder = CallGraphBuilder(Path(tmpdir))
             # Should not raise - just skip the bad file
             graph = builder.build()
@@ -506,12 +496,10 @@ def bad(
         """Test handling of empty Python files."""
         with tempfile.TemporaryDirectory() as tmpdir:
             Path(tmpdir, "empty.py").write_text("")
-            Path(tmpdir, "real.py").write_text(
-                """
+            Path(tmpdir, "real.py").write_text("""
 def real():
     pass
-"""
-            )
+""")
             builder = CallGraphBuilder(Path(tmpdir))
             graph = builder.build()
 
@@ -520,14 +508,12 @@ def real():
     def test_build_with_nested_functions(self):
         """Test handling of nested function definitions."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "nested.py").write_text(
-                """
+            Path(tmpdir, "nested.py").write_text("""
 def outer():
     def inner():
         helper()
     inner()
-"""
-            )
+""")
             builder = CallGraphBuilder(Path(tmpdir))
             graph = builder.build()
 
@@ -537,16 +523,14 @@ def outer():
     def test_build_with_classes(self):
         """Test handling of class methods in call graph."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "classes.py").write_text(
-                """
+            Path(tmpdir, "classes.py").write_text("""
 class MyClass:
     def method_a(self):
         self.method_b()
     
     def method_b(self):
         pass
-"""
-            )
+""")
             builder = CallGraphBuilder(Path(tmpdir))
             graph = builder.build()
 
@@ -645,8 +629,7 @@ class TestIntegration:
             tests.mkdir()
 
             Path(src, "__init__.py").write_text("")
-            Path(src, "core.py").write_text(
-                """
+            Path(src, "core.py").write_text("""
 from .utils import helper
 
 def main():
@@ -655,22 +638,17 @@ def main():
 
 def process():
     print("processing")
-"""
-            )
-            Path(src, "utils.py").write_text(
-                """
+""")
+            Path(src, "utils.py").write_text("""
 def helper():
     return "helping"
-"""
-            )
-            Path(tests, "test_core.py").write_text(
-                """
+""")
+            Path(tests, "test_core.py").write_text("""
 from src.core import main
 
 def test_main():
     main()
-"""
-            )
+""")
 
             builder = CallGraphBuilder(Path(tmpdir))
             graph = builder.build()

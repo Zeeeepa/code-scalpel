@@ -15,8 +15,7 @@ import re
 import sys
 from pathlib import Path
 
-
-LINK_RE = re.compile(r'\[([^\]]*)\]\(([^)]+)\)')
+LINK_RE = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
 URL_PREFIXES = ("http://", "https://", "mailto:", "//", "#", "ftp://")
 
 
@@ -54,7 +53,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Validate internal markdown links")
     parser.add_argument("--dir", default="docs", help="Directory to check")
     parser.add_argument("--ext", default=".md", help="File extension to check")
-    parser.add_argument("--exit-on-broken", action="store_true", help="Exit 1 if broken links found")
+    parser.add_argument(
+        "--exit-on-broken", action="store_true", help="Exit 1 if broken links found"
+    )
     args = parser.parse_args()
 
     root = Path(args.dir)
@@ -73,7 +74,9 @@ def main() -> int:
             total_broken += len(broken)
 
     if files_with_issues:
-        print(f"⚠️  {total_broken} broken internal link(s) in {len(files_with_issues)} file(s):")
+        print(
+            f"⚠️  {total_broken} broken internal link(s) in {len(files_with_issues)} file(s):"
+        )
         for path, broken_list in files_with_issues:
             try:
                 rel = path.relative_to(Path.cwd())

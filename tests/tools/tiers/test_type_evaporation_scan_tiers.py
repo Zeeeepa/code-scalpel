@@ -13,8 +13,7 @@ async def test_type_evaporation_scan_pro_sanity(pro_tier):
     - matched_endpoints present (frontend↔backend correlation)
     """
     # Frontend: define a type and make a fetch with untyped .json()
-    frontend_code = (
-        """
+    frontend_code = ("""
 // FILE: frontend.ts
 // Keep type definition within ~20 lines of fetch for endpoint association
 interface User { name: string; }
@@ -26,19 +25,16 @@ async function loadUser() {
   localStorage.setItem('k', JSON.stringify(data)); // library boundary
   return data as any; // rule trigger (enterprise-only)
 }
-"""
-    ).strip()
+""").strip()
 
     # Backend: simple route without validation
-    backend_code = (
-        """
+    backend_code = ("""
 // FILE: backend.py
 @app.get('/api/user')
 def get_user():
     data = request.get_json()  # unvalidated
     return jsonify(data)
-"""
-    ).strip()
+""").strip()
 
     result = await security.type_evaporation_scan(
         frontend_code=frontend_code,
@@ -68,8 +64,7 @@ async def test_type_evaporation_scan_enterprise_sanity(enterprise_tier):
     - custom_rule_violations present (from rules)
     - compliance_report present
     """
-    frontend_code = (
-        """
+    frontend_code = ("""
 // FILE: frontend.ts
 // Place type alias near fetch to associate endpoint in generator
  type Role = 'admin' | 'user';
@@ -80,19 +75,16 @@ async function postUser() {
   const value = JSON.parse('{"x": 1}'); // JSON.parse without validation
   return payload as Role; // unsafe assertion
 }
-"""
-    ).strip()
+""").strip()
 
-    backend_code = (
-        """
+    backend_code = ("""
 // FILE: backend.py
 @app.post('/api/user')
 def create_user():
     body = request.get_json()  # unvalidated
     name = body['name']
     return jsonify({'ok': True, 'name': name})
-"""
-    ).strip()
+""").strip()
 
     result = await security.type_evaporation_scan(
         frontend_code=frontend_code,

@@ -384,7 +384,9 @@ class ProjectCrawler:
         # Removed duplicate gitignore loading - ProjectWalker handles this
 
         if self.enable_cache:
-            self._cache_dir.mkdir(exist_ok=True)
+            self._cache_dir.mkdir(
+                parents=True, exist_ok=True
+            )  # [20260218_BUGFIX] parents=True — .code-scalpel/ may not exist yet
             self._cache = self._load_cache()
 
     def _load_cache(self) -> dict[str, Any]:

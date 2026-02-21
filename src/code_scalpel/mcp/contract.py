@@ -242,7 +242,6 @@ class ToolResponseEnvelope(BaseModel):
             "edges",
             "warnings",
             "violations",
-            "remediation_suggestions",
             "complexity_hotspots",
             "vulnerabilities",
             "test_cases",
@@ -258,6 +257,11 @@ class ToolResponseEnvelope(BaseModel):
             "backup_path",
             "diff",
             "pro_features_enabled",
+            "files_limit_applied",  # [20260218_BUGFIX] May be None for unlimited tiers; preserve hasattr contract
+            "max_test_cases_limit",  # [20260218_BUGFIX] None = unlimited; filtered by exclude_null_values
+            "language_detected",  # [20260218_BUGFIX] May be None; filtered by exclude_null_values
+            "max_depth_applied",  # [20260218_BUGFIX] May be None (unlimited); filtered by exclude_null_values
+            "remediation_suggestions",  # [20260218_BUGFIX] Tier-gated (Pro+); None for community
         }
         if (
             name in known_nullable_fields
@@ -487,8 +491,31 @@ def envelop_tool_function(
                 error_obj = ToolError(error=err_msg or "Tool failed", error_code=code)
 
             # [20260202_COMPAT] Support legacy tests calling tool functions directly
+            # [20260218_BUGFIX] Only bypass envelope if result is NOT already a ToolResponseEnvelope.
+            # Tests using tool.run() to validate the protocol contract expect a ToolResponseEnvelope
+            # and must not be short-circuited by this compat path.
             if "pytest" in sys.modules and kwargs.get("ctx") is None:
-                return result
+                if not isinstance(result, ToolResponseEnvelope):
+                    return result
+
+            # [20260220_FEATURE] v1.4.0 - Apply response_config data filtering to graph tools.
+            # The envelop_tool_function path previously bypassed filter_tool_response entirely,
+            # meaning response_config.json had zero effect on get_call_graph, get_project_map,
+            # get_graph_neighborhood, get_cross_file_dependencies, cross_file_security_scan.
+            # Envelope fields (tier, request_id etc.) are kept intact; only data is filtered.
+            _cfg = get_response_config()
+            _cfg._check_reload()
+            _is_error = error_obj is not None
+            _filtered = result
+            try:
+                if isinstance(result, BaseModel):
+                    _filtered = result.model_dump(mode="json", exclude_none=False)
+                if isinstance(_filtered, dict):
+                    _filtered = filter_tool_response(
+                        _filtered, tool_name=tool_id, tier=tier, is_error=_is_error
+                    )
+            except Exception:
+                _filtered = result
 
             return ToolResponseEnvelope(
                 tier=tier,
@@ -499,7 +526,7 @@ def envelop_tool_function(
                 duration_ms=duration_ms,
                 error=error_obj,
                 upgrade_hints=[],
-                data=result,
+                data=_filtered,
             )
         except BaseException as exc:  # noqa: BLE001
             # [20260202_COMPAT] Support legacy tests expecting exceptions

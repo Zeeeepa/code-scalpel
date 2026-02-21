@@ -46,7 +46,7 @@ if [ ! -f "pyproject.toml" ]; then
 fi
 
 # [20251214_REFACTOR] Resolve Python executable for cross-shell portability.
-PYTHON_BIN=$(command -v python.exe || command -v py.exe || command -v py || command -v python || command -v python3 || true)
+PYTHON_BIN=$(command -v python || command -v python3 || command -v python.exe || command -v py.exe || command -v py || true)
 if [ -z "$PYTHON_BIN" ]; then
     echo "ERROR: Python executable not found in PATH"
     exit 1

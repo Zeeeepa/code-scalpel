@@ -728,6 +728,10 @@ def _generate_tests_sync(
             truncation_warning=truncation_warning,
             pytest_code=pytest_code,
             unittest_code=unittest_code,
+            # [20260218_BUGFIX] Populate output metadata fields
+            framework_used=framework,
+            data_driven_enabled=data_driven,
+            bug_reproduction_enabled=crash_log is not None,
         )
 
     except Exception as e:
@@ -736,6 +740,8 @@ def _generate_tests_sync(
             function_name=function_name or "unknown",
             test_count=0,
             total_test_cases=0,
+            # [20260218_BUGFIX] Preserve framework in error responses for metadata contract
+            framework_used=framework,
             error=f"Test generation failed: {str(e)}",
         )
 

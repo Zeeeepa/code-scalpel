@@ -4,6 +4,36 @@ from __future__ import annotations
 
 import pytest
 from pathlib import Path
+from unittest.mock import patch
+
+
+@pytest.fixture(autouse=True)
+def patch_response_config():
+    """Patch response config to use debug profile for oracle tests.
+
+    This ensures that all envelope fields (tool_id, tier, etc.) are included
+    in the response, which the oracle tests assert on.
+    """
+    from code_scalpel.mcp.response_config import ResponseConfig
+
+    class DebugResponseConfig(ResponseConfig):
+        def get_envelope_fields(self, tool_name=None):
+            return {
+                "tier",
+                "tool_version",
+                "tool_id",
+                "request_id",
+                "capabilities",
+                "duration_ms",
+                "error",
+                "upgrade_hints",
+            }
+
+    with patch(
+        "code_scalpel.mcp.contract.get_response_config",
+        return_value=DebugResponseConfig(),
+    ):
+        yield
 
 
 @pytest.fixture
@@ -14,8 +44,7 @@ def sample_auth_file(tmp_path: Path) -> Path:
         Path to sample file
     """
     auth_py = tmp_path / "auth.py"
-    auth_py.write_text(
-        """
+    auth_py.write_text("""
 from typing import Optional
 from datetime import datetime
 
@@ -43,8 +72,7 @@ def validate_email(email: str) -> bool:
 def hash_password(password: str) -> str:
     \"\"\"Hash a password.\"\"\"
     return password
-"""
-    )
+""")
     return auth_py
 
 
@@ -56,8 +84,7 @@ def sample_models_file(tmp_path: Path) -> Path:
         Path to sample file
     """
     models_py = tmp_path / "models.py"
-    models_py.write_text(
-        """
+    models_py.write_text("""
 from typing import List
 
 
@@ -75,8 +102,7 @@ class User(BaseModel):
     @classmethod
     def from_dict(cls, data: dict) -> "User":
         return cls(id=data["id"], email=data["email"])
-"""
-    )
+""")
     return models_py
 
 
@@ -91,8 +117,7 @@ def sample_project(tmp_path: Path) -> Path:
     src.mkdir()
 
     # Create auth.py
-    (src / "auth.py").write_text(
-        """
+    (src / "auth.py").write_text("""
 from typing import Optional
 
 
@@ -104,17 +129,14 @@ def validate_token(token: str) -> Optional[dict]:
 def encode_token(user_id: int) -> str:
     \"\"\"Encode JWT token.\"\"\"
     return ""
-"""
-    )
+""")
 
     # Create models.py
-    (src / "models.py").write_text(
-        """
+    (src / "models.py").write_text("""
 class User:
     def __init__(self, id: int, email: str):
         self.id = id
         self.email = email
-"""
-    )
+""")
 
     return tmp_path

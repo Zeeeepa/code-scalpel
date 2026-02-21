@@ -1001,3 +1001,201 @@ code-scalpel hook post-tool-use # Run audit logging
 
 See `docs/architecture/IDE_ENFORCEMENT_GOVERNANCE.md` for full documentation.
 """
+
+# [20260220_FEATURE] Response configuration templates - created during boot/init
+# so users and AI agents can immediately control output verbosity.
+RESPONSE_CONFIG_JSON_TEMPLATE = """{
+  "$schema": "./response_config.schema.json",
+  "version": "1.4.0",
+  "description": "MCP response configuration - controls output verbosity for all tools independent of tier. Edit 'global.profile' to adjust detail level: minimal, standard, verbose, or debug.",
+  "global": {
+    "profile": "minimal",
+    "exclude_empty_arrays": true,
+    "exclude_empty_objects": true,
+    "exclude_null_values": true,
+    "exclude_default_values": true
+  },
+  "profiles": {
+    "minimal": {
+      "description": "Default. Bare minimum for LLM understanding - maximum token efficiency (~50-100 tokens per response). Escalate to standard, verbose, or debug when more detail is needed.",
+      "envelope": {
+        "include": []
+      },
+      "common_exclusions": [
+        "server_version",
+        "request_id",
+        "duration_ms",
+        "capabilities"
+      ]
+    },
+    "standard": {
+      "description": "Balanced output with essential metadata (~100-500 tokens). Good for most interactive AI workflows that benefit from error context.",
+      "envelope": {
+        "include": ["error", "upgrade_hints"]
+      },
+      "common_exclusions": [
+        "server_version",
+        "request_id"
+      ]
+    },
+    "verbose": {
+      "description": "Detailed output with full metadata (~500-2000 tokens). Use when debugging tool behaviour or investigating unexpected results.",
+      "envelope": {
+        "include": ["error", "upgrade_hints", "duration_ms"]
+      },
+      "common_exclusions": [
+        "server_version"
+      ]
+    },
+    "debug": {
+      "description": "Full output including all metadata (unlimited tokens). Use for development and integration testing only.",
+      "envelope": {
+        "include": ["tier", "tool_version", "tool_id", "request_id", "capabilities", "duration_ms", "error", "upgrade_hints"]
+      },
+      "common_exclusions": []
+    }
+  },
+  "tool_overrides": {
+    "_comment": "Per-tool field exclusions to control output size. Not tier-based - purely for token efficiency. Remove entries to include more detail for specific tools.",
+    "_comment_exclude_when_tier": "Use 'exclude_when_tier' inside any tool override to suppress fields at specific tiers. Keys are community/pro/enterprise; values are arrays of field names. Layered with 'exclude_fields' for fine-grained control.",
+    "analyze_code": {
+      "exclude_fields": ["raw_ast", "token_positions"],
+      "include_on_error": ["parser_warnings", "sanitization_report", "error_location", "suggested_fix"]
+    },
+    "security_scan": {
+      "exclude_fields": ["scan_metadata", "parser_warnings", "constraint_dump", "solver_statistics"]
+    },
+    "extract_code": {
+      "exclude_fields": ["extraction_metadata", "ast_node_ids"],
+      "include_on_error": ["parser_warnings", "error_location", "suggested_fix"]
+    },
+    "symbolic_execute": {
+      "exclude_fields": ["solver_statistics", "constraint_dump", "z3_model_dump", "path_conditions_raw", "concolic_results"]
+    },
+    "generate_unit_tests": {
+      "exclude_fields": ["generation_metadata", "symbolic_paths_raw"]
+    },
+    "crawl_project": {
+      "exclude_fields": ["crawl_statistics", "file_hashes", "parse_timings"]
+    },
+    "get_call_graph": {
+      "exclude_fields": ["graph_metadata", "edge_weights", "traversal_order"]
+    },
+    "simulate_refactor": {
+      "exclude_fields": ["simulation_metadata", "ast_diff_raw"]
+    },
+    "scan_dependencies": {
+      "exclude_fields": ["scan_metadata", "api_response_raw"]
+    },
+    "update_symbol": {
+      "exclude_fields": ["backup_metadata", "syntax_tree_diff"],
+      "include_on_error": ["parser_warnings", "error_location", "suggested_fix"]
+    },
+    "validate_paths": {
+      "exclude_fields": ["validation_metadata", "stat_results"]
+    }
+  }
+}
+"""
+
+RESPONSE_CONFIG_SCHEMA_JSON_TEMPLATE = """{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Code Scalpel Response Configuration Schema",
+  "description": "Configure MCP tool response output verbosity for token efficiency. Controls which metadata/tool data fields are included in responses - independent of tier.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Code Scalpel version this config is for"
+    },
+    "description": {
+      "type": "string"
+    },
+    "global": {
+      "type": "object",
+      "description": "Global settings applied to all tools unless overridden",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose", "debug"],
+          "description": "Default output profile. minimal=~50-100 tokens, standard=~100-500, verbose=~500-2000, debug=unlimited"
+        },
+        "exclude_empty_arrays": { "type": "boolean" },
+        "exclude_empty_objects": { "type": "boolean" },
+        "exclude_null_values": { "type": "boolean" },
+        "exclude_default_values": { "type": "boolean" }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "description": "Named output profiles. 'profile' in global or tool_overrides refers to these names.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "envelope": {
+            "type": "object",
+            "properties": {
+              "include": {
+                "type": "array",
+                "description": "Envelope metadata fields to include",
+                "items": {
+                  "type": "string",
+                  "enum": ["tier", "tool_version", "tool_id", "request_id", "capabilities", "duration_ms", "error", "upgrade_hints"]
+                }
+              }
+            }
+          },
+          "common_exclusions": {
+            "type": "array",
+            "description": "Fields to exclude from all tool responses at this profile level",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tool_overrides": {
+      "type": "object",
+      "description": "Per-tool configuration. Keys are tool names (e.g., analyze_code, security_scan).",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "properties": {
+              "profile": {
+                "type": "string",
+                "enum": ["minimal", "standard", "verbose", "debug"]
+              },
+              "exclude_fields": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Fields to always exclude from this tool's response"
+              },
+              "include_only": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Whitelist mode: only include these fields"
+              },
+              "include_on_error": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Extra fields included only when the tool returns an error"
+              },
+              "exclude_when_tier": {
+                "type": "object",
+                "description": "Tier-conditional exclusions. Keys are tier names (community, pro, enterprise); values are arrays of field names to exclude at that tier. Useful for suppressing heavy metadata on lower tiers.",
+                "properties": {
+                  "community": { "type": "array", "items": { "type": "string" } },
+                  "pro":       { "type": "array", "items": { "type": "string" } },
+                  "enterprise":{ "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+"""

@@ -4,7 +4,6 @@ Tests write_perfect_code tool registration and behavior.
 """
 
 import pytest
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -20,8 +19,12 @@ class TestWritePerfectCodeSync:
     """Test synchronous implementation of write_perfect_code."""
 
     @pytest.fixture
-    def sample_file(self):
-        """Create a temporary Python file."""
+    def sample_file(self, tmp_path):
+        """Create a temporary Python file in an isolated tmp_path directory.
+
+        [20260219_BUGFIX] Use tmp_path to ensure the OraclePipeline only scans
+        a small isolated directory, not /tmp or the full workspace.
+        """
         content = '''"""Sample module."""
 
 def hello(name: str) -> str:
@@ -35,24 +38,30 @@ class Greeter:
         """Greet a person."""
         return hello(name)
 '''
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
-            f.write(content)
-            return f.name
+        sample = tmp_path / "sample.py"
+        sample.write_text(content, encoding="utf-8")
+        return str(sample)
 
     def test_sync_implementation_valid_file(self, sample_file):
         """Test sync implementation with valid file."""
-        with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
-            markdown = _write_perfect_code_sync(
-                file_path=sample_file,
-                instruction="Add error handling",
-            )
+        sample_dir = str(Path(sample_file).parent)
+        # [20260219_BUGFIX] Mock get_project_root to isolated tmp_path dir; use community
+        # tier (max_files=50) so the 1-file scan completes instantly.
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
+            with patch(
+                "code_scalpel.mcp.server.get_project_root", return_value=sample_dir
+            ):
+                markdown = _write_perfect_code_sync(
+                    file_path=sample_file,
+                    instruction="Add error handling",
+                )
 
-            assert isinstance(markdown, str)
-            assert len(markdown) > 0
-            assert "Code Generation Constraints" in markdown
-            assert sample_file in markdown
+                assert isinstance(markdown, str)
+                assert len(markdown) > 0
+                assert "Code Generation Constraints" in markdown
+                assert sample_file in markdown
 
     def test_sync_implementation_missing_file(self):
         """Test sync implementation with missing file."""
@@ -78,67 +87,84 @@ class Greeter:
                 instruction="",
             )
 
-    def test_sync_implementation_invalid_python(self):
+    def test_sync_implementation_invalid_python(self, tmp_path):
         """Test sync implementation with invalid Python syntax."""
+        # [20260219_BUGFIX] Use tmp_path for isolated scan root; mock get_project_root
+        # to prevent the graph engine from scanning the workspace.
         content = "def broken("
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
-            f.write(content)
-            f.flush()
-            file_path = f.name
+        file_path = str(tmp_path / "broken.py")
+        Path(file_path).write_text(content, encoding="utf-8")
 
-        try:
-            with pytest.raises(SyntaxError):
-                _write_perfect_code_sync(
-                    file_path=file_path,
-                    instruction="Fix syntax",
-                )
-        finally:
-            Path(file_path).unlink()
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
+            with patch(
+                "code_scalpel.mcp.server.get_project_root", return_value=str(tmp_path)
+            ):
+                with pytest.raises(SyntaxError):
+                    _write_perfect_code_sync(
+                        file_path=file_path,
+                        instruction="Fix syntax",
+                    )
 
     def test_sync_implementation_respects_tier(self, sample_file):
         """Test that sync implementation respects tier for limits."""
-        with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
-            markdown = _write_perfect_code_sync(
-                file_path=sample_file,
-                instruction="Add validation",
-            )
+        sample_dir = str(Path(sample_file).parent)
+        # [20260219_BUGFIX] Mock get_project_root to isolated tmp_path dir.
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
+            with patch(
+                "code_scalpel.mcp.server.get_project_root", return_value=sample_dir
+            ):
+                markdown = _write_perfect_code_sync(
+                    file_path=sample_file,
+                    instruction="Add validation",
+                )
 
-            # Pro tier should have reasonable context
-            assert len(markdown) > 100
+                # Pro tier should have reasonable context
+                assert len(markdown) > 100
 
 
 class TestWritePerfectCodeAsync:
     """Test async implementation of write_perfect_code."""
 
     @pytest.fixture
-    def sample_file(self):
-        """Create a temporary Python file."""
+    def sample_file(self, tmp_path):
+        """Create a temporary Python file in an isolated tmp_path directory.
+
+        [20260219_BUGFIX] Use tmp_path to ensure the OraclePipeline only scans
+        a small isolated directory, not /tmp or the full workspace.
+        """
         content = '''"""Sample module."""
 
 def add(a: int, b: int) -> int:
     """Add two numbers."""
     return a + b
 '''
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
-            f.write(content)
-            return f.name
+        sample = tmp_path / "sample.py"
+        sample.write_text(content, encoding="utf-8")
+        return str(sample)
 
     @pytest.mark.asyncio
     async def test_async_implementation_valid_file(self, sample_file):
         """Test async implementation with valid file."""
-        with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
-            markdown = await _write_perfect_code_impl(
-                file_path=sample_file,
-                instruction="Add logging",
-            )
+        sample_dir = str(Path(sample_file).parent)
+        # [20260219_BUGFIX] Mock get_project_root to isolated tmp_path dir.
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
+            with patch(
+                "code_scalpel.mcp.server.get_project_root", return_value=sample_dir
+            ):
+                markdown = await _write_perfect_code_impl(
+                    file_path=sample_file,
+                    instruction="Add logging",
+                )
 
-            assert isinstance(markdown, str)
-            assert len(markdown) > 0
-            assert "Code Generation Constraints" in markdown
+                assert isinstance(markdown, str)
+                assert len(markdown) > 0
+                assert "Code Generation Constraints" in markdown
 
     @pytest.mark.asyncio
     async def test_async_implementation_propagates_file_not_found(self):
@@ -165,19 +191,22 @@ class TestWritePerfectCodeMCPTool:
     """Test MCP tool registration and interface."""
 
     @pytest.fixture
-    def sample_file(self):
-        """Create a temporary Python file."""
+    def sample_file(self, tmp_path):
+        """Create a temporary Python file in an isolated tmp_path directory.
+
+        [20260219_BUGFIX] Use tmp_path for consistency (these tests mock
+        _write_perfect_code_impl so no real scan occurs, but using tmp_path
+        ensures cleanup and isolation).
+        """
         content = '''"""Sample module."""
 
 def multiply(a: int, b: int) -> int:
     """Multiply two numbers."""
     return a * b
 '''
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
-            f.write(content)
-            return f.name
+        sample = tmp_path / "sample.py"
+        sample.write_text(content, encoding="utf-8")
+        return str(sample)
 
     @pytest.mark.asyncio
     async def test_tool_success_response(self, sample_file):
@@ -244,8 +273,12 @@ class TestWritePerfectCodeIntegration:
     """Integration tests for write_perfect_code tool."""
 
     @pytest.fixture
-    def sample_file(self):
-        """Create a temporary Python file."""
+    def sample_file(self, tmp_path):
+        """Create a temporary Python file in an isolated tmp_path directory.
+
+        [20260219_BUGFIX] Use tmp_path to ensure the OraclePipeline only scans
+        a small isolated directory, not /tmp or the full workspace.
+        """
         content = '''"""Authentication module."""
 
 import json
@@ -274,38 +307,50 @@ class TokenManager:
         """Retrieve user token."""
         return self.tokens.get(user_id)
 '''
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", delete=False, encoding="utf-8"
-        ) as f:
-            f.write(content)
-            return f.name
+        sample = tmp_path / "auth.py"
+        sample.write_text(content, encoding="utf-8")
+        return str(sample)
 
     def test_sync_with_real_file_content(self, sample_file):
         """Test sync implementation with real file content."""
-        with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
-            markdown = _write_perfect_code_sync(
-                file_path=sample_file,
-                instruction="Add token refresh functionality",
-            )
+        sample_dir = str(Path(sample_file).parent)
+        # [20260219_BUGFIX] Mock get_project_root to isolated tmp_path dir.
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
+            with patch(
+                "code_scalpel.mcp.server.get_project_root", return_value=sample_dir
+            ):
+                markdown = _write_perfect_code_sync(
+                    file_path=sample_file,
+                    instruction="Add token refresh functionality",
+                )
 
-            # Should include symbols from the file
-            assert "validate_token" in markdown
-            assert "TokenManager" in markdown
-            assert "store_token" in markdown
-            # Should include instruction
-            assert "token refresh" in markdown.lower()
+                # Should include symbols from the file
+                assert "validate_token" in markdown
+                assert "TokenManager" in markdown
+                assert "store_token" in markdown
+                # Should include instruction
+                assert "token refresh" in markdown.lower()
 
     @pytest.mark.asyncio
     async def test_async_integration_with_mcp_tool(self, sample_file):
         """Test async implementation integrates with MCP tool."""
-        with patch("code_scalpel.mcp.protocol._get_current_tier", return_value="pro"):
-            response = await write_perfect_code(
-                file_path=sample_file,
-                instruction="Add expiration checking",
-            )
+        sample_dir = str(Path(sample_file).parent)
+        # [20260219_BUGFIX] Mock get_project_root to isolated tmp_path dir.
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
+            with patch(
+                "code_scalpel.mcp.server.get_project_root", return_value=sample_dir
+            ):
+                response = await write_perfect_code(
+                    file_path=sample_file,
+                    instruction="Add expiration checking",
+                )
 
-            assert isinstance(response, ToolResponseEnvelope)
-            assert response.error is None
-            assert response.data is not None
-            assert "Code Generation Constraints" in response.data
-            assert sample_file in response.data
+                assert isinstance(response, ToolResponseEnvelope)
+                assert response.error is None
+                assert response.data is not None
+                assert "Code Generation Constraints" in response.data
+                assert sample_file in response.data

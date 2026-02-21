@@ -31,6 +31,8 @@ from .templates import (
     PROJECT_STRUCTURE_REGO_TEMPLATE,
     PROJECT_STRUCTURE_YAML_TEMPLATE,
     README_TEMPLATE,
+    RESPONSE_CONFIG_JSON_TEMPLATE,
+    RESPONSE_CONFIG_SCHEMA_JSON_TEMPLATE,
     SECRET_DETECTION_REGO_TEMPLATE,
 )
 
@@ -297,6 +299,23 @@ Do not commit `license.jwt` to version control if it contains sensitive informat
     hooks_readme_file = config_dir / "HOOKS_README.md"
     hooks_readme_file.write_text(HOOKS_README_TEMPLATE, encoding="utf-8")
     files_created.append("HOOKS_README.md")
+
+    # ========================================================================
+    # [20260220_FEATURE] v1.3.6 - Response Configuration
+    # Created in both 'full' and 'templates_only' modes so users and AI agents
+    # can immediately control detail level sent to the AI during tool operations.
+    # ========================================================================
+    response_config_file = config_dir / "response_config.json"
+    if not response_config_file.exists():
+        response_config_file.write_text(RESPONSE_CONFIG_JSON_TEMPLATE, encoding="utf-8")
+        files_created.append("response_config.json")
+
+    response_config_schema_file = config_dir / "response_config.schema.json"
+    if not response_config_schema_file.exists():
+        response_config_schema_file.write_text(
+            RESPONSE_CONFIG_SCHEMA_JSON_TEMPLATE, encoding="utf-8"
+        )
+        files_created.append("response_config.schema.json")
 
     # ========================================================================
     # [20241225_FEATURE] v3.3.0 - Policy Integrity Manifest

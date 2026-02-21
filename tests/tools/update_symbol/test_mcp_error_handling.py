@@ -80,11 +80,9 @@ async def test_update_symbol_fault_injection_returns_internal_error(tmp_path):
 
     # Try to update a symbol with invalid/conflicting parameters
     sample_file = tmp_path / "sample.py"
-    sample_file.write_text(
-        """def foo():
+    sample_file.write_text("""def foo():
     return 0
-"""
-    )
+""")
 
     # Invalid operation: empty new_code should fail validation
     args = {
@@ -98,15 +96,22 @@ async def test_update_symbol_fault_injection_returns_internal_error(tmp_path):
     # Empty new_code should fail validation
     result = await tool.run(args, context=None, convert_result=False)
 
-    # Result should be a PatchResultModel (even on failure)
+    # Result should be a PatchResultModel, dict, or ToolResponseEnvelope (even on failure)
+    from code_scalpel.mcp.contract import ToolResponseEnvelope
+
     assert isinstance(
-        result, (PatchResultModel, dict)
-    ), f"Tool should return a PatchResultModel or dict, got {type(result)}"
+        result, (PatchResultModel, dict, ToolResponseEnvelope)
+    ), f"Tool should return a PatchResultModel, dict, or ToolResponseEnvelope, got {type(result)}"
 
     # Check for failure
     if isinstance(result, PatchResultModel):
         assert result.success is False, "Empty new_code should fail validation"
         assert result.error_code == "UPDATE_SYMBOL_MISSING_NEW_CODE"
+    elif isinstance(result, ToolResponseEnvelope):
+        # [20260202_BUGFIX] ToolResponseEnvelope: error is in result.data dict, not at top level
+        data = result.data if isinstance(result.data, dict) else {}
+        assert data.get("success") is False, "Empty new_code should fail"
+        assert data.get("error") is not None, "Should include error message"
     else:
         assert result.get("success") is False, "Empty new_code should fail"
         assert "error" in result, "Should include error message"
@@ -130,11 +135,9 @@ async def test_update_symbol_respects_timeout_budget(monkeypatch, tmp_path):
     # Create file within project root (security requirement)
     project_root = Path("/mnt/k/backup/Develop/code-scalpel")
     sample_file = project_root / "test_timeout_sample_temp.py"
-    sample_file.write_text(
-        """def foo():
+    sample_file.write_text("""def foo():
     return 0
-"""
-    )
+""")
 
     try:
         args = {
@@ -149,8 +152,10 @@ async def test_update_symbol_respects_timeout_budget(monkeypatch, tmp_path):
             tool.run(args, context=None, convert_result=False), timeout=1.0
         )
 
-        # Verify result is PatchResultModel instance and completed within timeout
-        assert isinstance(result, (dict, PatchResultModel))
+        # Verify result is PatchResultModel, dict, or ToolResponseEnvelope - completed within timeout
+        from code_scalpel.mcp.contract import ToolResponseEnvelope
+
+        assert isinstance(result, (dict, PatchResultModel, ToolResponseEnvelope))
 
         # If it's a model, check the success field
         if isinstance(result, PatchResultModel):
@@ -158,6 +163,12 @@ async def test_update_symbol_respects_timeout_budget(monkeypatch, tmp_path):
             assert result.success is True
             assert result.file_path == str(sample_file)
             assert result.target_name == "foo"
+        elif isinstance(result, ToolResponseEnvelope):
+            # [20260202_BUGFIX] ToolResponseEnvelope: data payload is in result.data
+            data = result.data if isinstance(result.data, dict) else {}
+            err = data.get("error") or result.error
+            if not err:
+                assert data.get("success") is True
         else:
             # Dict response (legacy path)
             assert result.get("duration_ms", 0) < 1000
@@ -187,11 +198,9 @@ async def test_update_symbol_async_calls_do_not_block_event_loop(monkeypatch, tm
         # [20260121_FEATURE] Files must be within project root to avoid path sandbox rejection
         project_root = Path("/mnt/k/backup/Develop/code-scalpel")
         sample_file = project_root / f"test_async_{i}_temp.py"
-        sample_file.write_text(
-            """def foo():
+        sample_file.write_text("""def foo():
     return 0
-"""
-        )
+""")
 
         try:
             args = {
@@ -211,11 +220,19 @@ async def test_update_symbol_async_calls_do_not_block_event_loop(monkeypatch, tm
 
     assert elapsed < 2.0, f"async dispatch took too long: {elapsed}s"
     for res in results:
-        # [20260121_FEATURE] Tool returns PatchResultModel; support legacy dict path
-        assert isinstance(res, (dict, PatchResultModel))
+        # [20260121_FEATURE] Tool returns PatchResultModel, ToolResponseEnvelope, or legacy dict
+        from code_scalpel.mcp.contract import ToolResponseEnvelope
+
+        assert isinstance(res, (dict, PatchResultModel, ToolResponseEnvelope))
         if isinstance(res, PatchResultModel):
             assert hasattr(res, "success")
             assert hasattr(res, "file_path")
+        elif isinstance(res, ToolResponseEnvelope):
+            # [20260202_BUGFIX] ToolResponseEnvelope: data payload is in res.data
+            data = res.data if isinstance(res.data, dict) else {}
+            err = data.get("error") or res.error
+            if not err:
+                assert data.get("success") is True
         else:
             assert res.get("duration_ms", 0) < 1000
             err = res.get("error")
@@ -242,11 +259,9 @@ async def test_update_symbol_memory_error_returns_structured_envelope(
 
     project_root = Path("/mnt/k/backup/Develop/code-scalpel")
     sample_file = project_root / "test_oom_sample_temp.py"
-    sample_file.write_text(
-        """def foo():
+    sample_file.write_text("""def foo():
     return 0
-"""
-    )
+""")
 
     # Inject MemoryError in the patcher
     def mock_from_file(*args, **kwargs):
@@ -307,11 +322,9 @@ async def test_update_symbol_redacts_pii_from_error_details(
 
     project_root = Path("/mnt/k/backup/Develop/code-scalpel")
     sample_file = project_root / "test_pii_sample_temp.py"
-    sample_file.write_text(
-        """def foo():
+    sample_file.write_text("""def foo():
     return 0
-"""
-    )
+""")
 
     secret_string = "sk_live_51AbC123XyZ456SECRET789"
     args = {

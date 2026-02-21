@@ -1,5 +1,11 @@
 """Response formatting and filtering based on profiles.
 
+[20260220_DEPRECATE] v1.4.0 - This module is DEAD CODE and is not used by any tool
+in the MCP pipeline. The active implementation is in response_config.py (ResponseConfig)
+and contract.py (make_envelope / envelop_tool_function). ResponseFormatter.format_with_envelope
+and the PROFILES dict here have diverged from the live config and will be removed in v1.5.0.
+Do not add new references to ResponseFormatter.
+
 This module implements the ResponseFormatter that controls output detail
 levels through cascading profile logic:
 
@@ -298,6 +304,12 @@ class ResponseFormatter:
             "error",
             "validation_passed",
             "response_profile",
+            # [20260220_BUGFIX] capabilities_used must always be included so agents
+            # can observe which capabilities were invoked, regardless of profile tier
+            "capabilities_used",
+            # [20260220_BUGFIX] suggestions must always be included so agents
+            # receive actionable correction hints (e.g. typo fixes), regardless of profile
+            "suggestions",
         }
 
         # Add profile-specified envelope fields

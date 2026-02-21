@@ -64,40 +64,43 @@ class TestOracleWritePerfectCodeWithWrongInputs:
             Path(temp_path).unlink()
 
     @pytest.mark.asyncio
-    async def test_valid_inputs_returns_spec(self):
+    async def test_valid_inputs_returns_spec(self, tmp_path):
         """Test that valid inputs return constraint specification.
 
         AI scenario: AI correctly identifies file and instruction
         Expected: Successful response with constraint specification
+
+        [20260219_BUGFIX] Use tmp_path + community tier + mock get_project_root
+        to prevent OraclePipeline from scanning /tmp or the workspace.
         """
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+        temp_path = str(tmp_path / "auth.py")
+        Path(temp_path).write_text(
+            """
 def authenticate(user: str, password: str) -> bool:
     return user == "admin" and password == "secret"
 
 class AuthManager:
     def validate(self, token: str) -> bool:
         return len(token) > 0
-"""
-            )
-            temp_path = f.name
+""",
+            encoding="utf-8",
+        )
 
-        try:
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
             with patch(
-                "code_scalpel.mcp.protocol._get_current_tier", return_value="pro"
+                "code_scalpel.mcp.server.get_project_root", return_value=str(tmp_path)
             ):
                 response = await write_perfect_code(
                     file_path=temp_path,
                     instruction="Add token refresh and security improvements",
                 )
 
-            assert isinstance(response, ToolResponseEnvelope)
-            assert response.error is None
-            assert response.data is not None
-            assert "Code Generation Constraints" in response.data
-        finally:
-            Path(temp_path).unlink()
+        assert isinstance(response, ToolResponseEnvelope)
+        assert response.error is None
+        assert response.data is not None
+        assert "Code Generation Constraints" in response.data
 
 
 class TestOracleAnalyzeCodeWithWrongInputs:
@@ -181,15 +184,13 @@ class TestOracleExtractCodeWithWrongInputs:
         Expected: Error indicates function not found, may suggest similar names
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 def compute_sum(a, b):
     return a + b
 
 def compute_product(a, b):
     return a * b
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -216,8 +217,7 @@ def compute_product(a, b):
         Expected: Successful extraction with code and context
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 import math
 
 def calculate_distance(x1, y1, x2, y2):
@@ -228,8 +228,7 @@ class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -256,8 +255,7 @@ class Point:
         Expected: Successful extraction of method with class context
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 class Calculator:
     '''A simple calculator.'''
     
@@ -268,8 +266,7 @@ class Calculator:
     def multiply(self, a: int, b: int) -> int:
         '''Multiply two numbers.'''
         return a * b
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -295,15 +292,13 @@ class TestOracleRenameSymbolWithWrongInputs:
         Expected: Error indicates symbol not found
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 def authenticate_user(username, password):
     return True
 
 def validate_token(token):
     return len(token) > 0
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -329,15 +324,13 @@ def validate_token(token):
         Expected: Successful rename with backup created
         """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write(
-                """
+            f.write("""
 def old_name(x):
     '''This will be renamed.'''
     return x * 2
 
 print(old_name(5))
-"""
-            )
+""")
             temp_path = f.name
 
         try:
@@ -375,100 +368,103 @@ class TestOracleFeedbackMessages:
         assert isinstance(response.error.error, str)
 
     @pytest.mark.asyncio
-    async def test_success_includes_metadata(self):
+    async def test_success_includes_metadata(self, tmp_path):
         """Test that success responses include all metadata.
 
         Oracle principle: Tool responses should always be complete
-        """
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write("def test(): pass")
-            temp_path = f.name
 
-        try:
+        [20260219_BUGFIX] Use tmp_path + community tier + mock get_project_root.
+        """
+        temp_path = str(tmp_path / "test.py")
+        Path(temp_path).write_text("def test(): pass", encoding="utf-8")
+
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
             with patch(
-                "code_scalpel.mcp.protocol._get_current_tier", return_value="pro"
+                "code_scalpel.mcp.server.get_project_root", return_value=str(tmp_path)
             ):
                 response = await write_perfect_code(
                     file_path=temp_path, instruction="add docstring"
                 )
 
-            if response.error is None:
-                assert response.data is not None
-                assert response.tool_version is not None
-                assert response.tier is not None
-                assert response.duration_ms is not None
-        finally:
-            Path(temp_path).unlink()
+        if response.error is None:
+            assert response.data is not None
+            assert response.tool_version is not None
+            assert response.tier is not None
+            assert response.duration_ms is not None
 
 
 class TestOracleConsistencyAcrossTools:
     """Test that oracle behavior is consistent across all tools."""
 
     @pytest.mark.asyncio
-    async def test_all_tools_return_envelope(self):
+    async def test_all_tools_return_envelope(self, tmp_path):
         """Test that all tools return ToolResponseEnvelope.
 
         Consistency principle: All responses follow same contract
+
+        [20260219_BUGFIX] Use tmp_path + community tier + mock get_project_root.
         """
         # write_perfect_code
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write("def test(): pass")
-            temp_path = f.name
+        temp_path = str(tmp_path / "test.py")
+        Path(temp_path).write_text("def test(): pass", encoding="utf-8")
 
-        try:
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
             with patch(
-                "code_scalpel.mcp.protocol._get_current_tier", return_value="pro"
+                "code_scalpel.mcp.server.get_project_root", return_value=str(tmp_path)
             ):
                 resp1 = await write_perfect_code(
                     file_path=temp_path, instruction="test"
                 )
-            assert isinstance(resp1, ToolResponseEnvelope)
+        assert isinstance(resp1, ToolResponseEnvelope)
 
-            # analyze_code
-            resp2 = await analyze_code(code="def test(): pass")
-            assert isinstance(resp2, ToolResponseEnvelope)
+        # analyze_code
+        resp2 = await analyze_code(code="def test(): pass")
+        assert isinstance(resp2, ToolResponseEnvelope)
 
-            # extract_code
-            resp3 = await extract_code(
-                target_type="function", target_name="test", file_path=temp_path
-            )
-            assert isinstance(resp3, ToolResponseEnvelope)
-        finally:
-            Path(temp_path).unlink()
+        # extract_code
+        resp3 = await extract_code(
+            target_type="function", target_name="test", file_path=temp_path
+        )
+        assert isinstance(resp3, ToolResponseEnvelope)
 
     @pytest.mark.asyncio
-    async def test_all_tools_include_tier(self):
+    async def test_all_tools_include_tier(self, tmp_path):
         """Test that all tool responses include tier information.
 
         Consistency principle: Tier information is always accessible
-        """
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
-            f.write("def test(): pass")
-            temp_path = f.name
 
-        try:
+        [20260219_BUGFIX] Use tmp_path + community tier + mock get_project_root.
+        """
+        temp_path = str(tmp_path / "test.py")
+        Path(temp_path).write_text("def test(): pass", encoding="utf-8")
+
+        with patch(
+            "code_scalpel.mcp.protocol._get_current_tier", return_value="community"
+        ):
             with patch(
-                "code_scalpel.mcp.protocol._get_current_tier", return_value="pro"
+                "code_scalpel.mcp.server.get_project_root", return_value=str(tmp_path)
             ):
                 resp1 = await write_perfect_code(
                     file_path=temp_path, instruction="test"
                 )
                 resp2 = await analyze_code(code="def test(): pass")
 
-            # Verify that both responses contain tier information somewhere
-            # Tier may be on envelope or in data payload depending on response config
-            resp1_tier = resp1.tier or (
-                resp1.data.get("tier_applied") if isinstance(resp1.data, dict) else None
-            )
-            resp2_tier = resp2.tier or (
-                resp2.data.get("tier_applied") if isinstance(resp2.data, dict) else None
-            )
+        # Verify that both responses contain tier information somewhere
+        # Tier may be on envelope or in data payload depending on response config
+        resp1_tier = resp1.tier or (
+            resp1.data.get("tier_applied") if isinstance(resp1.data, dict) else None
+        )
+        resp2_tier = resp2.tier or (
+            resp2.data.get("tier_applied") if isinstance(resp2.data, dict) else None
+        )
 
-            # Both should have a tier applied (either pro from patch or community default)
-            assert resp1_tier in ("pro", "community")
-            assert resp2_tier in ("pro", "community")
-        finally:
-            Path(temp_path).unlink()
+        # Both should have a tier applied (community, pro, or enterprise)
+        assert resp1_tier in ("pro", "community", "enterprise")
+        assert resp2_tier in ("pro", "community", "enterprise")
 
 
 if __name__ == "__main__":

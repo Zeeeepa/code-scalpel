@@ -115,17 +115,38 @@ def set_default_license_path():
 
 @pytest.fixture(autouse=True)
 def _clear_tier_cache_globally():
-    """Clear tier detection caches before AND after every test.
+    """Clear tier detection caches AND snapshot/restore tier env vars around each test.
 
-    This prevents cross-test tier leakage due to module-level caches in:
+    This prevents cross-test tier leakage from:
     - jwt_validator._LICENSE_VALIDATION_CACHE (24h TTL process-global cache)
     - config_loader._config_cache (keyed on file mtime)
     - protocol._LAST_VALID_LICENSE_TIER (grace-period variable)
     - server._cached_tier (server-level cached tier)
+    - os.environ mutations by tests that use os.environ directly instead of monkeypatch
+
+    [20260220_BUGFIX] v1.4.0 - Snapshot/restore CODE_SCALPEL_LICENSE_PATH and
+    CODE_SCALPEL_TIER env vars so tests that set them via os.environ without
+    monkeypatch do not contaminate later tests.
     """
+    # Snapshot tier env vars before the test
+    _TIER_ENV_KEYS = (
+        "CODE_SCALPEL_LICENSE_PATH",
+        "CODE_SCALPEL_TIER",
+        "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY",
+        "CODE_SCALPEL_TEST_FORCE_TIER",
+    )
+    saved = {k: os.environ.get(k) for k in _TIER_ENV_KEYS}
+
     clear_tier_caches()
     yield
     clear_tier_caches()
+
+    # Restore env vars to pre-test state
+    for k, v in saved.items():
+        if v is None:
+            os.environ.pop(k, None)
+        else:
+            os.environ[k] = v
 
 
 @pytest.fixture
@@ -615,11 +636,17 @@ def clear_tier_cache():
 
     config_loader.clear_cache()
 
+    # [20260220_BUGFIX] Clean up CRL path env var to prevent cross-test pollution
+    if "CODE_SCALPEL_LICENSE_CRL_PATH" in os.environ:
+        del os.environ["CODE_SCALPEL_LICENSE_CRL_PATH"]
+
     yield
 
     # Cleanup AFTER test
     jwt_validator._LICENSE_VALIDATION_CACHE = None
     config_loader.clear_cache()
+    if "CODE_SCALPEL_LICENSE_CRL_PATH" in os.environ:
+        del os.environ["CODE_SCALPEL_LICENSE_CRL_PATH"]
 
 
 @pytest.fixture

@@ -3,7 +3,7 @@
 Tests that verify tier limits are enforced correctly for rename_symbol.
 
 Community tier: Single-file only (max_files_searched=0, max_files_updated=0)
-Pro tier: Cross-file updates (max_files_searched=500, max_files_updated=200)
+Pro tier: Cross-file updates (max_files_searched=None, max_files_updated=None)
 Enterprise tier: Unlimited (max_files_searched=None, max_files_updated=None)
 """
 
@@ -33,8 +33,8 @@ class TestRenameSymbolTierEnforcement:
         caps = get_tool_capabilities("rename_symbol", "pro")
 
         assert caps["enabled"] is True
-        assert caps["limits"]["max_files_searched"] == 500
-        assert caps["limits"]["max_files_updated"] == 200
+        assert caps["limits"]["max_files_searched"] is None  # Unlimited per limits.toml
+        assert caps["limits"]["max_files_updated"] is None  # Unlimited per limits.toml
         assert "definition_rename" in caps["capabilities"]
         assert "cross_file_reference_rename" in caps["capabilities"]
         assert "import_rename" in caps["capabilities"]
@@ -100,14 +100,12 @@ class TestRenameSymbolCrossFileCapabilities:
         # Create many files to exceed limit
         for i in range(10):
             extra = temp_project / f"extra_{i}.py"
-            extra.write_text(
-                f"""
+            extra.write_text(f"""
 from main import old_function
 
 def use_{i}():
     return old_function()
-""".strip()
-            )
+""".strip())
 
         result = rename_references_across_project(
             project_root=temp_project,
@@ -414,8 +412,7 @@ class TestRenameSymbolAdvancedEdgeCases:
 
         main_py = temp_project / "main.py"
         shadowed_py = temp_project / "shadowed.py"
-        shadowed_py.write_text(
-            """
+        shadowed_py.write_text("""
 from main import old_function
 
 def outer():
@@ -425,8 +422,7 @@ def outer():
         return old_function()
 
     return value + inner(1)
-""".strip()
-        )
+""".strip())
 
         patcher = UnifiedPatcher.from_file(str(main_py))
         assert patcher.rename_symbol("function", "old_function", "new_function").success
@@ -456,8 +452,7 @@ def outer():
 
         main_py = temp_project / "main.py"
         scoped_py = temp_project / "scoped.py"
-        scoped_py.write_text(
-            """
+        scoped_py.write_text("""
 from main import old_function
 
 value = old_function()
@@ -465,8 +460,7 @@ value = old_function()
 def use_global():
     global old_function
     return old_function()
-""".strip()
-        )
+""".strip())
 
         patcher = UnifiedPatcher.from_file(str(main_py))
         assert patcher.rename_symbol("function", "old_function", "new_function").success
@@ -497,24 +491,20 @@ def use_global():
         circle_a = temp_project / "circle_a.py"
         circle_b = temp_project / "circle_b.py"
 
-        circle_a.write_text(
-            """
+        circle_a.write_text("""
 from main import old_function
 import circle_b
 
 def call_a():
     return old_function() + circle_b.call_b()
-""".strip()
-        )
-        circle_b.write_text(
-            """
+""".strip())
+        circle_b.write_text("""
 from main import old_function
 import circle_a
 
 def call_b():
     return old_function() + circle_a.call_a()
-""".strip()
-        )
+""".strip())
 
         patcher = UnifiedPatcher.from_file(str(main_py))
         assert patcher.rename_symbol("function", "old_function", "new_function").success
@@ -583,14 +573,12 @@ class TestEnterpriseWorkflowCoverage:
         extra_files = []
         for i in range(12):
             extra = temp_project / f"enterprise_extra_{i}.py"
-            extra.write_text(
-                f"""
+            extra.write_text(f"""
 from main import old_function
 
 def use_{i}():
     return old_function()
-""".strip()
-            )
+""".strip())
             extra_files.append(extra)
 
         patcher = UnifiedPatcher.from_file(str(main_py))

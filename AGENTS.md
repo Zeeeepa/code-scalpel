@@ -235,6 +235,6 @@ Before committing code, ensure:
 
 ---
 
-**Last Updated:** February 1, 2026  
-**Project Version:** 1.3.0  
+**Last Updated:** February 20, 2026  
+**Project Version:** 1.4.0  
 **Python Support:** 3.10, 3.11, 3.12, 3.13

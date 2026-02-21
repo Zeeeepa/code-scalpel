@@ -66,8 +66,7 @@ def process_file(z):
     def test_suggest_with_file_code(self, tmp_path: Path):
         """Should generate suggestions from file content."""
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def calculate_sum(a, b):
     return a + b
 
@@ -76,8 +75,7 @@ def calculate_product(x, y):
 
 def calculate_diff(p, q):
     return p - q
-"""
-        )
+""")
 
         context = {
             "file_path": str(test_file),
@@ -1253,8 +1251,7 @@ class TestOracleTierIsolation:
         envelope_dict = result.model_dump()
         assert envelope_dict["error"]["error_code"] == "correction_needed"
         assert "suggestions" in envelope_dict["error"]["error_details"]
-        # Tier should be community
-        assert envelope_dict.get("tier") == "community"
+        # Note: envelope_dict["tier"] is only populated in debug profile (not minimal default)
 
     def test_oracle_different_tiers_same_enhancement(self, monkeypatch):
         """Oracle enhancement should behave identically across all tiers."""

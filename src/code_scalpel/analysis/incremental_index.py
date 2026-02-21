@@ -90,8 +90,7 @@ class IncrementalIndex:
     def _init_database(self) -> None:
         """Create database schema if not exists."""
         with self._get_connection() as conn:
-            conn.executescript(
-                """
+            conn.executescript("""
                 CREATE TABLE IF NOT EXISTS schema_version (
                     version INTEGER PRIMARY KEY
                 );
@@ -115,8 +114,7 @@ class IncrementalIndex:
                 
                 CREATE INDEX IF NOT EXISTS idx_content_hash ON file_analysis(content_hash);
                 CREATE INDEX IF NOT EXISTS idx_timestamp ON file_analysis(analysis_timestamp);
-            """
-            )
+            """)
 
             # Check/set schema version
             cursor = conn.execute("SELECT version FROM schema_version LIMIT 1")
