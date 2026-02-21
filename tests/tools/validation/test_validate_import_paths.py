@@ -12,15 +12,13 @@ class TestValidateImportPaths:
         """Test detection of deprecated import patterns."""
         # Create test file with deprecated import
         test_file = tmp_path / "deprecated_import.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 # Old import pattern
 from code_scalpel.server import some_function
 
 # Correct import
 from code_scalpel.mcp.tools.new_module import some_function
-"""
-        )
+""")
 
         validator = ImportPathValidator(tmp_path)
         results = validator.validate_file(test_file)
@@ -58,12 +56,10 @@ from code_scalpel.mcp.tools.new_module import some_function
     def test_provides_fix_suggestions(self, tmp_path):
         """Test generation of fix suggestions."""
         test_file = tmp_path / "broken.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 from code_scalpel.server import old_tool
 import code_scalpel.old_helpers as helpers
-"""
-        )
+""")
 
         validator = ImportPathValidator(tmp_path)
         results = validator.validate_file(test_file)
@@ -125,12 +121,10 @@ import code_scalpel.old_helpers as helpers
         """Test detection of problematic relative imports."""
         test_file = tmp_path / "package" / "sub" / "module.py"
         test_file.parent.mkdir(parents=True)
-        test_file.write_text(
-            """
+        test_file.write_text("""
 from ..server import func
 from . import sibling
-"""
-        )
+""")
 
         validator = ImportPathValidator(tmp_path)
         results = validator.validate_file(test_file)
@@ -141,13 +135,11 @@ from . import sibling
     def test_suggests_canonical_imports(self, tmp_path):
         """Test suggestion of canonical new import paths."""
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 # Old patterns
 from code_scalpel.server import analyze_code
 import code_scalpel.helpers as helpers
-"""
-        )
+""")
 
         validator = ImportPathValidator(tmp_path)
         results = validator.validate_file(test_file)

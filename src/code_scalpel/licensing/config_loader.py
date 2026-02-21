@@ -137,7 +137,13 @@ def get_tool_limits(
     tier_config = config.get(tier, {})
     tool_limits = tier_config.get(tool_id, {})
 
-    return tool_limits
+    # [20260218_BUGFIX] Normalize -1 sentinel (unlimited) to None for all integer
+    # fields, consistent with features.py which already does this conversion.
+    # This ensures callers using `is not None` checks treat -1 as unlimited.
+    return {
+        k: (None if isinstance(v, int) and v == -1 else v)
+        for k, v in tool_limits.items()
+    }
 
 
 def merge_limits(defaults: Dict[str, Any], overrides: Dict[str, Any]) -> Dict[str, Any]:

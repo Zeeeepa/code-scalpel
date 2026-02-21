@@ -2,8 +2,8 @@
 
 > [20260207_DOCS] Added regulated enterprise deployment gameplan reference.
 
-**Updated:** February 1, 2026  
-**Version:** 1.3.0
+**Updated:** February 20, 2026  
+**Version:** 1.4.0
 
 ---
 
@@ -92,6 +92,7 @@
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| v1.4.0 | 2026-02-20 | Tier Limit Rebalancing & Website |
 | v1.3.0 | 2026-02-01 | Oracle Resilience Middleware |
 | v1.2.1 | 2026-01-26 | UVX entry point fix |
 | v1.2.0 | 2026-01-26 | Project Awareness Engine |

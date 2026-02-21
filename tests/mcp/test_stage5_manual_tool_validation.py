@@ -52,8 +52,7 @@ def test_project(tmp_path):
     # Python file with function
     # [20251228_TEST] Include an actual sink call (cursor.execute) so
     # security_scan reliably reports a finding.
-    (project / "utils.py").write_text(
-        '''
+    (project / "utils.py").write_text('''
 def add(a, b):
     """Add two numbers."""
     return a + b
@@ -63,29 +62,24 @@ def vulnerable(user_input, cursor):
     query = f"SELECT * FROM users WHERE id = {user_input}"
     cursor.execute(query)
     return query
-'''
-    )
+''')
 
     # requirements.txt for dependency scanning
     (project / "requirements.txt").write_text("requests==2.31.0\n")
 
     # TypeScript file for type evaporation testing
-    (project / "frontend.ts").write_text(
-        """
+    (project / "frontend.ts").write_text("""
 type Role = 'admin' | 'user';
 const role = (document.getElementById('role') as HTMLInputElement).value as Role;
-"""
-    )
+""")
 
     # Backend Python for type evaporation
-    (project / "backend.py").write_text(
-        """
+    (project / "backend.py").write_text("""
 from flask import request
 
 def get_role():
     return request.json['role']
-"""
-    )
+""")
 
     return project
 

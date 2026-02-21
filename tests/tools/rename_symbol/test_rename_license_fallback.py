@@ -236,10 +236,14 @@ class TestLicenseFallbackIntegration:
         assert comm_caps["limits"]["max_files_searched"] == 0
         assert comm_caps["limits"]["max_files_updated"] == 0
 
-        # Pro: bounded multi-file
+        # Pro: unlimited multi-file (per limits.toml)
         pro_caps = get_tool_capabilities("rename_symbol", "pro")
-        assert pro_caps["limits"]["max_files_searched"] == 500
-        assert pro_caps["limits"]["max_files_updated"] == 200
+        assert (
+            pro_caps["limits"]["max_files_searched"] is None
+        )  # -1 in limits.toml → None
+        assert (
+            pro_caps["limits"]["max_files_updated"] is None
+        )  # -1 in limits.toml → None
 
         # Enterprise: unlimited
         ent_caps = get_tool_capabilities("rename_symbol", "enterprise")

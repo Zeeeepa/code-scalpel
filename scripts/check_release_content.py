@@ -113,7 +113,7 @@ def build_stale_version_check(current_version: str) -> list[Check]:
     major, minor, patch = current_version.split(".")
     patch_int = int(patch)
     # Build alternation pattern matching any older patch in same major.minor
-    # e.g. if current is 1.3.5, flag v1.3.0 through v1.3.4
+    # e.g. if current is 1.4.0, flag v1.4.0 through v1.4.0
     if patch_int == 0:
         return []  # nothing older in this minor series to flag
     old_patches = "|".join(
@@ -126,9 +126,15 @@ def build_stale_version_check(current_version: str) -> list[Check]:
             pattern=pattern,
             extensions=(".html", ".md"),
             exclude=(
-                ".deprecated", "release_artifacts", "validation.html",
-                "changelog", "CHANGELOG", "release_notes", "archive/",
-                "CONSOLIDATION_SUMMARY", "DEPLOYMENT_READY",
+                ".deprecated",
+                "release_artifacts",
+                "validation.html",
+                "changelog",
+                "CHANGELOG",
+                "release_notes",
+                "archive/",
+                "CONSOLIDATION_SUMMARY",
+                "DEPLOYMENT_READY",
             ),
             severity="warning",
             message=f"Stale version reference — current is v{current_version}. Update or remove.",
@@ -158,12 +164,26 @@ def scan_file(path: Path, check: Check) -> list[Violation]:
         if check.is_regex:
             if re.search(check.pattern, line):
                 violations.append(
-                    Violation(check.name, check.severity, str(path), lineno, line.strip(), check.message)
+                    Violation(
+                        check.name,
+                        check.severity,
+                        str(path),
+                        lineno,
+                        line.strip(),
+                        check.message,
+                    )
                 )
         else:
             if check.pattern in line:
                 violations.append(
-                    Violation(check.name, check.severity, str(path), lineno, line.strip(), check.message)
+                    Violation(
+                        check.name,
+                        check.severity,
+                        str(path),
+                        lineno,
+                        line.strip(),
+                        check.message,
+                    )
                 )
     return violations
 
@@ -173,19 +193,33 @@ def should_exclude(path: Path, exclude: tuple[str, ...]) -> bool:
     return any(excl in path_str for excl in exclude)
 
 
-SKIP_DIRS = frozenset({
-    "site", "dist", "node_modules", ".venv", "venv", ".git",
-    "__pycache__", ".cache", ".tox", "build", ".internal_docs",
-    "docs_backup_20260207_094705",
-})
+SKIP_DIRS = frozenset(
+    {
+        "site",
+        "dist",
+        "node_modules",
+        ".venv",
+        "venv",
+        ".git",
+        "__pycache__",
+        ".cache",
+        ".tox",
+        "build",
+        ".internal_docs",
+        "docs_backup_20260207_094705",
+    }
+)
 
 
 def iter_source_files(website_dir: Path, ext: str):
     """Walk website_dir skipping generated/dependency directories."""
     import os
+
     for dirpath_str, dirnames, filenames in os.walk(website_dir):
         # Prune skip dirs in-place so os.walk doesn't descend into them
-        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS and not d.startswith(".")]
+        dirnames[:] = [
+            d for d in dirnames if d not in SKIP_DIRS and not d.startswith(".")
+        ]
         dirpath = Path(dirpath_str)
         for fname in filenames:
             if fname.endswith(ext):
@@ -207,9 +241,17 @@ def run_checks(website_dir: Path, checks: list[Check]) -> list[Violation]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Pre-release content accuracy checker")
-    parser.add_argument("--website-dir", default="website", help="Path to website directory")
-    parser.add_argument("--strict", action="store_true", help="Treat warnings as errors")
-    parser.add_argument("--summary-only", action="store_true", help="Print summary only, no per-line output")
+    parser.add_argument(
+        "--website-dir", default="website", help="Path to website directory"
+    )
+    parser.add_argument(
+        "--strict", action="store_true", help="Treat warnings as errors"
+    )
+    parser.add_argument(
+        "--summary-only",
+        action="store_true",
+        help="Print summary only, no per-line output",
+    )
     args = parser.parse_args()
 
     project_root = Path(__file__).parent.parent
@@ -247,7 +289,11 @@ def main() -> int:
         print(f"   {viols[0].message}")
         if not args.summary_only:
             for v in viols[:5]:  # Show first 5 per check to avoid noise
-                rel_path = Path(v.file).relative_to(project_root) if project_root in Path(v.file).parents else v.file
+                rel_path = (
+                    Path(v.file).relative_to(project_root)
+                    if project_root in Path(v.file).parents
+                    else v.file
+                )
                 print(f"   {rel_path}:{v.line}  {v.content[:100]}")
             if len(viols) > 5:
                 print(f"   ... and {len(viols) - 5} more")
@@ -259,7 +305,9 @@ def main() -> int:
         print("✅ All content checks passed — site is clean for release.\n")
         return 0
 
-    print(f"{'❌' if errors else '⚠️ '} Found {len(errors)} error(s), {len(warnings)} warning(s) across {len(violations)} total occurrence(s).")
+    print(
+        f"{'❌' if errors else '⚠️ '} Found {len(errors)} error(s), {len(warnings)} warning(s) across {len(violations)} total occurrence(s)."
+    )
 
     if errors:
         print("\nErrors BLOCK release. Fix them before deploying.")

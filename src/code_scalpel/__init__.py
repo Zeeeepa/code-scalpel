@@ -29,7 +29,8 @@ For AI agent integrations:
 # [20260202_RELEASE] v1.3.3 - Pipeline solidification and project organization
 # [20260205_RELEASE] v1.3.4 - Bundled-only limits.toml, removed duplicate resolver internals
 # [20260210_RELEASE] v1.3.5 - Windows encoding fix, auto-init fix, update check
-__version__ = "1.3.5"
+# [20260220_RELEASE] v1.4.0 - Full response_config coverage (graph tools, hot-reload, template cleanup)
+__version__ = "1.4.0"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 

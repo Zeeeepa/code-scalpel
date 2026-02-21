@@ -56,8 +56,7 @@ class TestHIPAACompliance:
     async def test_hipaa_phi_logging_violation(self, tmp_path, enterprise_license):
         """Detect HIPAA violation: PHI data in logs."""
         test_file = tmp_path / "healthcare.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import logging
 
 logger = logging.getLogger(__name__)
@@ -67,8 +66,7 @@ def process_patient(patient_id, ssn, diagnosis):
     logger.info(f"Processing patient {patient_id} with SSN {ssn}")
     logger.debug(f"Diagnosis: {diagnosis}")
     return {"status": "processed"}
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -94,8 +92,7 @@ def process_patient(patient_id, ssn, diagnosis):
     async def test_hipaa_unencrypted_transmission(self, tmp_path, enterprise_license):
         """Test HIPAA compliance checking for unencrypted transmission (structure test)."""
         test_file = tmp_path / "api.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import requests
 
 def send_patient_data(patient_info):
@@ -105,8 +102,7 @@ def send_patient_data(patient_info):
         json={"ssn": patient_info["ssn"], "diagnosis": patient_info["diagnosis"]}
     )
     return response.json()
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -124,8 +120,7 @@ def send_patient_data(patient_info):
     async def test_hipaa_compliance_score(self, tmp_path, enterprise_license):
         """Verify HIPAA compliance score is calculated."""
         test_file = tmp_path / "compliant.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import logging
 from cryptography.fernet import Fernet
 
@@ -135,8 +130,7 @@ def process_patient(encrypted_data):
     # Good: encrypted data handling
     logger.info("Processing encrypted patient data")
     return {"status": "processed"}
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -154,8 +148,7 @@ class TestSOC2Compliance:
     async def test_soc2_hardcoded_secrets(self, tmp_path, enterprise_license):
         """Test SOC2 hardcoded secrets detection (structure test)."""
         test_file = tmp_path / "config.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 # SOC2-SEC-001: Hardcoded credentials
 API_KEY = "sk-prod-abc123xyz789"
 DATABASE_PASSWORD = "MySecretPass123!"
@@ -163,8 +156,7 @@ AWS_SECRET_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 
 def connect_to_db():
     return database.connect(password=DATABASE_PASSWORD)
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -182,8 +174,7 @@ def connect_to_db():
     async def test_soc2_insufficient_logging(self, tmp_path, enterprise_license):
         """Test SOC2 compliance checking for insufficient logging (structure test)."""
         test_file = tmp_path / "auth.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def authenticate_user(username, password):
     # SOC2-SEC-002: No audit trail for authentication
     if check_credentials(username, password):
@@ -194,8 +185,7 @@ def delete_user_data(user_id):
     # SOC2-SEC-003: No audit trail for data deletion
     database.delete(user_id)
     return True
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -212,15 +202,13 @@ def delete_user_data(user_id):
     async def test_soc2_no_exception_handling(self, tmp_path, enterprise_license):
         """Test SOC2 compliance availability checks (structure test)."""
         test_file = tmp_path / "service.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def process_payment(amount):
     # SOC2-AV-001: No exception handling - can crash service
     charge = payment_gateway.charge(amount)
     database.record_transaction(charge)
     return charge.id
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -240,8 +228,7 @@ class TestGDPRCompliance:
     async def test_gdpr_pii_in_logs(self, tmp_path, enterprise_license):
         """Detect GDPR violation: PII in logs."""
         test_file = tmp_path / "user_service.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import logging
 
 logger = logging.getLogger(__name__)
@@ -251,8 +238,7 @@ def register_user(email, full_name, phone):
     logger.info(f"Registering user: {email}, {full_name}, {phone}")
     user_id = database.create_user(email, full_name, phone)
     return user_id
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -274,8 +260,7 @@ def register_user(email, full_name, phone):
     async def test_gdpr_missing_data_deletion(self, tmp_path, enterprise_license):
         """Test GDPR right-to-be-forgotten compliance checking (structure test)."""
         test_file = tmp_path / "user_api.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 class UserAPI:
     def get_user(self, user_id):
         return database.get_user(user_id)
@@ -285,8 +270,7 @@ class UserAPI:
     
     # GDPR002: Missing delete_user method (right to be forgotten)
     # No way for users to request data deletion
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -303,8 +287,7 @@ class UserAPI:
     async def test_gdpr_international_transfer(self, tmp_path, enterprise_license):
         """Test GDPR international transfer compliance checking (structure test)."""
         test_file = tmp_path / "backup.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import boto3
 import json
 
@@ -316,8 +299,7 @@ def backup_user_data(user_data):
         Key=f'users/{user_data["id"]}.json',
         Body=json.dumps(user_data)
     )
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -337,8 +319,7 @@ class TestPCIDSSCompliance:
     async def test_pci_card_number_in_logs(self, tmp_path, enterprise_license):
         """Detect PCI-DSS violation: Card numbers in logs."""
         test_file = tmp_path / "payment.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import logging
 
 logger = logging.getLogger(__name__)
@@ -348,8 +329,7 @@ def process_payment(card_number, cvv, expiry):
     logger.info(f"Processing card: {card_number}, CVV: {cvv}")
     result = payment_gateway.charge(card_number, cvv, expiry)
     return result
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -371,16 +351,14 @@ def process_payment(card_number, cvv, expiry):
     async def test_pci_unencrypted_card_storage(self, tmp_path, enterprise_license):
         """Test PCI-DSS card storage compliance checking (structure test)."""
         test_file = tmp_path / "database.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def store_payment_method(user_id, card_number, cvv):
     # PCI002: Storing card data unencrypted (PCI-DSS 3.4 violation)
     database.execute(
         "INSERT INTO payment_methods (user_id, card_number, cvv) VALUES (?, ?, ?)",
         (user_id, card_number, cvv)
     )
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -397,8 +375,7 @@ def store_payment_method(user_id, card_number, cvv):
     async def test_pci_insecure_transmission(self, tmp_path, enterprise_license):
         """Test PCI-DSS transmission security compliance checking (structure test)."""
         test_file = tmp_path / "checkout.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import requests
 
 def submit_payment(card_data):
@@ -408,8 +385,7 @@ def submit_payment(card_data):
         json=card_data
     )
     return response.json()
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -429,8 +405,7 @@ class TestMultipleStandards:
     async def test_all_standards_together(self, tmp_path, enterprise_license):
         """Verify all compliance standards can be checked together."""
         test_file = tmp_path / "multi_compliance.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import logging
 import requests
 
@@ -444,8 +419,7 @@ def process_healthcare_payment(patient_ssn, card_number, diagnosis):
         "card": card_number,
         "diagnosis": diagnosis
     })
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -469,8 +443,7 @@ def process_healthcare_payment(patient_ssn, card_number, diagnosis):
     ):
         """Verify compliance score aggregates across all standards."""
         test_file = tmp_path / "service.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def secure_service():
     # Well-written code with proper practices
     try:
@@ -480,8 +453,7 @@ def secure_service():
     except Exception as e:
         logger.error("Processing failed", exc_info=True)
         raise
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -515,11 +487,9 @@ class TestAuditTrail:
     async def test_audit_trail_contains_metadata(self, tmp_path, enterprise_license):
         """Verify audit trail contains required metadata."""
         test_file = tmp_path / "service.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 API_KEY = "secret123"
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -541,8 +511,7 @@ class TestCertifications:
     async def test_certifications_field_exists(self, tmp_path, enterprise_license):
         """Verify certifications field exists in result data."""
         test_file = tmp_path / "compliant.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import logging
 from typing import Optional
 
@@ -557,8 +526,7 @@ def secure_function(data: dict) -> Optional[dict]:
     except Exception as e:
         logger.error("Error occurred", exc_info=True)
         return None
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -580,12 +548,10 @@ class TestPDFReportGeneration:
     ):
         """Verify PDF report is generated when generate_report=True."""
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 import logging
 logger = logging.getLogger(__name__)
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -648,11 +614,9 @@ class TestComplianceReportStructure:
     ):
         """Verify compliance reports have standard structure."""
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 API_KEY = "secret"
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],

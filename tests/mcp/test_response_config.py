@@ -76,6 +76,9 @@ def test_response_config_loaded_from_cwd_filters_fields(
     # Unexcluded field remains.
     assert filtered["ok"] == "yep"
 
+    # Reset singleton after test to avoid poisoning other tests
+    _reset_response_config_singleton()
+
 
 def test_response_config_falls_back_to_defaults_on_invalid_json(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
@@ -96,3 +99,6 @@ def test_response_config_falls_back_to_defaults_on_invalid_json(
     # Defaults should still preserve `success` and should apply some exclusions.
     assert filtered["success"] is True
     assert filtered.get("ok") == "yep"
+
+    # Reset singleton after test to avoid poisoning other tests
+    _reset_response_config_singleton()

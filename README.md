@@ -1,6 +1,6 @@
 # Code Scalpel: Reduce AI Costs by 200x
 
-**Latest Release: v1.3.5 | February 10, 2026**
+**Latest Release: v1.4.0 | February 20, 2026**
 
 **Stop copy-pasting entire files into Claude.** Give your AI assistant surgical code analysis tools and reduce costs by 200x.
 
@@ -33,6 +33,66 @@ Code Scalpel is an **MCP (Model Context Protocol) server** that gives AI assista
 ```
 
 **Savings:** 97% cost reduction, 83% time reduction, zero workflow changes.
+
+---
+
+## The Bridge: Stochastic AI → Reliable Engineering
+
+Code Scalpel is the bridge between **stochastic AI** (LLMs that guess) and **reliable software engineering** (deterministic systems that know).
+
+Your AI assistant is a probability engine. It generates the *most likely* answer based on patterns in training data. That works brilliantly for prose and boilerplate. It breaks down when precision is non-negotiable — refactoring a production service, tracing a SQL injection through four files, or proving that a rename touched every caller.
+
+Code Scalpel wraps your stochastic agent in a **deterministic glass box**: every code operation backed by a real AST parse, a real call graph, a real theorem prover. The agent still generates; Code Scalpel verifies, executes, and logs.
+
+```
+Stochastic LLM  →  Code Scalpel  →  Deterministic Code Operations
+  (guesses)           (glass box)          (verified facts)
+```
+
+---
+
+## The Four Pillars
+
+### 1. 💸 Cheaper AI — 99% Context Reduction
+
+Instead of feeding 10 full files (15,000 tokens) to the model, Code Scalpel's PDG engine surgically extracts only the relevant function and its live dependencies.
+
+| Approach | Tokens Used | Cost (Claude Sonnet) |
+|---|---|---|
+| **Read entire file** | ~10,000 | $0.030 per query |
+| **`extract_code("calculate_tax")`** | ~200 | $0.0006 per query |
+
+**Result:** $450/month → $22/month doing the same work. You save money *and* the model focuses better because it isn't drowning in irrelevant context.
+
+### 2. 🎯 More Accurate AI — Graph Facts, Not LLM Guesses
+
+When Code Scalpel reports *"this function has 3 callers"*, that is a **graph fact** derived from AST parsing — not an LLM estimate.
+
+| Analysis | Text-Matching Agent | Code Scalpel (AST + PDG) |
+|---|---|---|
+| Simple rename | ~73% correct | **97% correct** |
+| Cross-file refactor | ~41% correct | **94% correct** |
+| Security-aware edit | ~28% correct | **91% correct** |
+
+**Symbolic execution** with the Z3 theorem prover mathematically explores every code path — finding edge cases that humans and LLMs both miss. When `symbolic_execute` says a path is safe, it is provably safe.
+
+### 3. 🛡️ Safer AI — The Syntax-Aware Gatekeeper
+
+Every AI-generated edit passes through Code Scalpel's AST parser **before** it touches disk.
+
+> **Without Code Scalpel:** Agent hallucinates a missing `)` → file written → build breaks → you find out later.
+>
+> **With Code Scalpel:** AST parser fails on the malformed output → edit rejected and logged → agent retries with corrected code.
+
+The `simulate_refactor` tool runs a behavioral diff before any change is applied. If the semantics change unexpectedly, the operation is blocked.
+
+### 4. 🏛️ Governable AI — The Invisible Audit Trail
+
+Compliance isn't optional in regulated environments. Code Scalpel creates a `.code-scalpel/audit.jsonl` trail for every agent operation.
+
+- **Provenance:** We log the decision path (graph trace), not just the diff output.
+- **Integrity:** `verify_policy_integrity` cryptographically ensures your governance rules haven't drifted.
+- **Explainability:** When a regulator asks *"why did the agent make that change?"*, you have a deterministic, reproducible answer — not *"the model seemed confident"*.
 
 ---
 
@@ -120,7 +180,15 @@ Then follow the [Installation Guide for Claude](docs/INSTALLING_FOR_CLAUDE.md) t
 
 ## The Problem: Why AI Agents Need Code Scalpel
 
-Today's AI agents treat code as **text**. They read entire file contents, guess line numbers, and generate diffs based on pattern matching. This causes four critical problems:
+Most teams are on **Day 1** of agentic engineering: *"Look, it writes code!"* Day 3 is coming — and Day 3 is about **Governance, Security, and Compliance**.
+
+Today's agents treat code as text. They read files like a novel, guess line numbers, and *vibe-code* their way through refactors. In a serious engineering or regulated environment, this creates three compounding risks:
+
+- **The Black Box Risk** — A regulator or incident review asks *why* the agent made a decision. You can't explain it because it was a probabilistic guess, not a logged, traceable operation.
+- **The Hallucination Risk** — The agent invents a closing `)`, a missing import, or a non-existent dependency. The build breaks silently or — worse — ships.
+- **The Blind Spot Risk** — The agent generates a SQL injection vulnerability because it cannot see data flow across file boundaries. Pattern matching misses what taint analysis finds.
+
+Code Scalpel is **the adult in the room**. It replaces the guesswork with deterministic, auditable, graph-based operations.
 
 ### 1. 💸 **Massive Token Waste (95% of tokens are irrelevant)**
 You ask: "Explain the `calculate_tax` function."
@@ -631,7 +699,7 @@ codescalpel capabilities
 
 ## Release Information
 **Launch Date**: January 2026
-**Version**: v1.3.5
+**Version**: v1.4.0
 **License**: MIT (Community)
 
 Code Scalpel is built for the new era of **Agentic Engineering**. It is not just a linter; it is the sensory and actuator system for the next generation of AI developers.

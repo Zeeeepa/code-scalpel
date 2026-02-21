@@ -15,12 +15,18 @@ import re
 import sys
 from pathlib import Path
 
-
 PLACEHOLDER = "{{ SCALPEL_VERSION }}"
 # Pattern for hardcoded version in HTML/JS — catches v1.x.y that aren't
 # from changelog/release notes/release_artifacts paths
 VERSION_RE = re.compile(r"\bv\d+\.\d+\.\d+\b")
-SKIP_PATHS = ("release_artifacts", "changelog", "CHANGELOG", "release_notes", "validation.html", ".deprecated")
+SKIP_PATHS = (
+    "release_artifacts",
+    "changelog",
+    "CHANGELOG",
+    "release_notes",
+    "validation.html",
+    ".deprecated",
+)
 
 
 def load_version(project_root: Path) -> str:
@@ -53,11 +59,15 @@ def inject_into_file(path: Path, version: str, dry_run: bool) -> bool:
         path.write_text(updated, encoding="utf-8")
 
     count = original.count(PLACEHOLDER)
-    print(f"  {'[dry-run] ' if dry_run else ''}✓ {path.relative_to(path.parents[4] if len(path.parents) > 4 else path.parent)} — replaced {count} placeholder(s)")
+    print(
+        f"  {'[dry-run] ' if dry_run else ''}✓ {path.relative_to(path.parents[4] if len(path.parents) > 4 else path.parent)} — replaced {count} placeholder(s)"
+    )
     return True
 
 
-def find_stale_versions(website_dir: Path, current_version: str) -> list[tuple[Path, int, str]]:
+def find_stale_versions(
+    website_dir: Path, current_version: str
+) -> list[tuple[Path, int, str]]:
     """Find hardcoded version strings that don't match current version."""
     stale = []
     for ext in (".html", ".js", ".md"):
@@ -77,10 +87,20 @@ def find_stale_versions(website_dir: Path, current_version: str) -> list[tuple[P
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Inject version from pyproject.toml into website files")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would change without writing")
-    parser.add_argument("--website-dir", default="website", help="Path to website directory")
-    parser.add_argument("--check-stale", action="store_true", help="After injection, report any remaining hardcoded versions")
+    parser = argparse.ArgumentParser(
+        description="Inject version from pyproject.toml into website files"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would change without writing"
+    )
+    parser.add_argument(
+        "--website-dir", default="website", help="Path to website directory"
+    )
+    parser.add_argument(
+        "--check-stale",
+        action="store_true",
+        help="After injection, report any remaining hardcoded versions",
+    )
     args = parser.parse_args()
 
     project_root = Path(__file__).parent.parent
@@ -108,7 +128,9 @@ def main() -> int:
 
     if changed == 0:
         print(f"\n  No {PLACEHOLDER!r} placeholders found — nothing to inject.")
-        print("  To use: add {{ SCALPEL_VERSION }} to HTML/MD files where the version should appear.")
+        print(
+            "  To use: add {{ SCALPEL_VERSION }} to HTML/MD files where the version should appear."
+        )
     else:
         print(f"\n✅ Injected v{version} into {changed} file(s).")
 

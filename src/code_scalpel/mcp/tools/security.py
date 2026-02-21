@@ -22,7 +22,9 @@ from code_scalpel.mcp.oracle_middleware import with_oracle_resilience, PathStrat
 from code_scalpel import __version__ as _pkg_version
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Detect dangerous sink patterns (SQL injection, XSS, etc.) across Python, JS, TS, and Java."
+)
 async def unified_sink_detect(
     code: str, language: str = "auto", confidence_threshold: float = 0.7
 ) -> ToolResponseEnvelope:
@@ -119,7 +121,9 @@ async def unified_sink_detect(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Detect TypeScript type-safety erosion: 'any' widening, unsafe casts, and missing guards."
+)
 @with_oracle_resilience(tool_id="type_evaporation_scan", strategy=PathStrategy)
 async def type_evaporation_scan(
     frontend_code: str | None = None,
@@ -277,7 +281,9 @@ async def type_evaporation_scan(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Check requirements/package files for known CVEs via the OSV vulnerability database."
+)
 @with_oracle_resilience(tool_id="scan_dependencies", strategy=PathStrategy)
 async def scan_dependencies(
     path: str | None = None,
@@ -379,7 +385,9 @@ async def scan_dependencies(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Taint-based vulnerability scan for SQL injection, XSS, command injection, and path traversal."
+)
 @with_oracle_resilience(tool_id="security_scan", strategy=PathStrategy)
 async def security_scan(
     code: Optional[str] = None,

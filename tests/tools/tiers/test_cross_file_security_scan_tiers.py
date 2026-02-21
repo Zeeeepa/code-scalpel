@@ -20,8 +20,7 @@ def multi_file_sql_injection_project(tmp_path):
     """Create a multi-file Python project with SQL injection vulnerability."""
     # routes.py - Entry point with user input (source)
     routes_py = tmp_path / "routes.py"
-    routes_py.write_text(
-        """
+    routes_py.write_text("""
 from flask import Flask, request
 from db import execute_query
 
@@ -32,13 +31,11 @@ def get_user(username):
     # User input - taint source
     user_input = request.args.get("name")
     return execute_query(user_input)
-"""
-    )
+""")
 
     # db.py - Database execution (sink)
     db_py = tmp_path / "db.py"
-    db_py.write_text(
-        """
+    db_py.write_text("""
 import sqlite3
 
 def execute_query(user_input):
@@ -49,18 +46,15 @@ def execute_query(user_input):
     query = f"SELECT * FROM users WHERE name = '{user_input}'"
     cursor.execute(query)
     return cursor.fetchall()
-"""
-    )
+""")
 
     # utils.py - Additional module in flow
     utils_py = tmp_path / "utils.py"
-    utils_py.write_text(
-        """
+    utils_py.write_text("""
 def process_input(data):
     # Data processing without sanitization
     return data.strip()
-"""
-    )
+""")
 
     return tmp_path
 
@@ -70,8 +64,7 @@ def multi_file_command_injection_project(tmp_path):
     """Create a multi-file project with command injection vulnerability."""
     # main.py
     main_py = tmp_path / "main.py"
-    main_py.write_text(
-        """
+    main_py.write_text("""
 import sys
 from executor import run_command
 
@@ -79,13 +72,11 @@ def main(user_input):
     # User input as taint source
     result = run_command(user_input)
     return result
-"""
-    )
+""")
 
     # executor.py
     executor_py = tmp_path / "executor.py"
-    executor_py.write_text(
-        """
+    executor_py.write_text("""
 import os
 import subprocess
 
@@ -97,8 +88,7 @@ def run_command(cmd):
 def run_subprocess(args):
     # Another dangerous sink
     return subprocess.call(f"ls {args}", shell=True)
-"""
-    )
+""")
 
     return tmp_path
 
@@ -108,20 +98,17 @@ def multi_file_path_traversal_project(tmp_path):
     """Create a multi-file project with path traversal vulnerability."""
     # api.py
     api_py = tmp_path / "api.py"
-    api_py.write_text(
-        """
+    api_py.write_text("""
 from handler import get_file
 
 def serve_file(filename):
     # User input - taint source
     return get_file(filename)
-"""
-    )
+""")
 
     # handler.py
     handler_py = tmp_path / "handler.py"
-    handler_py.write_text(
-        """
+    handler_py.write_text("""
 import os
 
 def get_file(user_path):
@@ -130,8 +117,7 @@ def get_file(user_path):
     full_path = os.path.join(base_dir, user_path)
     with open(full_path, "r") as f:
         return f.read()
-"""
-    )
+""")
 
     return tmp_path
 
@@ -141,26 +127,22 @@ def benign_multi_file_project(tmp_path):
     """Create a benign multi-file project with no vulnerabilities."""
     # lib.py
     lib_py = tmp_path / "lib.py"
-    lib_py.write_text(
-        """
+    lib_py.write_text("""
 def safe_add(a, b):
     return a + b
 
 def safe_multiply(x, y):
     return x * y
-"""
-    )
+""")
 
     # main.py
     main_py = tmp_path / "main.py"
-    main_py.write_text(
-        """
+    main_py.write_text("""
 from lib import safe_add, safe_multiply
 
 def calculate(x, y):
     return safe_add(safe_multiply(x, 2), y)
-"""
-    )
+""")
 
     return tmp_path
 

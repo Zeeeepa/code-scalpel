@@ -1,9 +1,9 @@
 {
   "$schema": "./response_config.schema.json",
-  "version": "3.3.1",
+  "version": "1.4.0",
   "description": "MCP response configuration for token efficiency - controls output verbosity for all tools independent of tier",
   "global": {
-    "profile": "debug",
+    "profile": "minimal",
     "exclude_empty_arrays": true,
     "exclude_empty_objects": true,
     "exclude_null_values": true,
@@ -25,7 +25,7 @@
   },
   "profiles": {
     "minimal": {
-      "description": "Bare minimum for LLM understanding - maximum token efficiency (~50-100 tokens)",
+      "description": "Default. Bare minimum for LLM understanding - maximum token efficiency (~50-100 tokens). Escalate to standard, verbose, or debug when more detail is needed.",
       "envelope": {
         "include": []
       },

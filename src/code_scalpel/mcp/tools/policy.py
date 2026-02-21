@@ -18,7 +18,9 @@ from code_scalpel.mcp.oracle_middleware import with_oracle_resilience, PathStrat
 from code_scalpel import __version__ as _pkg_version
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Verify file paths are accessible and resolve aliases; detects Docker mounting issues."
+)
 @with_oracle_resilience(tool_id="validate_paths", strategy=PathStrategy)
 async def validate_paths(
     paths: list[str], project_root: str | None = None
@@ -92,7 +94,9 @@ async def validate_paths(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Cryptographically verify .code-scalpel policy files have not been tampered with."
+)
 @with_oracle_resilience(tool_id="verify_policy_integrity", strategy=PathStrategy)
 async def verify_policy_integrity(
     policy_dir: str | None = None,
@@ -168,7 +172,9 @@ async def verify_policy_integrity(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Check code against style guides and compliance standards (HIPAA, SOC2, PCI-DSS)."
+)
 @with_oracle_resilience(tool_id="code_policy_check", strategy=PathStrategy)
 async def code_policy_check(
     paths: list[str],

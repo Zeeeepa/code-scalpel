@@ -2,7 +2,7 @@
   "name": "code-scalpel",
   "displayName": "Code Scalpel",
   "description": "MCP server toolkit for AI agents - surgical code analysis, security scanning, and intelligent refactoring",
-  "version": "1.3.5",
+  "version": "1.4.0",
   "publisher": "3DTechus",
   "icon": "images/icon.png",
   "repository": {
@@ -117,11 +117,14 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.85.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "@vscode/vsce": "^2.22.0",
-    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "@typescript-eslint/parser": "^8.56.0",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^9.0.0",
     "typescript": "^5.3.0"
+  },
+  "overrides": {
+    "minimatch": "3"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0"

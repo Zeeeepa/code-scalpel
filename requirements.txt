@@ -36,4 +36,4 @@ pytest-timeout>=2.3.1  # [20251230_TEST] Fail fast on hangs
 freezegun>=1.4.0  # [20251228_TEST] Time-mocking for expiration/grace tests
 structlog>=24.1.0  # [20251216_FEATURE] v2.2.0 Structured MCP logging
 PyJWT[crypto]>=2.10.1  # [20251230_BUGFIX] Align with mcp>=1.25.0
-cryptography>=41.0.0  # [20251225_FEATURE] v3.3.0 RSA key support for JWT
+cryptography>=42.0.0  # [20251225_FEATURE] v3.3.0 RSA key support for JWT; [20260218_SECURITY] bump >=42.0.0 (CVE-2024-26130)

@@ -30,7 +30,9 @@ if _extract_code is None or _rename_symbol is None or _update_symbol is None:
     raise ImportError("Extraction helpers missing expected tool implementations.")
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Surgically extract a named function, class, or method with optional dependency context."
+)
 @with_oracle_resilience(tool_id="extract_code", strategy=SymbolStrategy)
 async def extract_code(
     target_type: str,
@@ -173,7 +175,9 @@ async def extract_code(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Rename a symbol (function/class/variable) throughout a file or codebase."
+)
 @with_oracle_resilience(tool_id="rename_symbol", strategy=RenameSymbolStrategy)
 async def rename_symbol(
     file_path: str,
@@ -258,7 +262,9 @@ async def rename_symbol(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Replace a named function or class in a file with new code, preserving surrounding code."
+)
 @with_oracle_resilience(tool_id="update_symbol", strategy=SymbolStrategy)
 async def update_symbol(
     file_path: str,

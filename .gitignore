@@ -352,3 +352,4 @@ tests/**/temp/
 tests/**/tmp/
 test_credentials.json
 test_tokens.json
+vscode-extension/node_modules/

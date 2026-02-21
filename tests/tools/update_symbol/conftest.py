@@ -60,12 +60,25 @@ def clear_tier_cache():
         server._cached_tier = None
     if hasattr(server, "_SESSION_UPDATE_COUNTS"):
         server._SESSION_UPDATE_COUNTS = {}
+    # [20260219_BUGFIX] Also clear protocol grace state to prevent tier leakage
+    try:
+        from code_scalpel.mcp import protocol
+
+        protocol._LAST_VALID_LICENSE_TIER = None
+        protocol._LAST_VALID_LICENSE_AT = None
+    except Exception:
+        pass
 
 
 # Paths to test license files (relative to project root)
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-PRO_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/pro.license.jwt"
-ENTERPRISE_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/enterprise.license.jwt"
+# [20260219_BUGFIX] Correct license file paths to match tests/licenses/ contents
+PRO_LICENSE_PATH = (
+    PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_190345.jwt"
+)
+ENTERPRISE_LICENSE_PATH = (
+    PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt"
+)
 
 # Fallback to archive if tests/licenses doesn't have valid ones
 ARCHIVE_PRO_LICENSE = (
@@ -165,12 +178,27 @@ def community_tier(monkeypatch):
     """
     Fixture that sets up Community tier for testing.
 
-    Ensures no license is loaded by disabling license discovery.
+    Ensures no license is loaded by removing LICENSE_PATH and disabling discovery.
+    [20260218_BUGFIX] Also clears tier caches to avoid enterprise license leaking
+    from the session-level set_default_license_path fixture.
     """
+    from tests.utils.tier_setup import clear_tier_caches
+
+    # Clear caches first so tier detection re-evaluates from scratch
+    clear_tier_caches()
+
+    # Remove any existing license path (set by session fixture)
+    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
     # Disable license discovery to ensure community tier
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
-    yield {"tier": "community", "license_path": None, "is_mocked": False}
+    # Clear caches after env change so get_current_tier reads updated env
+    clear_tier_caches()
+
+    try:
+        yield {"tier": "community", "license_path": None, "is_mocked": False}
+    finally:
+        clear_tier_caches()
 
 
 # =============================================================================
@@ -182,8 +210,7 @@ def community_tier(monkeypatch):
 def temp_python_file(tmp_path):
     """Create a temporary Python file with sample code."""
     py_file = tmp_path / "sample.py"
-    py_file.write_text(
-        """
+    py_file.write_text("""
 def add_numbers(a, b):
     '''Add two numbers.'''
     return a + b
@@ -198,8 +225,7 @@ class Calculator:
     def multiply(self, x, y):
         '''Multiply two numbers.'''
         return x * y
-"""
-    )
+""")
     return py_file
 
 
@@ -207,8 +233,7 @@ class Calculator:
 def temp_js_file(tmp_path):
     """Create a temporary JavaScript file with sample code."""
     js_file = tmp_path / "sample.js"
-    js_file.write_text(
-        """
+    js_file.write_text("""
 function addNumbers(a, b) {
     // Add two numbers
     return a + b;
@@ -227,8 +252,7 @@ class Calculator {
         return x * y;
     }
 }
-"""
-    )
+""")
     return js_file
 
 
@@ -240,8 +264,7 @@ def temp_multifile_project(tmp_path):
 
     # File 1: utils.py
     utils_file = src_dir / "utils.py"
-    utils_file.write_text(
-        """
+    utils_file.write_text("""
 def calculate_discount(price, rate=0.1):
     '''Calculate discount.'''
     return price * (1 - rate)
@@ -249,13 +272,11 @@ def calculate_discount(price, rate=0.1):
 def validate_price(price):
     '''Validate price.'''
     return price > 0
-"""
-    )
+""")
 
     # File 2: services.py
     services_file = src_dir / "services.py"
-    services_file.write_text(
-        """
+    services_file.write_text("""
 from utils import calculate_discount
 
 def apply_discount(price):
@@ -266,8 +287,7 @@ def process_order(items):
     '''Process order.'''
     total = sum(items)
     return apply_discount(total)
-"""
-    )
+""")
 
     return {"root": tmp_path, "utils": utils_file, "services": services_file}
 

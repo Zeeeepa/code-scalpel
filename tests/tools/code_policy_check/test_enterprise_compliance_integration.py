@@ -55,8 +55,7 @@ class TestHIPAAPatternDetection:
     async def test_hipaa001_phi_in_logs_detected(self, tmp_path, enterprise_license):
         """Verify HIPAA001 pattern detects PHI in log statements."""
         test_file = tmp_path / "healthcare.py"
-        test_file.write_text(
-            """import logging
+        test_file.write_text("""import logging
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +65,7 @@ def process_patient(patient_id, ssn, diagnosis):
     # Line 9: HIPAA001 violation - diagnosis in logs
     logger.debug(f"Patient diagnosis: {diagnosis}")
     return {"status": "processed"}
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -101,8 +99,7 @@ def process_patient(patient_id, ssn, diagnosis):
     async def test_hipaa002_unencrypted_phi_storage(self, tmp_path, enterprise_license):
         """Verify HIPAA002 detects PHI stored without encryption."""
         test_file = tmp_path / "storage.py"
-        test_file.write_text(
-            """import json
+        test_file.write_text("""import json
 
 def save_patient_record(patient_data):
     # HIPAA002: Current regex requires patient/medical/health = open/write/json.dump
@@ -117,8 +114,7 @@ def save_patient_record(patient_data):
     # json.dump(patient_data, open("file.txt", "w"))  # No = on same line
     # with open("medical.txt", "w") as f:  # Context manager pattern
     #     f.write(patient_data)
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -140,8 +136,7 @@ def save_patient_record(patient_data):
     async def test_hipaa_compliant_code_scores_high(self, tmp_path, enterprise_license):
         """Verify HIPAA-compliant code passes checks with high score."""
         test_file = tmp_path / "compliant.py"
-        test_file.write_text(
-            """import logging
+        test_file.write_text("""import logging
 from cryptography.fernet import Fernet
 
 logger = logging.getLogger(__name__)
@@ -155,8 +150,7 @@ def process_patient_securely(encrypted_id):
     process_securely(decrypted_data)
     
     return {"status": "processed"}
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -176,8 +170,7 @@ class TestSOC2PatternDetection:
     async def test_soc2001_missing_authentication(self, tmp_path, enterprise_license):
         """Verify SOC2001 detects API endpoints without authentication."""
         test_file = tmp_path / "api.py"
-        test_file.write_text(
-            """from flask import Flask, request
+        test_file.write_text("""from flask import Flask, request
 
 app = Flask(__name__)
 
@@ -192,8 +185,7 @@ def delete_user():
     user_id = request.json["user_id"]
     database.delete_user(user_id)
     return {"deleted": user_id}
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -218,8 +210,7 @@ def delete_user():
     async def test_soc2003_missing_input_validation(self, tmp_path, enterprise_license):
         """Verify SOC2003 detects user input without validation."""
         test_file = tmp_path / "handler.py"
-        test_file.write_text(
-            """from flask import request
+        test_file.write_text("""from flask import request
 
 def process_input():
     # SOC2003: Direct use without validation
@@ -231,8 +222,7 @@ def process_input():
     send_notification(email)
     
     return result
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -262,8 +252,7 @@ class TestGDPRPatternDetection:
     async def test_gdpr001_pii_without_consent(self, tmp_path, enterprise_license):
         """Verify GDPR001 detects PII collection without consent check."""
         test_file = tmp_path / "registration.py"
-        test_file.write_text(
-            """from flask import request
+        test_file.write_text("""from flask import request
 
 def register_user():
     # GDPR001: Collecting PII without consent verification
@@ -275,8 +264,7 @@ def register_user():
     # No consent check before this point!
     user = database.create(email=email, name=name, address=address, phone=phone)
     return {"user_id": user.id}
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -299,8 +287,7 @@ def register_user():
     async def test_gdpr002_no_retention_policy(self, tmp_path, enterprise_license):
         """Verify GDPR002 detects data storage without retention policy."""
         test_file = tmp_path / "storage.py"
-        test_file.write_text(
-            """def store_activity(user_id, activity):
+        test_file.write_text("""def store_activity(user_id, activity):
     # GDPR002: No retention policy, data stored indefinitely
     db.insert("user_logs", {
         "user_id": user_id,
@@ -311,8 +298,7 @@ def register_user():
 def save_session(session_data):
     # GDPR002: No expiration or TTL
     database.collection("sessions").save(session_data)
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -330,8 +316,7 @@ class TestPCIDSSPatternDetection:
     async def test_pci001_card_numbers_in_logs(self, tmp_path, enterprise_license):
         """Verify PCI001 detects credit card numbers in logs."""
         test_file = tmp_path / "payment.py"
-        test_file.write_text(
-            """import logging
+        test_file.write_text("""import logging
 
 logger = logging.getLogger(__name__)
 
@@ -342,8 +327,7 @@ def process_payment(card_number, cvv, amount):
     
     charge = payment_gateway.charge(card_number, cvv, amount)
     return charge
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -379,8 +363,7 @@ def process_payment(card_number, cvv, amount):
     async def test_pci002_unencrypted_card_storage(self, tmp_path, enterprise_license):
         """Verify PCI002 detects unencrypted card data storage."""
         test_file = tmp_path / "card_storage.py"
-        test_file.write_text(
-            """def save_card_details(card_number, cvv, expiry):
+        test_file.write_text("""def save_card_details(card_number, cvv, expiry):
     # PCI002: Storing CVV is prohibited, card should be encrypted
     card_data = {
         "card_number": card_number,
@@ -388,8 +371,7 @@ def process_payment(card_number, cvv, amount):
         "expiry": expiry
     }
     database.save("payment_methods", card_data)
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -403,8 +385,7 @@ def process_payment(card_number, cvv, amount):
     async def test_pci003_insecure_transmission(self, tmp_path, enterprise_license):
         """Verify PCI003 detects payment data over HTTP."""
         test_file = tmp_path / "checkout.py"
-        test_file.write_text(
-            """import requests
+        test_file.write_text("""import requests
 
 def submit_payment(card_info):
     # PCI003: Sending payment data over HTTP instead of HTTPS
@@ -413,8 +394,7 @@ def submit_payment(card_info):
         json={"card": card_info, "amount": 99.99}
     )
     return response.json()
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -432,8 +412,7 @@ class TestMultiStandardCompliance:
     async def test_multi_standard_scan(self, tmp_path, enterprise_license):
         """Verify can scan for multiple standards at once."""
         test_file = tmp_path / "multi_violations.py"
-        test_file.write_text(
-            """import logging
+        test_file.write_text("""import logging
 from flask import request
 
 logger = logging.getLogger(__name__)
@@ -450,8 +429,7 @@ def process_healthcare_payment(patient_ssn, card_number, email):
     
     # SOC2 violation: No authentication check
     return {"status": "processed"}
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -481,15 +459,13 @@ class TestPDFReportGeneration:
     ):
         """Verify PDF report is generated when generate_report=True."""
         test_file = tmp_path / "violations.py"
-        test_file.write_text(
-            """import logging
+        test_file.write_text("""import logging
 
 logger = logging.getLogger(__name__)
 
 def process_sensitive_data(ssn, card_number):
     logger.info(f"SSN: {ssn}, Card: {card_number}")
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -512,8 +488,7 @@ def process_sensitive_data(ssn, card_number):
     async def test_pdf_contains_compliance_findings(self, tmp_path, enterprise_license):
         """Verify PDF report contains compliance violation details."""
         test_file = tmp_path / "hipaa_violations.py"
-        test_file.write_text(
-            """import logging
+        test_file.write_text("""import logging
 
 logger = logging.getLogger(__name__)
 
@@ -522,8 +497,7 @@ def log_patient_info(patient_id, ssn, diagnosis):
     logger.info(f"Patient {patient_id} SSN: {ssn}")
     logger.debug(f"Diagnosis: {diagnosis}")
     logger.warning(f"Medical record: {patient_id}-{ssn}")
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -546,8 +520,7 @@ def log_patient_info(patient_id, ssn, diagnosis):
     async def test_pdf_multi_standard_report(self, tmp_path, enterprise_license):
         """Verify PDF report covers multiple compliance standards."""
         test_file = tmp_path / "multi_standard.py"
-        test_file.write_text(
-            """import logging
+        test_file.write_text("""import logging
 from flask import request
 
 logger = logging.getLogger(__name__)
@@ -563,8 +536,7 @@ def process_data():
     
     # PCI: Card in logs
     logger.debug(f"Card: {request.form['card']}")
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -595,8 +567,7 @@ class TestComplianceScoring:
         """Verify compliance score decreases as violations increase."""
         # File with many violations
         violation_file = tmp_path / "many_violations.py"
-        violation_file.write_text(
-            """import logging
+        violation_file.write_text("""import logging
 
 logger = logging.getLogger(__name__)
 
@@ -606,8 +577,7 @@ def bad_function(ssn1, ssn2, ssn3, diagnosis1, diagnosis2):
     logger.info(f"SSN3: {ssn3}")
     logger.info(f"Diagnosis1: {diagnosis1}")
     logger.info(f"Diagnosis2: {diagnosis2}")
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(violation_file)],
@@ -623,8 +593,7 @@ def bad_function(ssn1, ssn2, ssn3, diagnosis1, diagnosis2):
     async def test_compliant_code_scores_high(self, tmp_path, enterprise_license):
         """Verify compliant code receives high compliance score."""
         compliant_file = tmp_path / "compliant_code.py"
-        compliant_file.write_text(
-            """import logging
+        compliant_file.write_text("""import logging
 from cryptography.fernet import Fernet
 
 logger = logging.getLogger(__name__)
@@ -638,8 +607,7 @@ def secure_function(encrypted_id):
     process_data(data)
     
     return {"status": "success"}
-"""
-        )
+""")
 
         result = await code_policy_check(
             paths=[str(compliant_file)],

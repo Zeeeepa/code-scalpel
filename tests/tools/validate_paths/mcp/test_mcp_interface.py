@@ -11,6 +11,7 @@ format (JSON-RPC wrappers), since validate_paths returns the tool model.
 import pytest
 
 from code_scalpel.mcp.server import mcp
+from tests.utils.tier_setup import activate_tier
 
 
 class TestValidatePathsMCPToolAvailability:
@@ -257,9 +258,10 @@ class TestValidatePathsMCPProTierInterface:
     @pytest.mark.asyncio
     async def test_pro_tier_unlimited_paths_in_mcp(self, tmp_path, monkeypatch):
         """Pro tier should not truncate path list."""
-        monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
-        monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
-        monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
+        # [20260219_BUGFIX] Use real license file via activate_tier so that
+        # _get_current_tier() returns an actual licensed tier (not community fallback)
+        # even when run after licensing tests that pollute env/cache state.
+        activate_tier("pro", monkeypatch=monkeypatch)
 
         # 150 paths should not truncate at pro.
         paths = [str(tmp_path / f"p{i}.txt") for i in range(150)]
@@ -276,9 +278,10 @@ class TestValidatePathsMCPEnterpriseTierInterface:
         self, tmp_path, monkeypatch
     ):
         """Enterprise tier should include security diagnostics fields (may be empty)."""
-        monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
-        monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
-        monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
+        # [20260219_BUGFIX] Use real license file via activate_tier so that
+        # _get_current_tier() returns an actual licensed tier (not community fallback)
+        # even when run after licensing tests that pollute env/cache state.
+        activate_tier("enterprise", monkeypatch=monkeypatch)
 
         tool = mcp._tool_manager._tools.get("validate_paths")
         response = await tool.fn(paths=["../escape.txt"], project_root=str(tmp_path))

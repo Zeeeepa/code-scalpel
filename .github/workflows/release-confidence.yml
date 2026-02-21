@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag/version to validate (e.g., v1.3.5)'
+        description: 'Tag/version to validate (e.g., v1.4.0)'
         required: true
-        default: 'v1.3.5'
+        default: 'v1.4.0'
   push:
     tags:
       - 'v*'

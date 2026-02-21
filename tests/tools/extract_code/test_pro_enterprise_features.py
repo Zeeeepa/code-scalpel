@@ -19,12 +19,16 @@ class TestProTierFeatures:
 
     @pytest.fixture(autouse=True)
     def setup_pro_tier(self, monkeypatch):
-        """[20260111_FIX] Ensure Pro tier is active for all tests in this class."""
-        # Clear any license discovery disabling from other tests
-        monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
-        # Force Pro tier via test override
-        monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
-        monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
+        """[20260111_FIX] Ensure Pro tier is active for all tests in this class.
+        [20260220_BUGFIX] Direct module-level patch - immune to env var order-dependency.
+        Per license hierarchy: enterprise license enables pro/community downgrade via env,
+        but module-level patching is more reliable for test isolation.
+        """
+        from code_scalpel.mcp.tools import extraction
+        from code_scalpel.mcp.helpers import extraction_helpers
+
+        monkeypatch.setattr(extraction, "_get_current_tier", lambda: "pro")
+        monkeypatch.setattr(extraction_helpers, "get_current_tier", lambda: "pro")
         yield
 
     @pytest.mark.asyncio
@@ -193,12 +197,16 @@ class TestEnterpriseTierFeatures:
 
     @pytest.fixture(autouse=True)
     def setup_enterprise_tier(self, monkeypatch):
-        """[20260111_FIX] Ensure Enterprise tier is active for all tests in this class."""
-        # Clear any license discovery disabling from other tests
-        monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
-        # Force Enterprise tier via test override
-        monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
-        monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
+        """[20260111_FIX] Ensure Enterprise tier is active for all tests in this class.
+        [20260220_BUGFIX] Direct module-level patch - immune to env var order-dependency.
+        """
+        from code_scalpel.mcp.tools import extraction
+        from code_scalpel.mcp.helpers import extraction_helpers
+
+        monkeypatch.setattr(extraction, "_get_current_tier", lambda: "enterprise")
+        monkeypatch.setattr(
+            extraction_helpers, "get_current_tier", lambda: "enterprise"
+        )
         yield
 
     @pytest.mark.asyncio
@@ -449,6 +457,11 @@ class TestFeatureGating:
             raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
+        # [20260220_BUGFIX] Patch module-level tier function directly
+        from code_scalpel.mcp.helpers import extraction_helpers
+
+        monkeypatch.setattr(extraction, "_get_current_tier", lambda: "pro")
+        monkeypatch.setattr(extraction_helpers, "get_current_tier", lambda: "pro")
 
         (tmp_path / "app.py").write_text("def main():\n    pass\n")
 
