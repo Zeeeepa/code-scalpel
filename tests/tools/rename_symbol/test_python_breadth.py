@@ -28,13 +28,15 @@ def project(tmp_path: Path) -> Path:
 
 def test_async_function_rename_same_file(project: Path):
     src = project / "mod.py"
-    src.write_text("""
+    src.write_text(
+        """
 import asyncio
 
 async def old_func():
     await asyncio.sleep(0)
     return 1
-""".strip())
+""".strip()
+    )
 
     p = UnifiedPatcher.from_file(str(src))
     res = p.rename_symbol("function", "old_func", "new_func")
@@ -48,7 +50,8 @@ async def old_func():
 
 def test_staticmethod_and_classmethod_same_file(project: Path):
     src = project / "cm.py"
-    src.write_text("""
+    src.write_text(
+        """
 class C:
     @staticmethod
     def old_static(x):
@@ -57,7 +60,8 @@ class C:
     @classmethod
     def old_class(cls, y):
         return y
-""".strip())
+""".strip()
+    )
 
     p = UnifiedPatcher.from_file(str(src))
     assert p.rename_symbol("method", "C.old_static", "new_static").success
@@ -74,14 +78,16 @@ class C:
 
 def test_decorated_function_same_file(project: Path):
     src = project / "dec.py"
-    src.write_text("""
+    src.write_text(
+        """
 def dec(fn):
     return fn
 
 @dec
 def old_name():
     return 1
-""".strip())
+""".strip()
+    )
 
     p = UnifiedPatcher.from_file(str(src))
     res = p.rename_symbol("function", "old_name", "new_name")
@@ -94,7 +100,8 @@ def old_name():
 
 def test_property_getter_setter_same_file(project: Path):
     src = project / "prop.py"
-    src.write_text("""
+    src.write_text(
+        """
 class P:
     def __init__(self):
         self._v = 0
@@ -106,7 +113,8 @@ class P:
     @old_prop.setter
     def old_prop(self, v):
         self._v = v
-""".strip())
+""".strip()
+    )
 
     p = UnifiedPatcher.from_file(str(src))
     # Rename property accessor name
@@ -143,7 +151,8 @@ def test_cross_file_relative_and_alias_imports(project: Path):
     a = pkg / "a.py"
     a.write_text("def old_func():\n    return 1\n")
     b = project / "b.py"
-    b.write_text("""
+    b.write_text(
+        """
 from pkg import old_func as alias
 from pkg import old_func
 import pkg.a as mod
@@ -153,7 +162,8 @@ def use():
     y = old_func()
     z = mod.old_func()
     return x + y + z
-""".strip())
+""".strip()
+    )
 
     res = rename_references_across_project(
         project_root=project,
@@ -181,13 +191,15 @@ def test_getattr_usage_not_rewritten(project: Path):
     a = project / "a.py"
     a.write_text("def old_func():\n    return 1\n")
     b = project / "b.py"
-    b.write_text("""
+    b.write_text(
+        """
 import a
 
 def use():
     fn = getattr(a, "old_func")
     return fn()
-""".strip())
+""".strip()
+    )
 
     res = rename_references_across_project(
         project_root=project,
@@ -211,12 +223,16 @@ def use():
 # [20260108_TEST] Nested function rename should update definition and calls
 def test_nested_function_rename_same_file(project: Path):
     src = project / "nested.py"
-    src.write_text(("""
+    src.write_text(
+        (
+            """
 def outer():
     def old_inner(x):
         return x + 1
     return old_inner(1)
-""").strip())
+"""
+        ).strip()
+    )
 
     p = UnifiedPatcher.from_file(str(src))
     res = p.rename_symbol("function", "old_inner", "new_inner")
@@ -245,14 +261,18 @@ def test_lambda_not_renamed_as_function(project: Path):
 # [20260108_TEST] Comments and docstrings should not be rewritten
 def test_comments_and_docstrings_not_rewritten(project: Path):
     src = project / "docs.py"
-    src.write_text(('''"""
+    src.write_text(
+        (
+            '''"""
 old_name docstring mention
 """
 
 def old_name():
     # old_name used in comment
     return 1
-''').strip())
+'''
+        ).strip()
+    )
 
     p = UnifiedPatcher.from_file(str(src))
     res = p.rename_symbol("function", "old_name", "new_name")
@@ -269,7 +289,9 @@ def old_name():
 # [20260108_TEST] Multi-line definition and call formatting supported
 def test_multiline_definition_and_call_rename(project: Path):
     src = project / "multiline.py"
-    src.write_text(("""
+    src.write_text(
+        (
+            """
 def old_name(
     a,
     b,
@@ -282,7 +304,9 @@ result = old_name(
     2,
     3,
 )
-""").strip())
+"""
+        ).strip()
+    )
 
     p = UnifiedPatcher.from_file(str(src))
     res = p.rename_symbol("function", "old_name", "new_name")

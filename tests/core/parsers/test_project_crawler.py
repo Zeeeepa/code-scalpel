@@ -201,7 +201,8 @@ class TestProjectCrawler:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create main module
             main_file = Path(tmpdir) / "main.py"
-            main_file.write_text("""
+            main_file.write_text(
+                """
 import os
 from utils import helper
 
@@ -212,11 +213,13 @@ def main():
 class App:
     def run(self):
         pass
-""")
+"""
+            )
 
             # Create utils module
             utils_file = Path(tmpdir) / "utils.py"
-            utils_file.write_text("""
+            utils_file.write_text(
+                """
 def helper():
     return 42
 
@@ -231,7 +234,8 @@ def complex_helper(x, y, z):
                         except:
                             pass
     return None
-""")
+"""
+            )
 
             # Create subdirectory with module
             subdir = Path(tmpdir) / "submodule"
@@ -240,11 +244,13 @@ def complex_helper(x, y, z):
             sub_file.write_text("# Submodule init")
 
             sub_module = subdir / "core.py"
-            sub_module.write_text("""
+            sub_module.write_text(
+                """
 class Core:
     def process(self):
         return True
-""")
+"""
+            )
 
             # Create excluded directory
             venv_dir = Path(tmpdir) / "venv"
@@ -370,7 +376,8 @@ class TestReportGeneration:
         """Create a temporary project for report testing."""
         with tempfile.TemporaryDirectory() as tmpdir:
             main_file = Path(tmpdir) / "main.py"
-            main_file.write_text("""
+            main_file.write_text(
+                """
 def simple():
     return 1
 
@@ -383,7 +390,8 @@ def complex(x, y, z):
                         if i > 5:
                             break
     return None
-""")
+"""
+            )
             yield tmpdir
 
     def test_generate_report(self, temp_project):
@@ -463,14 +471,16 @@ class TestConvenienceFunction:
         """Create a temporary project."""
         with tempfile.TemporaryDirectory() as tmpdir:
             main_file = Path(tmpdir) / "main.py"
-            main_file.write_text("""
+            main_file.write_text(
+                """
 def hello():
     return 42
 
 class Greeter:
     def greet(self, name):
         return f"Hello, {name}"
-""")
+"""
+            )
             yield tmpdir
 
     def test_crawl_project_function(self, temp_project):
@@ -544,7 +554,8 @@ def greet():
         """Test handling of nested classes."""
         with tempfile.TemporaryDirectory() as tmpdir:
             nested_file = Path(tmpdir) / "nested.py"
-            nested_file.write_text("""
+            nested_file.write_text(
+                """
 class Outer:
     class Inner:
         def inner_method(self):
@@ -552,7 +563,8 @@ class Outer:
     
     def outer_method(self):
         pass
-""")
+"""
+            )
 
             crawler = ProjectCrawler(tmpdir)
             result = crawler.crawl()
@@ -563,10 +575,12 @@ class Outer:
         """Test that lambdas don't cause issues."""
         with tempfile.TemporaryDirectory() as tmpdir:
             lambda_file = Path(tmpdir) / "lambdas.py"
-            lambda_file.write_text("""
+            lambda_file.write_text(
+                """
 square = lambda x: x ** 2
 items = list(filter(lambda x: x > 0, [1, -2, 3]))
-""")
+"""
+            )
 
             crawler = ProjectCrawler(tmpdir)
             result = crawler.crawl()

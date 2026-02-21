@@ -24,7 +24,8 @@ class TestCrossFileResolution:
         """Create a temporary project structure with multiple files."""
         # models.py - defines TaxRate
         models_py = tmp_path / "models.py"
-        models_py.write_text('''"""Models module."""
+        models_py.write_text(
+            '''"""Models module."""
 
 class TaxRate:
     """Tax rate configuration."""
@@ -43,11 +44,13 @@ def get_default_rate() -> float:
 
 
 TAX_CONSTANT = 0.15
-''')
+'''
+        )
 
         # utils.py - imports from models
         utils_py = tmp_path / "utils.py"
-        utils_py.write_text('''"""Utilities module."""
+        utils_py.write_text(
+            '''"""Utilities module."""
 
 from models import TaxRate, get_default_rate, TAX_CONSTANT
 
@@ -61,13 +64,15 @@ def calculate_tax(amount: float) -> float:
 def apply_flat_tax(amount: float) -> float:
     """Apply flat tax using constant."""
     return amount * TAX_CONSTANT
-''')
+'''
+        )
 
         # services/order.py - nested import
         services_dir = tmp_path / "services"
         services_dir.mkdir()
         order_py = services_dir / "order.py"
-        order_py.write_text('''"""Order service."""
+        order_py.write_text(
+            '''"""Order service."""
 
 from models import TaxRate
 
@@ -80,7 +85,8 @@ class OrderProcessor:
     
     def process(self, amount: float) -> float:
         return amount + self.tax_rate.calculate(amount)
-''')
+'''
+        )
 
         return tmp_path
 
@@ -209,14 +215,16 @@ class TestCrossFileEdgeCases:
         """Create a project with various edge cases."""
         # File with missing import target
         broken_py = tmp_path / "broken.py"
-        broken_py.write_text('''"""Broken imports."""
+        broken_py.write_text(
+            '''"""Broken imports."""
 
 from nonexistent import DoesNotExist
 
 
 def use_missing():
     return DoesNotExist()
-''')
+'''
+        )
 
         # File with relative imports
         pkg_dir = tmp_path / "package"
@@ -224,29 +232,35 @@ def use_missing():
         (pkg_dir / "__init__.py").write_text("")
 
         helper_py = pkg_dir / "helper.py"
-        helper_py.write_text('''"""Helper module."""
+        helper_py.write_text(
+            '''"""Helper module."""
 
 def helper_func():
     return 42
-''')
+'''
+        )
 
         main_py = pkg_dir / "main.py"
-        main_py.write_text('''"""Main module."""
+        main_py.write_text(
+            '''"""Main module."""
 
 from .helper import helper_func
 
 
 def main():
     return helper_func()
-''')
+'''
+        )
 
         # Standalone file
         standalone_py = tmp_path / "standalone.py"
-        standalone_py.write_text('''"""No imports."""
+        standalone_py.write_text(
+            '''"""No imports."""
 
 def pure_function(x: int) -> int:
     return x * 2
-''')
+'''
+        )
 
         return tmp_path
 
@@ -336,33 +350,39 @@ class TestCrossFileDepthLimits:
     def chain_project(self, tmp_path: Path):
         """Create a project with chained dependencies."""
         # level0.py
-        (tmp_path / "level0.py").write_text('''"""Base level."""
+        (tmp_path / "level0.py").write_text(
+            '''"""Base level."""
 
 BASE_VALUE = 100
 
 def level0_func():
     return BASE_VALUE
-''')
+'''
+        )
 
         # level1.py imports level0
-        (tmp_path / "level1.py").write_text('''"""Level 1."""
+        (tmp_path / "level1.py").write_text(
+            '''"""Level 1."""
 
 from level0 import level0_func, BASE_VALUE
 
 
 def level1_func():
     return level0_func() + BASE_VALUE
-''')
+'''
+        )
 
         # level2.py imports level1
-        (tmp_path / "level2.py").write_text('''"""Level 2."""
+        (tmp_path / "level2.py").write_text(
+            '''"""Level 2."""
 
 from level1 import level1_func
 
 
 def level2_func():
     return level1_func() * 2
-''')
+'''
+        )
 
         return tmp_path
 
@@ -410,12 +430,14 @@ class TestImportMapBuilding:
     def test_from_import(self, tmp_path: Path):
         """Test mapping from 'from X import Y' syntax."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""from models import User, Order
+        test_file.write_text(
+            """from models import User, Order
 from utils import helper as h
 
 def func():
     pass
-""")
+"""
+        )
 
         extractor = SurgicalExtractor.from_file(str(test_file))
         import_map = extractor._build_import_map()
@@ -427,12 +449,14 @@ def func():
     def test_import_module(self, tmp_path: Path):
         """Test mapping from 'import X' syntax."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""import os
+        test_file.write_text(
+            """import os
 import sys as system
 
 def func():
     pass
-""")
+"""
+        )
 
         extractor = SurgicalExtractor.from_file(str(test_file))
         import_map = extractor._build_import_map()
@@ -523,7 +547,8 @@ class TestTransitiveDependencies:
         """Create a temporary project with transitive dependencies."""
         # base.py - defines BaseClass
         base_py = tmp_path / "base.py"
-        base_py.write_text('''"""Base module."""
+        base_py.write_text(
+            '''"""Base module."""
 
 class BaseClass:
     """Base class for all services."""
@@ -533,11 +558,13 @@ class BaseClass:
     
     def get_name(self) -> str:
         return self.name
-''')
+'''
+        )
 
         # models.py - imports from base.py
         models_py = tmp_path / "models.py"
-        models_py.write_text('''"""Models module."""
+        models_py.write_text(
+            '''"""Models module."""
 
 from base import BaseClass
 
@@ -548,11 +575,13 @@ class UserModel(BaseClass):
     def __init__(self, name: str, email: str):
         super().__init__(name)
         self.email = email
-''')
+'''
+        )
 
         # services.py - imports from models.py
         services_py = tmp_path / "services.py"
-        services_py.write_text('''"""Services module."""
+        services_py.write_text(
+            '''"""Services module."""
 
 from models import UserModel
 
@@ -560,7 +589,8 @@ from models import UserModel
 def create_user(name: str, email: str) -> UserModel:
     """Create a new user."""
     return UserModel(name, email)
-''')
+'''
+        )
 
         return tmp_path
 
@@ -645,28 +675,33 @@ class TestModuleReexports:
         """Create a temporary project with re-exports."""
         # internal.py - defines internal classes
         internal_py = tmp_path / "internal.py"
-        internal_py.write_text('''"""Internal module - not public."""
+        internal_py.write_text(
+            '''"""Internal module - not public."""
 
 class _InternalHelper:
     """Internal helper class."""
     
     def process(self, data: str) -> str:
         return data.upper()
-''')
+'''
+        )
 
         # public_api.py - re-exports InternalHelper
         public_api_py = tmp_path / "public_api.py"
-        public_api_py.write_text('''"""Public API module."""
+        public_api_py.write_text(
+            '''"""Public API module."""
 
 from internal import _InternalHelper as InternalHelper
 
 # Explicitly define what's public
 __all__ = ["InternalHelper"]
-''')
+'''
+        )
 
         # client.py - imports from public_api
         client_py = tmp_path / "client.py"
-        client_py.write_text('''"""Client code."""
+        client_py.write_text(
+            '''"""Client code."""
 
 from public_api import InternalHelper
 
@@ -674,14 +709,17 @@ from public_api import InternalHelper
 def create_helper() -> InternalHelper:
     """Factory function."""
     return InternalHelper()
-''')
+'''
+        )
 
         # alt_api.py - re-exports without __all__
         alt_api_py = tmp_path / "alt_api.py"
-        alt_api_py.write_text('''"""Alternative API."""
+        alt_api_py.write_text(
+            '''"""Alternative API."""
 
 from internal import _InternalHelper
-''')
+'''
+        )
 
         return tmp_path
 
@@ -714,25 +752,29 @@ from internal import _InternalHelper
         """Test that circular imports don't cause infinite loops."""
         # circular_a.py
         circular_a = tmp_path / "circular_a.py"
-        circular_a.write_text('''"""Module A."""
+        circular_a.write_text(
+            '''"""Module A."""
 
 from circular_b import b_function
 
 
 def a_function():
     return b_function()
-''')
+'''
+        )
 
         # circular_b.py - imports from circular_a
         circular_b = tmp_path / "circular_b.py"
-        circular_b.write_text('''"""Module B."""
+        circular_b.write_text(
+            '''"""Module B."""
 
 from circular_a import a_function
 
 
 def b_function():
     return a_function()
-''')
+'''
+        )
 
         # Try to resolve - should not hang
         extractor = SurgicalExtractor.from_file(str(circular_a))

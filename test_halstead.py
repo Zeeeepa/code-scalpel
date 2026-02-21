@@ -1,4 +1,3 @@
-import os
 from tests.utils.tier_setup import tier_context
 from code_scalpel.licensing.features import has_capability, get_tool_capabilities
 from code_scalpel.mcp.server import _get_current_tier

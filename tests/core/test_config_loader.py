@@ -35,14 +35,16 @@ def test_load_limits_from_default_location():
 def test_load_limits_with_explicit_path(tmp_path):
     """Test loading from explicit path."""
     config_file = tmp_path / "test_limits.toml"
-    config_file.write_text("""
+    config_file.write_text(
+        """
 [pro.extract_code]
 max_depth = 999
 cross_file_deps = true
 
 [community.security_scan]
 max_findings = 123
-""")
+"""
+    )
 
     limits = load_limits(config_file)
 
@@ -55,10 +57,12 @@ def test_get_tool_limits():
     """Test extracting limits for specific tool/tier."""
     with tempfile.TemporaryDirectory() as tmpdir:
         config_file = Path(tmpdir) / "limits.toml"
-        config_file.write_text("""
+        config_file.write_text(
+            """
 [pro.extract_code]
 max_depth = 42
-""")
+"""
+        )
 
         limits_config = load_limits(config_file)
         tool_limits = get_tool_limits("extract_code", "pro", limits_config)
@@ -81,11 +85,13 @@ def test_merge_limits():
 def test_get_tool_capabilities_with_config_override(tmp_path, monkeypatch):
     """Test that get_tool_capabilities picks up a custom limits file."""
     config_file = tmp_path / "limits.toml"
-    config_file.write_text("""
+    config_file.write_text(
+        """
 [pro.extract_code]
 max_depth = 555
 include_cross_file_deps = true
-""")
+"""
+    )
 
     # Redirect the bundled-file resolver to our test file
     monkeypatch.setattr(
@@ -103,10 +109,12 @@ include_cross_file_deps = true
 def test_load_limits_explicit_path(tmp_path):
     """Test that load_limits honours an explicit config_path argument."""
     config_file = tmp_path / "custom.toml"
-    config_file.write_text("""
+    config_file.write_text(
+        """
 [community.extract_code]
 max_depth = 777
-""")
+"""
+    )
 
     limits = load_limits(config_path=config_file)
 
@@ -162,10 +170,12 @@ def test_null_values_in_config(tmp_path):
     config_file = tmp_path / "limits.toml"
     # TOML uses 'inf' or omit the key for unlimited; null is not valid TOML
     # Instead, test that we can handle the Python None from omitted values
-    config_file.write_text("""
+    config_file.write_text(
+        """
 [enterprise.extract_code]
 cross_file_deps = true
-""")
+"""
+    )
 
     limits = load_limits(config_file)
 
@@ -183,10 +193,12 @@ cross_file_deps = true
 def test_array_values_in_config(tmp_path):
     """Test that array limit values work."""
     config_file = tmp_path / "limits.toml"
-    config_file.write_text("""
+    config_file.write_text(
+        """
 [pro.symbolic_execute]
 constraint_types = ["int", "bool", "string"]
-""")
+"""
+    )
 
     limits = load_limits(config_file)
 
@@ -200,10 +212,12 @@ constraint_types = ["int", "bool", "string"]
 def test_load_limits_custom_path(tmp_path):
     """Test that load_limits reads correctly from an arbitrary path."""
     custom_config = tmp_path / "custom.toml"
-    custom_config.write_text("""
+    custom_config.write_text(
+        """
 [pro.extract_code]
 max_depth = 999
-""")
+"""
+    )
 
     limits = load_limits(config_path=custom_config)
 
@@ -231,7 +245,8 @@ def test_default_extract_code_limits(tier, expected_max_depth):
 def test_full_integration_workflow(tmp_path, monkeypatch):
     """Test full workflow: custom limits file loaded, tools read correct values."""
     deployed_config = tmp_path / "limits.toml"
-    deployed_config.write_text("""
+    deployed_config.write_text(
+        """
 [pro.extract_code]
 max_depth = 5
 cross_file_deps = true
@@ -239,7 +254,8 @@ max_extraction_size_mb = 20
 
 [community.security_scan]
 max_findings = 100
-""")
+"""
+    )
 
     monkeypatch.setattr(
         "code_scalpel.licensing.config_loader._find_config_file",

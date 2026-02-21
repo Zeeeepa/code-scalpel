@@ -19,7 +19,8 @@ from code_scalpel.mcp.helpers.security_helpers import _scan_dependencies_sync
 def python_requirements_with_vulns(tmp_path):
     """Create a Python requirements.txt with known vulnerable packages."""
     req_file = tmp_path / "requirements.txt"
-    req_file.write_text("""
+    req_file.write_text(
+        """
 # Vulnerable packages (intentionally outdated for testing)
 requests==2.6.0
 django==1.4.0
@@ -27,7 +28,8 @@ pillow==2.4.0
 urllib3==1.7
 cryptography==0.4
 flask==0.10
-""")
+"""
+    )
     return tmp_path
 
 
@@ -35,7 +37,8 @@ flask==0.10
 def python_pyproject_with_vulns(tmp_path):
     """Create a pyproject.toml with vulnerable dependencies."""
     pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text("""
+    pyproject.write_text(
+        """
 [project]
 name = "test-project"
 version = "0.1.0"
@@ -50,7 +53,8 @@ dev = [
     "pytest==3.0.0",
     "black==19.10b0",
 ]
-""")
+"""
+    )
     return tmp_path
 
 
@@ -58,7 +62,8 @@ dev = [
 def javascript_package_json_with_vulns(tmp_path):
     """Create a package.json with vulnerable dependencies."""
     pkg_json = tmp_path / "package.json"
-    pkg_json.write_text("""{
+    pkg_json.write_text(
+        """{
   "name": "test-app",
   "version": "1.0.0",
   "dependencies": {
@@ -71,7 +76,8 @@ def javascript_package_json_with_vulns(tmp_path):
     "babel": "5.0.0"
   }
 }
-""")
+"""
+    )
     return tmp_path
 
 
@@ -79,7 +85,8 @@ def javascript_package_json_with_vulns(tmp_path):
 def java_pom_xml_with_vulns(tmp_path):
     """Create a pom.xml with vulnerable dependencies."""
     pom_file = tmp_path / "pom.xml"
-    pom_file.write_text("""<?xml version="1.0" encoding="UTF-8"?>
+    pom_file.write_text(
+        """<?xml version="1.0" encoding="UTF-8"?>
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
@@ -104,7 +111,8 @@ def java_pom_xml_with_vulns(tmp_path):
     </dependency>
   </dependencies>
 </project>
-""")
+"""
+    )
     return tmp_path
 
 
@@ -112,13 +120,15 @@ def java_pom_xml_with_vulns(tmp_path):
 def java_gradle_with_vulns(tmp_path):
     """Create a build.gradle with vulnerable dependencies."""
     gradle_file = tmp_path / "build.gradle"
-    gradle_file.write_text("""
+    gradle_file.write_text(
+        """
 dependencies {
     implementation 'org.springframework:spring-core:3.0.0'
     implementation 'commons-io:commons-io:2.4'
     testImplementation 'junit:junit:3.8.1'
 }
-""")
+"""
+    )
     return tmp_path
 
 
@@ -126,11 +136,13 @@ dependencies {
 def benign_python_project(tmp_path):
     """Create a benign Python project with no known vulnerabilities."""
     req_file = tmp_path / "requirements.txt"
-    req_file.write_text("""
+    req_file.write_text(
+        """
 requests==2.31.0
 django==4.2.0
 pillow==10.0.0
-""")
+"""
+    )
     return tmp_path
 
 
@@ -444,12 +456,14 @@ class TestScanDependenciesEnterpriseTier:
         # Create multi-language project
         (tmp_path / "requirements.txt").write_text("requests==2.6.0\n")
         (tmp_path / "package.json").write_text('{"dependencies": {"express": "3.0.0"}}')
-        (tmp_path / "pom.xml").write_text("""<?xml version="1.0"?>
+        (tmp_path / "pom.xml").write_text(
+            """<?xml version="1.0"?>
 <project><dependencies>
 <dependency><groupId>org.springframework</groupId>
 <artifactId>spring-core</artifactId>
 <version>3.0.0</version>
-</dependency></dependencies></project>""")
+</dependency></dependencies></project>"""
+        )
 
         result = _scan_dependencies_sync(
             project_root=str(tmp_path),

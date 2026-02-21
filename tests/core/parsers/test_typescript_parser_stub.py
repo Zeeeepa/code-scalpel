@@ -7,7 +7,8 @@ from code_scalpel.polyglot.typescript.parser import TypeScriptParser
 
 
 def _ts_sample_code() -> str:
-    return textwrap.dedent("""
+    return textwrap.dedent(
+        """
         import { Router, Request } from 'express';
         import type { User } from './models';
         
@@ -28,7 +29,8 @@ def _ts_sample_code() -> str:
         export default function defaultHelper(name: string) {
             return name;
         }
-        """).strip()
+        """
+    ).strip()
 
 
 def test_parse_with_fallback_extracts_structures():
@@ -66,14 +68,16 @@ def test_parse_file_sets_language_and_handles_missing(tmp_path: Path):
 
 def test_analyzer_metrics_and_security(tmp_path: Path):
     analyzer = TypeScriptAnalyzer(language="javascript")
-    code = textwrap.dedent("""
+    code = textwrap.dedent(
+        """
         export function risky(input) {
             eval(input);
             const el = document.getElementById('root');
             el.innerHTML = input;
             return el;
         }
-        """).strip()
+        """
+    ).strip()
 
     result = analyzer.analyze(code, filename="demo.js")
     assert result.success is True

@@ -557,7 +557,9 @@ def func_1():
 def func_2():
     pass
 
-""" + "\n".join([f"def func_{i}(): pass" for i in range(3, 50)])
+""" + "\n".join(
+            [f"def func_{i}(): pass" for i in range(3, 50)]
+        )
 
         async def run_large_async():
             simulator = RefactorSimulator()

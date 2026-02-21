@@ -15,12 +15,15 @@ async def test_invalid_license_falls_back_to_community(
         is_expired = False
 
     project = make_project(
-        {f"src/file_{i}.py": """
+        {
+            f"src/file_{i}.py": """
 from shared.target import target
 
 def use():
     return target()
-""" for i in range(6)}
+"""
+            for i in range(6)
+        }
         | {
             "shared/target.py": """
 def target():
@@ -64,12 +67,15 @@ async def test_expired_license_falls_back_to_community(
         is_expired = True
 
     project = make_project(
-        {f"src/file_{i}.py": """
+        {
+            f"src/file_{i}.py": """
 from shared.target import target
 
 def use():
     return target()
-""" for i in range(3)}
+"""
+            for i in range(3)
+        }
         | {
             "shared/target.py": """
 def target():
@@ -110,12 +116,15 @@ async def test_invalid_signature_falls_back_to_community(
         is_expired = False
 
     project = make_project(
-        {f"src/file_{i}.py": """
+        {
+            f"src/file_{i}.py": """
 from shared.target import target
 
 def use():
     return target()
-""" for i in range(3)}
+"""
+            for i in range(3)
+        }
         | {
             "shared/target.py": """
 def target():
@@ -155,12 +164,15 @@ async def test_malformed_jwt_falls_back_to_community(
         is_expired = False
 
     project = make_project(
-        {f"src/file_{i}.py": """
+        {
+            f"src/file_{i}.py": """
 from shared.target import target
 
 def use():
     return target()
-""" for i in range(4)}
+"""
+            for i in range(4)
+        }
         | {
             "shared/target.py": """
 def target():

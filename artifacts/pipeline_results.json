@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-02-11T15:18:27.687177",
+  "timestamp": "2026-02-21T16:57:13.722194",
   "checks": {
     "black": {
-      "status": "passed",
-      "output": "All files properly formatted"
+      "status": "failed",
+      "output": "--- /mnt/k/backup/Develop/code-scalpel/.tmp_tier_fallback/test.py\t2026-02-21 21:49:35.335440+00:00\n+++ /mnt/k/backup/Develop/code-scalpel/.tmp_tier_fallback/test.py\t2026-02-21 21:57:38.027722+00:00\n@@ -1,3 +1,3 @@\n def test_func():\n-    '''Update 9'''\n+    \"\"\"Update 9\"\"\"\n     pass\nSkipping .ipynb files as Jupyter dependencies are not installed.\nYou can fix this by running ``pip install \"black[jupyter]\"``\nwould reformat /mnt/k/backup/Develop/code-scalpel/.tmp_tier_fallback/test.py\n\nOh no! \ud83d\udca5 \ud83d\udc94 \ud83d\udca5\n1 file would be reformatted, 1103 files would be left unchanged.\n"
     },
     "ruff": {
-      "status": "passed",
-      "output": "No linting issues found"
+      "status": "failed",
+      "output": "F401 [*] `os` imported but unused\n --> test_halstead.py:1:8\n  |\n1 | import os\n  |        ^^\n2 | from tests.utils.tier_setup import tier_context\n3 | from code_scalpel.licensing.features import has_capability, get_tool_capabilities\n  |\nhelp: Remove unused import: `os`\n\nFound 1 error.\n[*] 1 fixable with the `--fix` option.\nwarning: The top-level linter settings are deprecated in favour of their counterparts in the `lint` section. Please update the following options in `packages/codescalpel-web/pyproject.toml`:\n  - 'ignore' -> 'lint.ignore'\n  - 'select' -> 'lint.select'\nwarning: The top-level linter settings are deprecated in favour of their counterparts in the `lint` section. Please update the following options in `packages/codescalpel-agents/pyproject.toml`:\n  - 'ignore' -> 'lint.ignore'\n  - 'select' -> 'lint.select'\n"
     },
     "pyright": {
       "status": "passed",

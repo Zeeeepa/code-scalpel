@@ -27,28 +27,34 @@ async def test_extract_code_pro_clamps_depth_and_emits_confidence(
     monkeypatch.setattr(server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False)
 
     # b.py
-    (tmp_path / "b.py").write_text("""\
+    (tmp_path / "b.py").write_text(
+        """\
 class B:
     pass
-""")
+"""
+    )
 
     # a.py imports B and defines A
-    (tmp_path / "a.py").write_text("""\
+    (tmp_path / "a.py").write_text(
+        """\
 from b import B
 
 class A:
     def __init__(self):
         self.b = B()
-""")
+"""
+    )
 
     # utils.py imports A and uses it
-    (tmp_path / "utils.py").write_text("""\
+    (tmp_path / "utils.py").write_text(
+        """\
 from a import A
 
 def f():
     a = A()
     return a
-""")
+"""
+    )
 
     # Simulate Pro tier via env; _get_current_tier honors this under pytest.
     monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")

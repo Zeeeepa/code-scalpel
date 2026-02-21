@@ -38,26 +38,31 @@ class TestCrossFileTaintTracking:
         """Taint should be tracked through import chain: A -> B -> C."""
         # File A: Source of taint
         file_a = temp_project / "source.py"
-        file_a.write_text("""
+        file_a.write_text(
+            """
 from flask import request
 
 def get_user_input():
     return request.args.get("user_id")  # TAINT SOURCE
-""")
+"""
+        )
 
         # File B: Intermediate processing
         file_b = temp_project / "processor.py"
-        file_b.write_text("""
+        file_b.write_text(
+            """
 from source import get_user_input
 
 def process_input():
     data = get_user_input()  # Receives taint
     return data.strip()  # Still tainted after transform
-""")
+"""
+        )
 
         # File C: Sink
         file_c = temp_project / "executor.py"
-        file_c.write_text("""
+        file_c.write_text(
+            """
 from processor import process_input
 import sqlite3
 
@@ -66,7 +71,8 @@ def execute_query():
     conn = sqlite3.connect("db.sqlite")
     cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")  # SINK!
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(temp_project), entry_points=["executor.py"]
@@ -80,7 +86,8 @@ def execute_query():
     async def test_taint_through_async_chain(self, temp_project):
         """Taint should be tracked through async/await chain."""
         file_a = temp_project / "async_source.py"
-        file_a.write_text("""
+        file_a.write_text(
+            """
 async def fetch_user_data(user_id: str) -> dict:
     # user_id is tainted (from user input)
     return {"id": user_id, "name": "Unknown"}
@@ -88,10 +95,12 @@ async def fetch_user_data(user_id: str) -> dict:
 async def process_user(user_id: str):
     data = await fetch_user_data(user_id)  # Taint propagates
     return data["id"]  # Still tainted
-""")
+"""
+        )
 
         file_b = temp_project / "async_sink.py"
-        file_b.write_text("""
+        file_b.write_text(
+            """
 from async_source import process_user
 import asyncio
 
@@ -100,7 +109,8 @@ async def dangerous_async(request_id: str):
     # Taint should reach here
     query = f"DELETE FROM users WHERE id = {user}"
     return query
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(temp_project), entry_points=["async_sink.py"]
@@ -112,17 +122,20 @@ async def dangerous_async(request_id: str):
     async def test_taint_through_callback(self, temp_project):
         """Taint should be tracked through callback pattern."""
         file_a = temp_project / "callback_source.py"
-        file_a.write_text("""
+        file_a.write_text(
+            """
 def with_callback(data, callback):
     result = callback(data)
     return result
 
 def identity(x):
     return x
-""")
+"""
+        )
 
         file_b = temp_project / "callback_sink.py"
-        file_b.write_text("""
+        file_b.write_text(
+            """
 from callback_source import with_callback
 from flask import request
 import os
@@ -133,7 +146,8 @@ def dangerous_callback(cmd):
 def handle_request():
     user_cmd = request.args.get("cmd")  # SOURCE
     with_callback(user_cmd, dangerous_callback)  # Taint flows through callback
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(temp_project), entry_points=["callback_sink.py"]
@@ -146,7 +160,8 @@ def handle_request():
     async def test_taint_through_decorator(self, temp_project):
         """Taint should be tracked through decorator wrapper."""
         file_a = temp_project / "decorators.py"
-        file_a.write_text("""
+        file_a.write_text(
+            """
 from functools import wraps
 
 def log_input(func):
@@ -155,10 +170,12 @@ def log_input(func):
         print(f"Input: {data}")  # Taint passes through
         return func(data, *args, **kwargs)
     return wrapper
-""")
+"""
+        )
 
         file_b = temp_project / "decorated_sink.py"
-        file_b.write_text("""
+        file_b.write_text(
+            """
 from decorators import log_input
 from flask import request
 import subprocess
@@ -170,7 +187,8 @@ def execute(command):
 def handler():
     cmd = request.form.get("command")  # SOURCE
     execute(cmd)  # Taint flows through decorator
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(temp_project), entry_points=["decorated_sink.py"]
@@ -182,7 +200,8 @@ def handler():
     async def test_taint_sanitizer_clears(self, temp_project):
         """Sanitizer should clear taint."""
         file_a = temp_project / "sanitizers.py"
-        file_a.write_text(r'''
+        file_a.write_text(
+            r'''
 import re
 
 def sanitize_id(user_id: str) -> int:
@@ -192,10 +211,12 @@ def sanitize_id(user_id: str) -> int:
 def sanitize_input(data: str) -> str:
     """Escapes special chars - clears taint."""
     return re.sub(r'[^\w]', '', data)  # SANITIZER
-''')
+'''
+        )
 
         file_b = temp_project / "safe_sink.py"
-        file_b.write_text("""
+        file_b.write_text(
+            """
 from sanitizers import sanitize_id
 from flask import request
 import sqlite3
@@ -208,7 +229,8 @@ def safe_query():
     cursor = conn.cursor()
     # This should be SAFE because sanitize_id converted to int
     cursor.execute(f"SELECT * FROM users WHERE id = {safe_id}")
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(temp_project), entry_points=["safe_sink.py"]
@@ -222,7 +244,8 @@ def safe_query():
     async def test_taint_through_context_manager(self, temp_project):
         """Taint should be tracked through context manager."""
         file_a = temp_project / "context_manager.py"
-        file_a.write_text("""
+        file_a.write_text(
+            """
 class DataProcessor:
     def __init__(self, data):
         self.data = data  # May be tainted
@@ -232,10 +255,12 @@ class DataProcessor:
     
     def __exit__(self, *args):
         pass
-""")
+"""
+        )
 
         file_b = temp_project / "context_sink.py"
-        file_b.write_text("""
+        file_b.write_text(
+            """
 from context_manager import DataProcessor
 from flask import request
 import os
@@ -245,7 +270,8 @@ def process_request():
     
     with DataProcessor(user_input) as data:
         os.system(data)  # SINK - taint came through __enter__
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(temp_project), entry_points=["context_sink.py"]
@@ -257,17 +283,20 @@ def process_request():
     async def test_taint_through_class_inheritance(self, temp_project):
         """Taint should be tracked through class inheritance."""
         file_a = temp_project / "base_handler.py"
-        file_a.write_text("""
+        file_a.write_text(
+            """
 class BaseHandler:
     def __init__(self, data):
         self.data = data
     
     def get_data(self):
         return self.data  # Returns potentially tainted data
-""")
+"""
+        )
 
         file_b = temp_project / "derived_handler.py"
-        file_b.write_text("""
+        file_b.write_text(
+            """
 from base_handler import BaseHandler
 from flask import request
 import subprocess
@@ -281,7 +310,8 @@ def handle():
     user_cmd = request.args.get("cmd")  # SOURCE
     handler = CommandHandler(user_cmd)
     handler.execute()  # Taint flows through inheritance
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(temp_project), entry_points=["derived_handler.py"]
@@ -300,7 +330,8 @@ def handle():
     )
     async def test_spring_jpa_cross_file_sink_detected(self, temp_project, sink_call):
         controller = temp_project / "controller.py"
-        controller.write_text("""
+        controller.write_text(
+            """
 from flask import request
 from repo import run_query
 
@@ -308,10 +339,12 @@ from repo import run_query
 def handler():
     name = request.args.get("name")  # SOURCE
     return run_query(name)
-""")
+"""
+        )
 
         repo = temp_project / "repo.py"
-        repo.write_text(f"""
+        repo.write_text(
+            f"""
 class EntityManager:
     def createNamedQuery(self, query):
         return query
@@ -329,7 +362,8 @@ jdbcTemplate = JdbcTemplate()
 def run_query(name):
     # [20251215_TEST] Taint should reach Spring/JPA sink
     return {sink_call}
-""")
+"""
+        )
 
         result = await cross_file_security_scan(
             project_root=str(temp_project), entry_points=["controller.py"]

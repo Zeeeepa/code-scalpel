@@ -11,14 +11,16 @@ from code_scalpel.ast_tools.import_resolver import ImportResolver, ImportType
 def test_flask_blueprint_detection(tmp_path: Path) -> None:
     app_py = tmp_path / "app.py"
     app_py.write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             from flask import Flask, Blueprint
 
             bp = Blueprint("bp", __name__)
 
             app = Flask(__name__)
             app.register_blueprint(bp)
-            """),
+            """
+        ),
         encoding="utf-8",
     )
 

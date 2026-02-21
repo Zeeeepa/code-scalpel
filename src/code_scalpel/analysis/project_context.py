@@ -129,7 +129,8 @@ class ProjectContext:
         cursor = self._db_conn.cursor()
 
         # Create tables
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS metadata (
                 project_root TEXT PRIMARY KEY,
                 created_at REAL,
@@ -140,9 +141,11 @@ class ProjectContext:
                 hash TEXT,
                 language_breakdown TEXT
             )
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS files (
                 id INTEGER PRIMARY KEY,
                 path TEXT UNIQUE,
@@ -155,9 +158,11 @@ class ProjectContext:
                 importance_score REAL,
                 cached_at REAL
             )
-        """)
+        """
+        )
 
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS directories (
                 id INTEGER PRIMARY KEY,
                 path TEXT UNIQUE,
@@ -169,7 +174,8 @@ class ProjectContext:
                 type_confidence REAL,
                 cached_at REAL
             )
-        """)
+        """
+        )
 
         self._db_conn.commit()
 

@@ -148,7 +148,8 @@ class TestOraclePipelineIntegration:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a test Python file
             test_file = Path(tmpdir) / "auth.py"
-            test_file.write_text("""
+            test_file.write_text(
+                """
 def login(username, password):
     '''Authenticate user.'''
     # TODO: Hash password
@@ -157,7 +158,8 @@ def login(username, password):
 class User:
     def __init__(self, name):
         self.name = name
-""")
+"""
+            )
 
             # Generate spec with small limits
             pipeline = OraclePipeline(
