@@ -5090,6 +5090,10 @@ def run_server(
     # [20251215_BUGFIX] Configure logging to stderr before anything else
     _configure_logging(transport)
 
+    # [20260220_FEATURE] Check for version mismatch in background
+    from code_scalpel.mcp.version_check import start_version_check_thread
+    start_version_check_thread()
+
     # Debug: emit startup parameters to stderr so test harness can capture flow
     _debug_print(
         f"DEBUG: run_server called transport={transport!r} host={host!r} port={port!r} allow_lan={allow_lan!r} root_path={root_path!r} tier={tier!r}"
