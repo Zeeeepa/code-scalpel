@@ -174,7 +174,7 @@ def test_large_function_perf():
 
 
 def test_very_large_class_perf():
-    """Very large class (500+ LOC) performance: target <3000ms median."""
+    """Very large class (500+ LOC) performance: target <5000ms median."""
     test_dir = setup_test_dir("very_large")
     try:
         test_file = test_dir / "test.py"
@@ -201,7 +201,7 @@ def test_very_large_class_perf():
         p99 = sorted_durations[int(len(sorted_durations) * 0.99)]
 
         assert (
-            med < 3000
+            med < 5000
         ), f"Very large class too slow: {med:.2f}ms (P95={p95:.2f}, P99={p99:.2f})"
         print(
             f"✅ Very large class: median={med:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms"

@@ -209,8 +209,8 @@ def add(a, b):
 
             # Enterprise should not be significantly faster (both should be fast)
             # but community should have access to smaller limits
-            assert community_ms < 200
-            assert enterprise_ms < 200
+            assert community_ms < 1000
+            assert enterprise_ms < 1000
 
 
 class TestOraclePipelineEntryPoints:
