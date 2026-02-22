@@ -1,6 +1,6 @@
 # Code Scalpel CI/CD Pipeline Results
 
-**Timestamp:** 2026-02-21T17:00:40.983876
+**Timestamp:** 2026-02-21T19:32:49.243222
 
 ## Check Results
 
@@ -8,7 +8,9 @@
 - ✅ **ruff**: passed
 - ✅ **pyright**: passed
 - ✅ **mcp_contracts**: passed
+- ✅ **build**: passed
 - ✅ **security**: passed
+- ❌ **pytest**: failed
 
 ## Overall Status
 
