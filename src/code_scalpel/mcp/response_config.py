@@ -27,7 +27,9 @@ class FilteredResponseDict(TypedDict, total=False):
 
 logger = logging.getLogger(__name__)
 
-# Default configuration (fallback)
+# Default configuration (fallback when no response_config.json exists)
+# [20260220_FEATURE] v1.4.0 - Default to minimal for maximum token efficiency.
+# Users and AI can escalate to standard/verbose/debug in response_config.json.
 DEFAULT_CONFIG = {
     "global": {
         "profile": "minimal",
@@ -262,7 +264,12 @@ class ResponseConfig:
         [20260119_FEATURE] Added is_error parameter to support include_on_error config.
         When is_error=True, fields listed in tool_overrides[tool].include_on_error
         are preserved even if they would otherwise be excluded.
+        [20260220_BUGFIX] v1.4.0 - Added hot-reload check. Previously _check_reload()
+        was implemented but never called, so edits to response_config.json required
+        a full server restart to take effect.
         """
+        # Throttle-check for config file changes (max once per second)
+        self._check_reload()
         if not isinstance(data, dict):
             return data
 

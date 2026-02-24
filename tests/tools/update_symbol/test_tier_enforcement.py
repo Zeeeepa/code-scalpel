@@ -47,6 +47,12 @@ class TestCommunityTierRealEnforcement:
             raising=False,
         )
 
+        # [20260220_BUGFIX] Patch _PROJECT_ROOT_HOLDER so test_dir is within project root
+        # (contamination from earlier tests can set project root to a pytest tmp dir)
+        import code_scalpel.mcp.server as server_module
+
+        monkeypatch.setattr(server_module, "_PROJECT_ROOT_HOLDER", [test_dir.resolve()])
+
         # Create test file (use separate file to avoid session limit from previous test)
         test_file = test_dir / "test2.py"
         test_file.write_text("def add_numbers(a, b):\n    return a + b\n")
@@ -209,6 +215,11 @@ class TestTierFallbackBehavior:
                     setattr(server, attr, None)
                 except Exception:
                     pass
+
+        # [20260220_BUGFIX] Patch _PROJECT_ROOT_HOLDER so test_dir is within project root
+        import code_scalpel.mcp.server as server_module
+
+        monkeypatch.setattr(server_module, "_PROJECT_ROOT_HOLDER", [test_dir.resolve()])
 
         # Create test file
         test_file = test_dir / "test.py"

@@ -49,6 +49,15 @@ For UI changes, CLI output changes, or visualization updates.
 - [ ] All new and existing tests pass (`pytest`)
 - [ ] I have updated documentation if needed
 - [ ] I have added a changelog entry if this is user-facing
+- [ ] `pyright src/` reports no new type errors
+- [ ] Change tag `[YYYYMMDD_TYPE]` added to any modified code
+
+### If website/content files changed
+- [ ] `python scripts/check_release_content.py --strict` passes
+- [ ] No hardcoded pricing (`$29`, `$49`, etc.) introduced
+- [ ] No dead `/contact` links — use `mailto:sales@codescalpel.dev`
+- [ ] MCP code blocks include `"mcp"` as second argument
+- [ ] New version strings use `{{ SCALPEL_VERSION }}` placeholder (not hardcoded)
 
 ## [ATTACHMENT] Additional Notes
 

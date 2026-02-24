@@ -197,6 +197,7 @@ max_sinks = -1               # Unlimited (match Enterprise)
 
 [pro.validate_paths]
 enabled = true
+max_paths = -1               # [20260218_BUGFIX] Unlimited (match Enterprise); tests verify None
 
 [pro.verify_policy_integrity]
 max_policy_files = -1        # Unlimited (match Enterprise)
@@ -220,8 +221,8 @@ validation_level = "semantic"
 max_updates_per_call = -1
 
 [pro.rename_symbol]
-max_files_searched = -1      # Unlimited (match Enterprise)
-max_files_updated = -1       # Unlimited (match Enterprise)
+max_files_searched = -1      # Unlimited (same as Enterprise)
+max_files_updated = -1       # Unlimited (same as Enterprise)
 
 [pro.simulate_refactor]
 max_file_size_mb = 100       # Match Enterprise
@@ -302,6 +303,7 @@ enabled = true
 
 [enterprise.validate_paths]
 enabled = true
+max_paths = -1               # [20260218_BUGFIX] Unlimited; tests verify None
 
 [enterprise.code_policy_check]
 compliance_enabled = true
@@ -321,6 +323,8 @@ max_updates_per_call = -1
 
 [enterprise.rename_symbol]
 enabled = true
+max_files_searched = -1      # Unlimited
+max_files_updated = -1       # Unlimited
 
 [enterprise.simulate_refactor]
 max_file_size_mb = 100

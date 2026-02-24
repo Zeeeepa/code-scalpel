@@ -461,6 +461,7 @@ def start_mcp_server(
     ssl_certfile: str | None = None,
     ssl_keyfile: str | None = None,
     license_file: str | None = None,
+    mismatch_action: str | None = None,
 ) -> int:
     """Start the MCP-compliant server (for AI clients like Claude Desktop, Cursor).
 
@@ -506,6 +507,9 @@ def start_mcp_server(
             )
             return 1
         os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
+
+    if mismatch_action:
+        os.environ["CODE_SCALPEL_VERSION_MISMATCH_ACTION"] = mismatch_action
 
     # [20251215_FEATURE] Determine protocol based on SSL config
     use_https = ssl_certfile and ssl_keyfile
@@ -1941,6 +1945,13 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         default=None,
         help="Path to SSL private key file for HTTPS (required for Claude API)",
     )
+    # [20260220_FEATURE] Configurable version mismatch handling
+    mcp_parser.add_argument(
+        "--mismatch-action",
+        choices=["warn", "error", "ignore", "auto-upgrade"],
+        default=None,
+        help="Action to take if PyPI version is newer than current version (default: warn)",
+    )
 
     # License management commands
     license_parser = subparsers.add_parser(
@@ -2223,6 +2234,8 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
                     "ssl_keyfile": ssl_keyfile,
                 }
             )
+        if getattr(args, "mismatch_action", None):
+            start_kwargs["mismatch_action"] = args.mismatch_action
 
         # Keep main() compatible with older stubs/tests by filtering unknown kwargs.
         import inspect

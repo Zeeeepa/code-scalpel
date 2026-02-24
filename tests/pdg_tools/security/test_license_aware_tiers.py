@@ -142,21 +142,21 @@ def calculate_tax(amount, rate=0.1):
             # Without explicit license path and discovery disabled, should be community
             assert tier == "community"
 
-    def test_license_tier_override_via_env(self):
-        """CODE_SCALPEL_TIER can override/force a tier for testing."""
+    def test_license_tier_downgrade_via_env(self):
+        """CODE_SCALPEL_TIER can downgrade a tier for testing."""
         from code_scalpel.mcp.server import _get_current_tier
+        from tests.utils.tier_setup import tier_context
 
-        with patch.dict(
-            os.environ,
-            {
-                "CODE_SCALPEL_TIER": "pro",
-                "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY": "1",
-                "CODE_SCALPEL_TEST_FORCE_TIER": "1",
-            },
-        ):
-            tier = _get_current_tier()
-            # When license discovery is disabled but test override is enabled, honor tier
-            assert tier == "pro"
+        with tier_context("enterprise", skip_if_missing=True):
+            with patch.dict(
+                os.environ,
+                {
+                    "CODE_SCALPEL_TIER": "community",
+                },
+            ):
+                tier = _get_current_tier()
+                # When licensed as enterprise but requested community, honor downgrade
+                assert tier == "community"
 
     def test_license_tier_cannot_exceed_actual_licensed(self):
         """CODE_SCALPEL_TIER cannot elevate tier beyond what's licensed."""

@@ -26,19 +26,16 @@ def temp_project_with_symbol():
         root = Path(tmpdir)
 
         # Create main.py with definition
-        (root / "main.py").write_text(
-            """
+        (root / "main.py").write_text("""
 def process_data(x):
     '''Process the data.'''
     return x * 2
 
 result = process_data(5)
-"""
-        )
+""")
 
         # Create handler.py with multiple calls
-        (root / "handler.py").write_text(
-            """
+        (root / "handler.py").write_text("""
 from main import process_data
 
 def handle_request(data):
@@ -49,12 +46,10 @@ def handle_request(data):
 def handle_batch(items):
     '''Handle batch.'''
     return [process_data(item) for item in items]
-"""
-        )
+""")
 
         # Create test file with references
-        (root / "test_main.py").write_text(
-            """
+        (root / "test_main.py").write_text("""
 import unittest
 from main import process_data
 
@@ -65,19 +60,16 @@ class TestProcessData(unittest.TestCase):
 
     def test_with_negative(self):
         assert process_data(-5) == -10
-"""
-        )
+""")
 
         # Create utils.py with additional call
-        (root / "utils.py").write_text(
-            """
+        (root / "utils.py").write_text("""
 from main import process_data
 
 def transform(value):
     '''Transform value using process_data.'''
     return process_data(value) + 1
-"""
-        )
+""")
 
         yield root
 
@@ -326,13 +318,11 @@ class TestGetSymbolReferencesEnterpriseTier:
         # Create CODEOWNERS file
         codeowners_path = temp_project_with_symbol / ".github"
         codeowners_path.mkdir(exist_ok=True)
-        (codeowners_path / "CODEOWNERS").write_text(
-            """# Code ownership
+        (codeowners_path / "CODEOWNERS").write_text("""# Code ownership
 * @default-owner
 main.py @main-owner
 handler.py @handler-owner
-"""
-        )
+""")
 
         result = _get_symbol_references_sync(
             "process_data",
@@ -356,12 +346,10 @@ handler.py @handler-owner
         # Create CODEOWNERS file
         codeowners_path = temp_project_with_symbol / ".github"
         codeowners_path.mkdir(exist_ok=True)
-        (codeowners_path / "CODEOWNERS").write_text(
-            """# Code ownership
+        (codeowners_path / "CODEOWNERS").write_text("""# Code ownership
 * @default-owner
 main.py @main-owner
-"""
-        )
+""")
 
         result = _get_symbol_references_sync(
             "process_data",

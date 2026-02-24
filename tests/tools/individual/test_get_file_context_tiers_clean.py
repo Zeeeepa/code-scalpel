@@ -4,6 +4,7 @@ import textwrap
 
 import pytest
 
+from code_scalpel.mcp.contract import ToolResponseEnvelope
 from code_scalpel.mcp.models.core import FileContextResult
 from code_scalpel.mcp.tools.context import get_file_context
 
@@ -20,37 +21,24 @@ async def test_async_get_file_context_pro(monkeypatch, tmp_path):
     helper.write_text("CONST = 1\n")
 
     target = tmp_path / "target.py"
-    target.write_text(
-        textwrap.dedent(
-            """
+    target.write_text(textwrap.dedent("""
             import helper
 
             def calc(x):
                 return helper.CONST + x
-            """
-        )
-    )
+            """))
 
-    pro_caps = _caps(
-        2000,
-        {
-            "raw_source_retrieval",
-            "ast_based_outlining",
-            "semantic_summarization",
-            "intent_extraction",
-            "related_imports_inclusion",
-            "smart_context_expansion",
-        },
-    )
+    # [20260220_BUGFIX] Patch module-level tier functions directly (both context tool and helpers)
+    from code_scalpel.mcp.tools import context as context_module
+    from code_scalpel.mcp.helpers import context_helpers
 
-    import code_scalpel.mcp.server as server
-
-    monkeypatch.setattr(server, "get_current_tier_from_license", lambda: "pro")
-    monkeypatch.setattr(server, "get_tool_capabilities", lambda tool, tier: pro_caps)
+    monkeypatch.setattr(context_module, "_get_current_tier", lambda: "pro")
+    monkeypatch.setattr(context_helpers, "get_current_tier", lambda: "pro")
 
     result = await get_file_context(str(target))
 
-    assert isinstance(result, FileContextResult)
+    # [20260218_BUGFIX] get_file_context now returns ToolResponseEnvelope; accept both
+    assert isinstance(result, (FileContextResult, ToolResponseEnvelope))
     assert result.semantic_summary
     assert result.related_imports
     assert result.expanded_context
@@ -61,33 +49,17 @@ async def test_async_get_file_context_enterprise_redaction(monkeypatch, tmp_path
     secret = tmp_path / "secret.py"
     secret.write_text("token='AKIA1234567890123456'\nemail='x@y.com'\n")
 
-    enterprise_caps = _caps(
-        None,
-        {
-            "raw_source_retrieval",
-            "ast_based_outlining",
-            "semantic_summarization",
-            "intent_extraction",
-            "related_imports_inclusion",
-            "smart_context_expansion",
-            "pii_redaction",
-            "secret_masking",
-            "api_key_detection",
-            "rbac_aware_retrieval",
-            "file_access_control",
-        },
-    )
+    # [20260220_BUGFIX] Patch module-level tier functions directly (both context tool and helpers)
+    from code_scalpel.mcp.tools import context as context_module
+    from code_scalpel.mcp.helpers import context_helpers
 
-    import code_scalpel.mcp.server as server
-
-    monkeypatch.setattr(server, "get_current_tier_from_license", lambda: "enterprise")
-    monkeypatch.setattr(
-        server, "get_tool_capabilities", lambda tool, tier: enterprise_caps
-    )
+    monkeypatch.setattr(context_module, "_get_current_tier", lambda: "enterprise")
+    monkeypatch.setattr(context_helpers, "get_current_tier", lambda: "enterprise")
 
     result = await get_file_context(str(secret))
 
-    assert isinstance(result, FileContextResult)
+    # [20260218_BUGFIX] get_file_context now returns ToolResponseEnvelope; accept both
+    assert isinstance(result, (FileContextResult, ToolResponseEnvelope))
     assert result.pii_redacted is True
     assert result.secrets_masked is True
     assert result.access_controlled is True

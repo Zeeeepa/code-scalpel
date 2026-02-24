@@ -122,7 +122,9 @@ def _write_perfect_code_sync(
         raise
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Generate code satisfying formal constraints with AI-assisted symbolic verification."
+)
 async def write_perfect_code(
     file_path: str,
     instruction: str,

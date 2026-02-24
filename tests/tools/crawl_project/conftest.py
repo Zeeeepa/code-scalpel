@@ -12,27 +12,40 @@ def _write(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+# [20260219_BUGFIX] Replace dead env-var fixtures with license-backed activate_tier() calls.
+# CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY and CODE_SCALPEL_TEST_FORCE_TIER are dead env vars.
+# Tier requires a valid license JWT from tests/licenses/ to resolve correctly.
+
+
 @pytest.fixture(autouse=True)
-def disable_license_discovery(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+def clear_tier_cache_crawl(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Clear all tier caches before/after each test to prevent cross-test leakage."""
+    from tests.utils.tier_setup import clear_tier_caches
+
+    clear_tier_caches()
+    yield
+    clear_tier_caches()
 
 
 @pytest.fixture
 def community_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
-    monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
+    from tests.utils.tier_setup import activate_tier
+
+    activate_tier("community", monkeypatch=monkeypatch)
 
 
 @pytest.fixture
 def pro_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
-    monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
+    from tests.utils.tier_setup import activate_tier
+
+    activate_tier("pro", monkeypatch=monkeypatch)
 
 
 @pytest.fixture
 def enterprise_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
-    monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
+    from tests.utils.tier_setup import activate_tier
+
+    activate_tier("enterprise", monkeypatch=monkeypatch)
 
 
 @pytest.fixture

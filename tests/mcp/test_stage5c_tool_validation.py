@@ -26,6 +26,8 @@ class TestStage5CToolValidation:
         """Ensure deterministic Community tier for test isolation."""
         # [20260111_FIX] Use monkeypatch for proper test isolation instead of
         # module-level os.environ.setdefault which polluted subsequent test sessions.
+        monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
+        monkeypatch.delenv("CODE_SCALPEL_LICENSE_VERIFIER_URL", raising=False)
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
         monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
         monkeypatch.setenv("CODE_SCALPEL_TIER", "community")

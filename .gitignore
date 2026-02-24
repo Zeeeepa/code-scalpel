@@ -352,3 +352,15 @@ tests/**/temp/
 tests/**/tmp/
 test_credentials.json
 test_tokens.json
+<<<<<<< Updated upstream
+vscode-extension/node_modules/
+=======
+
+# ===== 7. NODE / JS / VS CODE EXTENSION =====
+*.vsix
+node_modules/
+vscode-extension/.vscode-test/
+vscode-extension/dist/
+vscode-extension/node_modules/
+vscode-extension/out/
+>>>>>>> Stashed changes

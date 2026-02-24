@@ -281,6 +281,14 @@ class PathResolver:
         """
         attempted_paths = []
 
+        # [20260219_BUGFIX] Normalize backslashes to forward slashes on non-Windows
+        # platforms for paths that don't have a Windows drive letter (C:\...).
+        # Without this, a path like '\tmp\foo.txt' is treated as a relative path
+        # with literal backslash characters, causing rglob to scan the entire
+        # filesystem looking for a file named '\tmp\foo.txt'.
+        if "\\" in path and not re.match(r"^[A-Za-z]:[/\\]", path):
+            path = path.replace("\\", "/")
+
         # [20251215_FEATURE] Strategy 0: Windows path handling
         # Detect Windows-style paths (C:\... or C:/...) and handle them appropriately
         if self._parse_windows_path(path):

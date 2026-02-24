@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.4.0] - 2026-02-20
+
+### Added
+- `response_config.json` and `response_config.schema.json` are now created automatically on first MCP server boot / `codescalpel init`, so users and AI agents can immediately control output verbosity without manual setup.
+- `exclude_when_tier` support documented in generated schema and template — allows per-tool, per-tier field suppression.
 
 ### Changed
 - **Tier limit rebalancing:** Data-driven recalibration of all tier limits
@@ -14,22 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enterprise: Fixed unified_sink_detect.max_sinks bug (was 50, same as Community → now unlimited)
 - Updated 25+ tier test files across 8 test directories to reflect new limit values
 - Updated capabilities/README.md tier comparison table with accurate limit values
-
-### Added
-- `tests/tier_validation/` — Scientific tier validation test suite (71 tests)
-  - Monotonicity: Community ≤ Pro ≤ Enterprise for all numeric limits
-  - Parity: Pro numeric limits = Enterprise numeric limits
-  - Superset: Enterprise capabilities ⊃ Pro capabilities (139 unique)
-  - Persona coverage: Community limits accommodate all solo dev project types
-  - Regression: Specific limit values match documented strategy
-- `docs/guides/tier_philosophy.md` — Tier design principles and philosophy
-- `docs/architecture/tier_limit_justification.md` — Scientific methodology for limit derivation
-- `TIER_STRATEGY_OPTIONS.md` — Comprehensive tier strategy with proposed limits and benchmarks
+- `response_config.json` template version updated to `1.4.0`.
+- Profile default alignment: `DEFAULT_CONFIG` now defaults to `"standard"` instead of `"minimal"`, matching the generated template.
+- Non-functional `parsing` section removed from `response_config.json` template and schema.
 
 ### Fixed
+- Graph tools (`get_call_graph`, `get_graph_neighborhood`, `get_project_map`, `get_cross_file_dependencies`, `cross_file_security_scan`) now respect `response_config.json` filtering.
+- Hot reload now works: edits to `response_config.json` take effect without a server restart.
 - `features.toml`: Added 3 missing Pro capabilities to Enterprise (closure_detection, dependency_injection_suggestions, variable_promotion in extract_code; code_ownership_mapping in get_project_map)
 - `limits.toml`: Enterprise unified_sink_detect.max_sinks was incorrectly 50 (same as Community), now unlimited
 - Pre-existing `max_updates_per_session` → `max_updates_per_call` key mismatch in integration tests
+
+### Deprecated
+- `ResponseFormatter` class in `response_formatter.py` is now marked as deprecated. It will be removed in v1.5.0.
 
 ### Planned
 - Custom language profile support (unified LanguageProfile abstraction; Phase 2 parser registries for Go, C#, C++, Ruby, Swift)

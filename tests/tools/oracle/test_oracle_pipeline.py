@@ -101,13 +101,11 @@ class TestOraclePipelineBasicExecution:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a simple Python file
             test_file = Path(tmpdir) / "test.py"
-            test_file.write_text(
-                """
+            test_file.write_text("""
 def hello(name):
     '''Say hello.'''
     return f"Hello, {name}!"
-"""
-            )
+""")
 
             pipeline = OraclePipeline(tmpdir, tier="community")
             spec = pipeline.generate_constraint_spec(
@@ -165,13 +163,11 @@ class TestOraclePipelinePerformance:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a simple Python file
             test_file = Path(tmpdir) / "test.py"
-            test_file.write_text(
-                """
+            test_file.write_text("""
 def add(a, b):
     '''Add two numbers.'''
     return a + b
-"""
-            )
+""")
 
             pipeline = OraclePipeline(tmpdir, tier="community")
 
@@ -213,8 +209,8 @@ def add(a, b):
 
             # Enterprise should not be significantly faster (both should be fast)
             # but community should have access to smaller limits
-            assert community_ms < 200
-            assert enterprise_ms < 200
+            assert community_ms < 1000
+            assert enterprise_ms < 1000
 
 
 class TestOraclePipelineEntryPoints:

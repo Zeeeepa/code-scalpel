@@ -10,8 +10,7 @@ from code_scalpel.mcp.helpers.analyze_helpers import _analyze_code_sync
 
 
 def _python_sample():
-    return textwrap.dedent(
-        """
+    return textwrap.dedent("""
         import math
 
         def foo(x):
@@ -20,39 +19,32 @@ def _python_sample():
         class Bar:
             def method(self, y):
                 return y * 2
-        """
-    )
+        """)
 
 
 def _javascript_sample():
-    return textwrap.dedent(
-        """
+    return textwrap.dedent("""
         import util from "./util.js";
         function foo(x) { return x + 1; }
         class Bar { method(y) { return y * 2; } }
-        """
-    )
+        """)
 
 
 def _typescript_sample():
-    return textwrap.dedent(
-        """
+    return textwrap.dedent("""
         import { Util } from "./util";
         export function foo(x: number): number { return x + 1; }
         export class Bar { method(y: number): number { return y * 2; } }
-        """
-    )
+        """)
 
 
 def _java_sample():
-    return textwrap.dedent(
-        """
+    return textwrap.dedent("""
         import java.util.*;
         public class Foo {
             public int add(int x) { return x + 1; }
         }
-        """
-    )
+        """)
 
 
 class TestAnalyzeCodeCommunityTier:

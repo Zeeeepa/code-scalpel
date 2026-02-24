@@ -21,7 +21,9 @@ from code_scalpel.mcp.oracle_middleware import (
 from code_scalpel import __version__ as _pkg_version
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Crawl a directory and return a file inventory with complexity metrics and security warnings."
+)
 @with_oracle_resilience(tool_id="crawl_project", strategy=PathStrategy)
 async def crawl_project(
     root_path: str | None = None,
@@ -113,7 +115,9 @@ async def crawl_project(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Get a file overview (functions, classes, imports, summary) without reading the full content."
+)
 @with_oracle_resilience(tool_id="get_file_context", strategy=PathStrategy)
 async def get_file_context(file_path: str) -> ToolResponseEnvelope:
     """Get a file overview without reading full content.
@@ -199,7 +203,9 @@ async def get_file_context(file_path: str) -> ToolResponseEnvelope:
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Find all references, definitions, and call sites for a named symbol across the project."
+)
 @with_oracle_resilience(tool_id="get_symbol_references", strategy=SymbolStrategy)
 async def get_symbol_references(
     symbol_name: str,

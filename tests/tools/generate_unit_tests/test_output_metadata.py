@@ -37,8 +37,12 @@ def calculate_total(items):
         assert result.bug_reproduction_enabled is False
 
     @pytest.mark.asyncio
-    async def test_unittest_framework_metadata(self):
+    async def test_unittest_framework_metadata(self, monkeypatch):
         """Unittest framework should be reflected in metadata."""
+        # [20260220_BUGFIX] Unittest framework requires pro tier - patch directly
+        from code_scalpel.mcp.tools import symbolic
+
+        monkeypatch.setattr(symbolic, "_get_current_tier", lambda: "pro")
         code = """
 def add(a, b):
     return a + b

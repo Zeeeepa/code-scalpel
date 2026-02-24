@@ -2558,6 +2558,8 @@ def _generate_tests_sync(
             test_cases=test_cases,
             pytest_code=result.pytest_code,
             unittest_code=result.unittest_code,
+            # [20260218_BUGFIX] Populate metadata fields from the request
+            framework_used=framework,
         )
 
     except Exception as e:
@@ -2565,6 +2567,8 @@ def _generate_tests_sync(
             success=False,
             function_name=function_name or "unknown",
             test_count=0,
+            # [20260218_BUGFIX] Preserve framework in error responses for metadata contract
+            framework_used=framework,
             error=f"Test generation failed: {str(e)}",
         )
 
@@ -5101,6 +5105,10 @@ def run_server(
     # [20251215_BUGFIX] Configure logging to stderr before anything else
     _configure_logging(transport)
 
+    # [20260220_FEATURE] Check for version mismatch in background
+    from code_scalpel.mcp.version_check import start_version_check_thread
+    start_version_check_thread()
+
     # Debug: emit startup parameters to stderr so test harness can capture flow
     _debug_print(
         f"DEBUG: run_server called transport={transport!r} host={host!r} port={port!r} allow_lan={allow_lan!r} root_path={root_path!r} tier={tier!r}"
@@ -5597,7 +5605,7 @@ def _get_audit_trail() -> list:
     return _SESSION_AUDIT_TRAIL.copy()
 
 
-# Tool re-exports from tools/*.py - all 22 tools
+# Tool re-exports from tools/*.py - all 23 tools
 from code_scalpel.mcp.tools.analyze import analyze_code  # noqa: E402, F401
 from code_scalpel.mcp.tools.security import (  # noqa: E402, F401
     scan_dependencies,
@@ -5632,6 +5640,9 @@ from code_scalpel.mcp.tools.policy import (  # noqa: E402, F401
     validate_paths,
     verify_policy_integrity,
 )
+
+# [20260218_FEATURE] Register get_capabilities as the 23rd tool
+from code_scalpel.mcp.tools.system import get_capabilities  # noqa: E402, F401
 
 # Resource re-exports from resources.py
 from code_scalpel.mcp.resources import (  # noqa: E402, F401

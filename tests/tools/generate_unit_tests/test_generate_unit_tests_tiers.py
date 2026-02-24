@@ -106,8 +106,10 @@ async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(monkeypat
         )
 
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
-    # [20250108_BUGFIX] Mock _get_current_tier directly since env var only allows downgrade
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
+    # [20260220_BUGFIX] Patch symbolic module's _get_current_tier directly (direct import from protocol)
+    from code_scalpel.mcp.tools import symbolic
+
+    monkeypatch.setattr(symbolic, "_get_current_tier", lambda: "pro")
 
     ok = await server.generate_unit_tests(
         code="def f(x):\n    return x\n",
@@ -149,8 +151,10 @@ async def test_generate_unit_tests_enterprise_allows_bug_repro(monkeypatch):
         )
 
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
-    # [20250108_BUGFIX] Mock _get_current_tier directly since env var only allows downgrade
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "enterprise")
+    # [20260220_BUGFIX] Patch symbolic module's _get_current_tier directly (direct import from protocol)
+    from code_scalpel.mcp.tools import symbolic
+
+    monkeypatch.setattr(symbolic, "_get_current_tier", lambda: "enterprise")
 
     ok = await server.generate_unit_tests(
         code="def divide(a, b):\n    return a / b\n",
@@ -169,6 +173,9 @@ async def test_generate_unit_tests_limits_toml_override(monkeypatch, tmp_path):
     """limits.toml should be the source of truth for numeric limits."""
     from code_scalpel.licensing import clear_cache
     from code_scalpel.mcp import server
+
+    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
+    monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
     calls: list[dict[str, Any]] = []
 

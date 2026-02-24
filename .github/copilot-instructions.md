@@ -792,7 +792,7 @@ Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operati
 **Coverage Gate:** ≥90% combined (statement + branch)
 **Current Coverage:** 94.86% combined (96.28% stmt, 90.95% branch)
 
-**MCP Tools (Current - v1.3.0 - 22 tools):**
+**MCP Tools (Current - v1.4.0 - 23 tools):**
 - `analyze_code` - Parse and extract code structure (Python, JS, TS, Java)
 - `extract_code` - Surgical extraction by symbol name with cross-file deps
 - `update_symbol` - Safely replace functions/classes/methods in files
@@ -816,16 +816,14 @@ Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operati
 - `code_policy_check` - Check code against style guides and compliance standards
 - `type_evaporation_scan` - Detect TypeScript type evaporation vulnerabilities
 
-**Latest Release:** v1.3.0
-- Release Date: February 1, 2026
-- Release Notes: `docs/release_notes/RELEASE_NOTES_v1.3.0.md`
-- Evidence Files: `release_artifacts/v1.3.0/`
+**Latest Release:** v1.4.0
+- Release Date: February 20, 2026
+- Release Notes: `docs/release_notes/RELEASE_NOTES_v1.4.0.md`
+- Evidence Files: `release_artifacts/v1.4.0/`
 - **Key Changes:**
-  - Oracle Resilience Middleware for automatic AI agent error recovery
-  - Symbol fuzzy matching (typo correction) via Levenshtein distance
-  - Path resolution with workspace-aware suggestions
-  - Stage 2 error enhancement for both `envelope.error` and `data.error`
-  - 61 Oracle middleware tests (100% pass rate)
+  - Tier limit rebalancing (Community limits raised, Pro limits made unlimited)
+  - New `get_capabilities` tool
+  - Response filtering for graph tools to improve token efficiency
 
 ## Communication
 

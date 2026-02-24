@@ -33,7 +33,9 @@ _symbolic_execute_sync = sym_helpers._symbolic_execute_sync
 mcp = import_module("code_scalpel.mcp.protocol").mcp
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Explore execution paths symbolically to find edge cases, dead code, and unreachable branches."
+)
 async def symbolic_execute(
     code: str,
     max_paths: int | None = None,
@@ -145,7 +147,9 @@ async def symbolic_execute(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Generate unit test cases derived from symbolic execution paths for a function or class."
+)
 @with_oracle_resilience(tool_id="generate_unit_tests", strategy=GenerateTestsStrategy)
 async def generate_unit_tests(
     code: str | None = None,
@@ -329,7 +333,9 @@ async def generate_unit_tests(
         )
 
 
-@mcp.tool()
+@mcp.tool(
+    description="Simulate a code change and verify it is safe — detects behavior changes and security issues."
+)
 async def simulate_refactor(
     original_code: str,
     new_code: str | None = None,

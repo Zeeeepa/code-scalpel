@@ -23,16 +23,14 @@ class TestProjectScanner:
 
             # Create a simple Python file
             py_file = tmpdir_path / "test_module.py"
-            py_file.write_text(
-                """
+            py_file.write_text("""
 def hello():
     pass
 
 class MyClass:
     def method(self):
         pass
-"""
-            )
+""")
 
             # Scan with low limits
             scanner = ProjectScanner(
@@ -179,13 +177,11 @@ class MyClass:
 
             # Create a file with a class
             test_file = tmpdir_path / "test.py"
-            test_file.write_text(
-                """
+            test_file.write_text("""
 class MyClass:
     def method(self):
         pass
-"""
-            )
+""")
 
             # Scan
             scanner = ProjectScanner(
@@ -207,13 +203,11 @@ class MyClass:
 
             # Create a file with a class
             test_file = tmpdir_path / "test.py"
-            test_file.write_text(
-                """
+            test_file.write_text("""
 class MyClass:
     def method(self):
         pass
-"""
-            )
+""")
 
             # Scan
             scanner = ProjectScanner(

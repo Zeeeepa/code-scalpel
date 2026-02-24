@@ -83,17 +83,18 @@ def check_rename_compliance(
 
         if UnifiedGovernance is None:
             return ComplianceCheckResult(
-                allowed=False,
-                reason="UnifiedGovernance is not available",
+                allowed=True,
+                reason="Governance not available - allowing by default",
                 violations=[],
             )
         gov = UnifiedGovernance(governance_dir or ".code-scalpel")
 
         # Create operation for governance evaluation
         if Operation is None:
+            # [20260218_BUGFIX] Graceful degradation: allow when Operation class unavailable
             return ComplianceCheckResult(
-                allowed=False,
-                reason="Governance operation not available",
+                allowed=True,
+                reason="Governance operation not available - allowing by default",
                 violations=[],
             )
 
