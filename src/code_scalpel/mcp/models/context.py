@@ -29,6 +29,9 @@ class Language(str, Enum):
     GO = "go"
     RUST = "rust"
     JAVA = "java"
+    C = "c"  # [20260225_FEATURE] C language support
+    CPP = "cpp"  # [20260225_FEATURE] C++ language support
+    CSHARP = "csharp"  # [20260225_FEATURE] C# language support
     TERRAFORM = "terraform"
     YAML = "yaml"
     JSON = "json"

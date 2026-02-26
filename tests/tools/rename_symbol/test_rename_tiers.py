@@ -19,12 +19,12 @@ class TestRenameSymbolTierEnforcement:
     """Test that tier limits are enforced correctly."""
 
     def test_community_tier_limits_defined(self):
-        """Community tier has restrictive limits (single-file only)."""
+        """Community tier has restrictive limits (single-file only, max=1)."""
         caps = get_tool_capabilities("rename_symbol", "community")
 
         assert caps["enabled"] is True
-        assert caps["limits"]["max_files_searched"] == 0
-        assert caps["limits"]["max_files_updated"] == 0
+        assert caps["limits"]["max_files_searched"] == 1  # single-file (updated v2.0.1)
+        assert caps["limits"]["max_files_updated"] == 1  # single-file (updated v2.0.1)
         assert "definition_rename" in caps["capabilities"]
         assert "cross_file_reference_rename" not in caps["capabilities"]
 

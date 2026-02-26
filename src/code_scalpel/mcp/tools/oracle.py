@@ -122,46 +122,22 @@ def _write_perfect_code_sync(
         raise
 
 
-@mcp.tool(
-    description="Generate code satisfying formal constraints with AI-assisted symbolic verification."
-)
 async def write_perfect_code(
     file_path: str,
     instruction: str,
 ) -> ToolResponseEnvelope:
-    """Generate constraint specification for AI-assisted code generation.
+    """Internal Oracle pipeline function — NOT a public MCP tool.
 
-    **IMPORTANT: This is documented as a pipeline trigger, not a standard MCP tool.**
-    It should be reclassified as part of the Oracle pipeline that kicks off when
-    a tool fails, rather than being called directly by users.
+    Called automatically by the Oracle middleware when a tool invocation fails,
+    to generate a codebase-grounded constraint specification that guides
+    corrective code generation. Do not expose via @mcp.tool().
 
-    Provides a Markdown specification containing strict symbol table (function/class
-    signatures), graph constraints (dependencies, callers), architectural rules, code
-    context, and implementation notes. The LLM uses this spec to generate code that
-    compiles and integrates.
+    Args:
+        file_path: Path to the target file (e.g., "src/auth.py").
+        instruction: What needs to be implemented (e.g., "Add JWT validation").
 
-    **Tier Behavior:**
-    - Community: Basic symbol table and context (max 50 files, depth 2)
-    - Pro: All Community + graph constraints and dependencies (max 2000 files, depth 10)
-    - Enterprise: All Pro + architectural rules and deep analysis (unlimited files, depth 50)
-
-    **Tier Capabilities:**
-    - Community: Basic context only (max_files=50, max_depth=2)
-    - Pro: All Community + graph constraints (max_files=2000, max_depth=10)
-    - Enterprise: All Pro + architectural rules (max_files=unlimited, max_depth=50)
-
-    **Args:**
-        file_path (str): Path to target file (e.g., "src/auth.py").
-        instruction (str): What needs to be implemented (e.g., "Add JWT validation").
-
-    **Returns:**
-        ToolResponseEnvelope containing Markdown constraint specification with:
-        - data (str): Markdown specification containing symbols, graph, rules, context
-        - success (bool): True if specification generated
-        - error (str, optional): Error message if generation failed (file not found, invalid instruction, etc.)
-        - error (str): Error message if operation failed
-        - tier_applied (str): Tier used for analysis
-        - duration_ms (int): Analysis duration in milliseconds
+    Returns:
+        ToolResponseEnvelope containing a Markdown constraint specification.
     """
     started = time.perf_counter()
     try:

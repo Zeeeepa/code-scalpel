@@ -39,15 +39,20 @@ The Oracle module generates "Constraint Specifications" that bind Large Language
 
 ## Usage
 
-### MCP Tool: `write_perfect_code`
+### Internal Pipeline: `write_perfect_code`
+
+> **Note:** `write_perfect_code` is an internal Oracle pipeline function — it is **not** a public MCP tool.
+> It is invoked automatically by the Oracle middleware when a tool invocation fails. To trigger the
+> Oracle pipeline from your own code, use `OraclePipeline` or `generate_constraint_spec` directly.
 
 ```python
-result = await client.call_tool(
-    "write_perfect_code",
-    arguments={
-        "file_path": "src/auth.py",
-        "instruction": "Add JWT validation using the 'jose' library"
-    }
+from code_scalpel.oracle import generate_constraint_spec
+
+spec = generate_constraint_spec(
+    repo_root=".",
+    file_path="src/auth.py",
+    instruction="Add JWT validation using the 'jose' library",
+    tier="pro",
 )
 # Returns Markdown constraint specification
 ```
@@ -150,7 +155,7 @@ pytest tests/tools/oracle/ --cov=src/code_scalpel/oracle --cov-report=html
 
 ## Best Practices
 
-### When to Use write_perfect_code
+### When the Oracle Pipeline Activates
 
 ✅ **Good use cases:**
 - Implementing new features with complex dependencies
@@ -179,7 +184,7 @@ pytest tests/tools/oracle/ --cov=src/code_scalpel/oracle --cov-report=html
 
 ## Roadmap
 
-- **Phase 1 (Current):** `write_perfect_code` tool
+- **Phase 1 (Current):** Oracle constraint spec pipeline (internal; triggered on tool failure)
 - **Phase 2:** `enforce_topology` for architectural linting
 - **Phase 3:** `predict_regression_risk` for git-based risk analysis
 - **Phase 4:** `semantic_resolve_conflict` and `generate_live_docs`

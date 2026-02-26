@@ -80,8 +80,10 @@ enabled = true
 capabilities = [
     "basic_compliance",
     "basic_patterns",
+    "clang_tidy_rules",
     "eslint_rules",
     "pep8_validation",
+    "roslyn_analyzer_rules",
     "style_guide_checking",
 ]
 description = "Basic style guide and pattern checking"
@@ -93,10 +95,12 @@ capabilities = [
     "basic_compliance",
     "basic_patterns",
     "best_practice_analysis",
+    "clang_tidy_rules",
     "custom_rules",
     "eslint_rules",
     "extended_compliance",
     "pep8_validation",
+    "roslyn_analyzer_rules",
     "security_patterns",
     "style_guide_checking",
 ]
@@ -110,15 +114,18 @@ capabilities = [
     "basic_compliance",
     "basic_patterns",
     "best_practice_analysis",
+    "clang_tidy_rules",
     "compliance_auditing",
     "custom_rules",
     "eslint_rules",
     "extended_compliance",
     "gdpr_compliance",
     "hipaa_compliance",
+    "misra_c_compliance",
     "pci_dss_compliance",
     "pdf_certification",
     "pep8_validation",
+    "roslyn_analyzer_rules",
     "security_patterns",
     "soc2_compliance",
     "style_guide_checking",
@@ -290,6 +297,8 @@ description = "Unlimited depth with Dockerfile generation and org-wide resolutio
 enabled = true
 capabilities = [
     "basic_test_generation",
+    "catch2_support",
+    "nunit_support",
     "pytest_support",
 ]
 description = "Basic test generation (5 tests max)"
@@ -299,11 +308,15 @@ enabled = true
 capabilities = [
     "advanced_test_generation",
     "basic_test_generation",
+    "catch2_support",
     "data_driven_tests",
     "edge_case_detection",
+    "googletest_support",
     "jest_support",
+    "nunit_support",
     "pytest_support",
     "unittest_support",
+    "xunit_support",
 ]
 description = "Advanced test generation with edge cases"
 
@@ -313,15 +326,19 @@ capabilities = [
     "advanced_test_generation",
     "basic_test_generation",
     "bug_reproduction",
+    "catch2_support",
     "coverage_analysis",
     "coverage_optimization",
     "custom_test_templates",
     "data_driven_tests",
     "edge_case_detection",
+    "googletest_support",
     "jest_support",
     "mocha_support",
+    "nunit_support",
     "pytest_support",
     "unittest_support",
+    "xunit_support",
 ]
 description = "Unlimited tests with custom templates"
 
@@ -629,8 +646,15 @@ description = "Ownership attribution and impact analysis"
 enabled = true
 capabilities = [
     "backup",
+    "c_support",
+    "cpp_support",
+    "csharp_support",
     "definition_rename",
+    "java_support",
+    "javascript_support",
     "path_security_validation",
+    "python_support",
+    "typescript_support",
 ]
 description = "Rename symbol definition in a single file"
 
@@ -638,10 +662,17 @@ description = "Rename symbol definition in a single file"
 enabled = true
 capabilities = [
     "backup",
+    "c_support",
+    "cpp_support",
+    "csharp_support",
     "cross_file_reference_rename",
     "definition_rename",
     "import_rename",
+    "java_support",
+    "javascript_support",
     "path_security_validation",
+    "python_support",
+    "typescript_support",
 ]
 description = "Rename definition + conservative cross-file references/imports"
 
@@ -649,11 +680,18 @@ description = "Rename definition + conservative cross-file references/imports"
 enabled = true
 capabilities = [
     "backup",
+    "c_support",
+    "cpp_support",
+    "csharp_support",
     "cross_file_reference_rename",
     "definition_rename",
     "import_rename",
+    "java_support",
+    "javascript_support",
     "organization_wide_rename",
     "path_security_validation",
+    "python_support",
+    "typescript_support",
 ]
 description = "Enterprise-scale rename with org-wide scope"
 
@@ -666,8 +704,11 @@ enabled = true
 capabilities = [
     "basic_dependency_scan",
     "basic_remediation_suggestions",
+    "conan_scanning",
+    "nuget_scanning",
     "osv_vulnerability_detection",
     "severity_scoring",
+    "vcpkg_scanning",
 ]
 description = "Basic dependency vulnerability scan with CVE detection"
 
@@ -676,14 +717,17 @@ enabled = true
 capabilities = [
     "basic_dependency_scan",
     "basic_remediation_suggestions",
+    "conan_scanning",
     "false_positive_reduction",
     "license_compliance",
+    "nuget_scanning",
     "osv_vulnerability_detection",
     "reachability_analysis",
     "severity_scoring",
     "supply_chain_risk_scoring",
     "typosquatting_detection",
     "update_recommendations",
+    "vcpkg_scanning",
 ]
 description = "Full scan with reachability analysis and license compliance"
 
@@ -693,10 +737,12 @@ capabilities = [
     "automated_remediation",
     "basic_dependency_scan",
     "basic_remediation_suggestions",
+    "conan_scanning",
     "compliance_reporting",
     "custom_vulnerability_database",
     "false_positive_reduction",
     "license_compliance",
+    "nuget_scanning",
     "osv_vulnerability_detection",
     "policy_based_blocking",
     "private_dependency_scanning",
@@ -705,6 +751,7 @@ capabilities = [
     "supply_chain_risk_scoring",
     "typosquatting_detection",
     "update_recommendations",
+    "vcpkg_scanning",
 ]
 description = "Enterprise scan with compliance reporting and custom policies"
 
@@ -945,6 +992,8 @@ description = "Full type evaporation with schema generation and remediation"
 enabled = true
 capabilities = [
     "basic_confidence_scoring",
+    "c_sink_detection",
+    "cpp_sink_detection",
     "cwe_mapping",
     "file_operation_sinks",
     "java_sink_detection",
@@ -962,7 +1011,9 @@ enabled = true
 capabilities = [
     "advanced_confidence_scoring",
     "basic_confidence_scoring",
+    "c_sink_detection",
     "context_aware_detection",
+    "cpp_sink_detection",
     "cwe_mapping",
     "custom_sink_definitions",
     "email_send_detection",
@@ -989,9 +1040,11 @@ capabilities = [
     "advanced_confidence_scoring",
     "automated_sink_remediation",
     "basic_confidence_scoring",
+    "c_sink_detection",
     "clearance_requirement_tagging",
     "compliance_mapping",
     "context_aware_detection",
+    "cpp_sink_detection",
     "cwe_mapping",
     "custom_sink_definitions",
     "custom_sink_patterns",
@@ -1028,6 +1081,9 @@ enabled = true
 capabilities = [
     "automatic_backup",
     "basic_replacement",
+    "c_support",
+    "cpp_support",
+    "csharp_support",
     "java_support",
     "javascript_support",
     "python_support",
@@ -1042,6 +1098,9 @@ capabilities = [
     "atomic_multi_file",
     "automatic_backup",
     "basic_replacement",
+    "c_support",
+    "cpp_support",
+    "csharp_support",
     "cross_file_updates",
     "formatting_preservation",
     "import_auto_adjustment",
@@ -1065,8 +1124,11 @@ capabilities = [
     "automatic_backup",
     "basic_replacement",
     "branch_creation",
+    "c_support",
     "code_review_approval",
     "compliance_check",
+    "cpp_support",
+    "csharp_support",
     "cross_file_updates",
     "custom_validation_rules",
     "formatting_preservation",

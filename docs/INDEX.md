@@ -1,9 +1,10 @@
 # Code Scalpel Documentation Index
 
 > [20260207_DOCS] Added regulated enterprise deployment gameplan reference.
+> [20260224_DOCS] Updated to v2.0.0: C/C++/C# language support, social media marketing guide, polyglot test suite.
 
-**Updated:** February 20, 2026  
-**Version:** 1.4.0
+**Updated:** February 24, 2026  
+**Version:** 2.0.0
 
 ---
 
@@ -57,6 +58,7 @@
   - **Marketing Materials:**
     - [One-Pager](marketing/COMPLIANCE_ONE_PAGER.md) - Sales & demo material
     - [Comparison vs Alternatives](marketing/COMPLIANCE_COMPARISON.md) - Feature & cost comparison
+    - [Social Media & Platform Guide](marketing/SOCIAL_MEDIA.md) - Platform-specific copy (HN, Reddit, LinkedIn, Twitter/X, Dev.to, Product Hunt)
 
 ### 📦 Release & Deployment
 - [Release Process](RELEASE_PROCESS.md) - How to release
@@ -73,11 +75,14 @@
 - [Compliance Testing Strategy](testing/COMPLIANCE_TESTING_STRATEGY.md) - Two-tier compliance testing approach (NEW)
 - [Compliance Verification Report](testing/COMPLIANCE_VERIFICATION_REPORT.md) - Enterprise compliance testing (NEW)
 
+### � Documentation Governance
+- [Documentation Strategy](DOC_STRATEGY.md) - Content ownership, update contracts, anti-patterns
+
 ### 📁 Subdirectories
 - `archive/` - Historical documentation
 - `getting_started/` - Onboarding materials
 - `guides/` - How-to guides
-- `marketing/` - Marketing materials and sales collateral (NEW)
+- `marketing/` - Marketing materials and sales collateral
 - `oracle/` - Oracle middleware documentation (NEW)
 - `reference/` - API and specification docs
 - `release_automation/` - Release tooling docs
@@ -92,6 +97,8 @@
 
 | Version | Date | Highlights |
 |---------|------|------------|
+| v2.0.0 | 2026-02-24 | C, C++, C# language support; 23 tools; 7,575+ tests |
+| v1.5.0 | 2026-02-24 | C and C++ initial parser implementation |
 | v1.4.0 | 2026-02-20 | Tier Limit Rebalancing & Website |
 | v1.3.0 | 2026-02-01 | Oracle Resilience Middleware |
 | v1.2.1 | 2026-01-26 | UVX entry point fix |
@@ -245,7 +252,7 @@ Understanding what already exists before building on it.
 - ✅ Do: Read limits from `get_tool_capabilities()`
 - ✅ Do: Use `limits.toml` as single source of truth
 - ✅ Do: Write tests for each tier
-- ⚠️ Remember: All 22 tools always registered, schema never changes
+- ⚠️ Remember: All 23 tools always registered, schema never changes
 
 ---
 
@@ -272,7 +279,7 @@ Understanding what already exists before building on it.
 3. PRE_RELEASE_PIPELINE.md → [Enforcement Rules](#enforcement-rules--blockers)
 
 **What You'll Test:**
-- Tool availability (22 tools × 3 tiers = 66 tests)
+- Tool availability (23 tools × 3 tiers = 69 tests)
 - Tier limits (enforcement, not just documentation)
 - License validation (secrets injection, expiry)
 - Capability snapshots (regression detection)
@@ -308,9 +315,9 @@ Understanding what already exists before building on it.
 ## Key Concepts Explained
 
 ### Stable Tool Surface
-**What It Means:** All 22 tools always present, never hidden
+**What It Means:** All 23 tools always present, never hidden
 
-- ✅ 22 tools in tool list (always)
+- ✅ 23 tools in tool list (always)
 - ✅ Tool schemas immutable
 - ❌ No per-tier tool hiding
 - ❌ No per-tier schema changes
@@ -436,7 +443,7 @@ Week 1 (Jan 27-31): Foundation
 
 Week 2 (Feb 3-7): Test Infrastructure
 ├── Transport adapters
-├── Tool tests (22 tools × 3 tiers)
+├── Tool tests (23 tools × 3 tiers)
 ├── Limit tests
 └── Feature tests (24 features × 3 tiers)
 

@@ -1,12 +1,30 @@
 # Code Scalpel: Reduce AI Costs by 200x
 
-**Latest Release: v1.4.0 | February 20, 2026**
+**Latest Release: v2.0.2 | February 25, 2026**
 
 **Stop copy-pasting entire files into Claude.** Give your AI assistant surgical code analysis tools and reduce costs by 200x.
 
 **Result:** $450/month → $22/month. Same quality answers, 95% lower cost, 10x faster responses.
 
-![Free Forever](https://img.shields.io/badge/Free-Forever-brightgreen) ![Setup Time](https://img.shields.io/badge/Setup-2%20Minutes-blue) ![Local Execution](https://img.shields.io/badge/Runs-Locally-orange) ![Tools](https://img.shields.io/badge/Tools-23-purple)
+![Free Forever](https://img.shields.io/badge/Free-Forever-brightgreen) ![Setup Time](https://img.shields.io/badge/Setup-2%20Minutes-blue) ![Local Execution](https://img.shields.io/badge/Runs-Locally-orange) ![Tools](https://img.shields.io/badge/Tools-23-purple) ![Languages](https://img.shields.io/badge/Languages-7-blue)
+
+---
+
+## What's New in v2.0.0 — Polyglot Expansion
+
+Code Scalpel now supports **7 languages** with production-quality parsers. All **22 MCP tools** work across every language.
+
+| Language | Extensions | Highlights |
+|----------|-----------|-----------|
+| **Python** | `.py` | Full AST + PDG + symbolic execution |
+| **JavaScript** | `.js`, `.jsx` | AST, call graphs, extraction |
+| **TypeScript** | `.ts`, `.tsx` | Full type analysis, React components |
+| **Java** | `.java` | AST parsing and analysis |
+| **C** *(new in v2.0)* | `.c`, `.h` | Functions, structs, unions, enums, macros, bitfields |
+| **C++** *(new in v2.0)* | `.cpp`, `.hpp`, `.cc`, and more | Classes, templates, namespaces, operator overloading |
+| **C#** *(new in v2.0)* | `.cs` | Classes, records, interfaces, generics, async/await |
+
+262 new language tests added. Zero breaking changes to existing APIs. See [CHANGELOG](CHANGELOG.md) for full details.
 
 ---
 
@@ -290,7 +308,7 @@ def execute_search(query):
 
 ---
 
-## 23 Specialized Tools (All Free in Community Edition)
+## 22 Specialized Tools (All Free in Community Edition)
 
 Code Scalpel provides **20 development tools** + **3 system tools** = **23 total tools**.
 
@@ -368,7 +386,7 @@ Code Scalpel is NOT a fork or wrapper of the `scalpel` Python library. It's a co
 | **Cross-file Deps** | ✅ Full tracking | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited |
 | **MCP Server** | ✅ Primary interface | ❌ No | ❌ No | ❌ No |
 | **LLM-Friendly** | ✅ Designed for agents | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited |
-| **Polyglot** | ✅ Python, JS, TS, Java | ✅ Multi-language | ✅ Multi-language | ⚠️ Python-only |
+| **Polyglot** | ✅ Python, JS, TS, Java, C, C++, C# | ✅ Multi-language | ✅ Multi-language | ⚠️ Python-only |
 
 ### Code Scalpel vs IDE Extensions
 
@@ -590,7 +608,7 @@ claude mcp add codescalpel uvx codescalpel mcp
 
 ## CLI Usage
 
-**All 23 MCP tools are now available directly from the command line!**
+**All 22 MCP tools are now available directly from the command line!**
 
 In addition to the MCP server interface, Code Scalpel provides dedicated CLI commands for every tool. This is perfect for:
 - **Scripts and automation** - Integrate into CI/CD pipelines
@@ -625,7 +643,7 @@ codescalpel extract-code --help
 | `codescalpel cross-file-security-scan` | Cross-file taint analysis | `codescalpel cross-file-security-scan` |
 | `codescalpel validate-paths` | Validate import paths | `codescalpel validate-paths src/main.py` |
 
-**See all 23 commands**: [Complete CLI Tools Reference →](docs/CLI_TOOLS.md)
+**See all 22 commands**: [Complete CLI Tools Reference →](docs/CLI_TOOLS.md)
 
 ### Example Workflows
 
@@ -699,7 +717,7 @@ codescalpel capabilities
 
 ## Release Information
 **Launch Date**: January 2026
-**Version**: v1.4.0
+**Version**: v2.0.0
 **License**: MIT (Community)
 
 Code Scalpel is built for the new era of **Agentic Engineering**. It is not just a linter; it is the sensory and actuator system for the next generation of AI developers.

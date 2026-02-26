@@ -66,7 +66,7 @@ Each file contains:
       "available": true,
       "limits": {
         "max_file_size_mb": 10,
-        "languages": ["python", "javascript", "typescript", "java"]
+        "languages": ["python", "javascript", "typescript", "java", "c", "cpp", "csharp"]
       }
     },
     ...
@@ -96,8 +96,8 @@ All 23 tools are available in all tiers (Community, Pro, Enterprise). The tiers 
 - scan_dependencies, security_scan, simulate_refactor, symbolic_execute
 - type_evaporation_scan, unified_sink_detect, update_symbol
 
-**3 System Tools** (no tier gating):
-- validate_paths, verify_policy_integrity, write_perfect_code
+**2 System Tools** (no tier gating):
+- validate_paths, verify_policy_integrity
 
 ### Limit Escalation Example
 

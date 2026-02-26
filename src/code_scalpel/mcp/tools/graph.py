@@ -48,13 +48,13 @@ async def _get_call_graph_tool(
     """Build a call graph showing function relationships in the project.
 
     **Tier Behavior:**
-    - Community: Max depth 3, max nodes 50, basic call graph only
+    - Community: Max depth 10, max nodes 200, basic call graph only
     - Pro: All Community + path queries, focus mode, call context, confidence scoring
     - Enterprise: All Pro + hot path identification, dead code detection, custom graph analysis
 
     **Tier Capabilities:**
-    - Community: Basic call graph (max_depth=3, max_nodes=50)
-    - Pro: All Community + advanced features (max_depth=50, max_nodes=500)
+    - Community: Basic call graph (max_depth=10, max_nodes=200)
+    - Pro: All Community + advanced features (max_depth=unlimited, max_nodes=unlimited)
     - Enterprise: All Pro + enterprise metrics (max_depth=unlimited, max_nodes=unlimited)
 
     **Args:**
@@ -162,13 +162,13 @@ async def _get_graph_neighborhood_tool(
     """Extract k-hop neighborhood subgraph around a center node.
 
     **Tier Behavior:**
-    - Community: Max k=1, max nodes=20
+    - Community: Max k=2, max nodes=100
     - Pro: All Community + extended neighborhood
     - Enterprise: All Pro + unlimited neighborhood
 
     **Tier Capabilities:**
-    - Community: Limited neighborhood (max_k=1, max_nodes=20)
-    - Pro: Expanded neighborhood (max_k=5, max_nodes=100)
+    - Community: Limited neighborhood (max_k=2, max_nodes=100)
+    - Pro: Unlimited neighborhood (max_k=unlimited, max_nodes=unlimited)
     - Enterprise: Unlimited neighborhood (max_k=unlimited, max_nodes=unlimited)
 
     **Args:**
@@ -270,13 +270,13 @@ async def _get_project_map_tool(
     """Generate a comprehensive map of the project structure.
 
     **Tier Behavior:**
-    - Community: Up to 100 files, 50 modules, basic detail level
-    - Pro: All Community + up to 1000 files, 200 modules, detailed level
+    - Community: Up to 500 files, 100 modules, basic detail level
+    - Pro: All Community + unlimited files, 1000 modules, detailed level
     - Enterprise: All Pro + unlimited files, 1000 modules, comprehensive detail level
 
     **Tier Capabilities:**
-    - Community: Basic project map (max_files=100, max_modules=50)
-    - Pro: Detailed project map (max_files=1000, max_modules=200)
+    - Community: Basic project map (max_files=500, max_modules=100)
+    - Pro: Detailed project map (max_files=unlimited, max_modules=1000)
     - Enterprise: Comprehensive project map (max_files=unlimited, max_modules=1000)
 
     **Args:**
@@ -424,8 +424,8 @@ async def _get_cross_file_dependencies_tool(
     - Enterprise: All Pro + unlimited depth and files
 
     **Tier Capabilities:**
-    - Community: Limited depth analysis (max_depth=1, max_files=50)
-    - Pro: Extended depth analysis (max_depth=5, max_files=500)
+    - Community: Limited depth analysis (max_depth=3, max_files=200)
+    - Pro: Unlimited depth analysis (max_depth=unlimited, max_files=unlimited)
     - Enterprise: Unlimited depth and files
 
     **Args:**
@@ -526,13 +526,13 @@ async def _cross_file_security_scan_tool(
     analysis would miss.
 
     **Tier Behavior:**
-    - Community: Basic cross-file scan with single-module taint tracking (max 10 modules, depth 3)
-    - Pro: All Community + advanced taint tracking with framework-aware analysis (max 100 modules, depth 10)
+    - Community: Basic cross-file scan with single-module taint tracking (max 50 modules, depth 5)
+    - Pro: All Community + advanced taint tracking with framework-aware analysis (unlimited modules and depth)
     - Enterprise: All Pro + project-wide scan with custom rules and global flows (unlimited modules/depth)
 
     **Tier Capabilities:**
-    - Community: basic_cross_file_scan, single_module_taint_tracking, source_to_sink_tracing (max_modules=10, max_depth=3)
-    - Pro: All Community + advanced_taint_tracking, framework_aware_taint, dependency_injection_resolution (max_modules=100, max_depth=10)
+    - Community: basic_cross_file_scan, single_module_taint_tracking, source_to_sink_tracing (max_modules=50, max_depth=5)
+    - Pro: All Community + advanced_taint_tracking, framework_aware_taint, dependency_injection_resolution (max_modules=unlimited, max_depth=unlimited)
     - Enterprise: All Pro + project_wide_scan, custom_taint_rules, global_taint_flow, microservice_boundary_crossing (max_modules=unlimited, max_depth=unlimited)
 
     **Args:**

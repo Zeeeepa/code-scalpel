@@ -46,6 +46,7 @@ from code_scalpel.security.analyzers.unified_sink_detector import (
 # [20251218_BUGFIX] Import version from package instead of hardcoding
 from code_scalpel import __version__
 from code_scalpel.mcp.helpers.analyze_helpers import (
+    _analyze_clike_code as helper_analyze_clike_code,
     _analyze_code_sync as helper_analyze_code_sync,
     _analyze_java_code as helper_analyze_java_code,
     _analyze_javascript_code as helper_analyze_js_code,
@@ -1186,6 +1187,11 @@ def _count_complexity(tree: ast.AST) -> int:
     return complexity
 
 
+def _analyze_clike_code(code: str, language: str) -> AnalysisResult:
+    """Delegate C/C++/C# analysis to helper implementation (single source of truth)."""
+    return helper_analyze_clike_code(code, language)
+
+
 def _analyze_java_code(code: str) -> AnalysisResult:
     """Delegate Java analysis to helper implementation (single source of truth)."""
 
@@ -1227,12 +1233,24 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
             Language.JAVASCRIPT: "javascript",
             Language.TYPESCRIPT: "typescript",
             Language.JAVA: "java",
+            Language.C: "c",  # [20260225_FEATURE]
+            Language.CPP: "cpp",  # [20260225_FEATURE]
+            Language.CSHARP: "csharp",  # [20260225_FEATURE]
         }
         language = lang_map.get(detected, "python")
 
     # [20260110_FEATURE] v1.0 - Explicit language validation (BEFORE code validation)
     # Must happen before _validate_code() to prevent parsing unsupported languages as Python
-    SUPPORTED_LANGUAGES = {"python", "javascript", "typescript", "java"}
+    # [20260225_FEATURE] Added c/cpp/csharp now that IR normalizers are wired up
+    SUPPORTED_LANGUAGES = {
+        "python",
+        "javascript",
+        "typescript",
+        "java",
+        "c",
+        "cpp",
+        "csharp",
+    }
     if language.lower() not in SUPPORTED_LANGUAGES:
         return AnalysisResult(
             success=False,
@@ -1241,7 +1259,7 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
             imports=[],
             complexity=0,
             lines_of_code=0,
-            error=f"Unsupported language '{language}'. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}. Roadmap: Go/Rust in Q1 2026.",
+            error=f"Unsupported language '{language}'. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}. Roadmap: Go/Rust.",
         )
 
     valid, error = _validate_code(code)
@@ -1277,6 +1295,16 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
                 cached.tier_applied = get_current_tier_from_license()
 
             return cached
+
+    # [20260225_FEATURE] Route C, C++, C# to IR normalizer-based analyzer
+    if language.lower() in ("c", "cpp", "csharp"):
+        result = _analyze_clike_code(code, language.lower())
+        if result.success:
+            result.language_detected = language.lower()
+            result.tier_applied = get_current_tier_from_license()
+        if cache and result.success:
+            cache.set(code, "analysis", result.model_dump(), cache_config)
+        return result
 
     if language.lower() == "java":
         result = _analyze_java_code(code)
@@ -5092,6 +5120,7 @@ def run_server(
 
     # [20260220_FEATURE] Check for version mismatch in background
     from code_scalpel.mcp.version_check import start_version_check_thread
+
     start_version_check_thread()
 
     # Debug: emit startup parameters to stderr so test harness can capture flow

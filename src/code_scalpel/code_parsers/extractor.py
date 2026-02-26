@@ -38,6 +38,9 @@ class Language(Enum):
     JAVASCRIPT = "javascript"
     TYPESCRIPT = "typescript"
     JAVA = "java"
+    C = "c"  # [20260224_FEATURE] C language support
+    CPP = "cpp"  # [20260224_FEATURE] C++ language support
+    CSHARP = "csharp"  # [20260224_FEATURE] C# language support
     AUTO = "auto"  # Auto-detect from file extension
 
 
@@ -54,6 +57,20 @@ EXTENSION_MAP: dict[str, Language] = {
     ".mts": Language.TYPESCRIPT,
     ".cts": Language.TYPESCRIPT,
     ".java": Language.JAVA,
+    # [20260224_FEATURE] C/C++ extensions
+    ".c": Language.C,
+    ".h": Language.C,  # headers default to C but may be overridden
+    ".cpp": Language.CPP,
+    ".cc": Language.CPP,
+    ".cxx": Language.CPP,
+    ".c++": Language.CPP,
+    ".hpp": Language.CPP,
+    ".hxx": Language.CPP,
+    ".hh": Language.CPP,
+    ".h++": Language.CPP,
+    ".inl": Language.CPP,
+    # [20260224_FEATURE] C# extension
+    ".cs": Language.CSHARP,
 }
 
 
@@ -117,9 +134,55 @@ def detect_language(file_path: str | None, code: str | None = None) -> Language:
         ):
             return Language.TYPESCRIPT
 
+        # [20260224_FEATURE] C# indicators (check before Java – more specific)
+        # "using System" / Console.Write / namespace without #include are C#-only
+        if (
+            any(
+                kw in code
+                for kw in [
+                    "using System",
+                    "Console.Write",
+                    "void Main(",
+                ]
+            )
+            and "#include" not in code
+        ):
+            return Language.CSHARP
+
         # Java indicators
         if "public class " in code or "private class " in code or "package " in code:
             return Language.JAVA
+
+        # [20260224_FEATURE] C++ indicators (check before C – more specific)
+        if any(
+            kw in code
+            for kw in [
+                "namespace ",
+                "template<",
+                "template <",
+                "std::",
+                "public:",
+                "private:",
+                "protected:",
+                "#include <",
+                "nullptr",
+                "::",
+            ]
+        ):
+            return Language.CPP
+
+        # [20260224_FEATURE] C indicators
+        if any(
+            kw in code
+            for kw in [
+                "#include ",
+                "#define ",
+                "int main",
+                "struct ",
+                "typedef ",
+            ]
+        ):
+            return Language.C
 
         # JavaScript indicators (after ruling out TS)
         if any(kw in code for kw in ["function ", "const ", "let ", "var ", "=>"]):
@@ -217,6 +280,12 @@ class PolyglotExtractor:
             self._parse_typescript()
         elif self.language == Language.JAVA:
             self._parse_java()
+        elif self.language == Language.C:
+            self._parse_c()
+        elif self.language == Language.CPP:
+            self._parse_cpp()
+        elif self.language == Language.CSHARP:
+            self._parse_csharp()
         else:
             raise ValueError(f"Unsupported language: {self.language}")
 
@@ -299,6 +368,39 @@ class PolyglotExtractor:
         normalizer = JavaNormalizer()
         self._ir_module = normalizer.normalize(self.code)
 
+    def _parse_c(self) -> None:
+        """
+        Parse C code using tree-sitter-c.
+
+        [20260224_FEATURE] Added C support to code_parsers.
+        """
+        from code_scalpel.ir.normalizers.c_normalizer import CNormalizer
+
+        normalizer = CNormalizer()
+        self._ir_module = normalizer.normalize(self.code)
+
+    def _parse_cpp(self) -> None:
+        """
+        Parse C++ code using tree-sitter-cpp.
+
+        [20260224_FEATURE] Added C++ support to code_parsers.
+        """
+        from code_scalpel.ir.normalizers.cpp_normalizer import CppNormalizer
+
+        normalizer = CppNormalizer()
+        self._ir_module = normalizer.normalize(self.code)
+
+    def _parse_csharp(self) -> None:
+        """
+        Parse C# code using tree-sitter-c-sharp.
+
+        [20260224_FEATURE] Added C# support to code_parsers.
+        """
+        from code_scalpel.ir.normalizers.csharp_normalizer import CSharpNormalizer
+
+        normalizer = CSharpNormalizer()
+        self._ir_module = normalizer.normalize(self.code)
+
     def extract(
         self, target_type: str, target_name: str, include_dependencies: bool = False
     ) -> PolyglotExtractionResult:
@@ -320,6 +422,10 @@ class PolyglotExtractor:
         # Python uses existing extractor
         if self.language == Language.PYTHON:
             return self._extract_python(target_type, target_name)
+
+        # C/C++ parse are handled by tree-sitter normalizers
+        if self.language in (Language.C, Language.CPP, Language.CSHARP):
+            return self._extract_from_ir(target_type, target_name)
 
         # Other languages use IR-based extraction
         return self._extract_from_ir(target_type, target_name)

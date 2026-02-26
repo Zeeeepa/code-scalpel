@@ -606,7 +606,7 @@ uvx @modelcontextprotocol/inspector uvx codescalpel mcp
 # List available tools
 uvx codescalpel list-tools
 
-# Should show all 24 tools:
+# Should show all 23 tools:
 # - analyze_code
 # - extract_code
 # - security_scan

@@ -53,6 +53,7 @@ class Language(Enum):
     TYPESCRIPT = "typescript"
     JAVA = "java"
     GO = "go"
+    C = "c"  # [20260225_FEATURE]
     CSHARP = "csharp"
     CPP = "cpp"
     KOTLIN = "kotlin"
@@ -455,12 +456,13 @@ def detect_language(
             ".tsx": Language.TYPESCRIPT,
             ".java": Language.JAVA,
             ".go": Language.GO,
+            ".c": Language.C,  # [20260225_FEATURE]
+            ".h": Language.C,  # Headers default to C; override with explicit language arg
             ".cs": Language.CSHARP,
             ".cpp": Language.CPP,
             ".cc": Language.CPP,
             ".cxx": Language.CPP,
             ".hpp": Language.CPP,
-            ".h": Language.CPP,
             ".kt": Language.KOTLIN,
             ".kts": Language.KOTLIN,
             ".rb": Language.RUBY,
@@ -1285,10 +1287,16 @@ class UnifiedExtractor:
         """
         if self.language == Language.PYTHON:
             return self._extract_python(target_type, target_name, include_context)
-        elif self.language in (Language.JAVASCRIPT, Language.TYPESCRIPT, Language.JAVA):
+        elif self.language in (
+            Language.JAVASCRIPT,
+            Language.TYPESCRIPT,
+            Language.JAVA,
+            Language.C,  # [20260225_FEATURE]
+            Language.CPP,  # [20260225_FEATURE]
+            Language.CSHARP,  # [20260225_FEATURE]
+        ):
             return self._extract_polyglot(target_type, target_name)
         else:
-            # Future: Route to code_parser for other languages
             return self._extract_via_code_parser(target_type, target_name)
 
     def _extract_python(
@@ -1414,10 +1422,14 @@ class UnifiedExtractor:
 
         try:
             # Map unified language to polyglot language
+            # [20260225_FEATURE] Added C, C++, C# mappings
             lang_map = {
                 Language.JAVASCRIPT: PolyglotLang.JAVASCRIPT,
                 Language.TYPESCRIPT: PolyglotLang.TYPESCRIPT,
                 Language.JAVA: PolyglotLang.JAVA,
+                Language.C: PolyglotLang.C,
+                Language.CPP: PolyglotLang.CPP,
+                Language.CSHARP: PolyglotLang.CSHARP,
             }
 
             polyglot_extractor = PolyglotExtractor(
@@ -1476,8 +1488,10 @@ class UnifiedExtractor:
             target_name=target_name,
             target_type=target_type,
             language=self.language.value,
-            error=f"Language {self.language.value} extraction not yet implemented. "
-            f"Supported: Python, JavaScript, TypeScript, Java",
+            error=(
+                f"Language {self.language.value} extraction not yet implemented. "
+                f"Supported: Python, JavaScript, TypeScript, Java, C, C++, C#"
+            ),
         )
 
 

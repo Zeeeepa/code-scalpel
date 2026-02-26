@@ -30,7 +30,10 @@ For AI agent integrations:
 # [20260205_RELEASE] v1.3.4 - Bundled-only limits.toml, removed duplicate resolver internals
 # [20260210_RELEASE] v1.3.5 - Windows encoding fix, auto-init fix, update check
 # [20260220_RELEASE] v1.4.0 - Full response_config coverage (graph tools, hot-reload, template cleanup)
-__version__ = "1.4.0"
+# [20260224_RELEASE] v2.0.0 - Polyglot Expansion: full C, C++, C# support (tree-sitter parsers, IR normalizers, MCP adapters)
+# [20260225_RELEASE] v2.0.1 - Patch: documentation updates, wiki changelog backfill, packaging fix
+# [20260225_RELEASE] v2.0.2 - C/C++/C# capabilities extended to unified_sink_detect, generate_unit_tests, code_policy_check, scan_dependencies
+__version__ = "2.0.2"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 

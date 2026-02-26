@@ -771,9 +771,8 @@ Contains runnable example code for all integrations:
 
 ## Project Context
 
-# [20251223_DOCS] Updated for v3.0.5 "Ninja Consolidation" release -->
-# [20251221_DOCS] Updated for v3.1.0 "Parser Unification" release -->
-Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operations.
+# [20260224_DOCS] Updated for v2.0.0 "Polyglot Expansion" release
+Code Scalpel v2.0.0 is an MCP server toolkit for AI-driven surgical code operations.
 
 | Module | Status | Coverage |
 |--------|--------|----------|
@@ -783,17 +782,17 @@ Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operati
 | PDG Slicer | Stable | 100% |
 | Symbolic Engine | Stable | 100% |
 | Security Analysis | Stable | 100% |
-| MCP Server | Stable | 20 tools |
+| MCP Server | Stable | 23 tools |
 | Polyglot Parsers | Stable | 90%+ |
 | Autonomy Engine | Stable | 90%+ |
 | Unified Cache | Stable | 95%+ |
 
-**Test Suite:** 4,100+ tests passing (100% pass rate)
+**Test Suite:** 7,575+ tests passing (100% pass rate)
 **Coverage Gate:** ≥90% combined (statement + branch)
 **Current Coverage:** 94.86% combined (96.28% stmt, 90.95% branch)
 
-**MCP Tools (Current - v1.4.0 - 23 tools):**
-- `analyze_code` - Parse and extract code structure (Python, JS, TS, Java)
+**MCP Tools (Current - v2.0.0 - 23 tools):**
+- `analyze_code` - Parse and extract code structure (Python, JS, TS, Java, C, C++, C#)
 - `extract_code` - Surgical extraction by symbol name with cross-file deps
 - `update_symbol` - Safely replace functions/classes/methods in files
 - `rename_symbol` - Rename functions/classes/methods throughout codebase
@@ -816,14 +815,15 @@ Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operati
 - `code_policy_check` - Check code against style guides and compliance standards
 - `type_evaporation_scan` - Detect TypeScript type evaporation vulnerabilities
 
-**Latest Release:** v1.4.0
-- Release Date: February 20, 2026
-- Release Notes: `docs/release_notes/RELEASE_NOTES_v1.4.0.md`
-- Evidence Files: `release_artifacts/v1.4.0/`
+**Latest Release:** v2.0.0
+- Release Date: February 24, 2026
+- Release Notes: `docs/release_notes/RELEASE_NOTES_v2.0.0.md`
+- Evidence Files: `release_artifacts/v2.0.0/`
 - **Key Changes:**
-  - Tier limit rebalancing (Community limits raised, Pro limits made unlimited)
-  - New `get_capabilities` tool
-  - Response filtering for graph tools to improve token efficiency
+  - Full C, C++, and C# language support (tree-sitter parsers, IR normalizers, adapters)
+  - 262 new language-specific tests; 7,575 total tests passing
+  - Real-world pattern test suites for each language family
+  - Four normalizer bug fixes (IRIf/IRWhile `test` kwarg, tuple return types, C# operator declarations, C++ nested class extraction)
 
 ## Communication
 

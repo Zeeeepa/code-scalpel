@@ -98,7 +98,9 @@ Code Scalpel offers three tiers:
 - **Python** - Full support (AST + PDG + symbolic execution)
 - **JavaScript/TypeScript** - AST analysis, call graphs, extraction
 - **Java** - AST parsing and analysis
-- **Go, Rust, Ruby, PHP** - AST parsing via tree-sitter
+- **C / C++** - Extraction and analysis (added v2.0.0)
+- **C#** - Extraction and analysis (added v2.0.0)
+- **Go, Rust, Ruby, PHP** - Roadmap (AST via tree-sitter, partial)
 
 ## MCP Transports
 

@@ -63,17 +63,17 @@ class TestRenameSymbolCommunityTier:
         ), "Community should enforce snake_case validation"
 
     def test_community_no_cross_file_rename_limits(self, community_tier):
-        """Verify Community tier has zero cross-file rename limits."""
+        """Verify Community tier has single-file rename limits (max=1, updated v2.0.1)."""
         capabilities = get_tool_capabilities("rename_symbol", "community") or {}
         limits = capabilities.get("limits", {}) or {}
         max_searched = limits.get("max_files_searched")
         max_updated = limits.get("max_files_updated")
         assert (
-            max_searched == 0
-        ), f"Community should have max_files_searched=0, got {max_searched}"
+            max_searched == 1
+        ), f"Community should have max_files_searched=1, got {max_searched}"
         assert (
-            max_updated == 0
-        ), f"Community should have max_files_updated=0, got {max_updated}"
+            max_updated == 1
+        ), f"Community should have max_files_updated=1, got {max_updated}"
 
 
 class TestRenameSymbolProTier:
@@ -199,9 +199,9 @@ class TestRenameSymbolCrossTierComparison:
         comm_limits = comm_caps.get("limits", {}) or {}
         pro_limits = pro_caps.get("limits", {}) or {}
 
-        # Community: no cross-file
-        assert comm_limits.get("max_files_searched") == 0
-        assert comm_limits.get("max_files_updated") == 0
+        # Community: single-file only (max=1, updated v2.0.1)
+        assert comm_limits.get("max_files_searched") == 1
+        assert comm_limits.get("max_files_updated") == 1
 
         # Pro: unlimited cross-file
         assert pro_limits.get("max_files_searched") is None

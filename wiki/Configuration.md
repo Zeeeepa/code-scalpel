@@ -277,7 +277,7 @@ SCALPEL_TIER=community
 - Test generation: 10 paths
 
 **Features:**
-- All 22 tools available ✅
+- All 23 tools available ✅
 - AST parsing ✅
 - Taint analysis ✅
 - Symbolic execution ✅

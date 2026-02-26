@@ -66,6 +66,10 @@ class LanguageRouter:
         Language.GO: ["go"],
         Language.RUST: ["rs"],
         Language.JAVA: ["java"],
+        # [20260225_FEATURE] C, C++, C# via tree-sitter IR normalizers
+        Language.C: ["c", "h"],
+        Language.CPP: ["cpp", "cc", "cxx", "hpp", "hxx", "hh", "inl"],
+        Language.CSHARP: ["cs"],
         Language.TERRAFORM: ["tf", "tfvars"],
         Language.YAML: ["yaml", "yml"],
         Language.JSON: ["json"],

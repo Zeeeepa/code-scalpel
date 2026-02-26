@@ -1,13 +1,13 @@
 # Marketing Materials - Enterprise Compliance
 
-**Last Updated:** February 12, 2026  
+**Last Updated:** February 24, 2026  
 **Target Audience:** Sales, Marketing, Business Development
 
 ---
 
 ## Overview
 
-This directory contains sales and marketing collateral for Code Scalpel's Enterprise Compliance features. All materials are backed by comprehensive testing (93 tests, 100% passing).
+This directory contains sales and marketing collateral for Code Scalpel's Enterprise Compliance features. All materials are backed by comprehensive testing (7,575+ tests, 100% passing).
 
 ---
 
@@ -29,7 +29,29 @@ This directory contains sales and marketing collateral for Code Scalpel's Enterp
 
 ---
 
-### 2. [Comparison vs Alternatives (COMPLIANCE_COMPARISON.md)](COMPLIANCE_COMPARISON.md)
+### 2. [Social Media & Platform Guide (SOCIAL_MEDIA.md)](SOCIAL_MEDIA.md) 🆕
+
+**Use For:** Launch campaigns, community posts, ongoing developer relations
+
+**Content:**
+- Platform-specific copy for Hacker News, Reddit, LinkedIn, Twitter/X, Dev.to/Hashnode, Product Hunt
+- Ready-to-post text for each platform with correct tone and format
+- Post calendar with suggested launch sequence
+- Tone guide (what to do / not do per platform)
+
+**Platforms covered:**
+| Platform | Subreddits / Formats | Primary Audience |
+|----------|----------------------|-----------------|
+| Hacker News | Show HN launch post | Senior engineers, founders |
+| Reddit | r/programming, r/Python, r/netsec, r/devops | Developers |
+| LinkedIn | ROI posts, technical credibility posts | CTOs, CISOs |
+| Twitter/X | Threads + standalone tweets | Developers, security practitioners |
+| Dev.to / Hashnode | Article outlines + intros | Mid-level developers |
+| Product Hunt | Launch tagline + maker comment | Tech enthusiasts |
+
+---
+
+### 3. [Comparison vs Alternatives (COMPLIANCE_COMPARISON.md)](COMPLIANCE_COMPARISON.md)
 
 **Use For:** RFP responses, competitive analysis, buyer objection handling
 
@@ -129,7 +151,7 @@ This directory contains sales and marketing collateral for Code Scalpel's Enterp
 ### Objection 3: "How accurate is automated compliance scanning?"
 
 **Response:**
-- "93 comprehensive tests verify detection accuracy."
+- "7,575+ comprehensive tests verify detection accuracy."
 - Show: [Verification Report](../testing/COMPLIANCE_VERIFICATION_REPORT.md)
 - Proof: Specific rule IDs (HIPAA001, SOC2001) with line numbers
 
@@ -297,5 +319,5 @@ A: Enterprise includes priority email support + optional professional services.
 📧 **Marketing:** marketing@code-scalpel.com  
 📧 **Support:** support@code-scalpel.com
 
-**Last Updated:** February 12, 2026  
-**Version:** Code Scalpel 1.3.0
+**Last Updated:** February 24, 2026  
+**Version:** Code Scalpel 2.0.0

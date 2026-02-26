@@ -7,6 +7,257 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.2] - 2026-02-25
+
+### Added
+
+- `unified_sink_detect`: C and C++ sink detection across all tiers
+- `generate_unit_tests`: Catch2 + NUnit (Community+), Google Test + xUnit (Pro+)
+- `code_policy_check`: clang-tidy rules (Community+), Roslyn analyzers (Community+), MISRA-C compliance (Enterprise only)
+- `scan_dependencies`: Conan, vcpkg (C/C++) and NuGet (C#) package manager scanning — all tiers
+- Test suite: `tests/languages/test_v202_capabilities.py`
+
+---
+
+## [2.0.1] - 2026-02-25
+
+### Fixed
+
+- Packaging fix: re-release to correct PyPI upload issue with v2.0.0 artifacts
+- Documentation: wiki changelog backfill for v1.1.0 through v1.5.0 releases
+- VS Code extension version aligned with Python package
+
+---
+
+## [2.0.0] - 2026-02-24
+
+### Polyglot Expansion — C, C++, and C# Full Support
+
+Code Scalpel now supports 7 languages with production-quality parsers for C, C++, and C#.
+
+#### New Language Support
+
+- **C** — full AST extraction, IR normalization, `extract_code`/`update_symbol` support
+- **C++** — full support including templates, namespaces, nested classes
+- **C#** — full support including properties, interfaces, generics
+- 262 language-specific tests; 39 new real-world pattern tests
+- 4 normalizer bugs fixed during development
+
+#### Changes
+
+- 23 MCP tools (added `type_evaporation_scan`)
+- 7,575+ total tests passing (100% pass rate)
+- Pre-release pipeline: black, ruff, pyright, bandit, pytest, build — all passing
+
+#### Full Release Notes
+
+See [RELEASE_NOTES_v2.0.0](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/release_notes/RELEASE_NOTES_v2.0.0.md)
+
+---
+
+## [1.5.0] - 2026-02-24
+
+### Comprehensive C and C++ Parsing
+
+- **C and C++ parsing** via new `c_normalizer` and `cpp_normalizer` (tree-sitter)
+  - `.c`, `.h` (C); `.cpp`, `.cc`, `.cxx`, `.c++`, `.hpp`, `.hxx`, `.hh`, `.h++`, `.inl` (C++)
+  - IR nodes for functions, structs, unions, enums, macros, classes, namespaces, templates
+  - Language detection heuristics updated to distinguish C vs C++ by content and extension
+  - Integrated into `PolyglotExtractor` abstraction
+- New tests in `tests/languages/test_c_cpp_parsers.py` (realistic 3D project patterns)
+
+### Deprecated
+
+- `code_scalpel.polyglot` imports replaced by `code_parsers` canonical import path (removal in v3.3.0)
+
+---
+
+## [1.4.1] - 2026-02-24
+
+### Added
+
+- `codescalpel check` command — inspects an existing `.code-scalpel` directory and reports which configuration files are present, missing-but-recommended, or missing-and-required without modifying anything
+  - `--json` / `-j` flag for machine-readable output
+  - `--fix` / `-F` flag: fills missing files before reporting (equivalent to `init` + `check`)
+  - Integrity checking: files are parsed (JSON/YAML/Rego) and flagged if empty or corrupt
+- `codescalpel init` is now safe to re-run on existing configurations — adds only absent files, preserves all existing customizations
+
+---
+
+## [1.4.0] - 2026-02-20
+
+### Added
+
+- `response_config.json` and `response_config.schema.json` auto-created on first MCP server boot / `codescalpel init`
+
+### Changed
+
+- **Tier limit rebalancing** (data-driven recalibration):
+  - Community: Raised to cover solo dev projects ≤500 files (scanner 50→500, call_graph depth 3→10, nodes 50→200, extract_code depth 0→1, etc.)
+  - Pro: All numeric limits now unlimited — differentiates on features not scale caps
+  - Enterprise: Fixed `unified_sink_detect.max_sinks` bug (was 50, now unlimited)
+
+### Fixed
+
+- Graph tools now respect `response_config.json` filtering
+- Hot reload: edits to `response_config.json` take effect without server restart
+
+### Deprecated
+
+- `ResponseFormatter` class in `response_formatter.py` (removal in v1.5.0)
+
+---
+
+## [1.3.5] - 2026-02-10
+
+### Fixed
+
+- Windows `UnicodeEncodeError` on `codescalpel init` — all file I/O now uses `encoding='utf-8'`
+- MCP server auto-init now creates full configuration scaffolding (20 files) instead of empty directory
+
+### Added
+
+- Startup update check: non-blocking PyPI version query notifies users of available updates
+- License setup documentation (`docs/LICENSE_SETUP.md`)
+
+### Changed
+
+- **Architectural refactor**: Moved `limits.toml` and `features.toml` from `.code-scalpel/` to `src/code_scalpel/capabilities/` — packaged automatically, no `force-include` needed
+- Enhanced MCP server boot banner: shows license tier and license file path
+
+---
+
+## [1.3.4] - 2026-02-05
+
+### Added
+
+- `features.toml`: Bundled TOML source of truth for capability feature sets (66 sections: 22 tools × 3 tiers) — replaces 1600-line hardcoded dict
+
+### Changed
+
+- `config_loader` now uses two-path lookup (bundled wheel copy, dev-checkout fallback) instead of 7-layer search
+- `features.py` rewritten as thin loader (~230 lines, down from ~1600)
+- `limits.toml` ownership: tier limits are now fully package-managed
+
+### Fixed
+
+- Sentinel conversion: `-1` in TOML now converts to `None` (unlimited) at runtime
+
+---
+
+## [1.3.3] - 2026-02-02
+
+### Changed
+
+- **Project Structure Migration**: Consolidated cache directories into `.code-scalpel/cache/`
+  - Migrated `.scalpel_cache/`, `.code_scalpel_cache/`, `.scalpel_ast_cache/` → `.code-scalpel/cache/`
+  - Renamed `.code-scalpel/license/` → `.code-scalpel/licenses/`
+
+### Added
+
+- Version sync check in `verify.sh`
+- `scripts/verify_version_sync.sh`: Standalone version consistency checker
+- `--skip-build` flag for faster iteration in `verify.sh`
+- `docs/PIPELINE.md`: Comprehensive CI/CD pipeline documentation
+
+---
+
+## [1.3.2] - 2026-02-02
+
+### Added
+
+- **detect-secrets pre-commit hook** (Yelp/detect-secrets v1.4.0) with `.secrets.baseline`
+
+### Changed
+
+- Security hardening: Added 40+ `.gitignore` patterns blocking API tokens, credentials, vault files
+
+---
+
+## [1.3.1] - 2026-02-01
+
+### Changed
+
+- Pre-commit hook changed from `verify.sh` (comprehensive) to `verify_local.sh` (fast auto-fix)
+- Black/Ruff path alignment: checks only `src/ tests/` (matching CI)
+
+### Added
+
+- Optional Bandit and pip-audit as warning-only checks in `verify_local.sh`
+
+---
+
+## [1.3.0] - 2026-02-01
+
+### Added
+
+- **Oracle Resilience Middleware** — automatic error recovery for AI agent mistakes
+  - `@with_oracle_resilience` decorator for MCP tools
+  - Symbol fuzzy matching with Levenshtein distance (typo correction, e.g., `"procss_data"` → `"process_data"`)
+  - Path resolution with workspace-aware suggestions
+  - Multiple recovery strategies: `SymbolStrategy`, `PathStrategy`, `SafetyStrategy`, `CompositeStrategy`
+- 61 comprehensive Oracle middleware tests (100% pass rate)
+
+### Changed
+
+- Moved documentation to organized subdirectories (`docs/oracle/`, `docs/reference/`, `docs/architecture/`)
+
+---
+
+## [1.2.1] - 2026-01-26
+
+### Fixed
+
+- **UVX entry point**: Fixed missing `codescalpel` entry point that prevented `uvx codescalpel` from working
+  - v1.1.0 regression: package was renamed to `codescalpel` on PyPI but only had `code-scalpel` entry point
+  - Both `codescalpel` and `code-scalpel` commands now available
+
+---
+
+## [1.2.0] - 2026-01-26
+
+### Added
+
+- **Project Awareness Engine**: Intelligent codebase analysis subsystem
+  - `ProjectWalker`: Fast file discovery with smart filtering (9+ languages, 19 default exclusions)
+  - `ProjectContext`: Metadata storage with in-memory and optional SQLite caching
+  - `ParallelCrawler`: Parallel file scanning via `ThreadPoolExecutor` (batch size 100, supports 100k+ files; Pro/Enterprise)
+  - `IncrementalIndex`: Incremental project updates with dependency-aware cascading invalidation
+- 39 comprehensive tests for Project Awareness Engine
+
+---
+
+## [1.1.0] - 2026-01-26
+
+### Added
+
+- Phase 6 Kernel Integration for `analyze_code` tool
+- `SourceContext` model for unified input handling
+- `SemanticValidator` for pre-analysis input validation
+- `ResponseEnvelope` with metadata and tier information
+- `UpgradeHints` for tier-based feature suggestions
+
+### Fixed
+
+- Package name corrected in `pyproject.toml` (`code-scalpel` → `codescalpel`) for PyPI compatibility
+
+---
+
+## [1.0.1] - 2025-01-25
+
+### Added
+
+- Tier-based request/response governance (Community/Pro/Enterprise)
+- Parameter clamping with applied limits metadata
+- Installation guide for Claude Desktop (`INSTALLING_FOR_CLAUDE.md`)
+
+### Fixed
+
+- Version synchronization: `__init__.py` now matches `pyproject.toml`
+- Deprecated `datetime.datetime.now()` → `datetime.now(timezone.utc)` in licensing module
+
+---
+
 ## [1.0.0] - 2026-01-17
 
 ### Initial Public Release 🎉
@@ -276,32 +527,22 @@ Code Scalpel is an MCP server toolkit that enables AI assistants to perform surg
 
 ## Future Roadmap
 
-### v1.1.0 (Q2 2026)
+### v2.1.0 (Planned)
 
-- [ ] GraphQL API support
 - [ ] Enhanced Java support (PDG + taint analysis)
-- [ ] Go taint analysis
-- [ ] Real-time collaboration features
-- [ ] VS Code extension with UI
-- [ ] Performance dashboard
-
-### v1.2.0 (Q3 2026)
-
-- [ ] Kotlin language support
-- [ ] Swift language support
-- [ ] C/C++ basic support
+- [ ] Go language support (AST + basic analysis)
+- [ ] Kotlin and Swift language support
+- [ ] GraphQL API support
 - [ ] Enhanced compliance reporting
 - [ ] Custom sink/source definitions
-- [ ] Machine learning-based vulnerability detection
 
-### v2.0.0 (Q4 2026)
+### v3.0.0 (Planned)
 
 - [ ] Multi-repository analysis
 - [ ] Distributed scanning
 - [ ] Team collaboration features
 - [ ] Advanced IDE integrations
-- [ ] Cloud-native deployment options
-- [ ] Enhanced visualization tools
+- [ ] Remove deprecated `code_scalpel.polyglot` module
 
 ---
 
@@ -309,7 +550,15 @@ Code Scalpel is an MCP server toolkit that enables AI assistants to perform surg
 
 | Version | Date | Key Features |
 |---------|------|--------------|
-| **1.0.0** | 2026-01-17 | Initial public release, 22 tools, 7 languages |
+| **2.0.0** | 2026-02-24 | C, C++, C# support; 23 tools; 7,575+ tests |
+| 1.5.0 | 2026-02-24 | C/C++ parsing foundation |
+| 1.4.1 | 2026-02-24 | `codescalpel check` command |
+| 1.4.0 | 2026-02-20 | Response config, tier rebalancing |
+| 1.3.x | 2026-02-01–10 | Oracle resilience, security hardening, Windows fixes |
+| 1.2.x | 2026-01-26 | Project awareness engine, UVX entry point fix |
+| 1.1.0 | 2026-01-26 | Kernel integration, package name fix |
+| 1.0.1 | 2025-01-25 | Tier governance, Claude Desktop guide |
+| **1.0.0** | 2026-01-17 | Initial public release, 22 tools |
 | 0.3.0 | 2025-12-18 | Policy enforcement, tier system |
 | 0.2.0 | 2025-11-15 | Symbolic execution, test generation |
 | 0.1.0 | 2025-10-01 | Initial pre-release |
@@ -324,7 +573,7 @@ Code Scalpel is an MCP server toolkit that enables AI assistants to perform surg
 - None (backward compatible)
 
 **New Features:**
-- All 22 tools now publicly available
+- All 23 tools now publicly available
 - Enhanced documentation (GitHub Wiki)
 - Improved error messages
 

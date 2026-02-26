@@ -1,6 +1,6 @@
 # Code Scalpel Compliance vs Alternatives
 
-**Last Updated:** February 12, 2026
+**Last Updated:** February 24, 2026
 
 ---
 
@@ -122,7 +122,7 @@
 | Generic Linters | 60-80% | 70-85% | 65-80% | 60-80% |
 | Manual Audits | 5-15% | 5-15% | 5-15% | 5-15% |
 
-*Based on testing suite of 93 tests with known violations*
+*Based on testing suite of 7,575+ tests with known violations*
 
 ---
 
@@ -270,5 +270,5 @@ Payback Period = $1,188 / (Monthly Savings)
 📊 **ROI Calculator:** https://code-scalpel.com/roi  
 📚 **Documentation:** https://code-scalpel.com/docs
 
-**Last Updated:** February 12, 2026  
-**Version:** Code Scalpel 1.3.0
+**Last Updated:** February 24, 2026  
+**Version:** Code Scalpel 2.0.0

@@ -12,6 +12,7 @@ Complete reference for all Code Scalpel CLI tools. All MCP tools are now accessi
 - [Testing Tools](#testing-tools)
 - [Validation Tools](#validation-tools)
 - [Policy Tools](#policy-tools)
+- [Configuration Management](#configuration-management)
 - [Common Options](#common-options)
 - [Tier System](#tier-system)
 
@@ -47,7 +48,7 @@ codescalpel analyze --code "<code_string>" [options]
 
 **Options:**
 - `--json, -j` - Output as JSON
-- `--language, -l` - Specify language (python, javascript, typescript, java)
+- `--language, -l` - Specify language (python, javascript, typescript, java, c, cpp)
 
 **Examples:**
 ```bash
@@ -1056,6 +1057,165 @@ codescalpel get-symbol-references OldLibrary --project-root . --no-tests
 
 ---
 
+## Configuration Management
+
+Commands for setting up and maintaining the `.code-scalpel/` configuration directory.
+
+### init
+
+Initialize a `.code-scalpel/` configuration directory, or safely add any missing files to an existing one.
+
+**Usage:**
+```bash
+codescalpel init [options]
+```
+
+**Options:**
+- `--dir, -d <path>` — Target directory (default: current directory)
+- `--force, -f` — Deprecated; directory existence no longer blocks init
+
+**Behaviour:**
+- If `.code-scalpel/` does **not** exist: creates it with the full default configuration scaffold (~20 files including policies, audit log, license directory, and response configuration).
+- If `.code-scalpel/` **already exists**: adds only the files that are missing — all existing customisations are preserved. This is the recommended upgrade path for users moving between Code Scalpel versions.
+
+**Examples:**
+```bash
+# First-time setup
+codescalpel init
+
+# After upgrading Code Scalpel — add any new files without touching existing ones
+codescalpel init --dir /path/to/project
+
+# Verify what was added
+codescalpel check --dir /path/to/project
+```
+
+---
+
+### check
+
+Audit an existing `.code-scalpel/` directory and report which expected configuration files are present, missing, or corrupt.
+
+**Usage:**
+```bash
+codescalpel check [options]
+```
+
+**Options:**
+- `--dir, -d <path>` — Target directory (default: current directory)
+- `--json, -j` — Machine-readable JSON output
+- `--fix, -F` — Add any missing files before reporting (safe — never overwrites existing files)
+
+**Exit codes:**
+- `0` — All required files present and valid (recommended/optional files may still be missing)
+- `1` — One or more required files are missing or have parse errors
+
+**Integrity checking:**
+
+All present files are validated on every run:
+- JSON files are parsed; malformed JSON is flagged as `[PARSE ERROR]`
+- YAML files are parsed; malformed YAML is flagged as `[PARSE ERROR]`
+- Rego policy files are checked for a `package` declaration
+- Zero-byte files are flagged as `[EMPTY FILE]`
+
+Required files with integrity failures cause `exit 1` just like absent required files.
+
+**Examples:**
+```bash
+# Quick audit of current project
+codescalpel check
+
+# Audit and automatically fill in any gaps
+codescalpel check --fix
+
+# Machine-readable output for CI
+codescalpel check --json
+
+# Full check + fix in JSON (CI upgrade workflow)
+codescalpel check --fix --json | jq '.summary'
+```
+
+**JSON output structure:**
+```json
+{
+  "success": true,
+  "config_dir": "/path/to/.code-scalpel",
+  "fix_applied": null,
+  "summary": {
+    "required_missing": 0,
+    "recommended_missing": 0,
+    "optional_missing": 1,
+    "total_present": 19
+  },
+  "integrity": {
+    "ok": true,
+    "errors": [],
+    "warnings": [],
+    "files_validated": ["config.json", "policy.yaml", ...]
+  },
+  "files": {
+    "config.json": {
+      "present": true,
+      "level": "required",
+      "description": "Core settings (tier, paths, feature flags)",
+      "integrity": { "empty": false, "parse_error": null, "ok": true }
+    }
+  }
+}
+```
+
+**File tiers:**
+
+| Level | Files | Effect if missing |
+|-------|-------|-------------------|
+| Required | `config.json`, `policy.yaml`, `budget.yaml`, `response_config.json` | Some features will not work; `exit 1` |
+| Recommended | `dev-governance.yaml`, `project-structure.yaml`, `response_config.schema.json`, `policy.manifest.json`, `audit.log`, `license/README.md`, policy Rego files | Degraded functionality; `exit 0` |
+| Optional | `.gitignore`, `README.md`, `ide-extension.json`, `HOOKS_README.md`, `.env.example` | Informational only; `exit 0` |
+
+---
+
+### verify-policies
+
+Verify the cryptographic integrity of policy files using the HMAC manifest.
+
+**Usage:**
+```bash
+codescalpel verify-policies [options]
+```
+
+**Options:**
+- `--dir, -d <path>` — Target directory (default: current directory)
+- `--manifest-source` — Source of the manifest (`file` or `env`)
+
+**Example:**
+```bash
+codescalpel verify-policies
+codescalpel verify-policies --dir /path/to/project
+```
+
+---
+
+### regenerate-manifest
+
+Regenerate the `policy.manifest.json` cryptographic manifest after modifying policy files.
+
+**Usage:**
+```bash
+codescalpel regenerate-manifest [options]
+```
+
+**Options:**
+- `--dir, -d <path>` — Target directory (default: current directory)
+- `--signed-by` — Name/identifier to record in the manifest
+
+**Example:**
+```bash
+# After editing a .rego policy file
+codescalpel regenerate-manifest --signed-by "dev@example.com"
+```
+
+---
+
 ## Tips & Best Practices
 
 ### 1. Use JSON Output for Automation
@@ -1129,6 +1289,6 @@ Error: Tool 'extract_code' not found
 
 ---
 
-**Last Updated**: 2026-02-05
-**Version**: 1.3.2+
+**Last Updated**: 2026-02-24
+**Version**: 1.4.1+
 **Author**: Code Scalpel Team

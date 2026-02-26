@@ -334,7 +334,7 @@ if scan_result.vulnerabilities:
 
 ## Next Steps
 
-- **[MCP Tools Reference](MCP-Tools-Reference)** - Complete documentation of all 22 tools
+- **[MCP Tools Reference](MCP-Tools-Reference)** - Complete documentation of all 23 tools
 - **[Configuration](Configuration)** - Environment variables and settings
 - **[Examples](Examples)** - More complex use cases and patterns
 - **[Security](Security)** - Policy enforcement and integrity verification

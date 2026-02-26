@@ -47,13 +47,13 @@ async def symbolic_execute(
     and identify potential issues without concrete execution.
 
     **Tier Behavior:**
-    - Community: Basic symbolic execution (max_paths=50, max_depth=10)
-    - Pro: All Community + advanced symbolic execution with concolic execution (max_paths=unlimited, max_depth=100)
+     - Community: Basic symbolic execution (max_paths=100, max_depth=10)
+     - Pro: All Community + advanced symbolic execution with concolic execution (max_paths=unlimited, max_depth=unlimited)
     - Enterprise: All Pro + unlimited symbolic execution with distributed execution and memory modeling
 
     **Tier Capabilities:**
-    - Community: Basic symbolic execution (max_paths=50, max_depth=10, basic constraint types)
-    - Pro: All Community + concolic execution (max_paths=unlimited, max_depth=100)
+     - Community: Basic symbolic execution (max_paths=100, max_depth=10, basic constraint types)
+     - Pro: All Community + concolic execution (max_paths=unlimited, max_depth=unlimited)
     - Enterprise: All Pro + distributed execution, memory modeling (max_paths=unlimited, max_depth=unlimited)
 
     **Args:**
@@ -161,46 +161,46 @@ async def generate_unit_tests(
 ) -> ToolResponseEnvelope:
     """Generate unit tests from code using symbolic execution.
 
-    **Tier Behavior:**
-    - Community: Max 5 test cases, pytest framework only
-    - Pro: All Community + max 20 test cases, pytest/unittest frameworks, data-driven tests
-    - Enterprise: All Pro + unlimited test cases, all frameworks, data-driven tests, bug reproduction
+        **Tier Behavior:**
+        - Community: Max 5 test cases, pytest framework only
+        - Pro: All Community + max 20 test cases, pytest/unittest frameworks, data-driven tests
+        - Enterprise: All Pro + unlimited test cases, all frameworks, data-driven tests, bug reproduction
 
-    **Tier Capabilities:**
-    - Community: Limited test generation (max_test_cases=5, test_frameworks=["pytest"])
-    - Pro: All Community + data-driven tests (max_test_cases=20)
-    - Enterprise: All Pro + bug reproduction (max_test_cases=unlimited)
+        **Tier Capabilities:**
+    - Community: Limited test generation (max_test_cases=10, test_frameworks=["pytest"])
+          - Pro: All Community + data-driven tests (max_test_cases=unlimited, test_frameworks=["pytest", "unittest"])
+        - Enterprise: All Pro + bug reproduction (max_test_cases=unlimited)
 
-    Input Methods (choose one):
-    - `code`: Direct Python code string to analyze
-    - `file_path`: Path to Python file containing the code
-    - `function_name`: Name of function to generate tests for (requires file_path)
+        Input Methods (choose one):
+        - `code`: Direct Python code string to analyze
+        - `file_path`: Path to Python file containing the code
+        - `function_name`: Name of function to generate tests for (requires file_path)
 
-    **Args:**
-        code (str, optional): Python code string to generate tests for.
-        file_path (str, optional): Path to Python file to analyze.
-        function_name (str, optional): Specific function name to target.
-        framework (str): Test framework. Default: "pytest".
-        data_driven (bool): Generate parameterized data-driven tests (Pro+). Default: False.
-        crash_log (str, optional): Crash log for bug reproduction tests (Enterprise only).
+        **Args:**
+            code (str, optional): Python code string to generate tests for.
+            file_path (str, optional): Path to Python file to analyze.
+            function_name (str, optional): Specific function name to target.
+            framework (str): Test framework. Default: "pytest".
+            data_driven (bool): Generate parameterized data-driven tests (Pro+). Default: False.
+            crash_log (str, optional): Crash log for bug reproduction tests (Enterprise only).
 
-    **Returns:**
-        ToolResponseEnvelope containing TestGenerationResult with:
-        - success (bool): True if generation succeeded
-        - function_name (str): Target function name
-        - test_count (int): Number of test cases generated
-        - test_cases (list[dict]): Generated test cases with code, expected results
-        - total_test_cases (int): Total tests before truncation
-        - framework_used (str): Test framework used
-        - data_driven_enabled (bool): Whether data-driven tests were enabled
-        - bug_reproduction_enabled (bool): Whether bug reproduction was enabled
-        - coverage_estimate (float, 0-100): Code coverage estimate
-        - warnings (list[str]): Non-fatal warnings
-        - tier_applied (str): Tier used
-        - error (str, optional): Error message if generation failed
-        - error (str): Error message if operation failed
-        - tier_applied (str): Tier used for analysis
-        - duration_ms (int): Analysis duration in milliseconds
+        **Returns:**
+            ToolResponseEnvelope containing TestGenerationResult with:
+            - success (bool): True if generation succeeded
+            - function_name (str): Target function name
+            - test_count (int): Number of test cases generated
+            - test_cases (list[dict]): Generated test cases with code, expected results
+            - total_test_cases (int): Total tests before truncation
+            - framework_used (str): Test framework used
+            - data_driven_enabled (bool): Whether data-driven tests were enabled
+            - bug_reproduction_enabled (bool): Whether bug reproduction was enabled
+            - coverage_estimate (float, 0-100): Code coverage estimate
+            - warnings (list[str]): Non-fatal warnings
+            - tier_applied (str): Tier used
+            - error (str, optional): Error message if generation failed
+            - error (str): Error message if operation failed
+            - tier_applied (str): Tier used for analysis
+            - duration_ms (int): Analysis duration in milliseconds
     """
     started = time.perf_counter()
     try:
@@ -348,13 +348,13 @@ async def simulate_refactor(
     and structural changes that could break functionality.
 
     **Tier Behavior:**
-    - Community: Basic refactor simulation (max 1MB file size, basic analysis depth)
-    - Pro: All Community + advanced simulation with type checking (max 10MB file size, advanced analysis depth)
+      - Community: Basic refactor simulation (max 5MB file size, basic analysis depth)
+      - Pro: All Community + advanced simulation with type checking (max 100MB file size, advanced analysis depth)
     - Enterprise: All Pro + deep simulation with compliance validation (max 100MB file size, deep analysis depth)
 
     **Tier Capabilities:**
     - Community: basic_simulation, structural_diff (max_file_size_mb=1, analysis_depth="basic")
-    - Pro: All Community + advanced_simulation, behavior_preservation, type_checking (max_file_size_mb=10, analysis_depth="advanced")
+      - Pro: All Community + advanced_simulation, behavior_preservation, type_checking (max_file_size_mb=100, analysis_depth="advanced")
     - Enterprise: All Pro + regression_prediction, impact_analysis, compliance_validation (max_file_size_mb=100, analysis_depth="deep")
 
     **Args:**

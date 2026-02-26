@@ -1,8 +1,8 @@
 {
   "name": "code-scalpel",
   "displayName": "Code Scalpel",
-  "description": "MCP server toolkit for AI agents - surgical code analysis, security scanning, and intelligent refactoring",
-  "version": "1.4.0",
+  "description": "MCP server toolkit for AI agents - surgical code analysis for Python, JS, TS, Java, C, C++, and C# with security scanning and intelligent refactoring",
+  "version": "2.0.2",
   "publisher": "3DTechus",
   "icon": "images/icon.png",
   "repository": {
