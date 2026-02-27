@@ -131,7 +131,10 @@ class TestConfigurationAlignment:
         """Verify .code-scalpel/limits.toml doesn't advertise unsupported languages."""
         from pathlib import Path
 
-        import tomli
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib  # type: ignore[no-redef]
 
         # Load limits.toml
         limits_path = (
@@ -142,7 +145,7 @@ class TestConfigurationAlignment:
             / "limits.toml"
         )
         with open(limits_path, "rb") as f:
-            limits = tomli.load(f)
+            limits = tomllib.load(f)
 
         # Check Pro tier languages
         pro_langs = set(
@@ -173,7 +176,10 @@ class TestConfigurationAlignment:
         """Community and Pro should have same languages (Pro differs only in limits)."""
         from pathlib import Path
 
-        import tomli
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib  # type: ignore[no-redef]
 
         limits_path = (
             Path(__file__).parent.parent.parent.parent
@@ -183,7 +189,7 @@ class TestConfigurationAlignment:
             / "limits.toml"
         )
         with open(limits_path, "rb") as f:
-            limits = tomli.load(f)
+            limits = tomllib.load(f)
 
         community_langs = set(
             limits.get("community", {}).get("analyze_code", {}).get("languages", [])

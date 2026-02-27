@@ -133,7 +133,7 @@ async def test_update_symbol_respects_timeout_budget(monkeypatch, tmp_path):
     tool = mcp._tool_manager._tools["update_symbol"]
 
     # Create file within project root (security requirement)
-    project_root = Path("/mnt/k/backup/Develop/code-scalpel")
+    project_root = Path(__file__).parent.parent.parent.parent
     sample_file = project_root / "test_timeout_sample_temp.py"
     sample_file.write_text("""def foo():
     return 0
@@ -196,7 +196,7 @@ async def test_update_symbol_async_calls_do_not_block_event_loop(monkeypatch, tm
 
     async def invoke(i: int) -> PatchResultModel | dict:
         # [20260121_FEATURE] Files must be within project root to avoid path sandbox rejection
-        project_root = Path("/mnt/k/backup/Develop/code-scalpel")
+        project_root = Path(__file__).parent.parent.parent.parent
         sample_file = project_root / f"test_async_{i}_temp.py"
         sample_file.write_text("""def foo():
     return 0
@@ -257,7 +257,7 @@ async def test_update_symbol_memory_error_returns_structured_envelope(
     monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
     tool = mcp._tool_manager._tools["update_symbol"]
 
-    project_root = Path("/mnt/k/backup/Develop/code-scalpel")
+    project_root = Path(__file__).parent.parent.parent.parent
     sample_file = project_root / "test_oom_sample_temp.py"
     sample_file.write_text("""def foo():
     return 0
@@ -320,7 +320,7 @@ async def test_update_symbol_redacts_pii_from_error_details(
     from code_scalpel.mcp.models.core import PatchResultModel
     from pathlib import Path
 
-    project_root = Path("/mnt/k/backup/Develop/code-scalpel")
+    project_root = Path(__file__).parent.parent.parent.parent
     sample_file = project_root / "test_pii_sample_temp.py"
     sample_file.write_text("""def foo():
     return 0
