@@ -27,9 +27,21 @@ info()  { echo -e "${GREEN}[docs]${NC} $*"; }
 warn()  { echo -e "${YELLOW}[docs]${NC} $*"; }
 error() { echo -e "${RED}[docs]${NC} $*" >&2; }
 
+# ── mkdocs resolver: prefer PATH, fall back to uv run ──────────────────────────
+MKDOCS_CMD="mkdocs"
+if ! command -v mkdocs &>/dev/null; then
+    if command -v uv &>/dev/null; then
+        # Use uv to run mkdocs with all required plugins
+        MKDOCS_CMD="uv run --with mkdocs-material --with mkdocs-material-extensions --with mkdocs-jupyter --with mkdocs-git-revision-date-localized-plugin --with mkdocs-minify-plugin --with mkdocs-glightbox --with pymdown-extensions --with pygments mkdocs"
+    else
+        error "mkdocs not found. Install with: pip install mkdocs-material"
+        exit 1
+    fi
+fi
+
 # ── preflight checks ───────────────────────────────────────────────────────────
 check_prerequisites() {
-    if ! command -v mkdocs &>/dev/null; then
+    if [[ -z "$MKDOCS_CMD" ]]; then
         error "mkdocs not found. Install with: pip install mkdocs-material"
         exit 1
     fi
@@ -41,13 +53,10 @@ check_prerequisites() {
         error "Docs source not found at $DOCS_SOURCE"
         exit 1
     fi
-    # Verify the symlink is intact
-    local link_target
-    link_target="$(readlink "$WEBSITE_DIR/docs" 2>/dev/null || true)"
-    if [[ "$link_target" != "$DOCS_SOURCE" && "$link_target" != "../../website/docs" ]]; then
-        warn "website/docs symlink may be stale (pointing to: $link_target)"
-        warn "Expected: $DOCS_SOURCE"
-        warn "Run: ln -sfn $DOCS_SOURCE $WEBSITE_DIR/docs"
+    # Ensure website/docs -> website/site symlink exists (serves docs at /docs/ for any static server)
+    if [[ ! -L "$WEBSITE_DIR/docs" ]]; then
+        info "Creating website/docs -> website/site symlink..."
+        ln -sfn site "$WEBSITE_DIR/docs"
     fi
 }
 
@@ -81,7 +90,7 @@ if $SERVE; then
     info "Starting local preview server..."
     info "Content source: $DOCS_SOURCE"
     info "Press Ctrl+C to stop"
-    exec mkdocs serve --config-file mkdocs.yml
+    exec $MKDOCS_CMD serve --config-file mkdocs.yml
 fi
 
 info "Building documentation..."
@@ -89,7 +98,7 @@ info "  Source : docs/website/docs/"
 info "  Config : website/mkdocs.yml"
 info "  Output : website/site/"
 
-mkdocs build --config-file mkdocs.yml ${STRICT}
+$MKDOCS_CMD build --config-file mkdocs.yml ${STRICT}
 
 info "Build complete → website/site/"
 

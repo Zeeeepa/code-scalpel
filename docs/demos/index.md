@@ -117,6 +117,41 @@ Enterprise features focused on governance, compliance, and organizational scale.
 
 ---
 
+## Browse by Technical Category
+
+Deep-dive demos focused on **how** Code Scalpel works, organized by underlying technique. These go further than the persona demos — explaining the mechanics of each analytical method.
+
+| # | Category | Tools Covered | Tier | Duration |
+|---|----------|---------------|------|----------|
+| 1 | [Static Analysis: Instant Codebase Intelligence](by-category/01-static-analysis.md) | `analyze_code`, `crawl_project`, `get_file_context`, `get_project_map` | Community → Pro | 10 min |
+| 2 | [AST Analysis: Seeing Code as Structure](by-category/02-ast-analysis.md) | `analyze_code`, `extract_code`, `get_file_context` | Community | 8 min |
+| 3 | [PDGs and Call Graphs: Code Relationship Maps](by-category/03-pdg-call-graphs.md) | `get_call_graph`, `get_cross_file_dependencies`, `get_graph_neighborhood`, `get_project_map` | Pro | 12 min |
+| 4 | [Symbolic Execution: Z3 Mathematical Verification](by-category/04-symbolic-execution-z3.md) | `symbolic_execute`, `generate_unit_tests` | Pro | 14 min |
+| 5 | [Taint Analysis: Tracking Data to Dangerous Sinks](by-category/05-taint-analysis-security.md) | `security_scan`, `unified_sink_detect`, `cross_file_security_scan` | Community → Enterprise | 12 min |
+| 6 | [Polyglot Analysis: 7 Languages, One Tool](by-category/06-polyglot-analysis.md) | `analyze_code`, `extract_code`, `security_scan`, `crawl_project` | Community → Pro | 10 min |
+
+### Category Descriptions
+
+#### 1. Static Analysis
+Analyzing code without running it — extracting structure, complexity metrics, and patterns from source text parsed into ASTs. Use this to understand a new codebase in minutes, identify refactoring candidates, or get a project-wide health report.
+
+#### 2. AST Analysis
+Abstract Syntax Trees are the structured, hierarchical representation of source code — the grammar beneath the text. This demo explains why AST-based extraction is more reliable and 13x cheaper than sending raw files to an LLM.
+
+#### 3. PDGs and Call Graphs
+Program Dependency Graphs and call graphs show how code is **connected** — which functions call which, how data flows between modules, and what the blast radius of a change is. Essential before any refactor.
+
+#### 4. Symbolic Execution with Z3
+Treats inputs as mathematical symbols and exhaustively explores all execution paths using the Z3 SMT solver. Finds edge cases and security bugs that 95% code coverage misses. Used by NASA, Microsoft, and AWS.
+
+#### 5. Taint Analysis
+Tracks untrusted data (user input, HTTP requests) through your codebase to dangerous sinks (SQL queries, shell commands, HTML output). Detects fake sanitizers. Covers OWASP Top 10.
+
+#### 6. Polyglot Analysis
+All 23 MCP tools working across 7 languages (Python, JS, TS, Java, C, C++, C#) with a single consistent API. Eliminates per-language tool sprawl in polyglot monorepos.
+
+---
+
 ## Browse by Pillar
 
 ### 💰 Cheaper AI (Context Reduction)
