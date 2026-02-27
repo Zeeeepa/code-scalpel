@@ -36,11 +36,13 @@ def pro_license(monkeypatch):
     # Verify the license actually activates Pro tier — skip if invalid/expired
     try:
         from code_scalpel.licensing import jwt_validator, config_loader
+
         jwt_validator._LICENSE_VALIDATION_CACHE = None
         config_loader.clear_cache()
     except Exception:
         pass
     from code_scalpel.mcp.server import _get_current_tier
+
     actual_tier = _get_current_tier()
     if actual_tier != "pro":
         monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
