@@ -27,13 +27,13 @@ if streamable_http_client is None:
     pytestmark = [pytest.mark.skip("streamable-http client not available")]
 from mcp.shared.message import SessionMessage
 
-# [20260118_TEST] Skip entire module - requires running HTTP server
-pytestmark = pytest.mark.skip(
-    reason="[20260118_TEST] HTTP transport tests require running server - skip for local pipeline"
-)
+# [20260302_TEST] Removed blanket skip — tests spawn their own subprocess servers
+# on dynamically allocated free ports and are safe to run locally.
+pytestmark = pytest.mark.asyncio
 
 
 # [20251228_TEST] Canonical MCP tool registry (all tiers list all tools).
+# [20260302_BUGFIX] Updated to 23 tools (added get_capabilities).
 EXPECTED_ALL_TOOLS: set[str] = {
     "analyze_code",
     "code_policy_check",
@@ -42,6 +42,7 @@ EXPECTED_ALL_TOOLS: set[str] = {
     "extract_code",
     "generate_unit_tests",
     "get_call_graph",
+    "get_capabilities",
     "get_cross_file_dependencies",
     "get_file_context",
     "get_graph_neighborhood",
@@ -334,7 +335,9 @@ async def _assert_core_mcp_contract(
 
 async def test_mcp_stdio_transport_end_to_end(tmp_path: Path):
     with anyio.fail_after(120):
-        repo_root = Path(__file__).resolve().parents[1]
+        # [20260302_BUGFIX] Use parents[2] (project root) not parents[1] (tests/)
+        # to avoid tests/mcp/ shadowing the installed mcp SDK in subprocess cwd.
+        repo_root = Path(__file__).resolve().parents[2]
         env = _pythonpath_env(repo_root)
         _with_hs256_test_license_env(env, tmp_path, tier="enterprise")
 
@@ -354,7 +357,9 @@ async def test_mcp_stdio_transport_end_to_end(tmp_path: Path):
 
 async def test_mcp_stdio_transport_community_tier_filters_tools(tmp_path: Path):
     with anyio.fail_after(120):
-        repo_root = Path(__file__).resolve().parents[1]
+        # [20260302_BUGFIX] Use parents[2] (project root) not parents[1] (tests/)
+        # to avoid tests/mcp/ shadowing the installed mcp SDK in subprocess cwd.
+        repo_root = Path(__file__).resolve().parents[2]
         env = _pythonpath_env(repo_root)
         env["CODE_SCALPEL_TIER"] = "community"
 
@@ -379,7 +384,9 @@ async def test_mcp_stdio_transport_pro_tier_excludes_enterprise_only_tools(
     tmp_path: Path,
 ):
     with anyio.fail_after(120):
-        repo_root = Path(__file__).resolve().parents[1]
+        # [20260302_BUGFIX] Use parents[2] (project root) not parents[1] (tests/)
+        # to avoid tests/mcp/ shadowing the installed mcp SDK in subprocess cwd.
+        repo_root = Path(__file__).resolve().parents[2]
         env = _pythonpath_env(repo_root)
         env["CODE_SCALPEL_TIER"] = "pro"
         _with_hs256_test_license_env(env, tmp_path, tier="pro")
@@ -412,7 +419,9 @@ async def test_mcp_http_transports_end_to_end(
     tmp_path: Path, transport: str, endpoint_path: str
 ):
     with anyio.fail_after(180):
-        repo_root = Path(__file__).resolve().parents[1]
+        # [20260302_BUGFIX] Use parents[2] (project root) not parents[1] (tests/)
+        # to avoid tests/mcp/ shadowing the installed mcp SDK in subprocess cwd.
+        repo_root = Path(__file__).resolve().parents[2]
         env = _pythonpath_env(repo_root)
         _with_hs256_test_license_env(env, tmp_path, tier="enterprise")
 
@@ -482,91 +491,15 @@ async def test_mcp_http_transports_end_to_end(
                 proc.kill()
 
 
+# [20260302_TEST] Feature-gating model: all tiers expose 22 tools.
+# Removed stale expected_tools param sets from old tool-gating model.
 @pytest.mark.parametrize(
-    "transport,endpoint_path,tier,expected_tools",
+    "transport,endpoint_path,tier",
     [
-        (
-            "streamable-http",
-            "/mcp",
-            "community",
-            {
-                "analyze_code",
-                "extract_code",
-                "update_symbol",
-                "get_project_map",
-                "get_file_context",
-                "get_symbol_references",
-                "security_scan",
-                "unified_sink_detect",
-                "scan_dependencies",
-                "validate_paths",
-            },
-        ),
-        (
-            "sse",
-            "/sse",
-            "community",
-            {
-                "analyze_code",
-                "extract_code",
-                "update_symbol",
-                "get_project_map",
-                "get_file_context",
-                "get_symbol_references",
-                "security_scan",
-                "unified_sink_detect",
-                "scan_dependencies",
-                "validate_paths",
-            },
-        ),
-        (
-            "streamable-http",
-            "/mcp",
-            "pro",
-            {
-                "analyze_code",
-                "crawl_project",
-                "extract_code",
-                "generate_unit_tests",
-                "get_call_graph",
-                "get_file_context",
-                "get_graph_neighborhood",
-                "get_project_map",
-                "get_symbol_references",
-                "scan_dependencies",
-                "security_scan",
-                "simulate_refactor",
-                "symbolic_execute",
-                "type_evaporation_scan",
-                "unified_sink_detect",
-                "update_symbol",
-                "validate_paths",
-            },
-        ),
-        (
-            "sse",
-            "/sse",
-            "pro",
-            {
-                "analyze_code",
-                "crawl_project",
-                "extract_code",
-                "generate_unit_tests",
-                "get_call_graph",
-                "get_file_context",
-                "get_graph_neighborhood",
-                "get_project_map",
-                "get_symbol_references",
-                "scan_dependencies",
-                "security_scan",
-                "simulate_refactor",
-                "symbolic_execute",
-                "type_evaporation_scan",
-                "unified_sink_detect",
-                "update_symbol",
-                "validate_paths",
-            },
-        ),
+        ("streamable-http", "/mcp", "community"),
+        ("sse", "/sse", "community"),
+        ("streamable-http", "/mcp", "pro"),
+        ("sse", "/sse", "pro"),
     ],
 )
 async def test_mcp_http_transports_tier_tool_contract(
@@ -574,10 +507,11 @@ async def test_mcp_http_transports_tier_tool_contract(
     transport: str,
     endpoint_path: str,
     tier: str,
-    expected_tools: set[str],
 ):
     with anyio.fail_after(180):
-        repo_root = Path(__file__).resolve().parents[1]
+        # [20260302_BUGFIX] Use parents[2] (project root) not parents[1] (tests/)
+        # to avoid tests/mcp/ shadowing the installed mcp SDK in subprocess cwd.
+        repo_root = Path(__file__).resolve().parents[2]
         env = _pythonpath_env(repo_root)
         env["CODE_SCALPEL_TIER"] = tier
         if tier != "community":

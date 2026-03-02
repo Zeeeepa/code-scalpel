@@ -1,18 +1,26 @@
 # Installing Code Scalpel for Claude
 
-Code Scalpel is an AI-powered code analysis tool available for Claude Desktop, VSCode, and Cursor IDEs. This guide walks you through installation and integration.
+Code Scalpel is an AI-powered code analysis tool available for Claude Desktop, Claude Code, VSCode, and Cursor IDEs. This guide walks you through installation and integration.
 
 ---
 
 ## Quick Start
 
-The fastest way to use Code Scalpel with Claude:
+**Claude Code (terminal)** — single command registers and auto-deploys:
+
+```bash
+claude mcp add codescalpel uvx codescalpel mcp
+```
+
+Then open `claude` in any project directory — Code Scalpel is immediately available.
+
+**Claude Desktop** — start the MCP server directly:
 
 ```bash
 uvx codescalpel mcp
 ```
 
-This installs and configures Code Scalpel for immediate use with Claude Desktop.
+Then add Code Scalpel to `claude_desktop_config.json` (see [Claude Desktop Integration](#claude-desktop-integration)).
 
 ---
 
@@ -147,6 +155,80 @@ def fibonacci(n):
 ```
 
 Claude should respond with Code Scalpel tool availability and analysis results.
+
+---
+
+## Claude Code Integration
+
+Claude Code is Anthropic's terminal-based AI coding tool (`claude` CLI). The `claude mcp add` command registers an MCP server globally — no manual config file editing required.
+
+### Step 1: Register Code Scalpel
+
+```bash
+claude mcp add codescalpel uvx codescalpel mcp
+```
+
+This single command:
+- Registers Code Scalpel as an MCP server named `codescalpel`
+- Uses `uvx` to auto-download and run the latest `codescalpel` package
+- Persists the registration globally across all Claude Code sessions
+- Makes all 23 Code Scalpel tools available immediately in the `claude` REPL
+
+### Step 2: Verify Registration
+
+```bash
+claude mcp list
+```
+
+Expected output:
+```
+codescalpel: uvx codescalpel mcp
+```
+
+### Step 3: Use in Claude Code
+
+Open any project directory and launch Claude Code:
+
+```bash
+cd /path/to/your/project
+claude
+```
+
+Code Scalpel tools are automatically available. Example prompts:
+
+```
+Analyze main.py for security vulnerabilities
+Extract the calculate_tax function from billing.py
+Scan this project for CVEs in dependencies
+```
+
+### Project-Scoped Registration (Optional)
+
+To register Code Scalpel only for a specific project (stored in `.claude/settings.json`):
+
+```bash
+claude mcp add --scope project codescalpel uvx codescalpel mcp
+```
+
+### With a License Key
+
+To activate Pro or Enterprise features, pass the license path as an environment variable:
+
+```bash
+claude mcp add codescalpel \
+  -e CODE_SCALPEL_LICENSE_PATH=/path/to/license.jwt \
+  uvx codescalpel mcp
+```
+
+### Remove or Reset
+
+```bash
+# Remove the registration
+claude mcp remove codescalpel
+
+# Re-add with updated settings
+claude mcp add codescalpel uvx codescalpel mcp
+```
 
 ---
 
