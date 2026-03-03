@@ -5658,6 +5658,9 @@ from code_scalpel.mcp.tools.policy import (  # noqa: E402, F401
 # [20260218_FEATURE] Register get_capabilities as the 23rd tool
 from code_scalpel.mcp.tools.system import get_capabilities  # noqa: E402, F401
 
+# [20260303_FEATURE] C++ static analysis tool (24th tool)
+from code_scalpel.mcp.tools.static_analysis import run_static_analysis  # noqa: E402, F401
+
 # Resource re-exports from resources.py
 from code_scalpel.mcp.resources import (  # noqa: E402, F401
     get_code_resource,

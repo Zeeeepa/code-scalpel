@@ -292,3 +292,110 @@ pytest tests/languages/ -v --tb=short
 | `mod utils;` (file-based) causes confusion | `mod_item` without a body looks like a declaration | Check for `block` child; if absent, emit `IRImport` instead of `IRClassDef` |
 | Macros crash the normalizer | `macro_invocation` node not handled | Add `visit_macro_invocation()` → `IRCall(name=macro_name, _metadata={"kind": "macro"})` |
 | `match` arms cause node confusion | `match_arm` patterns are complex patterns, not expressions | Map entire `match_expression` → `IRIf`; store arm text in metadata rather than recursing |
+
+---
+
+## Phase 2 — Static Analysis Tool Parsers
+
+Rust does not yet have a `rust_parsers/` directory — it must be created as part of Phase 2. The directory structure and tool set to implement are defined here.
+
+### Directory to create: `src/code_scalpel/code_parsers/rust_parsers/`
+
+| File to create | Tool | Output format | Type |
+|---------------|------|--------------|------|
+| `__init__.py` | RustParserRegistry | — | Factory |
+| `rust_parsers_clippy.py` | Clippy | JSON (`cargo clippy --message-format json`) | Free — execute + parse |
+| `rust_parsers_cargo_audit.py` | cargo-audit | JSON (`cargo audit --json`) | Free — execute + parse |
+| `rust_parsers_cargo_deny.py` | cargo-deny | JSON (`cargo deny check --format json`) | Free — execute + parse |
+| `rust_parsers_rustfmt.py` | rustfmt | text diff | Free — execute + parse |
+| `rust_parsers_semgrep.py` | Semgrep (Rust rules) | JSON (`semgrep --json`) | Free — execute + parse |
+
+### Priority order
+
+1. **Clippy** — the canonical Rust linter; built into `rustup`; outputs Cargo diagnostic JSON
+2. **cargo-audit** — dependency vulnerability scanner using RustSec advisory database
+3. **cargo-deny** — dependency policy enforcement (licenses, advisories, bans)
+4. **rustfmt** — formatting; check-only mode returns unified diff
+5. **Semgrep** — generic patterns; good for security rules
+
+### Clippy implementation notes
+
+Clippy uses Cargo's JSON diagnostic format (same as `rustc`):
+```json
+{"reason":"compiler-message","message":{
+  "message":"this looks like you are trying to use `..` to repeat a value",
+  "level":"warning",
+  "spans":[{"file_name":"src/main.rs","line_start":12,"column_start":5}],
+  "code":{"code":"clippy::almost_swapped"}
+}}
+```
+
+Parse only messages where `reason == "compiler-message"` and `message.level` is `"warning"` or `"error"`.
+
+```python
+def execute_clippy(self, manifest_path: Path, config=None) -> list[ClippyDiagnostic]:
+    if shutil.which("cargo") is None:
+        return []
+    cmd = ["cargo", "clippy", "--manifest-path", str(manifest_path),
+           "--message-format", "json", "--", "-D", "warnings"]
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=manifest_path.parent)
+    return self.parse_json_output(result.stdout)
+
+def parse_json_output(self, output: str) -> list[ClippyDiagnostic]:
+    diagnostics = []
+    for line in output.strip().splitlines():
+        import json
+        msg = json.loads(line)
+        if msg.get("reason") != "compiler-message":
+            continue
+        m = msg["message"]
+        if m.get("level") not in ("warning", "error"):
+            continue
+        span = (m.get("spans") or [{}])[0]
+        diagnostics.append(ClippyDiagnostic(
+            lint_name=m.get("code", {}).get("code", ""),
+            message=m["message"],
+            level=m["level"],
+            file_path=span.get("file_name", ""),
+            line_number=span.get("line_start", 0),
+            column=span.get("column_start", 0),
+        ))
+    return diagnostics
+```
+
+### cargo-audit CWE mapping
+
+cargo-audit JSON includes `advisory.aliases` which often contain CVE IDs. Map CVEs to CWEs via the OSV database (already used in `scan_dependencies`):
+```python
+def map_to_cwe(self, findings: list[AuditFinding]) -> dict[str, list[AuditFinding]]:
+    # Use advisory.categories: ["code-execution", "memory-corruption", etc.]
+    CATEGORY_TO_CWE = {
+        "code-execution": "CWE-94",
+        "memory-corruption": "CWE-119",
+        "denial-of-service": "CWE-400",
+        "cryptography": "CWE-310",
+    }
+```
+
+### RustParserRegistry
+
+```python
+class RustParserRegistry:
+    def __init__(self):
+        self._parsers = {
+            "clippy":       ClippyParser,
+            "cargo-audit":  CargoAuditParser,
+            "cargo-deny":   CargoDenyParser,
+            "rustfmt":      RustfmtParser,
+            "semgrep":      SemgrepRustParser,
+        }
+```
+
+### Tests (`tests/languages/test_rust_tool_parsers.py`)
+
+- `test_clippy_parse_json_output()` — fixture Cargo JSON lines
+- `test_clippy_filters_non_diagnostic_messages()` — skip `"reason":"build-script-executed"`
+- `test_cargo_audit_parse_json()` — fixture advisory JSON
+- `test_cargo_audit_cwe_mapping()` — category → CWE
+- `test_registry_get_parser_clippy()` — factory test
+- `test_graceful_degradation_no_cargo()` — returns `[]` when `cargo` not in PATH

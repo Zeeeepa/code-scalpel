@@ -2,6 +2,8 @@
 
 This guide covers every integration point you need to touch when adding support for a new programming language. Follow the checklist in order — later steps depend on earlier ones being complete.
 
+**A language is only considered complete when both phases are done**: the IR layer (Phase 1) AND the static analysis tool parsers (Phase 2). Do not begin a new language until the previous language's Phase 2 is finished.
+
 **Target audience**: Contributors extending Code Scalpel's polyglot support.
 
 **Example used throughout**: Go (`go`, `.go` extension, `tree-sitter-go` backend).
@@ -15,6 +17,8 @@ This guide covers every integration point you need to touch when adding support 
 | Rust | [Adding-Rust.md](Adding-Rust.md) | High |
 | Swift | [Adding-Swift.md](Adding-Swift.md) | Medium-High |
 
+**Full gap analysis and language queue**: [Language-Completion-Roadmap.md](Language-Completion-Roadmap.md)
+
 ---
 
 ## Prerequisites
@@ -24,12 +28,15 @@ Before writing any code:
 1. Confirm a tree-sitter grammar exists: `pip show tree-sitter-go` or search PyPI for `tree-sitter-<lang>`.
 2. Add the dependency to `pyproject.toml` (Step 1 below).
 3. Understand the language's top-level AST node types — run the tree-sitter playground or check the grammar's `grammar.js`.
+4. Identify the language's static analysis tools (Step 10 below) — confirm which are freely executable vs. enterprise output-only.
 
 ---
 
 ## Integration Checklist
 
-There are **12 distinct integration points** across 3 layers. This table is your at-a-glance checklist:
+There are **two phases** totalling **20+ integration points**. Both phases are required for a language to be complete.
+
+### Phase 1 — IR Layer (extraction and analysis)
 
 | # | File | What to add |
 |---|------|-------------|
@@ -45,6 +52,14 @@ There are **12 distinct integration points** across 3 layers. This table is your
 | 10 | `src/code_scalpel/mcp/tools/oracle.py` (analyze_code) | Update `language` param docstring |
 | 11 | `src/code_scalpel/cli.py` | Add `.go` → `"go"` in the local `extension_map` dict |
 | 12 | `tests/languages/` | Add tests to `test_polyglot_support.py` + new `test_go_parser.py` |
+
+### Phase 2 — Static Analysis Tool Parsers
+
+| # | File | What to add |
+|---|------|-------------|
+| 13 | `src/code_scalpel/code_parsers/go_parsers/__init__.py` | Implement `GoParserRegistry` factory (replace `NotImplementedError` stubs) |
+| 14 | `src/code_scalpel/code_parsers/go_parsers/go_parsers_*.py` (each tool) | Full implementation: `execute_tool()`, `parse_output()`, `load_config()`, `categorize_findings()`, `map_to_cwe()`, `generate_report()` |
+| 15 | `tests/languages/test_go_tool_parsers.py` | **New file** — unit tests for each tool parser using fixture output files |
 
 ---
 
@@ -440,6 +455,164 @@ def test_extract_go_struct():
 ```
 
 Run with: `pytest tests/languages/test_go_parser.py -v`
+
+---
+
+---
+
+### Step 10 — Implement Static Analysis Tool Parsers (Phase 2)
+
+**Directory**: `src/code_scalpel/code_parsers/{lang}_parsers/`
+
+Every language has a `{lang}_parsers/` directory pre-scaffolded with tool-specific files (Phase 1 framework). All methods raise `NotImplementedError` until Phase 2 is complete. Phase 2 is **required** — do not tag a release without it.
+
+#### Tool classification
+
+Before implementing, classify each tool:
+
+| Type | How to implement | Example tools |
+|------|-----------------|---------------|
+| **Free / open-source** | Implement `execute_tool()` (subprocess) AND `parse_output()` | Cppcheck, clang-tidy, golangci-lint, RuboCop, Clippy |
+| **Enterprise / licensed** | Implement `parse_output()` only; `execute_tool()` raises `NotImplementedError` with a clear message | Coverity, SonarQube, Checkmarx |
+
+#### Standard method set for each tool parser
+
+Every tool parser must implement these methods:
+
+```python
+class SomeToolParser:
+    def execute_sometool(self, paths: list[Path], config=None) -> list[SomeFinding]:
+        """Run the tool as a subprocess. Return [] gracefully if not installed.
+        For enterprise tools: raise NotImplementedError with instructions."""
+        if shutil.which("sometool") is None:
+            return []  # tool not installed — graceful degradation
+        result = subprocess.run(["sometool", "--format=json", *paths], capture_output=True, text=True)
+        return self.parse_json_output(result.stdout)
+
+    def parse_json_output(self, output: str) -> list[SomeFinding]:
+        """Parse the tool's native output format (JSON, XML, SARIF, plain text)."""
+        ...
+
+    def load_config(self, config_file: Path) -> SomeConfig:
+        """Read tool-specific config file (.sometoolrc, .sometool.yaml, etc.)."""
+        ...
+
+    def categorize_findings(self, findings: list[SomeFinding]) -> dict[Category, list[SomeFinding]]:
+        """Group findings by severity or category enum."""
+        ...
+
+    def map_to_cwe(self, findings: list[SomeFinding]) -> dict[str, list[SomeFinding]]:
+        """Map findings to CWE identifiers. Return {} if tool has no CWE support."""
+        ...
+
+    def generate_report(self, findings: list[SomeFinding], format: str = "json") -> str:
+        """Produce normalized JSON or SARIF 2.1 output."""
+        ...
+```
+
+#### Implement the Registry
+
+Replace `NotImplementedError` stubs in `{lang}_parsers/__init__.py`:
+
+```python
+class GoParserRegistry:
+    def __init__(self):
+        from . import go_parsers_gofmt, go_parsers_golangci_lint, go_parsers_gosec
+        self._parsers = {
+            "gofmt":          go_parsers_gofmt.GofmtParser,
+            "golangci-lint":  go_parsers_golangci_lint.GolangciLintParser,
+            "gosec":          go_parsers_gosec.GosecParser,
+            # ... all tools for this language
+        }
+
+    def get_parser(self, tool_name: str):
+        cls = self._parsers.get(tool_name.lower())
+        if cls is None:
+            raise ValueError(f"Unknown Go tool: {tool_name!r}. Available: {sorted(self._parsers)}")
+        return cls()
+
+    def analyze(self, path, tools: list[str] | None = None) -> dict[str, list]:
+        tools = tools or list(self._parsers)
+        results = {}
+        for name in tools:
+            try:
+                parser = self.get_parser(name)
+                results[name] = parser.execute(path)
+            except (NotImplementedError, FileNotFoundError, OSError):
+                results[name] = []
+        return results
+```
+
+#### SARIF helper (for languages with multiple SARIF-outputting tools)
+
+If multiple tools for the language emit SARIF 2.1 (common for .NET, Java), add a shared helper:
+
+```python
+# In {lang}_parsers/__init__.py
+def _parse_sarif(sarif_path: Path) -> list[dict]:
+    """Parse SARIF 2.1 format — reused across multiple tool parsers."""
+    import json
+    sarif = json.loads(sarif_path.read_text())
+    findings = []
+    for run in sarif.get("runs", []):
+        for result in run.get("results", []):
+            for loc in result.get("locations", []):
+                region = loc.get("physicalLocation", {}).get("region", {})
+                findings.append({
+                    "rule_id": result.get("ruleId", ""),
+                    "message": result.get("message", {}).get("text", ""),
+                    "severity": result.get("level", "warning"),
+                    "file": loc.get("physicalLocation", {}).get("artifactLocation", {}).get("uri", ""),
+                    "line": region.get("startLine", 0),
+                    "column": region.get("startColumn", 0),
+                })
+    return findings
+```
+
+#### Writing Phase 2 tests
+
+Create `tests/languages/test_{lang}_tool_parsers.py`. Tests must **not** require the tool to be installed — use fixture strings/files instead:
+
+```python
+# tests/languages/test_go_tool_parsers.py
+import pytest
+from code_scalpel.code_parsers.go_parsers.go_parsers_golangci_lint import GolangciLintParser
+
+SAMPLE_OUTPUT = '''{"Issues":[
+  {"FromLinter":"govet","Text":"printf: Sprintf format %d has arg v of wrong type","Pos":{"Filename":"main.go","Line":12,"Column":5},"Severity":"error"}
+]}'''
+
+def test_parse_golangci_json():
+    parser = GolangciLintParser()
+    issues = parser.parse_json_output(SAMPLE_OUTPUT)
+    assert len(issues) == 1
+    assert issues[0].message == "printf: Sprintf format %d has arg v of wrong type"
+    assert issues[0].file_path == "main.go"
+    assert issues[0].line_number == 12
+
+def test_graceful_degradation_when_not_installed(monkeypatch):
+    import shutil
+    monkeypatch.setattr(shutil, "which", lambda _: None)
+    parser = GolangciLintParser()
+    result = parser.execute_golangci_lint([])
+    assert result == []
+
+def test_registry_get_parser():
+    from code_scalpel.code_parsers.go_parsers import GoParserRegistry
+    registry = GoParserRegistry()
+    parser = registry.get_parser("golangci-lint")
+    assert isinstance(parser, GolangciLintParser)
+```
+
+#### Reference implementations
+
+The most complete tool parser suites to reference:
+
+- **Python** (`python_parsers/`) — gold standard; 16 fully implemented tools
+- **JavaScript** (`javascript_parsers/`) — 11 implemented; good ESLint and Prettier patterns
+- **TypeScript** (`typescript_parsers/`) — complete; good SARIF and decorator patterns
+
+See [Language-Completion-Roadmap.md](Language-Completion-Roadmap.md) for per-language tool lists and implementation specs.
 
 ---
 

@@ -42,6 +42,7 @@ class Language(Enum):
     CPP = "cpp"  # [20260224_FEATURE] C++ language support
     CSHARP = "csharp"  # [20260224_FEATURE] C# language support
     GO = "go"  # [20260302_FEATURE] Go language support
+    KOTLIN = "kotlin"  # [20260303_FEATURE] Kotlin language support
     AUTO = "auto"  # Auto-detect from file extension
 
 
@@ -74,6 +75,8 @@ EXTENSION_MAP: dict[str, Language] = {
     ".cs": Language.CSHARP,
     # [20260302_FEATURE] Go extension
     ".go": Language.GO,
+    ".kt": Language.KOTLIN,  # [20260303_FEATURE]
+    ".kts": Language.KOTLIN,  # [20260303_FEATURE]
 }
 
 
@@ -151,6 +154,13 @@ def detect_language(file_path: str | None, code: str | None = None) -> Language:
             and "#include" not in code
         ):
             return Language.CSHARP
+
+        # [20260303_FEATURE] Kotlin indicators — check BEFORE Go/Java; "fun " is unique.
+        if any(
+            kw in code
+            for kw in ["fun ", "val ", "var ", "data class ", "object ", "companion object"]
+        ):
+            return Language.KOTLIN
 
         # [20260302_FEATURE] Go indicators — check BEFORE Java because "package " appears
         # in both languages; "func " and "package main" are unambiguous Go keywords.
@@ -299,6 +309,8 @@ class PolyglotExtractor:
             self._parse_csharp()
         elif self.language == Language.GO:
             self._parse_go()  # [20260302_FEATURE]
+        elif self.language == Language.KOTLIN:
+            self._parse_kotlin()  # [20260303_FEATURE]
         else:
             raise ValueError(f"Unsupported language: {self.language}")
 

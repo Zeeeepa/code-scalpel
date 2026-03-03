@@ -90,3 +90,16 @@ if _HAS_CSHARP:
 
 if _HAS_GO:
     __all__ += ["GoNormalizer", "GoVisitor"]
+
+# [20260303_FEATURE] Kotlin normalizer — requires tree-sitter-kotlin
+try:
+    from .kotlin_normalizer import KotlinNormalizer, KotlinVisitor
+
+    _HAS_KOTLIN = True
+except ImportError:
+    KotlinNormalizer = None  # type: ignore[assignment]
+    KotlinVisitor = None  # type: ignore[assignment]
+    _HAS_KOTLIN = False
+
+if _HAS_KOTLIN:
+    __all__ += ["KotlinNormalizer", "KotlinVisitor"]

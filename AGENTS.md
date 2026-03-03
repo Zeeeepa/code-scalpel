@@ -196,6 +196,51 @@ Before committing code, ensure:
   - Update `docs/INDEX.md` with new documentation link
 - Never recommend releases unless explicitly asked
 
+## Language Completion Standard
+
+A language is only considered **complete** when both phases are finished. Do not start a new language until the previous language's Phase 2 is done.
+
+### Phase 1 — IR Layer (prerequisite for extraction)
+1. `pip install tree-sitter-{lang}` + add to `pyproject.toml` (main deps, `[all]`, `[polyglot]`)
+2. `Language.LANG = "lang"` enum added to both `code_parsers/extractor.py` and `polyglot/extractor.py`
+3. Extension map entries (`.ext → Language.LANG`)
+4. `detect_language()` content-based heuristics
+5. `_parse()` dispatch case + `_parse_lang()` method
+6. `src/code_scalpel/ir/normalizers/lang_normalizer.py` — `LangVisitor` + `LangNormalizer`
+7. `normalizers/__init__.py` — conditional import with try/except
+8. `code_parsers/adapters/lang_adapter.py` — real implementation (not stub)
+9. `capabilities/limits.toml` — `"lang"` in all 3 tier sections of `analyze_code` and `unified_sink_detect`
+10. MCP docstrings updated in `extraction.py` and `oracle.py`
+11. `tests/languages/test_lang_parser.py` — 14+ test cases
+12. `tests/languages/test_polyglot_support.py` — extension + extraction matrix rows
+
+### Phase 2 — Static Analysis Tool Parsers (required for completeness)
+All tool parser files in `code_parsers/{lang}_parsers/` must be fully implemented:
+
+| Tool type | Implementation pattern |
+|-----------|----------------------|
+| Free tool (CLI) | `execute_tool()` via subprocess + `parse_output()` + categorize + CWE mapping + report |
+| Enterprise tool | `parse_output()` only; `execute_tool()` raises `NotImplementedError` with instructions |
+| Graceful degradation | `shutil.which("tool") is None → return []` |
+
+Each `{lang}_parsers/` directory requires:
+- One file per static analysis tool
+- `__init__.py` implementing `{Lang}ParserRegistry` with `get_parser(tool_name)` factory
+- `tests/languages/test_{lang}_tool_parsers.py` with fixture-based tests (no tools need to be installed)
+
+### Language Completion Status
+See `wiki/Language-Completion-Roadmap.md` for full gap analysis, implementation specs, and sequenced work queue.
+
+**Priority order for completing gaps before new languages:**
+1. **C++** (Phase 2): 7 tool parsers — Cppcheck, clang-tidy, Clang-SA, cpplint, Coverity, SonarQube
+2. **C#** (Phase 2): 6 tool parsers — Roslyn, StyleCop, SecurityCodeScan, FxCop, ReSharper, SonarQube
+3. **Go** (Phase 2): 6 tool parsers — gofmt, golint, govet, staticcheck, golangci-lint, gosec
+4. **Java** (Phase 2): 15 tool parsers — see roadmap for Tier A/B/C priority
+5. **JavaScript** (Phase 2 minor): 5 stubs to complete — npm_audit, jsdoc, package_json, test_detection, webpack
+6. **Then**: Kotlin → Ruby → Rust → Swift → PHP (in order)
+
+---
+
 ## Key Development Principles
 
 ### Governance
@@ -235,6 +280,6 @@ Before committing code, ensure:
 
 ---
 
-**Last Updated:** February 24, 2026  
-**Project Version:** 2.0.0  
+**Last Updated:** March 3, 2026
+**Project Version:** 2.1.0
 **Python Support:** 3.10, 3.11, 3.12, 3.13

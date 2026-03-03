@@ -17,6 +17,7 @@ class Language(Enum):
     CPP = "cpp"
     CSHARP = "csharp"  # [20260225_FEATURE]
     GO = "go"  # [20260302_FEATURE]
+    KOTLIN = "kotlin"  # [20260303_FEATURE]
     UNKNOWN = "unknown"
 
 

@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — Language Completion (C++, C#, Go, Java, JavaScript tool parsers)
+
+### Definition of "language complete" (new standard as of 2026-03-03)
+A language version is considered complete only when **both** phases are done:
+- **Phase 1**: IR normalizer, adapter, extractor wiring, `limits.toml`, MCP docstrings, tests
+- **Phase 2**: All `code_parsers/{lang}_parsers/` tool parsers fully implemented (execution + output parsing + categorization + CWE mapping + report generation)
+
+### Work queue before v2.2.0 (Kotlin)
+- **C++ Phase 2**: Cppcheck, clang-tidy, Clang Static Analyzer, cpplint, Coverity (output-only), SonarQube (output-only), CppParserRegistry, cpp_adapter.py
+- **C# Phase 2**: Roslyn Analyzers, StyleCop, SecurityCodeScan, FxCop, ReSharper, SonarQube, CSharpParserRegistry
+- **Go Phase 2**: gofmt, golint, govet, staticcheck, golangci-lint, gosec, GoParserRegistry
+- **Java Phase 2 (Tier A+B)**: PMD, Checkstyle, SpotBugs, FindSecBugs, ErrorProne, Infer, SonarQube, DependencyCheck, Semgrep
+- **JavaScript Phase 2 (minor)**: npm_audit, jsdoc, package_json, test_detection, webpack
+
+See [wiki/Language-Completion-Roadmap.md](wiki/Language-Completion-Roadmap.md) for full specs and implementation details.
+
+---
+
 ## [2.1.0] - 2026-03-02
 
 ### Added

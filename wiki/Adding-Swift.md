@@ -367,3 +367,79 @@ pytest tests/languages/ -v --tb=short
 ## Version Note
 
 The `tree-sitter-swift` Python binding has had less maintenance activity than the other grammars. Before starting, verify the currently published version on PyPI handles your target Swift syntax (Swift 5.9+). If the binding lags behind the language spec, note it in the implementation file header and pin to the tested version in `pyproject.toml`.
+
+---
+
+## Phase 2 — Static Analysis Tool Parsers
+
+The `swift_parsers/` directory is pre-scaffolded with Phase 1 framework. All 4 tool parsers must be fully implemented before Swift is considered complete.
+
+### Tools to implement
+
+| File | Tool | Output format | Type |
+|------|------|--------------|------|
+| `swift_parsers_SwiftLint.py` | SwiftLint | JSON (`swiftlint lint --reporter json`) | Free — execute + parse |
+| `swift_parsers_swiftformat.py` | SwiftFormat | text diff | Free — execute + parse |
+| `swift_parsers_sourcekitten.py` | SourceKitten | JSON (`sourcekitten doc ...`) | Free — execute + parse |
+| `swift_parsers_Tailor.py` | Tailor | JSON / XML | Free — execute + parse |
+
+### Priority order
+
+1. **SwiftLint** — universal Swift linter; JSON output; CWE-mappable rule violations
+2. **SwiftFormat** — formatting; check-only mode returns diff
+3. **SourceKitten** — documentation extraction and IDE-level semantic info
+4. **Tailor** — additional style enforcement
+
+### SwiftLint implementation notes
+
+SwiftLint JSON output format:
+```json
+[{"character":5,"file":"/path/to/File.swift","line":12,"reason":"Trailing whitespace.",
+  "rule_id":"trailing_whitespace","severity":"Warning","type":"Trailing Whitespace"}]
+```
+
+```python
+def execute_swiftlint(self, paths: list[Path], config=None) -> list[SwiftLintViolation]:
+    if shutil.which("swiftlint") is None:
+        return []
+    cmd = ["swiftlint", "lint", "--reporter", "json"] + [str(p) for p in paths]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return self.parse_json_output(result.stdout)
+
+def parse_json_output(self, output: str) -> list[SwiftLintViolation]:
+    import json
+    items = json.loads(output or "[]")
+    return [SwiftLintViolation(
+        file_path=item["file"],
+        line_number=item["line"],
+        column=item.get("character", 0),
+        rule_id=item["rule_id"],
+        message=item["reason"],
+        severity=item["severity"],
+    ) for item in items]
+```
+
+### Platform note
+
+SwiftLint and SwiftFormat are macOS-primary tools. Implement graceful degradation on Linux (check `sys.platform` and `shutil.which`). SourceKitten requires Xcode command-line tools (`xcode-select`) — document this requirement clearly and return `[]` if unavailable.
+
+### SwiftParserRegistry
+
+```python
+class SwiftParserRegistry:
+    def __init__(self):
+        self._parsers = {
+            "swiftlint":   SwiftLintParser,
+            "swiftformat": SwiftFormatParser,
+            "sourcekitten": SourceKittenParser,
+            "tailor":       TailorParser,
+        }
+```
+
+### Tests (`tests/languages/test_swift_tool_parsers.py`)
+
+- `test_swiftlint_parse_json_output()` — fixture JSON
+- `test_swiftlint_graceful_on_linux()` — skip if `swiftlint` not available
+- `test_swiftformat_parse_diff_output()` — fixture diff text
+- `test_registry_get_parser_swiftlint()` — factory test
+- `test_graceful_degradation_no_swiftlint()` — returns `[]` when not installed

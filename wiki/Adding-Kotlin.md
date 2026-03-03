@@ -280,3 +280,103 @@ pytest tests/languages/ -v --tb=short
 | Companion object methods missing | `companion_object` body not visited | Recurse into `companion_object.class_body` |
 | `when` expression crashes | Not mapped to an IR node | Map `when_expression` → `IRIf` with `_metadata["kind"] = "when"` |
 | `.kts` files not detected | Extension map only has `.kt` | Add both `.kt` and `.kts` to `EXTENSION_MAP` |
+
+---
+
+## Phase 2 — Static Analysis Tool Parsers
+
+The `kotlin_parsers/` directory is pre-scaffolded with Phase 1 framework (data classes, method stubs). All 8 tool parsers must be fully implemented before Kotlin is considered complete.
+
+### Tools to implement
+
+| File | Tool | Output format | Type |
+|------|------|--------------|------|
+| `kotlin_parsers_Detekt.py` | Detekt | XML / SARIF / JSON (`--report xml:...`) | Free — execute + parse |
+| `kotlin_parsers_ktlint.py` | ktlint | JSON (`ktlint --reporter=json`) | Free — execute + parse |
+| `kotlin_parsers_diktat.py` | diktat | SARIF / XML | Free — execute + parse |
+| `kotlin_parsers_gradle.py` | Gradle build | `build.gradle.kts` + build output | Config parsing |
+| `kotlin_parsers_compose.py` | Compose Lint | SARIF (Android Lint format) | Free — execute + parse |
+| `kotlin_parsers_Konsist.py` | Konsist | JUnit XML (test-based) | Test output parsing |
+| `kotlin_parsers_test.py` | Test utilities | — | Helper utilities |
+
+### Priority order
+
+1. **ktlint** — most widely used Kotlin linter; JSON output is trivial to parse
+2. **Detekt** — de-facto standard for Kotlin static analysis; rich rule set with severity levels
+3. **diktat** — Kotlin coding standard linter (Kotlin Foundation-endorsed)
+4. **Compose Lint** — critical for Android Kotlin projects (uses Android Lint SARIF)
+5. **Gradle** — parse `build.gradle.kts` for dependencies and configuration
+6. **Konsist** — architecture validation; parse JUnit XML output from tests
+
+### ktlint implementation notes
+
+ktlint JSON output format:
+```json
+[{"file":"src/main.kt","errors":[
+  {"line":12,"column":5,"message":"Unexpected blank line(s)","rule":"no-blank-line-before-rbrace"}
+]}]
+```
+
+```python
+def execute_ktlint(self, paths: list[Path], config=None) -> list[KtlintViolation]:
+    if shutil.which("ktlint") is None:
+        return []
+    cmd = ["ktlint", "--reporter=json"] + [str(p) for p in paths]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return self.parse_json_output(result.stdout)
+
+def parse_json_output(self, output: str) -> list[KtlintViolation]:
+    import json
+    files = json.loads(output or "[]")
+    violations = []
+    for file_entry in files:
+        for error in file_entry.get("errors", []):
+            violations.append(KtlintViolation(
+                file_path=file_entry["file"],
+                line_number=error["line"],
+                column=error["column"],
+                message=error["message"],
+                rule=error["rule"],
+                severity="warning",
+            ))
+    return violations
+```
+
+### Detekt implementation notes
+
+Detekt XML output format:
+```xml
+<checkstyle>
+  <file name="src/main.kt">
+    <error line="12" column="5" severity="warning" message="..." source="detekt.ComplexMethod"/>
+  </file>
+</checkstyle>
+```
+
+Use `xml.etree.ElementTree` to parse. Map `source` attribute to `DetektRuleCategory` enum.
+
+### KotlinParserRegistry
+
+```python
+class KotlinParserRegistry:
+    def __init__(self):
+        from . import kotlin_parsers_ktlint, kotlin_parsers_Detekt, kotlin_parsers_diktat
+        self._parsers = {
+            "ktlint":  kotlin_parsers_ktlint.KtlintParser,
+            "detekt":  kotlin_parsers_Detekt.DetektParser,
+            "diktat":  kotlin_parsers_diktat.DiktatParser,
+            "compose": kotlin_parsers_compose.ComposeLintParser,
+            "gradle":  kotlin_parsers_gradle.GradleParser,
+            "konsist": kotlin_parsers_Konsist.KonsistParser,
+        }
+    # ... standard get_parser() and analyze() methods
+```
+
+### Tests (`tests/languages/test_kotlin_tool_parsers.py`)
+
+Write fixture-based tests (do not require tools installed):
+- `test_ktlint_parse_json_output()` — parse sample JSON string
+- `test_detekt_parse_xml_output()` — parse sample Checkstyle XML
+- `test_detekt_categorize_by_rule()` — group by `DetektRuleCategory`
+- `test_registry_get_parser_ktlint()` — factory test
+- `test_graceful_degradation_no_ktlint()` — `shutil.which` returns None → returns `[]`

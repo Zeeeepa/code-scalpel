@@ -115,6 +115,11 @@ API Design (Planned):
 
 from __future__ import annotations
 
+import json
+import os
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -230,7 +235,23 @@ class IsortParser:
             IsortReport with sorting analysis results
 
         """
-        raise NotImplementedError("IsortParser.analyze_file() not yet implemented")
+        # [20260303_FEATURE] run isort --check-only --diff on file
+        path = Path(file_path)
+        if not shutil.which("isort"):
+            return IsortReport(
+                file_path=str(path), is_properly_sorted=True, error="isort not found"
+            )
+        result = subprocess.run(
+            ["isort", "--check-only", "--diff", str(path)],
+            capture_output=True,
+            text=True,
+        )
+        is_sorted = result.returncode == 0
+        return IsortReport(
+            file_path=str(path),
+            is_properly_sorted=is_sorted,
+            diff=result.stdout if not is_sorted else None,
+        )
 
     def analyze_code(self, code: str, filename: str = "<string>") -> IsortReport:
         """
@@ -244,7 +265,28 @@ class IsortParser:
             IsortReport with sorting analysis results
 
         """
-        raise NotImplementedError("IsortParser.analyze_code() not yet implemented")
+        # [20260303_FEATURE] write to temp file then run isort --check-only --diff
+        if not shutil.which("isort"):
+            return IsortReport(
+                file_path=filename, is_properly_sorted=True, error="isort not found"
+            )
+        fd, tmp = tempfile.mkstemp(suffix=".py")
+        try:
+            os.write(fd, code.encode())
+            os.close(fd)
+            result = subprocess.run(
+                ["isort", "--check-only", "--diff", tmp],
+                capture_output=True,
+                text=True,
+            )
+            is_sorted = result.returncode == 0
+            return IsortReport(
+                file_path=filename,
+                is_properly_sorted=is_sorted,
+                diff=result.stdout if not is_sorted else None,
+            )
+        finally:
+            os.unlink(tmp)
 
     def get_fixed_code(self, code: str) -> str:
         """
@@ -257,7 +299,24 @@ class IsortParser:
             Code with sorted imports
 
         """
-        raise NotImplementedError("IsortParser.get_fixed_code() not yet implemented")
+        # [20260303_FEATURE] prefer isort library; fall back to subprocess
+        try:
+            import isort as _isort  # type: ignore[import]
+
+            return _isort.code(code)  # type: ignore[no-any-return]
+        except ImportError:
+            pass
+        if not shutil.which("isort"):
+            return code
+        fd, tmp = tempfile.mkstemp(suffix=".py")
+        try:
+            os.write(fd, code.encode())
+            os.close(fd)
+            subprocess.run(["isort", tmp], capture_output=True)
+            with open(tmp) as fh:
+                return fh.read()
+        finally:
+            os.unlink(tmp)
 
     def load_config(self, config_path: str | Path) -> None:
         """
@@ -267,4 +326,68 @@ class IsortParser:
             config_path: Path to .isort.cfg or setup.cfg
 
         """
-        raise NotImplementedError("IsortParser.load_config() not yet implemented")
+        # [20260303_FEATURE] read profile setting from config file
+        path = Path(config_path)
+        if not path.exists():
+            return
+        content = path.read_text()
+        for line in content.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("profile"):
+                parts = stripped.split("=", 1)
+                if len(parts) == 2:
+                    self.config.profile = parts[1].strip().strip('"').strip("'")
+                break
+
+    # -------------------------------------------------------------------------
+    # [20260303_FEATURE] New methods added per Stage 4a spec
+    # -------------------------------------------------------------------------
+
+    def execute_isort(self, path: str = ".") -> list[dict]:
+        """Run isort --check-only --diff on path; return [] if not available."""
+        if not shutil.which("isort"):
+            return []
+        result = subprocess.run(
+            ["isort", "--check-only", "--diff", path],
+            capture_output=True,
+            text=True,
+        )
+        unsorted = self.parse_diff_output(result.stdout)
+        return [{"file": f, "is_sorted": False} for f in unsorted]
+
+    def parse_diff_output(self, diff_text: str) -> list[str]:
+        """Parse unified diff text and return list of unsorted file paths."""
+        files: list[str] = []
+        for line in diff_text.splitlines():
+            if line.startswith("--- "):
+                fname = line[4:].split("\t")[0].strip()
+                if fname and fname != "/dev/null" and fname not in files:
+                    files.append(fname)
+        return files
+
+    def check_files(self, paths: list) -> dict[str, bool]:
+        """Return {str(path): is_sorted} dict for each path."""
+        result_map: dict[str, bool] = {}
+        no_isort = not shutil.which("isort")
+        for p in paths:
+            key = str(p)
+            if no_isort:
+                result_map[key] = True
+                continue
+            res = subprocess.run(
+                ["isort", "--check-only", key],
+                capture_output=True,
+                text=True,
+            )
+            result_map[key] = res.returncode == 0
+        return result_map
+
+    def generate_report(self, findings: list, format: str = "json") -> str:
+        """Return JSON report of unsorted files."""
+        unsorted = [
+            f["file"] if isinstance(f, dict) else str(f) for f in findings
+        ]
+        return json.dumps(
+            {"tool": "isort", "total_unsorted": len(unsorted), "files": unsorted},
+            indent=2,
+        )

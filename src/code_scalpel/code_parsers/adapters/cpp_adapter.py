@@ -1,42 +1,55 @@
-"""C++ Parser Adapter - IParser interface for C++ parser.
+"""C++ Parser Adapter - IParser interface wrapping CppNormalizer.
 
-[20251224_FEATURE] Stub adapter for C++ parsing support.
+[20260303_FEATURE] Full implementation using CppNormalizer (tree-sitter-cpp).
+Replaces the NotImplementedError stub with a real implementation.
 """
 
 from typing import Any, List
 
-from ..interface import IParser, ParseResult
+from ..interface import IParser, Language, ParseResult
 
 
 class CppParserAdapter(IParser):
     """
-    Adapter for C++ parsing (STUB - Not Yet Implemented).
+    Adapter wrapping CppNormalizer to implement the IParser interface.
 
-    [20251224_STUB] Placeholder for C++ parser integration.
-
-    To implement:
-        1. Choose backend (tree-sitter-cpp, libclang, or clang python bindings)
-        2. Implement parse() method
-        3. Add C++-specific extraction methods
-        4. Support C++ version detection
-        5. Add template and namespace handling
+    [20260303_FEATURE] Thin wrapper over CppNormalizer that translates
+    between the IParser contract and the IR normalizer output.
     """
 
-    def __init__(self):
-        """Initialize the C++ parser adapter (stub)."""
-        raise NotImplementedError(
-            "CppParserAdapter not yet implemented. "
-            "See TODO items in this file for implementation roadmap."
-        )
+    def __init__(self) -> None:
+        """Initialize the C++ parser adapter."""
+        from code_scalpel.ir.normalizers.cpp_normalizer import CppNormalizer
+
+        self._normalizer = CppNormalizer()
 
     def parse(self, code: str) -> ParseResult:
-        """Parse C++ code (stub)."""
-        raise NotImplementedError("C++ parsing not yet implemented")
+        """Parse C++ source code and return a ParseResult with the IR module."""
+        ir_module = self._normalizer.normalize(code)
+        return ParseResult(
+            ast=ir_module,
+            errors=[],
+            warnings=[],
+            metrics={},
+            language=Language.CPP,
+        )
 
     def get_functions(self, ast_tree: Any) -> List[str]:
-        """Get function names from C++ AST (stub)."""
-        raise NotImplementedError("C++ function extraction not yet implemented")
+        """Return names of all top-level functions and methods."""
+        from code_scalpel.ir.nodes import IRFunctionDef
+
+        return [
+            n.name
+            for n in getattr(ast_tree, "body", [])
+            if isinstance(n, IRFunctionDef)
+        ]
 
     def get_classes(self, ast_tree: Any) -> List[str]:
-        """Get class names from C++ AST (stub)."""
-        raise NotImplementedError("C++ class extraction not yet implemented")
+        """Return names of all struct and class type declarations."""
+        from code_scalpel.ir.nodes import IRClassDef
+
+        return [
+            n.name
+            for n in getattr(ast_tree, "body", [])
+            if isinstance(n, IRClassDef)
+        ]

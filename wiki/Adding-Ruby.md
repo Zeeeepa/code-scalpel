@@ -282,3 +282,101 @@ pytest tests/languages/ -v --tb=short
 | Blocks cause infinite recursion | Block body recursed without depth guard | Track recursion depth; skip deep block traversal for extraction use case |
 | `attr_accessor` names missing | Macro call not parsed | Visit `call` nodes and check for `attr_accessor`/`attr_reader`/`attr_writer` identifiers |
 | Open class definitions create duplicate entries | Same class name appears twice | Expected behavior — emit separate `IRClassDef`; mark `_metadata["reopened"] = True` on subsequent ones |
+
+---
+
+## Phase 2 — Static Analysis Tool Parsers
+
+The `ruby_parsers/` directory is pre-scaffolded with Phase 1 framework. All 7 tool parsers must be fully implemented before Ruby is considered complete.
+
+### Tools to implement
+
+| File | Tool | Output format | Type |
+|------|------|--------------|------|
+| `ruby_parsers_RuboCop.py` | RuboCop | JSON (`rubocop --format json`) | Free — execute + parse |
+| `ruby_parsers_Reek.py` | Reek | JSON (`reek --format json`) | Free — execute + parse |
+| `ruby_parsers_brakeman.py` | Brakeman | JSON (`brakeman -f json`) | Free — execute + parse |
+| `ruby_parsers_bundler.py` | Bundler Audit | JSON (`bundler-audit check --format json`) | Free — execute + parse |
+| `ruby_parsers_fasterer.py` | Fasterer | text (line-by-line) | Free — execute + parse |
+| `ruby_parsers_simplecov.py` | SimpleCov | JSON (`.resultset.json`) | Output file parsing |
+| `ruby_parsers_ast.py` | AST utilities | — | Helper for IR normalization |
+
+### Priority order
+
+1. **RuboCop** — universal Ruby linter; JSON format is well-documented
+2. **Brakeman** — security scanner specifically for Rails; maps findings to CWEs
+3. **Reek** — code smell detector; JSON output
+4. **Bundler Audit** — dependency vulnerability scanner; pairs with `scan_dependencies`
+5. **Fasterer** — performance hints; simple text output
+6. **SimpleCov** — coverage metrics from `.resultset.json`
+
+### RuboCop implementation notes
+
+RuboCop JSON output format:
+```json
+{"files":[{"path":"app/models/user.rb","offenses":[
+  {"severity":"warning","message":"Use snake_case...","cop_name":"Naming/MethodName",
+   "location":{"line":12,"column":3}}
+]}],"summary":{"offense_count":1}}
+```
+
+```python
+def execute_rubocop(self, paths: list[Path], config=None) -> list[RuboCopViolation]:
+    if shutil.which("rubocop") is None:
+        return []
+    cmd = ["rubocop", "--format", "json", "--no-color"] + [str(p) for p in paths]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return self.parse_json_output(result.stdout)
+
+def parse_json_output(self, output: str) -> list[RuboCopViolation]:
+    import json
+    data = json.loads(output or '{"files":[]}')
+    violations = []
+    for file_entry in data.get("files", []):
+        for offense in file_entry.get("offenses", []):
+            violations.append(RuboCopViolation(
+                file_path=file_entry["path"],
+                cop_name=offense["cop_name"],
+                message=offense["message"],
+                severity=RuboCopSeverity(offense.get("severity", "warning")),
+                line_number=offense["location"]["line"],
+                column=offense["location"]["column"],
+            ))
+    return violations
+```
+
+### Brakeman CWE mapping
+
+Brakeman includes `warning_type` fields that map directly to CWEs:
+```python
+BRAKEMAN_CWE_MAP = {
+    "SQL Injection": "CWE-89",
+    "Cross-Site Scripting": "CWE-79",
+    "Command Injection": "CWE-78",
+    "Path Traversal": "CWE-22",
+    "Mass Assignment": "CWE-915",
+}
+```
+
+### RubyParserRegistry
+
+```python
+class RubyParserRegistry:
+    def __init__(self):
+        self._parsers = {
+            "rubocop":       RuboCopParser,
+            "brakeman":      BrakemanParser,
+            "reek":          ReekParser,
+            "bundler-audit": BundlerAuditParser,
+            "fasterer":      FastererParser,
+            "simplecov":     SimpleCovParser,
+        }
+```
+
+### Tests (`tests/languages/test_ruby_tool_parsers.py`)
+
+- `test_rubocop_parse_json_output()` — fixture JSON
+- `test_brakeman_cwe_mapping()` — SQL Injection → CWE-89
+- `test_reek_parse_json_output()` — fixture JSON
+- `test_registry_get_parser_rubocop()` — factory test
+- `test_graceful_degradation_no_rubocop()` — returns `[]` when not installed
