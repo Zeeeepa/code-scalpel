@@ -1,30 +1,31 @@
 # Code Scalpel: Reduce AI Costs by 200x
 
-**Latest Release: v2.0.2 | February 25, 2026**
+**Latest Release: v2.1.0 | March 3, 2026**
 
 **Stop copy-pasting entire files into Claude.** Give your AI assistant surgical code analysis tools and reduce costs by 200x.
 
 **Result:** $450/month → $22/month. Same quality answers, 95% lower cost, 10x faster responses.
 
-![Free Forever](https://img.shields.io/badge/Free-Forever-brightgreen) ![Setup Time](https://img.shields.io/badge/Setup-2%20Minutes-blue) ![Local Execution](https://img.shields.io/badge/Runs-Locally-orange) ![Tools](https://img.shields.io/badge/Tools-23-purple) ![Languages](https://img.shields.io/badge/Languages-7-blue)
+![Free Forever](https://img.shields.io/badge/Free-Forever-brightgreen) ![Setup Time](https://img.shields.io/badge/Setup-2%20Minutes-blue) ![Local Execution](https://img.shields.io/badge/Runs-Locally-orange) ![Tools](https://img.shields.io/badge/Tools-23-purple) ![Languages](https://img.shields.io/badge/Languages-8-blue)
 
 ---
 
-## What's New in v2.0.0 — Polyglot Expansion
+## What's New in v2.1.0 — Full Go Support
 
-Code Scalpel now supports **7 languages** with production-quality parsers. All **22 MCP tools** work across every language.
+Code Scalpel now supports **8 languages** with production-quality parsers. All **23 MCP tools** work across every language.
 
 | Language | Extensions | Highlights |
-|----------|-----------|-----------|
+|----------|-----------|----------|
 | **Python** | `.py` | Full AST + PDG + symbolic execution |
 | **JavaScript** | `.js`, `.jsx` | AST, call graphs, extraction |
 | **TypeScript** | `.ts`, `.tsx` | Full type analysis, React components |
 | **Java** | `.java` | AST parsing and analysis |
+| **Go** *(new in v2.1)* | `.go` | Functions, methods, structs, interfaces, imports, goroutines |
 | **C** *(new in v2.0)* | `.c`, `.h` | Functions, structs, unions, enums, macros, bitfields |
 | **C++** *(new in v2.0)* | `.cpp`, `.hpp`, `.cc`, and more | Classes, templates, namespaces, operator overloading |
 | **C#** *(new in v2.0)* | `.cs` | Classes, records, interfaces, generics, async/await |
 
-262 new language tests added. Zero breaking changes to existing APIs. See [CHANGELOG](CHANGELOG.md) for full details.
+285 new language tests added (v2.0: 262; v2.1: +23 Go tests). Zero breaking changes to existing APIs. See [CHANGELOG](CHANGELOG.md) for full details.
 
 ---
 
@@ -717,7 +718,7 @@ codescalpel capabilities
 
 ## Release Information
 **Launch Date**: January 2026
-**Version**: v2.0.0
+**Version**: v2.1.0
 **License**: MIT (Community)
 
 Code Scalpel is built for the new era of **Agentic Engineering**. It is not just a linter; it is the sensory and actuator system for the next generation of AI developers.

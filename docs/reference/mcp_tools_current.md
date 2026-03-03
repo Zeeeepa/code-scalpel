@@ -111,6 +111,19 @@ Check code against style guides and compliance standards (HIPAA, SOC2, PCI-DSS).
       "title": "Paths",
       "type": "array"
     },
+    "report_config": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Report Config"
+    },
     "rules": {
       "anyOf": [
         {
