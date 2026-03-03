@@ -131,10 +131,7 @@ class TestConfigurationAlignment:
         """Verify .code-scalpel/limits.toml doesn't advertise unsupported languages."""
         from pathlib import Path
 
-        try:
-            import tomllib
-        except ImportError:
-            import tomli as tomllib  # type: ignore[no-redef]
+        import tomli
 
         # Load limits.toml
         limits_path = (
@@ -145,41 +142,27 @@ class TestConfigurationAlignment:
             / "limits.toml"
         )
         with open(limits_path, "rb") as f:
-            limits = tomllib.load(f)
+            limits = tomli.load(f)
 
         # Check Pro tier languages
         pro_langs = set(
             limits.get("pro", {}).get("analyze_code", {}).get("languages", [])
         )
 
-        # Should NOT contain go or rust
-        assert (
-            "go" not in pro_langs
-        ), "Pro tier should not advertise Go until implemented"
+        # Should NOT contain rust (not yet implemented)
         assert (
             "rust" not in pro_langs
         ), "Pro tier should not advertise Rust until implemented"
 
         # Should only contain implemented languages
-        # [20260225_FEATURE] C/C++/C# wired up — update expected set
-        assert pro_langs == {
-            "python",
-            "javascript",
-            "typescript",
-            "java",
-            "c",
-            "cpp",
-            "csharp",
-        }
+        # [20260302_FEATURE] Go wired up in v2.1.0 — added to expected set
+        assert pro_langs == {"python", "javascript", "typescript", "java", "c", "cpp", "csharp", "go"}
 
     def test_community_tier_languages_match_pro(self):
         """Community and Pro should have same languages (Pro differs only in limits)."""
         from pathlib import Path
 
-        try:
-            import tomllib
-        except ImportError:
-            import tomli as tomllib  # type: ignore[no-redef]
+        import tomli
 
         limits_path = (
             Path(__file__).parent.parent.parent.parent
@@ -189,7 +172,7 @@ class TestConfigurationAlignment:
             / "limits.toml"
         )
         with open(limits_path, "rb") as f:
-            limits = tomllib.load(f)
+            limits = tomli.load(f)
 
         community_langs = set(
             limits.get("community", {}).get("analyze_code", {}).get("languages", [])
