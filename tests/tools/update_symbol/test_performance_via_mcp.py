@@ -39,7 +39,8 @@ from tests.tools.update_symbol.fixtures.performance_fixtures import (
 
 def setup_test_dir(name: str) -> Path:
     """Create a test directory within project root."""
-    test_dir = Path(f"/mnt/k/backup/Develop/code-scalpel/.test_perf_{name}")
+    project_root = Path(__file__).parent.parent.parent.parent
+    test_dir = project_root / f".test_perf_{name}"
     test_dir.mkdir(exist_ok=True)
     return test_dir
 

@@ -14,7 +14,9 @@ class Language(Enum):
     PYTHON = "python"
     JAVASCRIPT = "javascript"
     JAVA = "java"
+    C = "c"  # [20260225_FEATURE]
     CPP = "cpp"
+    CSHARP = "csharp"  # [20260225_FEATURE]
 
 
 @dataclass

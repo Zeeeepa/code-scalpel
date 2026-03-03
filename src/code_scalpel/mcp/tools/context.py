@@ -38,12 +38,12 @@ async def crawl_project(
     """Crawl a project directory and analyze Python files.
 
     **Tier Behavior:**
-    - Community: Limited to 100 files, basic file tree indexing with language breakdown and entrypoint detection
+    - Community: Limited to 500 files, basic file tree indexing with language breakdown and entrypoint detection
     - Pro: Unlimited files/depth, parallel processing, incremental crawling, framework detection, dependency mapping, hotspot identification
     - Enterprise: Unlimited files/depth/repos, distributed crawling, historical trends, custom rules, compliance scanning, monorepo support
 
     **Tier Capabilities:**
-    - Community: Full file tree indexing, language breakdown, gitignore respect, basic statistics, entrypoint detection (max 100 files, 10 depth)
+    - Community: Full file tree indexing, language breakdown, gitignore respect, basic statistics, entrypoint detection (max 500 files, 10 depth)
     - Pro: All Community features + parallel processing, incremental crawling, smart crawl, framework entrypoint detection, dependency mapping, hotspot identification, generated code detection, Next.js/Django/Flask route detection (unlimited files/depth)
     - Enterprise: All Pro features + distributed crawling, historical trend analysis, custom crawl rules, compliance scanning, incremental indexing, monorepo support, cross-repo dependency linking, 100k+ files support (unlimited files/depth/repos)
 
@@ -217,12 +217,12 @@ async def get_symbol_references(
     """Find all references to a symbol across the project.
 
     **Tier Behavior:**
-    - Community: Limited to 100 files searched, 100 references returned, basic symbol location
+     - Community: Limited to 200 files searched, 200 references returned, basic symbol location
     - Pro: Unlimited files and references, enhanced categorization (definition/import/call/read/write/reference), scope filtering, test file filtering
     - Enterprise: Unlimited files and references, CODEOWNERS integration, ownership attribution, impact analysis with risk scoring
 
     **Tier Capabilities:**
-    - Community: Up to 100 files searched, 100 references returned
+     - Community: Up to 200 files searched, 200 references returned
     - Pro: Unlimited files and references
     - Enterprise: Unlimited files and references
 

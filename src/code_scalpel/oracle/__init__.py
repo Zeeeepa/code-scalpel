@@ -1,6 +1,7 @@
 """Oracle: Deterministic code generation constraints for LLMs.
 
-[20260126_FEATURE] Phase 1 - write_perfect_code tool
+[20260126_FEATURE] Phase 1 - Oracle constraint spec pipeline
+[20260224_REFACTOR] write_perfect_code demoted to internal pipeline function; not a public MCP tool
 
 This module provides the Oracle system that generates constraint specifications
 to bind LLMs to the reality of your codebase, preventing hallucinations and

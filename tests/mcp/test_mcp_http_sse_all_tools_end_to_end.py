@@ -22,10 +22,9 @@ if streamable_http_client is None:
     # [20260117_TEST] Skip module when streamable HTTP client is unavailable
     pytestmark = [pytest.mark.skip("streamable-http client not available")]
 
-# [20260118_TEST] Skip entire module - requires running HTTP server
-pytestmark = pytest.mark.skip(
-    reason="[20260118_TEST] HTTP/SSE tests require running server - skip for local pipeline"
-)
+# [20260302_TEST] Removed blanket skip — tests spawn their own subprocess servers
+# on dynamically allocated free ports and are safe to run locally.
+pytestmark = pytest.mark.asyncio
 
 
 @dataclass(frozen=True)
@@ -213,7 +212,8 @@ async def _assert_all_tools_invocable(
 ) -> None:
     tools = await session.list_tools()
     tool_names = {t.name for t in tools.tools}
-    assert len(tool_names) == 22
+    # [20260302_BUGFIX] Updated from 22 to 23 (get_capabilities is the 23rd tool).
+    assert len(tool_names) == 23
 
     target_file_rel = str(paths["target_file"].relative_to(project_root))
 
@@ -452,7 +452,9 @@ async def test_mcp_http_sse_transports_invoke_all_tools(
     tmp_path: Path, transport: str, endpoint_path: str
 ):
     with anyio.fail_after(240):
-        repo_root = Path(__file__).resolve().parents[1]
+        # [20260302_BUGFIX] Use parents[2] (project root) not parents[1] (tests/)
+        # to avoid tests/mcp/ shadowing the installed mcp SDK in subprocess cwd.
+        repo_root = Path(__file__).resolve().parents[2]
 
         paths = _make_invocation_project(tmp_path)
         project_root = paths["project_root"]

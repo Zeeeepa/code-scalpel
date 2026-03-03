@@ -14,7 +14,7 @@ class TestLanguageValidation:
     """Test explicit language validation added in v1.0."""
 
     def test_unsupported_language_rejected_go(self):
-        """Go should be explicitly rejected with helpful error until Q1 2026."""
+        """Go should be explicitly rejected with helpful error (not yet implemented)."""
         code = """
 package main
 
@@ -28,7 +28,6 @@ func main() {
         assert result.error is not None
         assert "unsupported language" in result.error.lower()
         assert "go" in result.error.lower()
-        assert "q1 2026" in result.error.lower()
 
     def test_unsupported_language_rejected_rust(self):
         """Rust should be explicitly rejected with helpful error until Q1 2026."""
@@ -150,16 +149,14 @@ class TestConfigurationAlignment:
             limits.get("pro", {}).get("analyze_code", {}).get("languages", [])
         )
 
-        # Should NOT contain go or rust
-        assert (
-            "go" not in pro_langs
-        ), "Pro tier should not advertise Go until implemented"
+        # Should NOT contain rust (not yet implemented)
         assert (
             "rust" not in pro_langs
         ), "Pro tier should not advertise Rust until implemented"
 
         # Should only contain implemented languages
-        assert pro_langs == {"python", "javascript", "typescript", "java"}
+        # [20260302_FEATURE] Go wired up in v2.1.0 — added to expected set
+        assert pro_langs == {"python", "javascript", "typescript", "java", "c", "cpp", "csharp", "go"}
 
     def test_community_tier_languages_match_pro(self):
         """Community and Pro should have same languages (Pro differs only in limits)."""

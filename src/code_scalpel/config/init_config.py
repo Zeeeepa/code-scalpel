@@ -124,6 +124,136 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
     return validation_results
 
 
+def add_missing_config_files(target_dir: str = ".") -> dict:
+    """Add any missing .code-scalpel files without touching existing ones.
+
+    [20260224_FEATURE] Safe upgrade path: users on older versions can run
+    `codescalpel init` on an existing .code-scalpel directory to pick up
+    files that were added in newer releases (e.g. response_config.json,
+    response_config.schema.json) without overwriting their customisations.
+
+    Unlike `init_config_dir`, this function:
+    - Does NOT require the directory to be absent (works on existing dirs).
+    - Skips every file / subdirectory that already exists.
+    - Does NOT regenerate the HMAC manifest or secret key.
+
+    Args:
+        target_dir: Directory that contains (or will contain) .code-scalpel/
+
+    Returns:
+        Dictionary with ``success``, ``files_added``, ``files_skipped``, and
+        ``path`` keys.
+    """
+    target_path = Path(target_dir).resolve()
+    config_dir = target_path / ".code-scalpel"
+
+    if not config_dir.exists():
+        return {
+            "success": False,
+            "message": (
+                f".code-scalpel directory not found at {config_dir}. "
+                "Run 'codescalpel init' to create it first."
+            ),
+            "path": str(config_dir),
+            "files_added": [],
+            "files_skipped": [],
+        }
+
+    files_added: list[str] = []
+    files_skipped: list[str] = []
+
+    def _write_if_absent(rel: str, content: str) -> None:
+        """Write *content* to config_dir/rel only if the file doesn't exist."""
+        path = config_dir / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.exists():
+            files_skipped.append(rel)
+        else:
+            path.write_text(content, encoding="utf-8")
+            files_added.append(rel)
+
+    def _touch_if_absent(rel: str) -> None:
+        """Create an empty file at config_dir/rel only if absent."""
+        path = config_dir / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.exists():
+            files_skipped.append(rel)
+        else:
+            path.touch()
+            files_added.append(rel)
+
+    # Required files
+    _write_if_absent("config.json", CONFIG_JSON_TEMPLATE)
+    _write_if_absent("policy.yaml", POLICY_YAML_TEMPLATE)
+    _write_if_absent("budget.yaml", BUDGET_YAML_TEMPLATE)
+    _write_if_absent("response_config.json", RESPONSE_CONFIG_JSON_TEMPLATE)
+
+    # Recommended files
+    _write_if_absent("dev-governance.yaml", DEV_GOVERNANCE_YAML_TEMPLATE)
+    _write_if_absent("project-structure.yaml", PROJECT_STRUCTURE_YAML_TEMPLATE)
+    _write_if_absent(
+        "response_config.schema.json", RESPONSE_CONFIG_SCHEMA_JSON_TEMPLATE
+    )
+    _touch_if_absent("audit.log")
+
+    # License directory
+    _write_if_absent(
+        "license/README.md",
+        """# Code Scalpel License Directory
+
+This directory stores license keys and cached license state.
+
+- `license.jwt`: Place your Pro/Enterprise license key here.
+- `license_state.json`: Automatically generated cache of license validation results.
+
+Do not commit `license.jwt` to version control if it contains sensitive information.
+""",
+    )
+
+    # Policy Rego files
+    _write_if_absent("policies/README.md", POLICIES_README_TEMPLATE)
+    _write_if_absent("policies/architecture/README.md", ARCHITECTURE_README_TEMPLATE)
+    _write_if_absent(
+        "policies/architecture/layered_architecture.rego",
+        LAYERED_ARCHITECTURE_REGO_TEMPLATE,
+    )
+    _write_if_absent("policies/devops/README.md", DEVOPS_README_TEMPLATE)
+    _write_if_absent(
+        "policies/devops/docker_security.rego", DOCKER_SECURITY_REGO_TEMPLATE
+    )
+    _write_if_absent("policies/devsecops/README.md", DEVSECOPS_README_TEMPLATE)
+    _write_if_absent(
+        "policies/devsecops/secret_detection.rego", SECRET_DETECTION_REGO_TEMPLATE
+    )
+    _write_if_absent("policies/project/README.md", PROJECT_README_TEMPLATE)
+    _write_if_absent("policies/project/structure.rego", PROJECT_STRUCTURE_REGO_TEMPLATE)
+
+    # Optional files
+    _write_if_absent(".gitignore", GITIGNORE_TEMPLATE)
+    _write_if_absent("README.md", README_TEMPLATE)
+    _write_if_absent("ide-extension.json", IDE_EXTENSION_CONFIG_TEMPLATE)
+    _write_if_absent("HOOKS_README.md", HOOKS_README_TEMPLATE)
+
+    # .env.example lives next to .code-scalpel/, not inside it
+    env_example = target_path / ".env.example"
+    if env_example.exists():
+        files_skipped.append(".env.example")
+    else:
+        env_example.write_text(ENV_EXAMPLE_TEMPLATE, encoding="utf-8")
+        files_added.append(".env.example")
+
+    return {
+        "success": True,
+        "message": (
+            f"Added {len(files_added)} missing file(s); "
+            f"skipped {len(files_skipped)} existing file(s)."
+        ),
+        "path": str(config_dir),
+        "files_added": files_added,
+        "files_skipped": files_skipped,
+    }
+
+
 def init_config_dir(target_dir: str = ".", mode: str = "full") -> dict:
     """
     Initialize .code-scalpel configuration directory with templates.

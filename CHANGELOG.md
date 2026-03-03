@@ -5,6 +5,163 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — Language Completion (C++, C#, Go, Java, JavaScript tool parsers)
+
+### Definition of "language complete" (new standard as of 2026-03-03)
+A language version is considered complete only when **both** phases are done:
+- **Phase 1**: IR normalizer, adapter, extractor wiring, `limits.toml`, MCP docstrings, tests
+- **Phase 2**: All `code_parsers/{lang}_parsers/` tool parsers fully implemented (execution + output parsing + categorization + CWE mapping + report generation)
+
+### Work queue before v2.2.0 (Kotlin)
+- **C++ Phase 2**: Cppcheck, clang-tidy, Clang Static Analyzer, cpplint, Coverity (output-only), SonarQube (output-only), CppParserRegistry, cpp_adapter.py
+- **C# Phase 2**: Roslyn Analyzers, StyleCop, SecurityCodeScan, FxCop, ReSharper, SonarQube, CSharpParserRegistry
+- **Go Phase 2**: gofmt, golint, govet, staticcheck, golangci-lint, gosec, GoParserRegistry
+- **Java Phase 2 (Tier A+B)**: PMD, Checkstyle, SpotBugs, FindSecBugs, ErrorProne, Infer, SonarQube, DependencyCheck, Semgrep
+- **JavaScript Phase 2 (minor)**: npm_audit, jsdoc, package_json, test_detection, webpack
+
+See [wiki/Language-Completion-Roadmap.md](wiki/Language-Completion-Roadmap.md) for full specs and implementation details.
+
+---
+
+## [2.1.0] - 2026-03-02
+
+### Added
+- **Full Go language support** via new `GoNormalizer` and `GoVisitor` (tree-sitter-go).
+  Handles functions, methods (with receiver stored in metadata), structs, interfaces,
+  imports (aliased and grouped), `var`/`const` declarations, `:=` short variable
+  declarations, `if`/`for` statements, `return` statements, and call expressions.
+  Extensions: `.go`
+- `GoParserAdapter` — replaces the previous `NotImplementedError` stub with a full
+  implementation that delegates to `GoNormalizer` and returns a typed `ParseResult`.
+- Go integrated into `PolyglotExtractor` (`polyglot/extractor.py`) and
+  `code_parsers.extractor` — extension-based and content-based detection.
+- Content detection heuristics: `package main`, `func `, `import (`, `fmt.Println`,
+  `fmt.Printf` — placed before Java check to avoid `"package "` ambiguity.
+- `tree-sitter-go>=0.21.0` added to `[all]` and `[polyglot]` optional extras in
+  `pyproject.toml`.
+- `limits.toml`: `"go"` added to `analyze_code.languages` (Community, Pro, Enterprise);
+  `"csharp"` and `"go"` added to `unified_sink_detect.languages` (all tiers — csharp
+  was previously missing).
+- 23 new Go-specific tests in `tests/languages/test_go_parser.py` covering extension
+  detection, content detection, function/method/struct/interface/import extraction,
+  `:=` short var, for-loop IR mapping, and round-trip via `PolyglotExtractor`.
+- MCP docstrings in `extraction.py`, `analyze.py`, and `security.py` updated to list
+  Go as a supported language.
+- Internal wiki guides for adding Kotlin, Ruby, Rust, and Swift (four stub languages)
+  as standalone documents in `wiki/`.
+
+### Fixed
+- `cli.py`: Removed unused `missing: list[str]` parameter from `_print_group()` and
+  its three call sites — eliminates the Pyright "parameter declared but never used"
+  warning (line 573).
+- `go_normalizer.py`: Import alias now stored in `IRImport.alias` field (was
+  incorrectly placed in `names=`).
+
+---
+
+## [2.0.2] - 2026-02-25
+
+### Added
+- **`unified_sink_detect`**: C and C++ sink detection (`c_sink_detection`, `cpp_sink_detection`) — all tiers
+- **`generate_unit_tests`**: C/C++ test framework support (Catch2 — Community+; Google Test — Pro+); C# test framework support (NUnit — Community+; xUnit — Pro+)
+- **`code_policy_check`**: C/C++ linting via `clang_tidy_rules` (Community+); C# linting via `roslyn_analyzer_rules` (Community+); MISRA-C safety-critical compliance via `misra_c_compliance` (Enterprise only)
+- **`scan_dependencies`**: Package manager scanning for C/C++ via `conan_scanning` and `vcpkg_scanning`; C# via `nuget_scanning` — all tiers
+- Tests: `tests/languages/test_v202_capabilities.py` covering all new C/C++/C# capabilities across all four tools
+
+### Changed
+- `limits.toml`: Added `"c"` and `"cpp"` to `unified_sink_detect` `languages` array for all three tiers
+- `features.toml`: Expanded capability lists for `unified_sink_detect`, `generate_unit_tests`, `code_policy_check`, and `scan_dependencies`
+
+---
+
+## [2.0.1] - 2026-02-25
+
+### Fixed
+- Packaging fix: re-release to correct PyPI upload issue with v2.0.0 artifacts
+- Documentation: wiki changelog backfill for v1.1.0 through v1.5.0 releases
+- VS Code extension version aligned with Python package
+
+---
+
+## [2.0.0] - 2026-02-24
+
+### Added
+- **Full C language support** via new `CNormalizer` and `CVisitor` (tree-sitter-c).
+  Handles functions (pointer/variadic/static/extern), structs (named, typedef, anonymous),
+  unions, enums, `#include`/`#define` macros, bitfields, function pointer typedefs.
+  Extensions: `.c`, `.h`
+- **Full C++ language support** via new `CppNormalizer` and `CppVisitor` (tree-sitter-cpp).
+  Handles classes (inline/out-of-line methods, virtual/override, operator overloading,
+  multiple inheritance, nested classes), namespaces, templates (class/function/variadic),
+  `enum class`, `constexpr`, move semantics, `= delete`/`= default`, `using`, anonymous
+  namespaces, trailing return types.
+  Extensions: `.cpp`, `.cc`, `.cxx`, `.c++`, `.hpp`, `.hxx`, `.hh`, `.h++`, `.inl`
+- **Full C# language support** via new `CSharpNormalizer` and `CSharpVisitor` (tree-sitter-c-sharp).
+  Handles classes, structs, interfaces, records, record structs, enums, methods (async/await,
+  extension methods, tuple returns, operator overloads), properties, constructors, indexers,
+  delegates, events, partial classes, generics with constraints, pattern-matching switches,
+  nullable types.  Extensions: `.cs`
+- All three languages integrated into `PolyglotExtractor` and `code_parsers.extractor`.
+- `CSharpAdapter` upgraded from a `NotImplementedError` stub to a full implementation.
+- 262 new language-specific tests (C, C++, C#) including real-world smoke tests:
+  Win32 header, game-engine `Vec3`, Unity `MonoBehaviour` component, STL-style containers.
+
+### Fixed
+- `IRIf`/`IRWhile` constructed with wrong `condition=` kwarg in C# normalizer (correct: `test=`);
+  caused `TypeError` crash on any `if` inside a C# method body.
+- C# `tuple_type` missing from `_TYPE_NODES`; methods with tuple returns had names misidentified.
+- C# `operator_declaration` lacked a visitor; operator overloads (`operator+`, `operator==`) were
+  silently dropped.
+- C++ `_parse_class_body` did not unwrap `field_declaration → class_specifier` wrappers, making
+  nested class definitions invisible.
+
+### Changed
+- Version bumped from 1.5.0 to 2.0.0 (major: addition of three production language families).
+- `capabilities/README.md` language list expanded: added `c`, `cpp`, `csharp`.
+- Documentation updated throughout to reflect 7-language polyglot support.
+
+---
+
+## [1.5.0] - 2026-02-24
+
+### Added
+- Comprehensive **C and C++ parsing support** via new `c_normalizer` and `cpp_normalizer`.
+  - Recognizes `.c`, `.h` (C); `.cpp`, `.cc`, `.cxx`, `.c++`, `.hpp`, `.hxx`, `.hh`, `.h++`, `.inl` (C++).
+  - IR nodes for functions, structs, unions, enums, macros, classes, namespaces, templates, \#includes, `using` declarations, qualified method names, lambdas, and more.
+  - C/C++ languages integrated into the existing `PolyglotExtractor` abstraction.
+  - Language detection heuristics updated to distinguish C vs C++ with content and extension analysis.
+  - New tests under `tests/languages/test_c_cpp_parsers.py` exercise realistic 3D project patterns (Vec3, Mesh, AABB, etc.)
+- `code_parsers.extractor` now includes C/C++ in its `Language` enum, `EXTENSION_MAP`, detection heuristics, and parsing dispatch.
+- Tests and examples migrated off deprecated `code_scalpel.polyglot` module; `code_parsers` is now the canonical import path.
+
+### Changed
+- Updated `CHANGELOG.md` and other documentation to reflect migration timeline and new features.
+
+### Deprecated
+- `code_scalpel.polyglot` imports used in tests are replaced; polyglot module will be removed in v3.3.0.
+
+## [1.4.1] - 2026-02-24
+
+### Added
+- `codescalpel check` command: inspects an existing `.code-scalpel` directory and
+  reports which expected configuration files are present, missing-but-recommended,
+  or missing-and-required — without modifying anything.
+  - `--json` / `-j` flag: machine-readable output with per-file `integrity` object.
+  - `--fix` / `-F` flag: fills in any missing files before reporting, so check and
+    fix happen in one step (equivalent to `init` followed by `check`).
+  - Integrity checking: files are parsed (JSON/YAML/Rego) and flagged if empty or
+    corrupt. Required files with integrity failures cause `exit 1` just like missing
+    required files.
+- `codescalpel init` is now **safe to re-run** on existing configurations: when
+  `.code-scalpel/` already exists, `init` calls the new `add_missing_config_files()`
+  helper which adds only absent files — all existing customisations are preserved.
+  This is the recommended upgrade path when moving between Code Scalpel versions
+  (e.g. users missing `response_config.json` after upgrading from <1.4.0).
+- `add_missing_config_files(target_dir)` API in `code_scalpel.config.init_config`:
+  programmatic equivalent of re-running `init` on an existing directory.
+
+---
+
 ## [1.4.0] - 2026-02-20
 
 ### Added

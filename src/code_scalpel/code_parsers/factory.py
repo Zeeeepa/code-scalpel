@@ -38,14 +38,17 @@ class ParserFactory:
         "tsx": Language.TYPESCRIPT,
         # Java
         "java": Language.JAVA,
-        # C/C++
-        "c": Language.CPP,
+        # C  [20260225_FEATURE] was incorrectly mapped to CPP
+        "c": Language.C,
+        "h": Language.C,
+        # C++
         "cpp": Language.CPP,
         "cc": Language.CPP,
         "cxx": Language.CPP,
-        "h": Language.CPP,
         "hpp": Language.CPP,
         "hxx": Language.CPP,
+        # C#  [20260225_FEATURE]
+        "cs": Language.CSHARP,
     }
 
     @classmethod
@@ -149,6 +152,14 @@ def _register_available_parsers() -> None:
         from .adapters.java_adapter import JavaParserAdapter
 
         ParserFactory.register_parser(Language.JAVA, JavaParserAdapter)
+    except ImportError:
+        pass
+
+    # [20260225_FEATURE] C# parser via adapter (backed by CSharpNormalizer)
+    try:
+        from .adapters.csharp_adapter import CSharpParserAdapter
+
+        ParserFactory.register_parser(Language.CSHARP, CSharpParserAdapter)
     except ImportError:
         pass
 

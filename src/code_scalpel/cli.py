@@ -32,6 +32,19 @@ def analyze_file(
             ".mts": "typescript",
             ".cts": "typescript",
             ".java": "java",
+            # [20260302_FEATURE] C/C++/C# extensions added in v2.0.0
+            ".c": "c",
+            ".h": "c",
+            ".cpp": "cpp",
+            ".cc": "cpp",
+            ".cxx": "cpp",
+            ".c++": "cpp",
+            ".hpp": "cpp",
+            ".hxx": "cpp",
+            ".hh": "cpp",
+            ".h++": "cpp",
+            ".inl": "cpp",
+            ".cs": "csharp",
         }
         if ext in extension_map:
             language = extension_map[ext]
@@ -350,13 +363,308 @@ def scan_code_security(code: str, output_format: str = "text") -> int:
     return 0 if not result.has_vulnerabilities else 2
 
 
+def check_configuration(
+    target_dir: str = ".", json_output: bool = False, fix: bool = False
+) -> int:
+    """Check .code-scalpel directory for missing configuration files.
+
+    [20260224_FEATURE] check command - inspect an existing .code-scalpel dir and
+    report which expected files are present, missing-but-recommended, or missing-and-required.
+
+    [20260224_FEATURE] Extended with file integrity validation: detects empty files,
+    JSON/YAML parse errors, and Rego files missing a 'package' declaration.
+
+    [20260224_FEATURE] --fix flag: calls add_missing_config_files before reporting
+    so missing files are filled in and the output reflects the post-fix state.
+    """
+    import json as _json
+
+    from .config.init_config import add_missing_config_files, validate_config_files
+
+    target_path = Path(target_dir).resolve()
+    config_dir = target_path / ".code-scalpel"
+
+    # ------------------------------------------------------------------ #
+    # Catalogue of files produced by `codescalpel init`                    #
+    # Grouped by importance so the user knows what actually matters.       #
+    # ------------------------------------------------------------------ #
+    REQUIRED: list[tuple[str, str]] = [
+        ("config.json", "Core settings (tier, paths, feature flags)"),
+        ("policy.yaml", "Security & coding-style policy rules"),
+        ("budget.yaml", "Change-budget limits for AI operations"),
+        ("response_config.json", "Response verbosity & token-efficiency settings"),
+    ]
+    RECOMMENDED: list[tuple[str, str]] = [
+        ("dev-governance.yaml", "Development governance rules"),
+        ("project-structure.yaml", "Project structure expectations"),
+        ("response_config.schema.json", "JSON schema for response_config.json"),
+        ("policy.manifest.json", "Cryptographic manifest for policy integrity"),
+        ("audit.log", "Audit trail for agent operations"),
+        ("license/README.md", "License directory with setup instructions"),
+        (
+            "policies/architecture/layered_architecture.rego",
+            "Architecture boundary policy",
+        ),
+        ("policies/devops/docker_security.rego", "Docker security policy"),
+        ("policies/devsecops/secret_detection.rego", "Secret detection policy"),
+        ("policies/project/structure.rego", "Project structure policy"),
+    ]
+    OPTIONAL: list[tuple[str, str]] = [
+        (".gitignore", "Prevents accidental secret commits from this directory"),
+        ("README.md", "Configuration reference documentation"),
+        ("ide-extension.json", "IDE extension settings"),
+        ("HOOKS_README.md", "Git hooks integration guide"),
+        (".env.example", "Example environment variables template"),
+    ]
+
+    # ------------------------------------------------------------------ #
+    # Existence check                                                       #
+    # ------------------------------------------------------------------ #
+    def _check(entries: list[tuple[str, str]]) -> tuple[list[str], list[str]]:
+        present, missing = [], []
+        for name, _ in entries:
+            (present if (config_dir / name).exists() else missing).append(name)
+        return present, missing
+
+    if not config_dir.exists():
+        if json_output:
+            print(
+                _json.dumps(
+                    {
+                        "success": False,
+                        "error": "no_config_dir",
+                        "message": f".code-scalpel directory not found at {config_dir}",
+                        "suggestion": f"Run: codescalpel init --dir {target_dir}",
+                    },
+                    indent=2,
+                )
+            )
+        else:
+            print(f"[ERROR] .code-scalpel directory not found: {config_dir}")
+            print(f"\nRun 'codescalpel init --dir {target_dir}' to create it.")
+        return 1
+
+    # ------------------------------------------------------------------ #
+    # --fix: fill in missing files before reporting                         #
+    # ------------------------------------------------------------------ #
+    _fixed: dict | None = None
+    if fix:
+        _fixed = add_missing_config_files(str(target_path))
+
+    req_present, req_missing = _check(REQUIRED)
+    rec_present, rec_missing = _check(RECOMMENDED)
+    opt_present, opt_missing = _check(OPTIONAL)
+
+    all_missing = req_missing + rec_missing + opt_missing
+    all_present = req_present + rec_present + opt_present
+
+    # ------------------------------------------------------------------ #
+    # Integrity check (parse errors, empty files)                          #
+    # ------------------------------------------------------------------ #
+    integrity = validate_config_files(config_dir)
+
+    # Detect empty files among all present catalogue entries.
+    empty_files: list[str] = []
+    for name in all_present:
+        fpath = config_dir / name
+        if fpath.is_file() and fpath.stat().st_size == 0:
+            empty_files.append(name)
+
+    # Build a set of file names (relative to config_dir) that have parse errors.
+    _parse_error_names: set[str] = set()
+    for err in integrity["errors"]:
+        # Errors look like "config.json: Invalid JSON - ..." or
+        # "policies/arch/layered.rego: Read error - ..."
+        _parse_error_names.add(err.split(":")[0].strip())
+
+    # Required files that fail integrity (either empty or parse error).
+    req_integrity_failures = [
+        n for n in req_present if n in empty_files or n in _parse_error_names
+    ]
+
+    integrity_ok = integrity["success"] and not empty_files
+
+    # ------------------------------------------------------------------ #
+    # JSON output                                                          #
+    # ------------------------------------------------------------------ #
+    if json_output:
+        details: dict[str, dict] = {}
+        req_map = dict(REQUIRED)
+        rec_map = dict(RECOMMENDED)
+        for name, desc in REQUIRED + RECOMMENDED + OPTIONAL:
+            level = (
+                "required"
+                if name in req_map
+                else ("recommended" if name in rec_map else "optional")
+            )
+            present = (config_dir / name).exists()
+            file_integrity: dict = {}
+            if present:
+                fpath = config_dir / name
+                is_empty = fpath.is_file() and fpath.stat().st_size == 0
+                parse_error = next(
+                    (e for e in integrity["errors"] if e.startswith(name + ":")),
+                    None,
+                )
+                file_integrity = {
+                    "empty": is_empty,
+                    "parse_error": parse_error,
+                    "ok": not is_empty and parse_error is None,
+                }
+            details[name] = {
+                "present": present,
+                "level": level,
+                "description": desc,
+                **({"integrity": file_integrity} if present else {}),
+            }
+        print(
+            _json.dumps(
+                {
+                    "success": len(req_missing) == 0 and not req_integrity_failures,
+                    "config_dir": str(config_dir),
+                    "fix_applied": _fixed,
+                    "summary": {
+                        "required_missing": len(req_missing),
+                        "recommended_missing": len(rec_missing),
+                        "optional_missing": len(opt_missing),
+                        "total_present": len(all_present),
+                    },
+                    "integrity": {
+                        "ok": integrity_ok,
+                        "errors": integrity["errors"],
+                        "warnings": integrity["warnings"]
+                        + [f"{f}: file is empty" for f in empty_files],
+                        "files_validated": integrity["files_validated"],
+                    },
+                    "files": details,
+                    "suggestion": (
+                        f"Run 'codescalpel init --dir {target_dir}' to add missing defaults "
+                        "without overwriting existing files."
+                        if all_missing
+                        else "All files are present."
+                    ),
+                },
+                indent=2,
+            )
+        )
+        return 0 if (not req_missing and not req_integrity_failures) else 1
+
+    # ------------------------------------------------------------------ #
+    # Human-readable output                                                #
+    # ------------------------------------------------------------------ #
+    print("Code Scalpel Configuration Check")
+    print("=" * 60)
+    print(f"Directory: {config_dir}")
+    print()
+
+    if _fixed is not None:
+        if _fixed["files_added"]:
+            print(f"[FIX] Added {len(_fixed['files_added'])} missing file(s):")
+            for _f in _fixed["files_added"]:
+                print(f"   + {_f}")
+        else:
+            print("[FIX] Nothing to add \u2014 all files already present.")
+        print()
+
+    def _print_group(
+        label: str,
+        entries: list[tuple[str, str]],
+        present: list[str],
+        missing_icon: str,
+    ) -> None:
+        print(f"{label}")
+        desc_map = dict(entries)
+        for name in [e[0] for e in entries]:
+            if name in present:
+                # Add integrity annotation if there's an issue
+                if name in empty_files:
+                    print(f"   ⚠️   {name}  [EMPTY FILE]")
+                elif name in _parse_error_names:
+                    err = next(
+                        (e for e in integrity["errors"] if e.startswith(name + ":")), ""
+                    )
+                    print(
+                        f"   ❌  {name}  [PARSE ERROR: {err.split(':', 1)[-1].strip()}]"
+                    )
+                else:
+                    print(f"   ✅  {name}")
+            else:
+                print(f"   {missing_icon}  {name}")
+                print(f"         {desc_map[name]}")
+        print()
+
+    _print_group("Required files:", REQUIRED, req_present, "❌")
+    _print_group("Recommended files:", RECOMMENDED, rec_present, "⚠️ ")
+    _print_group("Optional files:", OPTIONAL, opt_present, "○ ")
+
+    # ------------------------------------------------------------------ #
+    # Integrity warnings                                                   #
+    # ------------------------------------------------------------------ #
+    if integrity["warnings"]:
+        print("Integrity warnings:")
+        for w in integrity["warnings"]:
+            print(f"   ⚠️   {w}")
+        if empty_files:
+            for f in empty_files:
+                print(f"   ⚠️   {f}: file is empty (0 bytes)")
+        print()
+    elif empty_files:
+        print("Integrity warnings:")
+        for f in empty_files:
+            print(f"   ⚠️   {f}: file is empty (0 bytes)")
+        print()
+
+    # ------------------------------------------------------------------ #
+    # Summary & suggestion                                                 #
+    # ------------------------------------------------------------------ #
+    if not all_missing and integrity_ok:
+        print("[OK] All expected configuration files are present and valid.")
+        return 0
+
+    print("-" * 60)
+    if req_missing:
+        print(
+            f"[FAIL]  {len(req_missing)} required file(s) missing — some features will not work."
+        )
+    if req_integrity_failures:
+        print(
+            f"[FAIL]  {len(req_integrity_failures)} required file(s) have integrity errors — {', '.join(req_integrity_failures)}"
+        )
+    if rec_missing:
+        print(
+            f"[WARN]  {len(rec_missing)} recommended file(s) missing — some features may be degraded."
+        )
+    if opt_missing:
+        print(f"[INFO]  {len(opt_missing)} optional file(s) missing.")
+    if empty_files and not req_integrity_failures:
+        print(f"[WARN]  {len(empty_files)} file(s) are empty: {', '.join(empty_files)}")
+    print()
+    if all_missing and not fix:
+        if req_missing or rec_missing:
+            print("Add missing files (safe \u2014 never overwrites existing files):")
+            print(f"   codescalpel init --dir {target_dir}")
+            print(
+                f"   codescalpel check --fix --dir {target_dir}  # check + fix in one step"
+            )
+        else:
+            print("Optional files can be added if needed:")
+            print(f"   codescalpel init --dir {target_dir}")
+
+    return 0 if (not req_missing and not req_integrity_failures) else 1
+
+
 def init_configuration(target_dir: str = ".", force: bool = False) -> int:
     """Initialize .code-scalpel configuration directory.
 
     [20251219_FEATURE] v3.0.2 - Auto-initialize configuration for first-time users.
     Creates .code-scalpel/ with config.json, policy.yaml, budget.yaml, README.md, .gitignore.
+
+    [20260224_FEATURE] When .code-scalpel already exists, seamlessly add any
+    files that were introduced in newer releases without touching existing ones.
+    This makes `codescalpel init` safe to re-run after upgrading.
     """
     from .config import init_config_dir
+    from .config.init_config import add_missing_config_files
 
     print("Code Scalpel Configuration Initialization")
     print("=" * 60)
@@ -370,11 +678,25 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
                 print(f"   Path: {result['path']}")
                 print("\n[SKIP] Use manual deletion if you need to reinitialize.")
                 return 1
+            # Directory already exists — fill in any files missing from this version.
+            print(
+                "\n[INFO] Configuration directory already exists — checking for missing files..."
+            )
+            print(f"   Path: {result['path']}")
+            update = add_missing_config_files(target_dir)
+            if update["files_added"]:
+                print(f"\n[UPDATED] Added {len(update['files_added'])} new file(s):")
+                for f in update["files_added"]:
+                    print(f"   + {f}")
             else:
-                print("\n[OK] Configuration directory already exists.")
-                print(f"   Path: {result['path']}")
-                print("\nUse --force to attempt reinitialization.")
-                return 0
+                print("\n[OK] All files are already present — nothing to add.")
+            if update["files_skipped"]:
+                print(
+                    f"\n   Kept {len(update['files_skipped'])} existing file(s) unchanged."
+                )
+            print()
+            print("Tip: run 'codescalpel check' to verify the configuration.")
+            return 0
         else:
             print(f"\n[ERROR] {result['message']}")
             return 1
@@ -1201,6 +1523,20 @@ def handle_validate_paths(args: argparse.Namespace) -> int:
     return invoke_tool_with_format("validate_paths", tool_args, output_format)
 
 
+def handle_static_analysis(args: argparse.Namespace) -> int:  # [20260303_FEATURE]
+    """Handle 'codescalpel static-analysis' command."""
+    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
+
+    tool_args = {
+        "paths": args.paths,
+        "tool": args.tool,
+        "language": "cpp",
+        "report_path": args.report,
+    }
+    output_format = "json" if args.json else "text"
+    return invoke_tool_with_format("run_static_analysis", tool_args, output_format)
+
+
 def handle_scan_dependencies(args: argparse.Namespace) -> int:
     """Handle 'codescalpel scan-dependencies' command."""
     from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
@@ -1784,6 +2120,36 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         help="Output as JSON",
     )
 
+    # [20260303_FEATURE] C++ Static Analysis command
+    static_analysis_parser = subparsers.add_parser(
+        "static-analysis",
+        help="Run C++ static-analysis tools (cppcheck, clang-tidy, clang-sa, cpplint, coverity, sonarqube)",
+    )
+    static_analysis_parser.add_argument(
+        "paths",
+        nargs="+",
+        help="Source files or directories to analyse",
+    )
+    static_analysis_parser.add_argument(
+        "--tool",
+        "-t",
+        default="cppcheck",
+        choices=["cppcheck", "clang-tidy", "clang-sa", "cpplint", "coverity", "sonarqube"],
+        help="Static-analysis tool to use (default: cppcheck)",
+    )
+    static_analysis_parser.add_argument(
+        "--report",
+        "-r",
+        default=None,
+        help="Parse a pre-existing report file instead of running the tool",
+    )
+    static_analysis_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output as JSON",
+    )
+
     # Scan Dependencies command
     scan_deps_parser = subparsers.add_parser(
         "scan-dependencies",
@@ -1851,6 +2217,29 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         "-j",
         action="store_true",
         help="Output as JSON",
+    )
+
+    # Check command (Configuration Audit) - [20260224_FEATURE]
+    check_parser = subparsers.add_parser(
+        "check", help="Check .code-scalpel directory for missing configuration files"
+    )
+    check_parser.add_argument(
+        "--dir",
+        "-d",
+        default=".",
+        help="Target directory containing .code-scalpel (default: current directory)",
+    )
+    check_parser.add_argument(
+        "--json",
+        "-j",
+        action="store_true",
+        help="Output results as JSON",
+    )
+    check_parser.add_argument(
+        "--fix",
+        "-F",
+        action="store_true",
+        help="Automatically add any missing files before reporting (safe \u2014 never overwrites existing)",
     )
 
     # Init command (Configuration Setup) - [20251219_FEATURE] v3.0.2
@@ -2174,6 +2563,9 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     elif args.command == "validate-paths":
         return handle_validate_paths(args)
 
+    elif args.command == "static-analysis":  # [20260303_FEATURE]
+        return handle_static_analysis(args)
+
     elif args.command == "scan-dependencies":
         return handle_scan_dependencies(args)
 
@@ -2182,6 +2574,9 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
 
     elif args.command == "verify-policy-integrity":
         return handle_verify_policy_integrity(args)
+
+    elif args.command == "check":  # [20260224_FEATURE]
+        return check_configuration(args.dir, args.json, args.fix)
 
     elif args.command == "init":  # [20251219_FEATURE] v3.0.2
         return init_configuration(args.dir, args.force)

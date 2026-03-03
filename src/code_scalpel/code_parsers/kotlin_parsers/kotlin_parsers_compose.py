@@ -1,123 +1,194 @@
 #!/usr/bin/env python3
-"""
-Compose Linter Parser - Jetpack Compose code quality and best practices analyzer.
+"""Jetpack Compose linter / compiler analysis parser.
 
-The Compose Linter (part of Compose Compiler) provides analysis of Jetpack Compose
-code, including recomposition warnings, performance issues, and best practices.
-
-Compose Linter features:
-- Recomposition tracking and warnings
-- Memoization recommendations
-- Composable function analysis
-- Parameter stability analysis
-- Performance metrics
+[20260303_FEATURE] Phase 2: full implementation replacing NotImplementedError stubs.
 """
 
-from dataclasses import dataclass
+import json
+import shutil
+import subprocess
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 class ComposeIssueType(Enum):
-    """Jetpack Compose issue types."""
-
+    STABILITY = "stability"
     RECOMPOSITION = "recomposition"
-    INSTABILITY = "instability"
-    MEMOIZATION = "memoization"
+    SIDE_EFFECT = "side-effect"
+    PREVIEW = "preview"
+    INTEROP = "interop"
     PERFORMANCE = "performance"
-    BEST_PRACTICE = "best_practice"
+    MISSING_CONTENT_DESCRIPTION = "missing-content-description"
+    OTHER = "other"
 
 
 class ComposeSeverity(Enum):
-    """Compose linter issue severity."""
-
     ERROR = "error"
     WARNING = "warning"
-    INFO = "info"
+    INFORMATION = "information"
+    HINT = "hint"
 
 
 @dataclass
 class ComposeIssue:
-    """Represents a Jetpack Compose code issue."""
-
     issue_type: str
+    severity: str
     message: str
     file_path: Optional[str] = None
     line_number: Optional[int] = None
     column: Optional[int] = None
-    severity: Optional[str] = None
-    composable_name: Optional[str] = None
-    recomposition_count: Optional[int] = None
+    rule_id: Optional[str] = None
+    suggestion: Optional[str] = None
 
 
 @dataclass
 class ComposeMetrics:
-    """Metrics for Jetpack Compose code."""
-
     total_composables: int = 0
-    unstable_composables: int = 0
-    memoized_composables: int = 0
-    total_recompositions: int = 0
-    average_recomposition_rate: float = 0.0
+    restartable_composables: int = 0
+    skippable_composables: int = 0
+    stable_classes: int = 0
+    unstable_classes: int = 0
+    recomposition_count: int = 0
+    skipped_count: int = 0
+    avg_recompositions: float = 0.0
 
 
 class ComposeLinterParser:
-    """Parser for Jetpack Compose linter output and metrics."""
+    """Parser for Jetpack Compose compiler output and lint reports."""
 
-    def __init__(self):
-        """Initialize Compose linter parser."""
-        self.issues: list[ComposeIssue] = []
+    def __init__(self) -> None:
+        self.issues: List[ComposeIssue] = []
         self.metrics: Optional[ComposeMetrics] = None
 
-    def parse_compiler_output(self, output: str) -> list[ComposeIssue]:
-        """
+    def parse_compiler_output(self, output: str) -> List[ComposeIssue]:
+        """Parse Compose compiler output or Android Lint SARIF / plain text."""
+        if not output or not output.strip():
+            return []
+        issues: List[ComposeIssue] = []
+        # Try SARIF JSON
+        try:
+            sarif = json.loads(output)
+            for run in sarif.get("runs", []):
+                for result in run.get("results", []):
+                    loc = result.get("locations", [{}])[0]
+                    physical = loc.get("physicalLocation", {})
+                    region = physical.get("region", {})
+                    file_path = (
+                        physical.get("artifactLocation", {}).get("uri", "")
+                    )
+                    sev_map = {"error": ComposeSeverity.ERROR.value,
+                               "warning": ComposeSeverity.WARNING.value,
+                               "note": ComposeSeverity.INFORMATION.value}
+                    level = result.get("level", "warning")
+                    issues.append(ComposeIssue(
+                        issue_type=ComposeIssueType.OTHER.value,
+                        severity=sev_map.get(level, level),
+                        message=result.get("message", {}).get("text", ""),
+                        file_path=file_path,
+                        line_number=region.get("startLine"),
+                        column=region.get("startColumn"),
+                        rule_id=result.get("ruleId"),
+                    ))
+            self.issues = issues
+            return issues
+        except (json.JSONDecodeError, KeyError):
+            pass
+        # Plain-text fallback: "file.kt:12: error: …"
+        import re
+        pattern = re.compile(r"^(.+):(\d+):\s+(error|warning|info):\s+(.+)$")
+        for line in output.splitlines():
+            m = pattern.match(line.strip())
+            if m:
+                issues.append(ComposeIssue(
+                    issue_type=ComposeIssueType.OTHER.value,
+                    severity=m.group(3),
+                    message=m.group(4),
+                    file_path=m.group(1),
+                    line_number=int(m.group(2)),
+                ))
+        self.issues = issues
+        return issues
 
-        Args:
-            output: Compiler output string
+    def parse_stability_analysis(self, report_data: Dict[str, Any]) -> List[ComposeIssue]:
+        """Parse Compose stability analysis report dict."""
+        issues: List[ComposeIssue] = []
+        for cls in report_data.get("unstableClasses", []):
+            issues.append(ComposeIssue(
+                issue_type=ComposeIssueType.STABILITY.value,
+                severity=ComposeSeverity.WARNING.value,
+                message=f"Unstable class: {cls.get('name', cls)} — {cls.get('reason', '')}",
+                file_path=cls.get("file"),
+                line_number=cls.get("line"),
+            ))
+        return issues
 
-        Returns:
-            List of parsed ComposeIssue objects
-        """
-        raise NotImplementedError("Phase 2: Compose compiler output parsing")
+    def analyze_recompositions(self, trace_data: Dict[str, Any]) -> ComposeMetrics:
+        """Analyse recomposition trace data."""
+        composables = trace_data.get("composables", [])
+        total = len(composables)
+        restartable = sum(1 for c in composables if c.get("restartable", False))
+        skippable = sum(1 for c in composables if c.get("skippable", False))
+        recomp_counts = [c.get("recompositions", 0) for c in composables]
+        skips = [c.get("skips", 0) for c in composables]
+        metrics = ComposeMetrics(
+            total_composables=total,
+            restartable_composables=restartable,
+            skippable_composables=skippable,
+            stable_classes=trace_data.get("stableClasses", 0),
+            unstable_classes=trace_data.get("unstableClasses", 0),
+            recomposition_count=sum(recomp_counts),
+            skipped_count=sum(skips),
+            avg_recompositions=sum(recomp_counts) / total if total else 0.0,
+        )
+        self.metrics = metrics
+        return metrics
 
-    def parse_stability_analysis(self, report_data: dict) -> dict[str, Any]:
-        """
+    def generate_performance_report(
+        self,
+        issues: Optional[List[ComposeIssue]] = None,
+        metrics: Optional[ComposeMetrics] = None,
+        format: str = "json",
+    ) -> str:
+        vs = issues if issues is not None else self.issues
+        m = metrics if metrics is not None else self.metrics
+        metrics_dict = {}
+        if m:
+            metrics_dict = {
+                "total_composables": m.total_composables,
+                "restartable": m.restartable_composables,
+                "skippable": m.skippable_composables,
+                "stable_classes": m.stable_classes,
+                "unstable_classes": m.unstable_classes,
+                "avg_recompositions": m.avg_recompositions,
+            }
+        if format == "json":
+            return json.dumps({
+                "tool": "compose-compiler",
+                "total_issues": len(vs),
+                "issues": [{"type": i.issue_type, "severity": i.severity,
+                            "message": i.message, "file": i.file_path,
+                            "line": i.line_number} for i in vs],
+                "metrics": metrics_dict,
+            }, indent=2)
+        lines = [f"Compose Analysis: {len(vs)} issue(s)"]
+        for i in vs:
+            lines.append(f"  [{i.severity}] {i.file_path}:{i.line_number} — {i.message}")
+        if metrics_dict:
+            lines.append(f"  Metrics: {metrics_dict}")
+        return "\n".join(lines)
 
-        Args:
-            report_data: Report data dictionary
-
-        Returns:
-            Analysis results with stability information
-        """
-        raise NotImplementedError("Phase 2: Stability analysis parsing")
-
-    def analyze_recompositions(self, trace_data: str) -> ComposeMetrics:
-        """
-
-        Args:
-            trace_data: Recomposition trace data
-
-        Returns:
-            ComposeMetrics object with analysis results
-        """
-        raise NotImplementedError("Phase 2: Recomposition analysis")
-
-    def generate_performance_report(self) -> str:
-        """
-
-        Returns:
-            Formatted report string
-        """
-        raise NotImplementedError("Phase 2: Compose performance report")
-
-    def execute_compiler_analysis(self, project_path: Path) -> dict[str, Any]:
-        """
-
-        Args:
-            project_path: Path to Kotlin/Compose project
-
-        Returns:
-            Analysis results dictionary
-        """
-        raise NotImplementedError("Phase 2: Compose compiler execution")
+    def execute_compiler_analysis(self, project_path: Path) -> Dict[str, Any]:
+        """Run ./gradlew lint; return issues list."""
+        gradlew = Path(project_path) / "gradlew"
+        if not gradlew.exists() and not shutil.which("gradle"):
+            return {"issues": [], "error": "gradle not found"}
+        cmd = [str(gradlew), "lint"] if gradlew.exists() else ["gradle", "lint"]
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True,
+                                    timeout=180, cwd=str(project_path))
+        except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
+            return {"issues": [], "error": str(exc)}
+        issues = self.parse_compiler_output(result.stdout + result.stderr)
+        return {"issues": issues, "error": None}

@@ -22,7 +22,7 @@ Code Scalpel is designed as a modular, tier-based MCP server with a focus on sur
 └────────────────────┬─────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────┐
-│              Tool Layer (22 Tools)                   │
+│              Tool Layer (23 Tools)                   │
 │  ┌──────────────┬──────────────┬──────────────────┐  │
 │  │ Extraction   │ Security     │ Verification     │  │
 │  │ - extract    │ - scan       │ - simulate       │  │
@@ -35,7 +35,8 @@ Code Scalpel is designed as a modular, tier-based MCP server with a focus on sur
 │              Core Analysis Layer                     │
 │  ┌─────────────────────────────────────────────────┐ │
 │  │  AST Parsers (tree-sitter, esprima)            │ │
-│  │  - Python, JS/TS, Java, Go, Rust, Ruby, PHP    │ │
+│  │  - Python, JS/TS, Java, C, C++, C#              │ │
+│  │  - Go, Rust, Ruby, PHP (roadmap/partial)        │ │
 │  └─────────────────────────────────────────────────┘ │
 │  ┌─────────────────────────────────────────────────┐ │
 │  │  PDG Builder (Program Dependence Graph)        │ │
@@ -68,7 +69,7 @@ Code Scalpel implements a three-tier architecture with **progressive enhancement
 **Philosophy:** Full functionality with reasonable limits for personal/open-source use.
 
 **Features:**
-- ✅ All 22 tools available
+- ✅ All 23 tools available
 - ✅ AST parsing (all languages)
 - ✅ Taint-based security scanning
 - ✅ Symbolic execution
@@ -212,6 +213,8 @@ async def extract_code(
 | Rust | `tree-sitter-rust` | AST parsing |
 | Ruby | `tree-sitter-ruby` | AST parsing |
 | PHP | `tree-sitter-php` | AST parsing |
+
+**Adding a new language?** See [Adding-A-Language.md](Adding-A-Language.md) for the complete integration checklist. Language-specific guides are available for [Kotlin](Adding-Kotlin.md), [Ruby](Adding-Ruby.md), [Rust](Adding-Rust.md), and [Swift](Adding-Swift.md).
 
 **Parser Architecture:**
 ```python

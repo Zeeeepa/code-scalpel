@@ -171,18 +171,19 @@ code-scalpel check --standard soc2 --staged
 
 ## Proof It Works
 
-### 93 Comprehensive Tests (100% Passing)
+### 7,575+ Comprehensive Tests (100% Passing)
 
-**Structure Tests (77):**
-- Tier enforcement verification
-- API contract validation
-- Report schema compliance
+**Language Tests (262):**
+- C, C++, C# parser coverage
+- Real-world pattern validation
+- Cross-language extraction accuracy
 
-**Integration Tests (16):**
+**Integration & Structure Tests:**
 - Real pattern detection (HIPAA, SOC2, GDPR, PCI-DSS)
 - PDF report generation with findings
 - Compliance scoring algorithm verification
 - Multi-standard scanning
+- Tier enforcement verification
 
 **Documentation Accuracy:** 100%  
 All claims verified by automated tests.
@@ -247,12 +248,12 @@ code-scalpel check --standard community --paths src/
 
 ## Technical Specifications
 
-**Languages Supported:** Python, JavaScript, TypeScript, Java  
+**Languages Supported:** Python, JavaScript, TypeScript, Java, C, C++, C#  
 **Compliance Standards:** HIPAA, SOC2, GDPR, PCI-DSS  
 **Detection Methods:** AST parsing + regex patterns + taint analysis  
 **Deployment:** MCP server (Claude, VS Code, Cursor) + CLI  
 **License:** RSA-2048 JWT cryptographic validation  
-**Test Coverage:** 93 tests (100% passing)  
+**Test Coverage:** 7,575+ tests (100% passing)  
 **Report Format:** PDF (base64-encoded) + JSON  
 **Performance:** Scan 10K LOC in <2 seconds  
 
@@ -261,6 +262,6 @@ code-scalpel check --standard community --paths src/
 **Code Scalpel Enterprise Compliance**  
 *Automated compliance scanning that scales with your business*
 
-**Last Updated:** February 12, 2026  
-**Version:** 1.3.0  
+**Last Updated:** February 24, 2026  
+**Version:** 2.0.0  
 **Learn More:** https://code-scalpel.com/docs

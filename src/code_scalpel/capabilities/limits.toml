@@ -27,6 +27,11 @@ languages = [
     "javascript",
     "typescript",
     "java",
+    "c",
+    "cpp",
+    "csharp",
+    "go",
+    "kotlin",
 ]
 
 [community.get_file_context]
@@ -83,6 +88,11 @@ languages = [
     "javascript",
     "typescript",
     "java",
+    "c",
+    "cpp",
+    "csharp",
+    "go",
+    "kotlin",
 ]
 max_sinks = 50
 
@@ -111,8 +121,8 @@ validation_level = "syntax"
 max_updates_per_call = 10
 
 [community.rename_symbol]
-max_files_searched = 0
-max_files_updated = 0
+max_files_searched = 1       # Single-file rename (definition in the file you specify)
+max_files_updated = 1
 
 [community.simulate_refactor]
 max_file_size_mb = 5         # Covers most source files
@@ -150,6 +160,11 @@ languages = [
     "javascript",
     "typescript",
     "java",
+    "c",
+    "cpp",
+    "csharp",
+    "go",
+    "kotlin",
 ]
 
 [pro.get_file_context]
@@ -192,6 +207,11 @@ languages = [
     "javascript",
     "typescript",
     "java",
+    "c",
+    "cpp",
+    "csharp",
+    "go",
+    "kotlin",
 ]
 max_sinks = -1               # Unlimited (match Enterprise)
 
@@ -354,6 +374,11 @@ languages = [
     "javascript",
     "typescript",
     "java",
+    "c",
+    "cpp",
+    "csharp",
+    "go",
+    "kotlin",
 ]
 max_sinks = -1               # Fixed: was 50 (same as Community)
 
@@ -361,3 +386,19 @@ max_sinks = -1               # Fixed: was 50 (same as Community)
 max_policy_files = -1
 signature_validation = true
 tamper_detection = true
+
+# [20260303_FEATURE] C++ static-analysis tool limits
+[community.run_static_analysis]
+tools = ["cppcheck", "clang-tidy", "clang-sa", "cpplint"]
+max_findings = 50
+report_parsing = true
+
+[pro.run_static_analysis]
+tools = ["cppcheck", "clang-tidy", "clang-sa", "cpplint"]
+max_findings = -1
+report_parsing = true
+
+[enterprise.run_static_analysis]
+tools = ["cppcheck", "clang-tidy", "clang-sa", "cpplint", "coverity", "sonarqube"]
+max_findings = -1
+report_parsing = true

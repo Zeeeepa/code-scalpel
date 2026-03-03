@@ -4,8 +4,10 @@
 
 set -e
 
-# Build the command with required arguments
-CMD="code-scalpel mcp --http --host 0.0.0.0 --port 8593 --allow-lan"
+# [20260302_BUGFIX] Use --transport streamable-http instead of --http (which
+# maps to legacy SSE transport). Streamable-http is the modern MCP transport
+# and aligns with test expectations (streamable_http_client → /mcp endpoint).
+CMD="code-scalpel mcp --transport streamable-http --host 0.0.0.0 --port 8593 --allow-lan"
 
 # Add root path if SCALPEL_ROOT is set
 if [ -n "$SCALPEL_ROOT" ]; then

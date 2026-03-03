@@ -38,6 +38,11 @@ class Language(Enum):
     JAVASCRIPT = "javascript"
     TYPESCRIPT = "typescript"
     JAVA = "java"
+    C = "c"  # [20260224_FEATURE] C language support
+    CPP = "cpp"  # [20260224_FEATURE] C++ language support
+    CSHARP = "csharp"  # [20260224_FEATURE] C# language support
+    GO = "go"  # [20260302_FEATURE] Go language support
+    KOTLIN = "kotlin"  # [20260303_FEATURE] Kotlin language support
     AUTO = "auto"  # Auto-detect from file extension
 
 
@@ -54,6 +59,24 @@ EXTENSION_MAP: dict[str, Language] = {
     ".mts": Language.TYPESCRIPT,
     ".cts": Language.TYPESCRIPT,
     ".java": Language.JAVA,
+    # [20260224_FEATURE] C/C++ extensions
+    ".c": Language.C,
+    ".h": Language.C,  # headers default to C but may be overridden
+    ".cpp": Language.CPP,
+    ".cc": Language.CPP,
+    ".cxx": Language.CPP,
+    ".c++": Language.CPP,
+    ".hpp": Language.CPP,
+    ".hxx": Language.CPP,
+    ".hh": Language.CPP,
+    ".h++": Language.CPP,
+    ".inl": Language.CPP,
+    # [20260224_FEATURE] C# extension
+    ".cs": Language.CSHARP,
+    # [20260302_FEATURE] Go extension
+    ".go": Language.GO,
+    ".kt": Language.KOTLIN,  # [20260303_FEATURE]
+    ".kts": Language.KOTLIN,  # [20260303_FEATURE]
 }
 
 
@@ -117,9 +140,70 @@ def detect_language(file_path: str | None, code: str | None = None) -> Language:
         ):
             return Language.TYPESCRIPT
 
+        # [20260224_FEATURE] C# indicators (check before Java – more specific)
+        # "using System" / Console.Write / namespace without #include are C#-only
+        if (
+            any(
+                kw in code
+                for kw in [
+                    "using System",
+                    "Console.Write",
+                    "void Main(",
+                ]
+            )
+            and "#include" not in code
+        ):
+            return Language.CSHARP
+
+        # [20260303_FEATURE] Kotlin indicators — check BEFORE Go/Java; "fun " is unique.
+        if any(
+            kw in code
+            for kw in ["fun ", "val ", "var ", "data class ", "object ", "companion object"]
+        ):
+            return Language.KOTLIN
+
+        # [20260302_FEATURE] Go indicators — check BEFORE Java because "package " appears
+        # in both languages; "func " and "package main" are unambiguous Go keywords.
+        if any(
+            kw in code
+            for kw in ["package main", "func ", "import (", "fmt.Println", "fmt.Printf"]
+        ):
+            return Language.GO
+
         # Java indicators
         if "public class " in code or "private class " in code or "package " in code:
             return Language.JAVA
+
+        # [20260224_FEATURE] C++ indicators (check before C – more specific)
+        if any(
+            kw in code
+            for kw in [
+                "namespace ",
+                "template<",
+                "template <",
+                "std::",
+                "public:",
+                "private:",
+                "protected:",
+                "#include <",
+                "nullptr",
+                "::",
+            ]
+        ):
+            return Language.CPP
+
+        # [20260224_FEATURE] C indicators
+        if any(
+            kw in code
+            for kw in [
+                "#include ",
+                "#define ",
+                "int main",
+                "struct ",
+                "typedef ",
+            ]
+        ):
+            return Language.C
 
         # JavaScript indicators (after ruling out TS)
         if any(kw in code for kw in ["function ", "const ", "let ", "var ", "=>"]):
@@ -217,6 +301,16 @@ class PolyglotExtractor:
             self._parse_typescript()
         elif self.language == Language.JAVA:
             self._parse_java()
+        elif self.language == Language.C:
+            self._parse_c()
+        elif self.language == Language.CPP:
+            self._parse_cpp()
+        elif self.language == Language.CSHARP:
+            self._parse_csharp()
+        elif self.language == Language.GO:
+            self._parse_go()  # [20260302_FEATURE]
+        elif self.language == Language.KOTLIN:
+            self._parse_kotlin()  # [20260303_FEATURE]
         else:
             raise ValueError(f"Unsupported language: {self.language}")
 
@@ -299,6 +393,50 @@ class PolyglotExtractor:
         normalizer = JavaNormalizer()
         self._ir_module = normalizer.normalize(self.code)
 
+    def _parse_c(self) -> None:
+        """
+        Parse C code using tree-sitter-c.
+
+        [20260224_FEATURE] Added C support to code_parsers.
+        """
+        from code_scalpel.ir.normalizers.c_normalizer import CNormalizer
+
+        normalizer = CNormalizer()
+        self._ir_module = normalizer.normalize(self.code)
+
+    def _parse_cpp(self) -> None:
+        """
+        Parse C++ code using tree-sitter-cpp.
+
+        [20260224_FEATURE] Added C++ support to code_parsers.
+        """
+        from code_scalpel.ir.normalizers.cpp_normalizer import CppNormalizer
+
+        normalizer = CppNormalizer()
+        self._ir_module = normalizer.normalize(self.code)
+
+    def _parse_csharp(self) -> None:
+        """
+        Parse C# code using tree-sitter-c-sharp.
+
+        [20260224_FEATURE] Added C# support to code_parsers.
+        """
+        from code_scalpel.ir.normalizers.csharp_normalizer import CSharpNormalizer
+
+        normalizer = CSharpNormalizer()
+        self._ir_module = normalizer.normalize(self.code)
+
+    def _parse_go(self) -> None:
+        """
+        Parse Go code using tree-sitter-go.
+
+        [20260302_FEATURE] Added Go support to code_parsers.
+        """
+        from code_scalpel.ir.normalizers.go_normalizer import GoNormalizer
+
+        normalizer = GoNormalizer()
+        self._ir_module = normalizer.normalize(self.code)
+
     def extract(
         self, target_type: str, target_name: str, include_dependencies: bool = False
     ) -> PolyglotExtractionResult:
@@ -320,6 +458,10 @@ class PolyglotExtractor:
         # Python uses existing extractor
         if self.language == Language.PYTHON:
             return self._extract_python(target_type, target_name)
+
+        # C/C++ parse are handled by tree-sitter normalizers
+        if self.language in (Language.C, Language.CPP, Language.CSHARP):
+            return self._extract_from_ir(target_type, target_name)
 
         # Other languages use IR-based extraction
         return self._extract_from_ir(target_type, target_name)

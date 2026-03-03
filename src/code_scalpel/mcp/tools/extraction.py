@@ -61,13 +61,13 @@ async def extract_code(
     'file_path' (recommended) or 'code' for the source.
 
     **Tier Behavior:**
-    - Community: Single-file extraction only, basic symbols, max depth 0, 1MB limit
-    - Pro: Cross-file dependencies, variable promotion, closure detection, max depth 1, 10MB limit
+    - Community: Single-file extraction only, basic symbols, max depth 1, 1MB limit
+    - Pro: Cross-file dependencies, variable promotion, closure detection, unlimited depth and size
     - Enterprise: Organization-wide resolution, custom patterns, Dockerfile generation, unlimited depth, 100MB limit
 
     **Tier Capabilities:**
-    - Community: single_file_extraction, basic_symbols (max_depth=0, max_file_size_mb=1)
-    - Pro: All Community + cross_file_deps, context_extraction, variable_promotion, closure_detection, dependency_injection_suggestions (max_depth=1, max_file_size_mb=10)
+    - Community: single_file_extraction, basic_symbols (max_depth=1, max_file_size_mb=1)
+    - Pro: All Community + cross_file_deps, context_extraction, variable_promotion, closure_detection, dependency_injection_suggestions (max_depth=unlimited, max_file_size_mb=100)
     - Enterprise: All Pro + org_wide_resolution, custom_extraction_patterns, dockerfile_generation, service_boundaries (max_depth=unlimited, max_file_size_mb=100)
 
     **Args:**
@@ -76,6 +76,7 @@ async def extract_code(
         file_path (str, optional): Path to source file. Either file_path or code required.
         code (str, optional): Source code string. Either file_path or code required.
         language (str, optional): Programming language. Default: auto-detect.
+                       Supported: python, javascript, typescript, java, c, cpp, csharp, go
         include_context (bool): Include surrounding code context. Default: False.
         context_depth (int): Depth of context to include. Default: 1.
         include_cross_file_deps (bool): Include cross-file dependencies (Pro+ only). Default: False.
@@ -195,8 +196,8 @@ async def rename_symbol(
 
     **Tier Capabilities:**
     - Community: Single-file renames, definition + local references only (max_files_searched=0, max_files_updated=0)
-    - Pro: All Community + cross-file renames (max_files_searched=500, max_files_updated=200)
-    - Enterprise: All Pro + audit trail, approval workflows, unlimited scope (max_files_searched=None, max_files_updated=None)
+    - Pro: All Community + unlimited cross-file renames (max_files_searched=unlimited, max_files_updated=unlimited)
+    - Enterprise: All Pro + audit trail, approval workflows, unlimited scope (max_files_searched=unlimited, max_files_updated=unlimited)
 
     **Args:**
         file_path (str): Path to the file containing the symbol to rename.

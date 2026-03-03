@@ -15,6 +15,7 @@ def register_tools() -> None:
     import_module("code_scalpel.mcp.tools.graph")
     import_module("code_scalpel.mcp.tools.policy")
     import_module("code_scalpel.mcp.tools.system")
+    import_module("code_scalpel.mcp.tools.static_analysis")  # [20260303_FEATURE] C++ tool parsers
 
 
 __all__ = ["register_tools"]

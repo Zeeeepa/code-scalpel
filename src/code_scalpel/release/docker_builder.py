@@ -292,6 +292,7 @@ class DockerImageBuilder:
         print(f"✅ Tagged: {build_result['latest_tag']}")
 
         # Build REST API image if Dockerfile.rest exists
+        rest_result = None
         if (self.project_dir / "Dockerfile.rest").exists():
             rest_result = self.build_image(
                 dockerfile="Dockerfile.rest",
@@ -311,17 +312,22 @@ class DockerImageBuilder:
             if self.username and self.password_or_token:
                 self.authenticate(dry_run=dry_run)
 
-            # Push all built images
+            # Push all built images (version tags)
             for image_tag in images_built:
                 self.push_image(image_tag, dry_run=dry_run)
                 images_pushed.append(image_tag)
                 print(f"✅ Pushed: {image_tag}")
 
-            # Also push latest tags
-            latest_tag = f"{self.registry}/code-scalpel:latest"
-            self.push_image(latest_tag, dry_run=dry_run)
-            images_pushed.append(latest_tag)
-            print(f"✅ Pushed: {latest_tag}")
+            # Also push latest tags for both images
+            for img_name, has_result in [
+                ("code-scalpel", True),
+                ("code-scalpel-rest", rest_result is not None),
+            ]:
+                if has_result:
+                    latest_tag = f"{self.registry}/{img_name}:latest"
+                    self.push_image(latest_tag, dry_run=dry_run)
+                    images_pushed.append(latest_tag)
+                    print(f"✅ Pushed: {latest_tag}")
 
         return {
             "version": self.version,

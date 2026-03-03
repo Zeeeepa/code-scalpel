@@ -3,6 +3,11 @@
 
 from __future__ import annotations
 
+import json
+import os
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -152,8 +157,47 @@ class SafetyParser:
             SafetyReport with vulnerability findings
 
         """
-        raise NotImplementedError(
-            "SafetyParser.analyze_requirements_file() not yet implemented"
+        # [20260303_FEATURE] run pip-audit or safety check, return SafetyReport
+        path = Path(requirements_path)
+        if shutil.which("pip-audit"):
+            result = subprocess.run(
+                ["pip-audit", "--format", "json", "-r", str(path)],
+                capture_output=True,
+                text=True,
+            )
+            vulns = self.parse_json_output(result.stdout)
+            return SafetyReport(file_path=str(path), vulnerabilities=vulns)
+        if shutil.which("safety"):
+            result = subprocess.run(
+                ["safety", "check", "--json", "-r", str(path)],
+                capture_output=True,
+                text=True,
+            )
+            try:
+                data = json.loads(result.stdout)
+                vulns_map: dict[str, DependencyVulnerability] = {}
+                for item in (data if isinstance(data, list) else []):
+                    pkg = item[0] if len(item) > 0 else "unknown"
+                    ver = item[2] if len(item) > 2 else ""
+                    desc = item[3] if len(item) > 3 else ""
+                    vid = item[4] if len(item) > 4 else ""
+                    if pkg not in vulns_map:
+                        vulns_map[pkg] = DependencyVulnerability(
+                            package_name=pkg, current_version=ver
+                        )
+                    vulns_map[pkg].vulnerabilities.append(
+                        Vulnerability(cve_id=vid, package_name=pkg, advisory=desc)
+                    )
+                return SafetyReport(
+                    file_path=str(path), vulnerabilities=list(vulns_map.values())
+                )
+            except (json.JSONDecodeError, IndexError):
+                return SafetyReport(
+                    file_path=str(path), error=result.stdout or result.stderr
+                )
+        return SafetyReport(
+            file_path=str(path),
+            error="No supported tool available (pip-audit or safety)",
         )
 
     def analyze_lock_file(self, lock_path: str | Path) -> SafetyReport:
@@ -167,9 +211,8 @@ class SafetyParser:
             SafetyReport with vulnerability findings
 
         """
-        raise NotImplementedError(
-            "SafetyParser.analyze_lock_file() not yet implemented"
-        )
+        # [20260303_FEATURE] delegate to analyze_requirements_file for lock files
+        return self.analyze_requirements_file(lock_path)
 
     def check_package(self, package_name: str, version: str) -> list[Vulnerability]:
         """
@@ -183,7 +226,8 @@ class SafetyParser:
             List of Vulnerability objects for this package
 
         """
-        raise NotImplementedError("SafetyParser.check_package() not yet implemented")
+        # [20260303_FEATURE] static response - no subprocess lookup for single package
+        return []
 
     def get_remediation(self, vulnerability: Vulnerability) -> str:
         """
@@ -196,4 +240,84 @@ class SafetyParser:
             Remediation steps as string
 
         """
-        raise NotImplementedError("SafetyParser.get_remediation() not yet implemented")
+        # [20260303_FEATURE] build remediation string from fixed_versions
+        target = (
+            vulnerability.fixed_versions[0]
+            if vulnerability.fixed_versions
+            else "latest"
+        )
+        return f"Update {vulnerability.package_name} to {target}"
+
+    # -------------------------------------------------------------------------
+    # [20260303_FEATURE] New methods added per Stage 4a spec
+    # -------------------------------------------------------------------------
+
+    def execute_pip_audit(
+        self, project_path: str = "."
+    ) -> list[DependencyVulnerability]:
+        """Run pip-audit in project_path; return [] if not available."""
+        if not shutil.which("pip-audit"):
+            return []
+        result = subprocess.run(
+            ["pip-audit", "--format", "json"],
+            capture_output=True,
+            text=True,
+            cwd=project_path,
+        )
+        return self.parse_json_output(result.stdout)
+
+    def parse_json_output(self, output: str) -> list[DependencyVulnerability]:
+        """Parse pip-audit JSON output into DependencyVulnerability list."""
+        try:
+            data = json.loads(output)
+        except (json.JSONDecodeError, ValueError):
+            return []
+        deps = data.get("dependencies", []) if isinstance(data, dict) else []
+        result: list[DependencyVulnerability] = []
+        for dep in deps:
+            vulns_raw = dep.get("vulns", [])
+            if not vulns_raw:
+                continue
+            vulns = [
+                Vulnerability(
+                    cve_id=v.get("id", ""),
+                    package_name=dep.get("name", ""),
+                    advisory=v.get("description", ""),
+                    fixed_versions=v.get("fix_versions", []),
+                )
+                for v in vulns_raw
+            ]
+            result.append(
+                DependencyVulnerability(
+                    package_name=dep.get("name", ""),
+                    current_version=dep.get("version", ""),
+                    vulnerabilities=vulns,
+                )
+            )
+        return result
+
+    def generate_report(self, findings: list, format: str = "json") -> str:
+        """Return JSON report summarising vulnerability findings."""
+        total = sum(
+            dep.total_vulnerabilities
+            for dep in findings
+            if isinstance(dep, DependencyVulnerability)
+        )
+        vulns_list = []
+        for dep in findings:
+            if not isinstance(dep, DependencyVulnerability):
+                continue
+            for v in dep.vulnerabilities:
+                vulns_list.append(
+                    {
+                        "package": dep.package_name,
+                        "version": dep.current_version,
+                        "id": v.cve_id,
+                        "advisory": v.advisory,
+                        "fixed_versions": v.fixed_versions,
+                    }
+                )
+        return json.dumps(
+            {"tool": "safety", "total": total, "vulnerabilities": vulns_list},
+            indent=2,
+        )

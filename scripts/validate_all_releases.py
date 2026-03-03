@@ -162,9 +162,15 @@ async def validate_v1_4_0():
     print('v1.4.0 "Context" Validation')
     print("=" * 60)
 
-    # P0: get_file_context (using server.py as test file)
+    # P0: get_file_context — use a small file (< 500 lines) so Community tier
+    # line limit doesn't suppress the AST results. server.py has 5000+ lines.
     test_file = (
-        Path(__file__).parent.parent / "src" / "code_scalpel" / "mcp" / "server.py"
+        Path(__file__).parent.parent
+        / "src"
+        / "code_scalpel"
+        / "mcp"
+        / "tools"
+        / "context.py"
     )
     if test_file.exists():
         ctx = await get_file_context(file_path=str(test_file))

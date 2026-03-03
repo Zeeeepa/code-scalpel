@@ -26,8 +26,47 @@ try:
 
     _HAS_JAVASCRIPT = True
 except ImportError:
-    JavaScriptNormalizer = None
+    JavaScriptNormalizer = None  # type: ignore[assignment]
     _HAS_JAVASCRIPT = False
+
+# [20260224_FEATURE] C/C++ normalizers — require tree-sitter-c / tree-sitter-cpp
+try:
+    from .c_normalizer import CNormalizer, CVisitor
+
+    _HAS_C = True
+except ImportError:
+    CNormalizer = None  # type: ignore[assignment]
+    CVisitor = None  # type: ignore[assignment]
+    _HAS_C = False
+
+try:
+    from .cpp_normalizer import CppNormalizer, CppVisitor
+
+    _HAS_CPP = True
+except ImportError:
+    CppNormalizer = None  # type: ignore[assignment]
+    CppVisitor = None  # type: ignore[assignment]
+    _HAS_CPP = False
+
+# [20260224_FEATURE] C# normalizer — requires tree-sitter-c-sharp
+try:
+    from .csharp_normalizer import CSharpNormalizer, CSharpVisitor
+
+    _HAS_CSHARP = True
+except ImportError:
+    CSharpNormalizer = None  # type: ignore[assignment]
+    CSharpVisitor = None  # type: ignore[assignment]
+    _HAS_CSHARP = False
+
+# [20260302_FEATURE] Go normalizer — requires tree-sitter-go
+try:
+    from .go_normalizer import GoNormalizer, GoVisitor
+
+    _HAS_GO = True
+except ImportError:
+    GoNormalizer = None  # type: ignore[assignment]
+    GoVisitor = None  # type: ignore[assignment]
+    _HAS_GO = False
 
 __all__ = [
     "BaseNormalizer",
@@ -39,3 +78,28 @@ __all__ = [
 
 if _HAS_JAVASCRIPT:
     __all__.append("JavaScriptNormalizer")
+
+if _HAS_C:
+    __all__ += ["CNormalizer", "CVisitor"]
+
+if _HAS_CPP:
+    __all__ += ["CppNormalizer", "CppVisitor"]
+
+if _HAS_CSHARP:
+    __all__ += ["CSharpNormalizer", "CSharpVisitor"]
+
+if _HAS_GO:
+    __all__ += ["GoNormalizer", "GoVisitor"]
+
+# [20260303_FEATURE] Kotlin normalizer — requires tree-sitter-kotlin
+try:
+    from .kotlin_normalizer import KotlinNormalizer, KotlinVisitor
+
+    _HAS_KOTLIN = True
+except ImportError:
+    KotlinNormalizer = None  # type: ignore[assignment]
+    KotlinVisitor = None  # type: ignore[assignment]
+    _HAS_KOTLIN = False
+
+if _HAS_KOTLIN:
+    __all__ += ["KotlinNormalizer", "KotlinVisitor"]

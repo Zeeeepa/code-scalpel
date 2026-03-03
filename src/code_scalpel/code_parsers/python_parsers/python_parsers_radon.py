@@ -242,6 +242,11 @@ API Design (Planned):
 
 from __future__ import annotations
 
+import json
+import os
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -414,7 +419,41 @@ class RadonParser:
             RadonReport with complexity metrics
 
         """
-        raise NotImplementedError("RadonParser.analyze_file() not yet implemented")
+        # [20260303_FEATURE] delegate to execute_radon_cc/mi then build RadonReport
+        path = Path(file_path)
+        cc_items = self.execute_radon_cc(str(path))
+        mi_items = self.execute_radon_mi(str(path))
+        report = RadonReport(file_path=str(path))
+        for item in cc_items:
+            itype = item.get("type", "")
+            if itype == "function":
+                report.functions.append(
+                    FunctionComplexity(
+                        name=item.get("name", ""),
+                        location=SourceLocation(line=item.get("lineno", 0)),
+                        metrics=ComplexityMetrics(
+                            cyclomatic_complexity=item.get("complexity", 0)
+                        ),
+                        affected_lines=max(
+                            0, item.get("endline", 0) - item.get("lineno", 0)
+                        ),
+                    )
+                )
+            elif itype in ("class", "method"):
+                report.classes.append(
+                    ClassComplexity(
+                        name=item.get("name", ""),
+                        location=SourceLocation(line=item.get("lineno", 0)),
+                        metrics=ComplexityMetrics(
+                            cyclomatic_complexity=item.get("complexity", 0)
+                        ),
+                    )
+                )
+        for item in mi_items:
+            mi_val = item.get("mi")
+            if mi_val is not None and report.overall_mi is None:
+                report.overall_mi = float(mi_val)
+        return report
 
     def analyze_code(self, code: str, filename: str = "<string>") -> RadonReport:
         """
@@ -428,7 +467,89 @@ class RadonParser:
             RadonReport with complexity metrics
 
         """
-        raise NotImplementedError("RadonParser.analyze_code() not yet implemented")
+        # [20260303_FEATURE] write to temp file then analyze
+        fd, tmp = tempfile.mkstemp(suffix=".py")
+        try:
+            os.write(fd, code.encode())
+            os.close(fd)
+            report = self.analyze_file(tmp)
+            report.file_path = filename
+            return report
+        finally:
+            os.unlink(tmp)
+
+    # -------------------------------------------------------------------------
+    # [20260303_FEATURE] New methods added per Stage 4a spec
+    # -------------------------------------------------------------------------
+
+    def execute_radon_cc(self, path: str = ".") -> list[dict]:
+        """Run radon cc -j on path; return [] if radon not available."""
+        if not shutil.which("radon"):
+            return []
+        result = subprocess.run(
+            ["radon", "cc", "-j", path], capture_output=True, text=True
+        )
+        return self.parse_cc_json(result.stdout)
+
+    def execute_radon_mi(self, path: str = ".") -> list[dict]:
+        """Run radon mi -j on path; return [] if radon not available."""
+        if not shutil.which("radon"):
+            return []
+        result = subprocess.run(
+            ["radon", "mi", "-j", path], capture_output=True, text=True
+        )
+        return self.parse_mi_json(result.stdout)
+
+    def parse_cc_json(self, output: str) -> list[dict]:
+        """Parse radon cc -j JSON output into flat list of function/class dicts."""
+        try:
+            data = json.loads(output)
+        except (json.JSONDecodeError, ValueError):
+            return []
+        items: list[dict] = []
+        for fname, entries in (data.items() if isinstance(data, dict) else []):
+            for entry in entries if isinstance(entries, list) else []:
+                entry["_file"] = fname
+                items.append(entry)
+        return items
+
+    def parse_mi_json(self, output: str) -> list[dict]:
+        """Parse radon mi -j JSON output into flat list of MI dicts."""
+        try:
+            data = json.loads(output)
+        except (json.JSONDecodeError, ValueError):
+            return []
+        items: list[dict] = []
+        for fname, entries in (data.items() if isinstance(data, dict) else []):
+            entry_list = entries if isinstance(entries, list) else [entries]
+            for entry in entry_list:
+                if isinstance(entry, dict):
+                    entry["_file"] = fname
+                    items.append(entry)
+        return items
+
+    def categorize_by_grade(self, items: list[dict]) -> dict[str, list[dict]]:
+        """Group items by their complexity grade (A-F)."""
+        cats: dict[str, list[dict]] = {
+            "A": [],
+            "B": [],
+            "C": [],
+            "D": [],
+            "E": [],
+            "F": [],
+        }
+        for item in items:
+            grade = item.get(
+                "rank", self.get_grade(item.get("complexity", 0))
+            )
+            cats.setdefault(grade, []).append(item)
+        return cats
+
+    def generate_report(self, findings: list[dict], format: str = "json") -> str:
+        """Return JSON report of radon complexity items."""
+        return json.dumps(
+            {"tool": "radon", "total": len(findings), "items": findings}, indent=2
+        )
 
     def get_grade(self, complexity: int) -> str:
         """

@@ -4,7 +4,9 @@ Validates that each tool's language support matches documentation:
 - Python: Full support for most tools
 - JavaScript/TypeScript: Sink detection and basic analysis
 - Java: Limited support (sink detection)
-- Go/Rust/C++/Ruby/PHP: Roadmap/partial support
+- C/C++/C#: Extraction support (analyze_code, extract_code) — added v2.0.0
+- Go: Extraction support (analyze_code, extract_code) — added v2.0.3 [20260302_FEATURE]
+- Rust/Ruby/PHP: Roadmap/partial support
 
 Tests verify:
 - Claimed language support actually works
@@ -12,6 +14,8 @@ Tests verify:
 - Accuracy across supported languages
 
 [20260124_TEST] Created comprehensive polyglot language verification.
+[20260224_TEST] Updated for v2.0.0: C, C++, C# are now fully supported.
+[20260302_TEST] Updated for v2.0.3: Go is now fully supported.
 """
 
 from __future__ import annotations
@@ -22,7 +26,10 @@ import pytest
 class TestAnalyzeCodeLanguageSupport:
     """Test language support for analyze_code tool."""
 
-    @pytest.mark.parametrize("language", ["python", "javascript", "typescript", "java"])
+    @pytest.mark.parametrize(
+        "language",
+        ["python", "javascript", "typescript", "java", "c", "cpp", "csharp", "go"],
+    )
     def test_analyze_code_supported_languages(self, language):
         """Supported languages should be analyzable."""
         # Python: Full AST analysis
@@ -40,14 +47,14 @@ class TestAnalyzeCodeLanguageSupport:
         # May not: advanced type analysis
         pass
 
-    def test_analyze_code_go_not_supported(self):
-        """Go support is roadmap only (not in v1.0.1)."""
-        # Should gracefully decline or skip
+    def test_analyze_code_go_supported(self):
+        """Go support is fully available as of v2.0.3. [20260302_FEATURE]"""
+        # analyze_code should work with Go source code
         pass
 
     def test_analyze_code_unsupported_language_error(self):
         """Unsupported languages should produce helpful error."""
-        # Not crash, but indicate: "Go not supported yet (roadmap Q1 2026)"
+        # Not crash, but indicate: "Go not supported yet (roadmap)"
         pass
 
 
@@ -81,9 +88,12 @@ class TestSecurityScanLanguageSupport:
 class TestUnifiedSinkDetectLanguageSupport:
     """Test unified_sink_detect language support."""
 
-    @pytest.mark.parametrize("language", ["python", "javascript", "typescript", "java"])
+    @pytest.mark.parametrize(
+        "language",
+        ["python", "javascript", "typescript", "java", "c", "cpp", "csharp", "go"],
+    )
     def test_unified_sink_detect_supported(self, language):
-        """Supported languages should be detectable."""
+        """Supported languages should be detectable (C/C++/C# added v2.0.0, Go added v2.0.3)."""
         pass
 
     def test_unified_sink_detect_python_sinks(self):
@@ -189,13 +199,21 @@ class TestTypeEvaporationLanguageSupport:
         ("security_scan", "java", "sink_only"),
         ("unified_sink_detect", "java", "supported"),
         ("extract_code", "java", "single_symbol"),
-        # Go/Rust: Roadmap only
-        ("analyze_code", "go", "not_supported"),
+        # Go: Full extraction support added v2.0.3 [20260302_FEATURE]
+        ("analyze_code", "go", "basic"),
+        ("extract_code", "go", "single_symbol"),
+        ("unified_sink_detect", "go", "supported"),
+        # Rust: Roadmap only
         ("analyze_code", "rust", "not_supported"),
-        ("security_scan", "go", "not_supported"),
         ("security_scan", "rust", "not_supported"),
-        ("unified_sink_detect", "go", "not_supported"),
-        # C/Ruby/PHP: Roadmap only
+        # C/C++/C#: Extraction support added in v2.0.0
+        ("analyze_code", "c", "basic"),
+        ("extract_code", "c", "single_symbol"),
+        ("analyze_code", "cpp", "basic"),
+        ("extract_code", "cpp", "single_symbol"),
+        ("analyze_code", "csharp", "basic"),
+        ("extract_code", "csharp", "single_symbol"),
+        # Ruby/PHP: Roadmap only
         ("security_scan", "php", "not_supported"),
         ("security_scan", "ruby", "not_supported"),
     ],
@@ -231,6 +249,12 @@ class TestLanguageDetection:
             "Main.java": "java",
             "main.go": "go",
             "lib.rs": "rust",
+            # [20260224_TEST] C/C++/C# added in v2.0.0
+            "vec3.c": "c",
+            "renderer.cpp": "cpp",
+            "renderer.cc": "cpp",
+            "vec3.h": "c",
+            "Program.cs": "csharp",
         }
 
         for filename, expected_lang in detections.items():
@@ -291,15 +315,24 @@ class TestLanguageSpecificVulnerabilities:
 class TestLanguageRoadmapTracking:
     """Verify roadmap language support matches documentation."""
 
-    def test_go_roadmap_documented(self):
-        """Go support roadmap should be documented."""
-        # Expected: Q1 2026 for analyze_code
-        pass
+    def test_go_fully_supported(self):
+        """Go is fully supported as of v2.0.3. [20260302_FEATURE]"""
+        # Go now supports: analyze_code, extract_code, unified_sink_detect
+        from code_scalpel.code_parsers.extractor import Language
+
+        assert Language.GO.value == "go"
 
     def test_rust_roadmap_documented(self):
         """Rust support roadmap should be documented."""
         pass
 
-    def test_c_roadmap_documented(self):
-        """C/C++ support roadmap should be documented."""
-        pass
+    def test_c_cpp_csharp_go_fully_supported(self):
+        """C, C++, C# and Go extraction is fully supported."""
+        # [20260224_TEST] C/C++/C# are now first-class citizens.
+        # [20260302_TEST] Go added as first-class citizen.
+        from code_scalpel.code_parsers.extractor import Language
+
+        assert Language.C.value == "c"
+        assert Language.CPP.value == "cpp"
+        assert Language.CSHARP.value == "csharp"
+        assert Language.GO.value == "go"

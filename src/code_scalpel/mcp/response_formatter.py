@@ -22,6 +22,7 @@ Profiles control:
 from __future__ import annotations
 
 import logging
+import warnings
 from typing import Any, Optional
 
 from pydantic import BaseModel
@@ -330,7 +331,7 @@ class ResponseFormatter:
         return filtered_envelope
 
     @staticmethod
-    def format_with_envelope(
+    def format_with_envelope(  # [20260224_DEPRECATE] remove in v1.5.0
         tool_id: str,
         tool_name: str,
         tool_version: str,
@@ -361,6 +362,14 @@ class ResponseFormatter:
         Returns:
             Filtered envelope dictionary ready for JSON serialization.
         """
+        # [20260224_DEPRECATE] warn on every call so callers know to migrate
+        warnings.warn(
+            "ResponseFormatter.format_with_envelope() is deprecated and will be "
+            "removed in v1.5.0. Use contract.envelop_tool_function() or "
+            "ResponseConfig from response_config.py instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         # Resolve profile
         profile = ResponseFormatter.resolve_profile_cascading(profile_name)
 

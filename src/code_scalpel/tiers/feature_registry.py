@@ -164,11 +164,12 @@ DEFAULT_FEATURES: Dict[str, Feature] = {
         description="Compliance and audit reporting",
         category="governance",
     ),
-    # [20260126_FEATURE] Oracle tools for deterministic code generation
+    # [20260126_FEATURE] Oracle pipeline for deterministic code generation
+    # [20260224_REFACTOR] Not a public MCP tool — internal pipeline tier-gating only
     "write_perfect_code": Feature(
         name="write_perfect_code",
         tier="pro",
-        description="Generate constraint specs for AI code generation",
+        description="Internal: Oracle pipeline constraint spec generation (not a public MCP tool)",
         category="oracle",
     ),
 }

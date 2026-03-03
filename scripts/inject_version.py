@@ -33,7 +33,7 @@ def load_version(project_root: Path) -> str:
     pyproject = project_root / "pyproject.toml"
     if not pyproject.exists():
         raise FileNotFoundError(f"pyproject.toml not found at {pyproject}")
-    text = pyproject.read_text()
+    text = pyproject.read_text(encoding="utf-8")
     m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.MULTILINE)
     if not m:
         raise ValueError("Could not find version in pyproject.toml")

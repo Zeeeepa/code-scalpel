@@ -21,6 +21,7 @@ Usage:
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -31,11 +32,26 @@ from typing import List, Optional, Tuple
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+# Load .env file if present (for local runs — CI uses GitHub Secrets)
+_env_file = Path(__file__).parent.parent / ".env"
+if _env_file.exists():
+    for _line in _env_file.read_text(encoding="utf-8").splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith("#") and "=" in _line:
+            _key, _, _val = _line.partition("=")
+            os.environ.setdefault(_key.strip(), _val.strip())
+
 
 class PipelineRunner:
-    def __init__(self, verbose: bool = False, generate_artifacts: bool = True):
+    def __init__(
+        self,
+        verbose: bool = False,
+        generate_artifacts: bool = True,
+        auto_fix: bool = False,
+    ):
         self.verbose = verbose
         self.generate_artifacts = generate_artifacts
+        self.auto_fix = auto_fix
         self.project_root = Path(__file__).parent.parent
         self.artifacts_dir = self.project_root / "artifacts"
         self.results = {
@@ -74,11 +90,23 @@ class PipelineRunner:
             return 1, "", str(e)
 
     def check_black_formatting(self) -> bool:
-        """Check Black code formatting."""
-        self.log("Checking Black formatting...")
-        exit_code, stdout, stderr = self.run_command(
-            ["black", "--check", "--diff", "."]
-        )
+        """Check Black code formatting, auto-fixing if --auto-fix is set."""
+        if self.auto_fix:
+            self.log("Auto-fixing Black formatting...")
+            exit_code, stdout, stderr = self.run_command(["black", "."])
+            if exit_code == 0:
+                self.log("✅ Black auto-fix applied")
+            else:
+                self.log("⚠️  Black auto-fix had issues (syntax errors?)", "WARNING")
+            # After fix, verify it's now clean
+            exit_code, stdout, stderr = self.run_command(
+                ["black", "--check", "--diff", "."]
+            )
+        else:
+            self.log("Checking Black formatting...")
+            exit_code, stdout, stderr = self.run_command(
+                ["black", "--check", "--diff", "."]
+            )
 
         if exit_code == 0:
             self.log("✅ Black formatting check passed")
@@ -96,9 +124,15 @@ class PipelineRunner:
             return False
 
     def check_ruff_linting(self) -> bool:
-        """Check Ruff linting."""
-        self.log("Checking Ruff linting...")
-        exit_code, stdout, stderr = self.run_command(["ruff", "check", "."])
+        """Check Ruff linting, auto-fixing safe issues if --auto-fix is set."""
+        if self.auto_fix:
+            self.log("Auto-fixing Ruff linting issues...")
+            self.run_command(["ruff", "check", "--fix", "."])
+            # After fix, verify remaining issues
+            exit_code, stdout, stderr = self.run_command(["ruff", "check", "."])
+        else:
+            self.log("Checking Ruff linting...")
+            exit_code, stdout, stderr = self.run_command(["ruff", "check", "."])
 
         if exit_code == 0:
             self.log("✅ Ruff linting check passed")
@@ -382,11 +416,19 @@ def main():
     parser.add_argument(
         "--verbose", "-v", action="store_true", default=False, help="Verbose output"
     )
+    parser.add_argument(
+        "--auto-fix",
+        action="store_true",
+        default=False,
+        help="Auto-fix black/ruff issues instead of just reporting them",
+    )
 
     args = parser.parse_args()
 
     pipeline = PipelineRunner(
-        verbose=args.verbose, generate_artifacts=args.generate_artifacts
+        verbose=args.verbose,
+        generate_artifacts=args.generate_artifacts,
+        auto_fix=args.auto_fix,
     )
     success = pipeline.run_pipeline(
         skip_tests=args.skip_tests, skip_build=args.skip_build

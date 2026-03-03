@@ -84,11 +84,112 @@ jobs:
     needs: [detect-release]
     if: always()
     uses: ./.github/workflows/ci.yml
-    
+    secrets: inherit
+
+  # Pre-release validation gate — runs only on detected releases, BLOCKS tag creation
+  pre-release-validate:
+    name: Pre-Release Validation Gate
+    needs: [detect-release, ci]
+    if: needs.detect-release.outputs.is_release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install black ruff pyright
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Verify CI passed (block release if CI failed)
+        run: |
+          CI_RESULT="${{ needs.ci.result }}"
+          if [[ "$CI_RESULT" == "failure" ]]; then
+            echo "::error::CI Pipeline failed — release blocked. Fix all CI failures before releasing."
+            exit 1
+          fi
+          echo "✅ CI result: $CI_RESULT"
+
+      - name: Black formatting check (must be clean for release)
+        run: |
+          if ! black --check src/ tests/; then
+            echo "::error::Black formatting failed. Run 'black .' locally, commit, and push before releasing."
+            exit 1
+          fi
+          echo "✅ Black formatting clean"
+
+      - name: Ruff lint check (must be clean for release)
+        run: |
+          if ! ruff check src/ tests/; then
+            echo "::error::Ruff linting failed. Run 'ruff check --fix .' locally, commit, and push before releasing."
+            exit 1
+          fi
+          echo "✅ Ruff linting clean"
+
+      - name: Unicode encoding validation
+        run: python scripts/validate_encoding.py
+
+      - name: Docs sync validation
+        env:
+          CODE_SCALPEL_DOC_PROJECT_ROOT: ${{ runner.temp }}/pre-release-docs
+        run: |
+          mkdir -p "$CODE_SCALPEL_DOC_PROJECT_ROOT"
+          python scripts/validate_docs_sync.py
+
+      - name: Version consistency check
+        run: |
+          PYPROJECT_VER=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          INIT_VER=$(python -c "import sys; sys.path.insert(0,'src'); from code_scalpel import __version__; print(__version__)")
+          echo "pyproject.toml: $PYPROJECT_VER"
+          echo "__init__.py:    $INIT_VER"
+          if [[ "$PYPROJECT_VER" != "$INIT_VER" ]]; then
+            echo "::error::Version mismatch: pyproject.toml=$PYPROJECT_VER vs __init__.py=$INIT_VER"
+            exit 1
+          fi
+          EXPECTED_TAG="v${{ needs.detect-release.outputs.version }}"
+          if [[ "v$PYPROJECT_VER" != "$EXPECTED_TAG" ]]; then
+            echo "::error::Version in pyproject.toml ($PYPROJECT_VER) doesn't match detected release tag ($EXPECTED_TAG)"
+            exit 1
+          fi
+          echo "✅ Version consistent: $PYPROJECT_VER"
+
+      - name: MCP reference docs exist and are committed
+        run: |
+          for TARGET in docs/reference/mcp_tools_current.md docs/reference/mcp_tools_by_tier.md; do
+            if [[ ! -f "$TARGET" ]]; then
+              echo "::error::$TARGET not found — regenerate and commit before releasing."
+              exit 1
+            fi
+            if ! git ls-files --error-unmatch "$TARGET" &>/dev/null; then
+              echo "::error::$TARGET is not tracked by git — run: git add -f $TARGET && git commit"
+              exit 1
+            fi
+            echo "✅ $TARGET exists and is committed"
+          done
+
+      - name: Pre-release gate summary
+        run: |
+          echo "🚀 Pre-release validation passed for v${{ needs.detect-release.outputs.version }}"
+          echo "   All checks green — proceeding to tag creation."
+
   # Create git tag and GitHub release
   create-release:
     name: Create Release Tag
-    needs: [detect-release, ci]
+    needs: [detect-release, ci, pre-release-validate]
     if: needs.detect-release.outputs.is_release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10

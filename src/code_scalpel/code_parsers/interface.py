@@ -13,7 +13,11 @@ class Language(Enum):
     JAVASCRIPT = "javascript"
     TYPESCRIPT = "typescript"
     JAVA = "java"
+    C = "c"  # [20260225_FEATURE]
     CPP = "cpp"
+    CSHARP = "csharp"  # [20260225_FEATURE]
+    GO = "go"  # [20260302_FEATURE]
+    KOTLIN = "kotlin"  # [20260303_FEATURE]
     UNKNOWN = "unknown"
 
 

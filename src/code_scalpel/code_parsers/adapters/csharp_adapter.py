@@ -1,7 +1,9 @@
-"""C# Parser Adapter - IParser interface for C# parser.
+"""C# Parser Adapter - IParser interface wrapping CSharpNormalizer.
 
-[20251224_FEATURE] Stub adapter for C# parsing support.
+[20260224_FEATURE] Full C# parsing support via tree-sitter-c-sharp.
 
+This adapter wraps CSharpNormalizer so the language-agnostic IParser
+interface can be used by the rest of the code_parsers infrastructure.
 """
 
 from typing import Any, List
@@ -11,33 +13,77 @@ from ..interface import IParser, ParseResult
 
 class CSharpParserAdapter(IParser):
     """
-    Adapter for C# parsing (STUB - Not Yet Implemented).
+    Adapter for C# parsing backed by CSharpNormalizer (tree-sitter-c-sharp).
 
-    [20251224_STUB] Placeholder for C# parser integration.
+    [20260224_FEATURE] Production-ready C# parser integration.
 
-    To implement:
-        1. Choose backend (tree-sitter-csharp or Roslyn)
-        2. Implement parse() method
-        3. Add C#-specific extraction methods
-        4. Support C# version detection
-        5. Add .NET framework detection
+    Supports:
+        - .cs file extension
+        - Class, struct, interface, record, enum extraction
+        - Method and constructor extraction
+        - Namespace transparency
+        - Generic type parameters
+        - Using directives, field declarations
+        - Control-flow: if / while / for / foreach / switch / try
     """
 
-    def __init__(self):
-        """Initialize the C# parser adapter (stub)."""
-        raise NotImplementedError(
-            "CSharpParserAdapter not yet implemented. "
-            "See TODO items in this file for implementation roadmap."
-        )
+    def __init__(self) -> None:
+        """Initialize the C# parser adapter using CSharpNormalizer."""
+        from code_scalpel.ir.normalizers.csharp_normalizer import CSharpNormalizer
+
+        self._normalizer = CSharpNormalizer()
+        self._cached_module: Any = None
+        self._cached_code: str = ""
 
     def parse(self, code: str) -> ParseResult:
-        """Parse C# code (stub)."""
-        raise NotImplementedError("C# parsing not yet implemented")
+        """Parse C# source code and return a ParseResult wrapping the IR module."""
+        from code_scalpel.code_parsers.interface import Language as IFaceLanguage
+
+        ir_module = self._normalizer.normalize(code)
+        self._cached_module = ir_module
+        self._cached_code = code
+        return ParseResult(
+            ast=ir_module,
+            language=IFaceLanguage.CSHARP,  # [20260225_BUGFIX] was UNKNOWN; enum now has CSHARP
+            errors=[],
+            warnings=[],
+            metrics={},
+        )
 
     def get_functions(self, ast_tree: Any) -> List[str]:
-        """Get method names from C# AST (stub)."""
-        raise NotImplementedError("C# method extraction not yet implemented")
+        """Return method/function names from a parsed IR module."""
+        from code_scalpel.ir.nodes import IRClassDef, IRFunctionDef, IRModule
+
+        names: List[str] = []
+        if not isinstance(ast_tree, IRModule):
+            return names
+
+        def _walk(nodes: Any) -> None:
+            for node in nodes:
+                if isinstance(node, IRFunctionDef):
+                    if not node._metadata.get("is_property"):
+                        names.append(node.name)
+                    # Also recurse into function body for nested functions
+                    _walk(node.body)
+                elif isinstance(node, IRClassDef):
+                    _walk(node.body)
+
+        _walk(ast_tree.body)
+        return names
 
     def get_classes(self, ast_tree: Any) -> List[str]:
-        """Get class names from C# AST (stub)."""
-        raise NotImplementedError("C# class extraction not yet implemented")
+        """Return class/struct/interface/record/enum names from a parsed IR module."""
+        from code_scalpel.ir.nodes import IRClassDef, IRModule
+
+        names: List[str] = []
+        if not isinstance(ast_tree, IRModule):
+            return names
+
+        def _walk(nodes: Any) -> None:
+            for node in nodes:
+                if isinstance(node, IRClassDef):
+                    names.append(node.name)
+                    _walk(node.body)
+
+        _walk(ast_tree.body)
+        return names

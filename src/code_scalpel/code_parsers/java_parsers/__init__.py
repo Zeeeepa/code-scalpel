@@ -47,7 +47,13 @@ from .java_parsers_javalang import (
     TryCatchPattern,
     TypeHierarchy,
 )
+from .java_parsers_DependencyCheck import CVEFinding, DependencyCheckParser
+from .java_parsers_Gradle import GradleCompileError, GradleDependency, GradleParser
+from .java_parsers_JaCoCo import ClassCoverage, CoverageMetrics, JaCoCoParser
+from .java_parsers_Maven import CompileError, MavenDependency, MavenParser, MavenPlugin
+from .java_parsers_Pitest import MutationResult, PitestParser
 from .java_parsers_PMD import PMDParser, PMDViolation
+from .java_parsers_Semgrep import SemgrepFinding, SemgrepParser
 from .java_parsers_SonarQube import SonarIssue, SonarMetrics, SonarQubeParser
 from .java_parsers_SpotBugs import SpotBug, SpotBugsParser
 
@@ -106,4 +112,23 @@ __all__ = [
     "SonarQubeParser",
     "SonarIssue",
     "SonarMetrics",
+    # Build tools — Stage 4c [20260303_FEATURE]
+    "MavenParser",
+    "MavenDependency",
+    "MavenPlugin",
+    "CompileError",
+    "GradleParser",
+    "GradleDependency",
+    "GradleCompileError",
+    # Coverage / mutation
+    "JaCoCoParser",
+    "CoverageMetrics",
+    "ClassCoverage",
+    "PitestParser",
+    "MutationResult",
+    # Vulnerability / SAST
+    "DependencyCheckParser",
+    "CVEFinding",
+    "SemgrepParser",
+    "SemgrepFinding",
 ]

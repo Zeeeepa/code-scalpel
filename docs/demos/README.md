@@ -19,11 +19,18 @@ docs/demos/
 │   ├── 02-cheaper-surgical.md
 │   ├── 03-safer-symbolic.md
 │   └── 04-governable-policies.md
-└── tech-leader/                        # Technical leadership demos (4 demos)
-    ├── 01-governable-compliance.md
-    ├── 02-accurate-supply-chain.md
-    ├── 03-safer-perfect-guard.md
-    └── 04-cheaper-monorepo.md
+├── tech-leader/                        # Technical leadership demos (4 demos)
+│   ├── 01-governable-compliance.md
+│   ├── 02-accurate-supply-chain.md
+│   ├── 03-safer-perfect-guard.md
+│   └── 04-cheaper-monorepo.md
+└── by-category/                        # Technical deep-dive demos (6 demos)
+    ├── 01-static-analysis.md           # AST parsing, crawl, complexity metrics
+    ├── 02-ast-analysis.md              # How ASTs work, extract_code mechanics
+    ├── 03-pdg-call-graphs.md           # Call graphs, cross-file deps, neighborhoods
+    ├── 04-symbolic-execution-z3.md     # Z3 solver, path exploration, test generation
+    ├── 05-taint-analysis-security.md   # Taint tracking, sink detection, OWASP
+    └── 06-polyglot-analysis.md         # 7-language support overview
 ```
 
 ## 🎯 Purpose
@@ -36,6 +43,8 @@ These demos serve multiple purposes:
 4. **Sales Enablement**: Show prospects the Four Pillars in action
 
 ## 📊 Demo Matrix
+
+### By Persona (Marketing / Onboarding)
 
 | Persona | Pillar | Demo | Tier | Duration |
 |---------|--------|------|------|----------|
@@ -52,7 +61,22 @@ These demos serve multiple purposes:
 | Tech Leader | Safer AI | Block Risky Commits | Enterprise | 12 min |
 | Tech Leader | Cheaper AI | Monorepo Incremental | Enterprise | 10 min |
 
-**Total**: 12 demos, 115 minutes, covering all personas and pillars
+**Subtotal**: 12 demos, 115 minutes
+
+### By Technical Category (Deep Dives / Education)
+
+| # | Category | Key Tools | Tier | Duration |
+|---|----------|-----------|------|----------|
+| 1 | Static Analysis | `analyze_code`, `crawl_project`, `get_file_context` | Community → Pro | 10 min |
+| 2 | AST Analysis | `analyze_code`, `extract_code` | Community | 8 min |
+| 3 | PDGs and Call Graphs | `get_call_graph`, `get_cross_file_dependencies` | Pro | 12 min |
+| 4 | Symbolic Execution + Z3 | `symbolic_execute`, `generate_unit_tests` | Pro | 14 min |
+| 5 | Taint Analysis + Security | `security_scan`, `unified_sink_detect` | Community → Enterprise | 12 min |
+| 6 | 7-Language Polyglot | `analyze_code`, `extract_code`, `security_scan` | Community → Pro | 10 min |
+
+**Subtotal**: 6 demos, 66 minutes
+
+**Grand Total**: 18 demos, 181 minutes, covering all personas, pillars, and technical categories
 
 ## 🔄 Four Pillars
 

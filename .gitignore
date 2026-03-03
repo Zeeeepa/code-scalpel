@@ -245,7 +245,8 @@ docs/_build/
 docs/_static/
 docs/_templates/
 
-# Pre-release marketing drafts (generated content; keep local)
+# Marketing collateral (internal use only; not for public distribution)
+docs/marketing/
 docs/marketing-pack/
 
 # Environment configurations

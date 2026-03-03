@@ -68,6 +68,22 @@ from typing import TYPE_CHECKING
 
 # Lazy imports to avoid circular dependencies
 if TYPE_CHECKING:
+    from .kotlin_parsers_diktat import (
+        DiktatParser, DiktatViolation, DiktatSeverity, DiktatRuleSet, DiktatConfig,
+    )
+    from .kotlin_parsers_gradle import (
+        GradleBuildParser, Dependency, GradlePlugin, BuildConfiguration,
+        ConfigurationType, PluginType,
+    )
+    from .kotlin_parsers_compose import (
+        ComposeLinterParser, ComposeIssue, ComposeMetrics, ComposeIssueType, ComposeSeverity,
+    )
+    from .kotlin_parsers_Konsist import (
+        KonsistParser, KonsistViolation, KonsistRule, KonsistSeverity, KonsistRuleType,
+    )
+    from .kotlin_parsers_test import (
+        KotlinTestParser, TestCase, TestSuite, CoverageMetrics, TestStatus, TestFramework,
+    )
     from .kotlin_parsers_Detekt import (
         DetektConfig,
         DetektFinding,
@@ -86,6 +102,21 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
+    # diktat
+    "DiktatParser", "DiktatViolation", "DiktatSeverity",
+    "DiktatRuleSet", "DiktatConfig",
+    # gradle
+    "GradleBuildParser", "Dependency", "GradlePlugin", "BuildConfiguration",
+    "ConfigurationType", "PluginType",
+    # compose
+    "ComposeLinterParser", "ComposeIssue", "ComposeMetrics",
+    "ComposeIssueType", "ComposeSeverity",
+    # konsist
+    "KonsistParser", "KonsistViolation", "KonsistRule",
+    "KonsistSeverity", "KonsistRuleType",
+    # kotlin-test
+    "KotlinTestParser", "TestCase", "TestSuite", "CoverageMetrics",
+    "TestStatus", "TestFramework",
     # Detekt
     "DetektParser",
     "DetektFinding",
@@ -105,6 +136,49 @@ __all__ = [
 
 def __getattr__(name: str):
     """Lazy load parser classes on first access."""
+    if name in (
+        "DiktatParser", "DiktatViolation", "DiktatSeverity", "DiktatRuleSet", "DiktatConfig",
+    ):
+        from .kotlin_parsers_diktat import (
+            DiktatParser, DiktatViolation, DiktatSeverity, DiktatRuleSet, DiktatConfig,
+        )
+        return locals()[name]
+
+    if name in (
+        "GradleBuildParser", "Dependency", "GradlePlugin", "BuildConfiguration",
+        "ConfigurationType", "PluginType",
+    ):
+        from .kotlin_parsers_gradle import (
+            GradleBuildParser, Dependency, GradlePlugin, BuildConfiguration,
+            ConfigurationType, PluginType,
+        )
+        return locals()[name]
+
+    if name in (
+        "ComposeLinterParser", "ComposeIssue", "ComposeMetrics",
+        "ComposeIssueType", "ComposeSeverity",
+    ):
+        from .kotlin_parsers_compose import (
+            ComposeLinterParser, ComposeIssue, ComposeMetrics, ComposeIssueType, ComposeSeverity,
+        )
+        return locals()[name]
+
+    if name in (
+        "KonsistParser", "KonsistViolation", "KonsistRule", "KonsistSeverity", "KonsistRuleType",
+    ):
+        from .kotlin_parsers_Konsist import (
+            KonsistParser, KonsistViolation, KonsistRule, KonsistSeverity, KonsistRuleType,
+        )
+        return locals()[name]
+
+    if name in (
+        "KotlinTestParser", "TestCase", "TestSuite", "CoverageMetrics", "TestStatus", "TestFramework",
+    ):
+        from .kotlin_parsers_test import (
+            KotlinTestParser, TestCase, TestSuite, CoverageMetrics, TestStatus, TestFramework,
+        )
+        return locals()[name]
+
     if name in (
         "DetektParser",
         "DetektFinding",

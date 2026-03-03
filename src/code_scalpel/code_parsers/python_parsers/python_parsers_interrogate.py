@@ -229,6 +229,11 @@ API Design (Planned):
 
 from __future__ import annotations
 
+import json
+import os
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -384,9 +389,28 @@ class InterrogateParser:
             InterrogateReport with coverage analysis
 
         """
-        raise NotImplementedError(
-            "InterrogateParser.analyze_file() not yet implemented"
+        # [20260303_FEATURE] run interrogate, build InterrogateReport from JSON
+        path = Path(file_path)
+        results = self.execute_interrogate(str(path))
+        report_data = results[0] if results else {}
+        cov = DocumentationCoverage(
+            total_items=report_data.get("total_items", 0),
+            documented_items=report_data.get("documented_items", 0),
         )
+        items: list[DocumentedItem] = []
+        for m in report_data.get("missing", []):
+            parts = m.split(":", 1)
+            itype = parts[0] if len(parts) == 2 else "function"
+            name = parts[1] if len(parts) == 2 else m
+            items.append(
+                DocumentedItem(
+                    name=name,
+                    item_type=itype,
+                    location=SourceLocation(line=0),
+                    has_docstring=False,
+                )
+            )
+        return InterrogateReport(file_path=str(path), coverage=cov, items=items)
 
     def analyze_code(self, code: str, filename: str = "<string>") -> InterrogateReport:
         """
@@ -400,8 +424,72 @@ class InterrogateParser:
             InterrogateReport with coverage analysis
 
         """
-        raise NotImplementedError(
-            "InterrogateParser.analyze_code() not yet implemented"
+        # [20260303_FEATURE] write to temp file then analyze
+        fd, tmp = tempfile.mkstemp(suffix=".py")
+        try:
+            os.write(fd, code.encode())
+            os.close(fd)
+            report = self.analyze_file(tmp)
+            report.file_path = filename
+            return report
+        finally:
+            os.unlink(tmp)
+
+    # -------------------------------------------------------------------------
+    # [20260303_FEATURE] New methods added per Stage 4a spec
+    # -------------------------------------------------------------------------
+
+    def execute_interrogate(self, path: str = ".") -> list[dict]:
+        """Run interrogate --output-format json on path; return [] if not available."""
+        if not shutil.which("interrogate"):
+            return []
+        result = subprocess.run(
+            ["interrogate", path, "--output-format", "json"],
+            capture_output=True,
+            text=True,
+        )
+        return self.parse_json_output(result.stdout or result.stderr)
+
+    def parse_json_output(self, output: str) -> list[dict]:
+        """Parse interrogate JSON output into list of dicts."""
+        try:
+            data = json.loads(output)
+        except (json.JSONDecodeError, ValueError):
+            return []
+        if isinstance(data, list):
+            return data  # type: ignore[return-value]
+        if isinstance(data, dict):
+            return [data]
+        return []
+
+    def get_coverage_summary(self, results: list[dict]) -> dict:
+        """Summarise coverage across all files in results."""
+        if not results:
+            return {"total_files": 0, "avg_coverage": 0.0, "files": []}
+        coverages = [float(r.get("docstring_coverage", 0.0)) for r in results]
+        return {
+            "total_files": len(results),
+            "avg_coverage": sum(coverages) / len(coverages),
+            "files": [r.get("filename", "") for r in results],
+        }
+
+    def list_missing_docstrings(self, results: list[dict]) -> list[str]:
+        """Flatten all missing docstring descriptions from results."""
+        missing: list[str] = []
+        for r in results:
+            missing.extend(r.get("missing", []))
+        return missing
+
+    def generate_report(self, findings: list[dict], format: str = "json") -> str:
+        """Return JSON report of documentation coverage."""
+        summary = self.get_coverage_summary(findings)
+        return json.dumps(
+            {
+                "tool": "interrogate",
+                "total": summary["total_files"],
+                "avg_coverage": summary["avg_coverage"],
+            },
+            indent=2,
         )
 
     def get_coverage_percentage(self, report: InterrogateReport) -> float:

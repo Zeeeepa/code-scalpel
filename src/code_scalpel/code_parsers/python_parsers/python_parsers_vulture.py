@@ -15,6 +15,12 @@ Priority: P2 - HIGH
 
 from __future__ import annotations
 
+import json
+import os
+import re
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -110,7 +116,25 @@ class VultureParser:
             VultureReport with dead code findings
 
         """
-        raise NotImplementedError("VultureParser.analyze_file() not yet implemented")
+        # [20260303_FEATURE] run vulture on file, build VultureReport from output
+        path = Path(file_path)
+        if not shutil.which("vulture"):
+            return VultureReport(file_path=str(path), error="vulture not found")
+        result = subprocess.run(
+            ["vulture", str(path)],
+            capture_output=True,
+            text=True,
+        )
+        items = self.parse_output(result.stdout)
+        report = VultureReport(file_path=str(path))
+        cats = self.categorize_dead_code(items)
+        report.unused_functions = cats.get("functions", [])
+        report.unused_classes = cats.get("classes", [])
+        report.unused_variables = cats.get("variables", [])
+        report.unused_imports = cats.get("imports", [])
+        report.unused_attributes = cats.get("attributes", [])
+        report.unused_arguments = cats.get("arguments", [])
+        return report
 
     def analyze_code(self, code: str, filename: str = "<string>") -> VultureReport:
         """
@@ -124,7 +148,26 @@ class VultureParser:
             VultureReport with dead code findings
 
         """
-        raise NotImplementedError("VultureParser.analyze_code() not yet implemented")
+        # [20260303_FEATURE] write to temp file, run vulture, build VultureReport
+        if not shutil.which("vulture"):
+            return VultureReport(file_path=filename, error="vulture not found")
+        fd, tmp = tempfile.mkstemp(suffix=".py")
+        try:
+            os.write(fd, code.encode())
+            os.close(fd)
+            result = subprocess.run(["vulture", tmp], capture_output=True, text=True)
+            items = self.parse_output(result.stdout)
+            report = VultureReport(file_path=filename)
+            cats = self.categorize_dead_code(items)
+            report.unused_functions = cats.get("functions", [])
+            report.unused_classes = cats.get("classes", [])
+            report.unused_variables = cats.get("variables", [])
+            report.unused_imports = cats.get("imports", [])
+            report.unused_attributes = cats.get("attributes", [])
+            report.unused_arguments = cats.get("arguments", [])
+            return report
+        finally:
+            os.unlink(tmp)
 
     def load_config(self, config_path: str | Path) -> None:
         """
@@ -134,7 +177,21 @@ class VultureParser:
             config_path: Path to setup.cfg or .vulture.ini
 
         """
-        raise NotImplementedError("VultureParser.load_config() not yet implemented")
+        # [20260303_FEATURE] read min_confidence from config file
+        path = Path(config_path)
+        if not path.exists():
+            return
+        content = path.read_text()
+        for line in content.splitlines():
+            stripped = line.strip()
+            if "min_confidence" in stripped:
+                parts = stripped.split("=", 1)
+                if len(parts) == 2:
+                    try:
+                        self.config.min_confidence = int(parts[1].strip())
+                    except ValueError:
+                        pass
+                break
 
     def filter_by_confidence(
         self,
@@ -152,6 +209,110 @@ class VultureParser:
             Filtered VultureReport
 
         """
-        raise NotImplementedError(
-            "VultureParser.filter_by_confidence() not yet implemented"
+        # [20260303_FEATURE] filter all UnusedItem lists by confidence threshold
+        threshold = (
+            min_confidence if min_confidence is not None else self.config.min_confidence
+        )
+        filtered = VultureReport(file_path=report.file_path, error=report.error)
+        filtered.unused_imports = [
+            i for i in report.unused_imports if i.confidence >= threshold
+        ]
+        filtered.unused_functions = [
+            i for i in report.unused_functions if i.confidence >= threshold
+        ]
+        filtered.unused_classes = [
+            i for i in report.unused_classes if i.confidence >= threshold
+        ]
+        filtered.unused_variables = [
+            i for i in report.unused_variables if i.confidence >= threshold
+        ]
+        filtered.unused_attributes = [
+            i for i in report.unused_attributes if i.confidence >= threshold
+        ]
+        filtered.unused_arguments = [
+            i for i in report.unused_arguments if i.confidence >= threshold
+        ]
+        filtered.unreachable_code = [
+            i for i in report.unreachable_code if i.confidence >= threshold
+        ]
+        return filtered
+
+    # -------------------------------------------------------------------------
+    # [20260303_FEATURE] New methods added per Stage 4a spec
+    # -------------------------------------------------------------------------
+
+    def execute_vulture(self, path: str = ".") -> list[UnusedItem]:
+        """Run vulture on path; return [] if not available."""
+        if not shutil.which("vulture"):
+            return []
+        result = subprocess.run(["vulture", path], capture_output=True, text=True)
+        return self.parse_output(result.stdout)
+
+    def parse_output(self, output: str) -> list[UnusedItem]:
+        """Parse vulture text output into UnusedItem list."""
+        pattern = re.compile(
+            r"^(.+?):(\d+): unused (\w+)(?:\s+\w+)* '([^']+)' \((\d+)% confidence\)"
+        )
+        items: list[UnusedItem] = []
+        for line in output.splitlines():
+            m = pattern.match(line.strip())
+            if m:
+                _fname, lineno, itype, name, conf = (
+                    m.group(1),
+                    m.group(2),
+                    m.group(3),
+                    m.group(4),
+                    m.group(5),
+                )
+                items.append(
+                    UnusedItem(
+                        name=name,
+                        item_type=itype,
+                        location=SourceLocation(line=int(lineno)),
+                        confidence=int(conf),
+                        message=line.strip(),
+                    )
+                )
+        return items
+
+    def categorize_dead_code(
+        self, items: list[UnusedItem]
+    ) -> dict[str, list[UnusedItem]]:
+        """Bucket UnusedItems by type."""
+        cats: dict[str, list[UnusedItem]] = {
+            "functions": [],
+            "classes": [],
+            "variables": [],
+            "imports": [],
+            "attributes": [],
+            "arguments": [],
+            "other": [],
+        }
+        type_map = {
+            "function": "functions",
+            "class": "classes",
+            "variable": "variables",
+            "import": "imports",
+            "attribute": "attributes",
+            "argument": "arguments",
+            "parameter": "arguments",
+        }
+        for item in items:
+            bucket = type_map.get(item.item_type, "other")
+            cats[bucket].append(item)
+        return cats
+
+    def generate_report(self, findings: list[UnusedItem], format: str = "json") -> str:
+        """Return JSON report of unused code items."""
+        items_list = [
+            {
+                "name": i.name,
+                "type": i.item_type,
+                "line": i.location.line,
+                "confidence": i.confidence,
+            }
+            for i in findings
+        ]
+        return json.dumps(
+            {"tool": "vulture", "total": len(findings), "items": items_list}, indent=2
         )

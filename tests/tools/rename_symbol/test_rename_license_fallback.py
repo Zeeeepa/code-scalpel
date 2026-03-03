@@ -231,10 +231,10 @@ class TestLicenseFallbackIntegration:
 
     def test_feature_limits_enforced_by_tier(self):
         """Feature limits are correctly enforced by tier."""
-        # Community: single-file only
+        # Community: single-file rename only (max=1, updated v2.0.1)
         comm_caps = get_tool_capabilities("rename_symbol", "community")
-        assert comm_caps["limits"]["max_files_searched"] == 0
-        assert comm_caps["limits"]["max_files_updated"] == 0
+        assert comm_caps["limits"]["max_files_searched"] == 1
+        assert comm_caps["limits"]["max_files_updated"] == 1
 
         # Pro: unlimited multi-file (per limits.toml)
         pro_caps = get_tool_capabilities("rename_symbol", "pro")

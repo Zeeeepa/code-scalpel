@@ -61,7 +61,9 @@ tests/
 │   └── test_features_tier_inheritance.py
 │
 ├── languages/                           # Polyglot language support
-│   └── test_polyglot_support.py
+│   ├── test_polyglot_support.py
+│   ├── test_c_cpp_parsers.py            # C and C++ normalizer tests (123 tests)
+│   └── test_csharp_parser.py           # C# normalizer tests (84 tests)
 │
 ├── integration/                         # Cross-tool workflows
 │   └── test_tool_pipelines.py
@@ -273,16 +275,21 @@ async def test_graph_pipeline():
 
 ### 7. Language Support Tests
 
-**Location**: `tests/languages/test_polyglot_support.py`
+**Location**: `tests/languages/`
 
 **Purpose**: Verify language support claims are accurate
 
+**Files**:
+- `test_polyglot_support.py` — high-level language detection and security scan coverage
+- `test_c_cpp_parsers.py` — C and C++ normalizer unit tests + real-world patterns (Win32 headers, game-engine Vec3, STL templates)
+- `test_csharp_parser.py` — C# normalizer unit tests + real-world patterns (Unity MonoBehaviour, async services, extension methods)
+
 **Coverage**:
-- Supported languages work correctly
+- Supported languages work correctly (Python, JS, TS, Java, C, C++, C#)
 - Unsupported languages handled gracefully
 - Language-specific vulnerabilities detected
 - Multi-language projects handled
-- Language roadmap tracking
+- Real-world snippet smoke tests for each language family
 
 **Example**:
 ```python

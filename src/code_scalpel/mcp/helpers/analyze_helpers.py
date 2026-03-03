@@ -8,7 +8,7 @@ import math
 import os
 import re
 import time
-from typing import Any
+from typing import Any, Optional
 
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
 
@@ -393,6 +393,107 @@ def _detect_organization_patterns_python(tree: ast.AST) -> list[str]:
             if node.name.endswith("Repository"):
                 patterns.append(f"Repository pattern detected: {node.name}")
     return patterns
+
+
+def _analyze_clike_code(code: str, language: str) -> AnalysisResult:
+    """Analyze C, C++, or C# code using the tree-sitter IR normalizer layer.
+
+    [20260225_FEATURE] Wires the v2.0.0 IR normalizers (c_normalizer,
+    cpp_normalizer, csharp_normalizer) into the analyze_code MCP tool.
+    """
+    try:
+        if language == "c":
+            from code_scalpel.ir.normalizers.c_normalizer import CNormalizer
+
+            normalizer: Any = CNormalizer()
+        elif language == "cpp":
+            from code_scalpel.ir.normalizers.cpp_normalizer import CppNormalizer
+
+            normalizer = CppNormalizer()
+        else:  # csharp
+            from code_scalpel.ir.normalizers.csharp_normalizer import CSharpNormalizer
+
+            normalizer = CSharpNormalizer()
+
+        ir_module = normalizer.normalize(code)
+    except ImportError as exc:
+        return AnalysisResult(
+            success=False,
+            functions=[],
+            classes=[],
+            imports=[],
+            complexity=0,
+            lines_of_code=0,
+            error=(
+                f"{language.upper()} support requires tree-sitter. "
+                f"Install with: pip install 'codescalpel[{language}]'. Error: {exc}"
+            ),
+        )
+    except Exception as exc:
+        return AnalysisResult(
+            success=False,
+            functions=[],
+            classes=[],
+            imports=[],
+            complexity=0,
+            lines_of_code=0,
+            error=f"{language.upper()} analysis failed: {exc}",
+        )
+
+    from code_scalpel.ir.nodes import IRClassDef, IRFunctionDef, IRImport
+
+    functions: list[str] = []
+    function_details: list[FunctionInfo] = []
+    classes: list[str] = []
+    class_details: list[ClassInfo] = []
+    imports: list[str] = []
+
+    def _walk(nodes: Any, inside_class: Optional[str] = None) -> None:
+        for node in nodes:
+            if isinstance(node, IRFunctionDef) and node.name:
+                start = node.loc.line if node.loc else 0
+                end = (node.loc.end_line or start) if node.loc else 0
+                functions.append(node.name)
+                function_details.append(
+                    FunctionInfo(
+                        name=node.name,
+                        lineno=start,
+                        end_lineno=end,
+                        is_async=node.is_async,
+                    )
+                )
+                _walk(node.body, inside_class)
+            elif isinstance(node, IRClassDef) and node.name:
+                start = node.loc.line if node.loc else 0
+                end = (node.loc.end_line or start) if node.loc else 0
+                methods = [
+                    n.name for n in node.body if isinstance(n, IRFunctionDef) and n.name
+                ]
+                classes.append(node.name)
+                class_details.append(
+                    ClassInfo(
+                        name=node.name,
+                        lineno=start,
+                        end_lineno=end,
+                        methods=methods,
+                    )
+                )
+                _walk(node.body, node.name)
+            elif isinstance(node, IRImport) and node.module:
+                imports.append(node.module)
+
+    _walk(ir_module.body)
+
+    return AnalysisResult(
+        success=True,
+        functions=functions,
+        classes=classes,
+        imports=imports,
+        complexity=len(functions),
+        lines_of_code=len(code.splitlines()),
+        function_details=function_details,
+        class_details=class_details,
+    )
 
 
 def _analyze_java_code(code: str) -> AnalysisResult:
@@ -988,12 +1089,24 @@ def _analyze_code_sync(
             Language.JAVASCRIPT: "javascript",
             Language.TYPESCRIPT: "typescript",
             Language.JAVA: "java",
+            Language.C: "c",  # [20260225_FEATURE]
+            Language.CPP: "cpp",  # [20260225_FEATURE]
+            Language.CSHARP: "csharp",  # [20260225_FEATURE]
         }
         language = lang_map.get(detected, "python")
 
     # [20260110_FEATURE] v1.0 - Explicit language validation (BEFORE code validation)
     # Must happen before _validate_code() to prevent parsing unsupported languages as Python
-    SUPPORTED_LANGUAGES = {"python", "javascript", "typescript", "java"}
+    # [20260225_FEATURE] Added c/cpp/csharp now that IR normalizers are wired up
+    SUPPORTED_LANGUAGES = {
+        "python",
+        "javascript",
+        "typescript",
+        "java",
+        "c",
+        "cpp",
+        "csharp",
+    }
     if language.lower() not in SUPPORTED_LANGUAGES:
         return AnalysisResult(
             success=False,
@@ -1002,7 +1115,7 @@ def _analyze_code_sync(
             imports=[],
             complexity=0,
             lines_of_code=0,
-            error=f"Unsupported language '{language}'. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}. Roadmap: Go/Rust in Q1 2026.",
+            error=f"Unsupported language '{language}'. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}. Roadmap: Go/Rust.",
         )
 
     valid, error = _validate_code(code)
@@ -1035,6 +1148,16 @@ def _analyze_code_sync(
                     cached["success"] = True
                 return AnalysisResult(**cached)
             return cached
+
+    # [20260225_FEATURE] Route C, C++, C# to IR normalizer-based analyzer
+    if language.lower() in ("c", "cpp", "csharp"):
+        result = _analyze_clike_code(code, language.lower())
+        if result.success:
+            result.language_detected = language.lower()
+            result.tier_applied = tier
+        if cache and result.success:
+            cache.set(code, "analysis", result.model_dump(), cache_config)
+        return result
 
     if language.lower() == "java":
         result = _analyze_java_code(code)

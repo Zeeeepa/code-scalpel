@@ -4,9 +4,9 @@ This directory contains the golden capability files for Code Scalpel's tier-base
 
 ## Files
 
-- **`community.json`** - Capabilities for the COMMUNITY tier (all 23 tools available)
-- **`pro.json`** - Capabilities for the PRO tier (all 23 tools available)
-- **`enterprise.json`** - Capabilities for the ENTERPRISE tier (all 23 tools available)
+- **`community.json`** - Capabilities for the COMMUNITY tier (all 22 tools available)
+- **`pro.json`** - Capabilities for the PRO tier (all 22 tools available)
+- **`enterprise.json`** - Capabilities for the ENTERPRISE tier (all 22 tools available)
 - **`schema.json`** - JSON Schema for validating capability files
 
 ## Usage
@@ -15,8 +15,8 @@ These files serve two purposes:
 
 ### 1. **Regression Testing** (Primary)
 The golden files are compared against dynamically-generated capabilities during CI/CD:
-- Tool count must match (always 23)
-- Available count must match (23 tools available at all tiers)
+- Tool count must match (always 22)
+- Available count must match (22 tools available at all tiers)
 - Tool limits must match the limits.toml configuration
 
 ```bash
@@ -66,7 +66,7 @@ Each file contains:
       "available": true,
       "limits": {
         "max_file_size_mb": 10,
-        "languages": ["python", "javascript", "typescript", "java"]
+        "languages": ["python", "javascript", "typescript", "java", "c", "cpp", "csharp"]
       }
     },
     ...
@@ -85,7 +85,7 @@ In the CI/CD pipeline, the following changes to capabilities WILL block a releas
 
 ## Tier Availability Summary
 
-All 23 tools are available in all tiers (Community, Pro, Enterprise). The tiers differ in their **usage limits**, not tool availability:
+All 22 tools are available in all tiers (Community, Pro, Enterprise). The tiers differ in their **usage limits**, not tool availability:
 
 ### Tool Categories
 
@@ -96,8 +96,8 @@ All 23 tools are available in all tiers (Community, Pro, Enterprise). The tiers 
 - scan_dependencies, security_scan, simulate_refactor, symbolic_execute
 - type_evaporation_scan, unified_sink_detect, update_symbol
 
-**3 System Tools** (no tier gating):
-- validate_paths, verify_policy_integrity, write_perfect_code
+**2 System Tools** (no tier gating):
+- validate_paths, verify_policy_integrity
 
 ### Limit Escalation Example
 
@@ -121,6 +121,6 @@ Tool: validate_paths (System Tool)
 | Category | Community | Pro | Enterprise |
 |----------|-----------|-----|------------|
 | Development Tools (20) | ✓ Solo dev limits (≤500 files) | ✓ Unlimited | ✓ Unlimited + Governance |
-| System Tools (3) | ✓ Standard | ✓ Standard | ✓ Standard |
-| **Total Tools** | **23** | **23** | **23** |
+| System Tools (2) | ✓ Standard | ✓ Standard | ✓ Standard |
+| **Total Tools** | **22** | **22** | **22** |
 | **Unique Capabilities** | 78 | 217 | 356 (139 governance-only) |

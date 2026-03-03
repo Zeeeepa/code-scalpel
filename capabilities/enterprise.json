@@ -1,18 +1,15 @@
 {
   "tier": "enterprise",
-  "generated_at": "2026-01-27T21:34:21.651289Z",
-  "tool_count": 23,
-  "available_count": 23,
+  "generated_at": "2026-03-01T13:38:47.301417Z",
+  "tool_count": 22,
+  "available_count": 22,
   "capabilities": {
     "analyze_code": {
       "tool_id": "analyze_code",
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_file_size_mb": 100,
-        "languages": [
-          "all"
-        ]
+        "max_file_size_mb": 100
       }
     },
     "code_policy_check": {
@@ -20,8 +17,6 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_files": -1,
-        "max_rules": -1,
         "compliance_enabled": true,
         "custom_rules_enabled": true,
         "audit_trail_enabled": true,
@@ -33,7 +28,6 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_files": -1,
         "parsing_enabled": true,
         "complexity_analysis": true,
         "respect_gitignore": true
@@ -44,8 +38,7 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_modules": -1,
-        "max_depth": -1
+        "enabled": true
       }
     },
     "extract_code": {
@@ -55,8 +48,7 @@
       "limits": {
         "include_cross_file_deps": true,
         "max_depth": -1,
-        "max_extraction_size_mb": 100,
-        "max_context_lines": -1
+        "max_extraction_size_mb": 100
       }
     },
     "generate_unit_tests": {
@@ -64,9 +56,7 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_test_cases": -1,
-        "test_frameworks": "all",
-        "enabled": true
+        "test_frameworks": "all"
       }
     },
     "get_call_graph": {
@@ -74,8 +64,7 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_depth": -1,
-        "max_nodes": -1
+        "enabled": true
       }
     },
     "get_cross_file_dependencies": {
@@ -83,8 +72,7 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_depth": -1,
-        "max_files": -1
+        "enabled": true
       }
     },
     "get_file_context": {
@@ -92,7 +80,7 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_context_lines": -1
+        "enabled": true
       }
     },
     "get_graph_neighborhood": {
@@ -109,7 +97,6 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_files": -1,
         "max_modules": 1000,
         "detail_level": "comprehensive"
       }
@@ -119,8 +106,7 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_files_searched": -1,
-        "max_references": -1
+        "enabled": true
       }
     },
     "rename_symbol": {
@@ -128,9 +114,9 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
+        "enabled": true,
         "max_files_searched": -1,
-        "max_files_updated": -1,
-        "enabled": true
+        "max_files_updated": -1
       }
     },
     "scan_dependencies": {
@@ -138,9 +124,7 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_dependencies": -1,
-        "osv_lookup": true,
-        "curation_enabled": true
+        "osv_lookup": true
       }
     },
     "security_scan": {
@@ -148,9 +132,7 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_findings": -1,
-        "max_file_size_kb": -1,
-        "severity_levels": "all"
+        "vulnerability_types": "all"
       }
     },
     "simulate_refactor": {
@@ -167,8 +149,6 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_paths": -1,
-        "max_depth": -1,
         "constraint_types": "all"
       }
     },
@@ -178,7 +158,8 @@
       "available": true,
       "limits": {
         "max_files": -1,
-        "frontend_only": false
+        "frontend_only": false,
+        "schema_generation": true
       }
     },
     "unified_sink_detect": {
@@ -186,7 +167,14 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "languages": "all",
+        "languages": [
+          "python",
+          "javascript",
+          "typescript",
+          "java",
+          "c",
+          "cpp"
+        ],
         "max_sinks": -1
       }
     },
@@ -205,9 +193,8 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_paths": 100,
-        "validate_existence": true,
-        "validate_readability": true
+        "enabled": true,
+        "max_paths": -1
       }
     },
     "verify_policy_integrity": {
@@ -215,9 +202,9 @@
       "tier": "enterprise",
       "available": true,
       "limits": {
-        "max_policy_files": 50,
-        "validate_schema": true,
-        "validate_conflicts": true
+        "max_policy_files": -1,
+        "signature_validation": true,
+        "tamper_detection": true
       }
     }
   }
