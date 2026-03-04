@@ -103,3 +103,16 @@ except ImportError:
 
 if _HAS_KOTLIN:
     __all__ += ["KotlinNormalizer", "KotlinVisitor"]
+
+# [20260303_FEATURE] PHP normalizer — requires tree-sitter-php
+try:
+    from .php_normalizer import PHPNormalizer, PHPVisitor
+
+    _HAS_PHP = True
+except ImportError:
+    PHPNormalizer = None  # type: ignore[assignment]
+    PHPVisitor = None  # type: ignore[assignment]
+    _HAS_PHP = False
+
+if _HAS_PHP:
+    __all__ += ["PHPNormalizer", "PHPVisitor"]

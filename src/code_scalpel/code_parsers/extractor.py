@@ -43,6 +43,7 @@ class Language(Enum):
     CSHARP = "csharp"  # [20260224_FEATURE] C# language support
     GO = "go"  # [20260302_FEATURE] Go language support
     KOTLIN = "kotlin"  # [20260303_FEATURE] Kotlin language support
+    PHP = "php"  # [20260303_FEATURE] PHP language support
     AUTO = "auto"  # Auto-detect from file extension
 
 
@@ -77,6 +78,13 @@ EXTENSION_MAP: dict[str, Language] = {
     ".go": Language.GO,
     ".kt": Language.KOTLIN,  # [20260303_FEATURE]
     ".kts": Language.KOTLIN,  # [20260303_FEATURE]
+    # [20260303_FEATURE] PHP extensions
+    ".php": Language.PHP,
+    ".php3": Language.PHP,
+    ".php4": Language.PHP,
+    ".php5": Language.PHP,
+    ".php7": Language.PHP,
+    ".phtml": Language.PHP,
 }
 
 
@@ -155,10 +163,21 @@ def detect_language(file_path: str | None, code: str | None = None) -> Language:
         ):
             return Language.CSHARP
 
+        # [20260303_FEATURE] PHP indicators — check before others; <?php is unique.
+        if "<?php" in code or "<?=" in code:
+            return Language.PHP
+
         # [20260303_FEATURE] Kotlin indicators — check BEFORE Go/Java; "fun " is unique.
         if any(
             kw in code
-            for kw in ["fun ", "val ", "var ", "data class ", "object ", "companion object"]
+            for kw in [
+                "fun ",
+                "val ",
+                "var ",
+                "data class ",
+                "object ",
+                "companion object",
+            ]
         ):
             return Language.KOTLIN
 
@@ -311,6 +330,8 @@ class PolyglotExtractor:
             self._parse_go()  # [20260302_FEATURE]
         elif self.language == Language.KOTLIN:
             self._parse_kotlin()  # [20260303_FEATURE]
+        elif self.language == Language.PHP:
+            self._parse_php()  # [20260303_FEATURE]
         else:
             raise ValueError(f"Unsupported language: {self.language}")
 
@@ -435,6 +456,17 @@ class PolyglotExtractor:
         from code_scalpel.ir.normalizers.go_normalizer import GoNormalizer
 
         normalizer = GoNormalizer()
+        self._ir_module = normalizer.normalize(self.code)
+
+    def _parse_php(self) -> None:
+        """
+        Parse PHP code using tree-sitter-php.
+
+        [20260303_FEATURE] Added PHP support to code_parsers.
+        """
+        from code_scalpel.ir.normalizers.php_normalizer import PHPNormalizer
+
+        normalizer = PHPNormalizer()
         self._ir_module = normalizer.normalize(self.code)
 
     def extract(

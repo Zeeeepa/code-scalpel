@@ -173,66 +173,76 @@ Phase 1: ✅ Complete | Adapter: ✅ Complete (`cpp_adapter.py` — [20260303_FE
 
 ---
 
-### C# — `csharp_parsers/` (0/6 complete)
+### C# — `csharp_parsers/` (6/6 complete) ✅ COMPLETE [20260303_FEATURE]
 
-Phase 1: ✅ Complete | Adapter: ❌ STUB (`csharp_adapter.py`) | Registry: ❌ STUB
+Phase 1: ✅ Complete | Adapter: ✅ Complete (`csharp_adapter.py`) | Registry: ✅ Complete
 
 | File | Lines | Status |
 |------|-------|--------|
-| `csharp_parsers_fxcop.py` | 92 | ⚠️ PARTIAL — FxCopViolation dataclass + enums; no parse/execute |
-| `csharp_parsers_SecurityCodeScan.py` | 96 | ⚠️ PARTIAL — dataclasses only; no implementation |
-| `csharp_parsers_ReSharper.py` | 28 | ❌ STUB — class skeleton + `raise NotImplementedError` |
-| `csharp_parsers_Roslyn-Analyzers.py` | 28 | ❌ STUB — class skeleton + `raise NotImplementedError` |
-| `csharp_parsers_StyleCop.py` | 28 | ❌ STUB — class skeleton + `raise NotImplementedError` |
-| `csharp_parsers_SonarQube.py` | 28 | ❌ STUB — class skeleton + `raise NotImplementedError` |
+| `__init__.py` | 233 | ✅ COMPLETE — `CSharpParserRegistry` + shared `_parse_sarif()` SARIF 2.1 helper |
+| `csharp_parsers_fxcop.py` | 260 | ✅ COMPLETE — FxCop XML/SARIF parse + execute + CWE mapping + report |
+| `csharp_parsers_SecurityCodeScan.py` | 259 | ✅ COMPLETE — CWE-mapped security scanner; execute + SARIF 2.1 parse |
+| `csharp_parsers_ReSharper.py` | 194 | ✅ COMPLETE — enterprise XML parse (execute raises NotImplementedError by design) |
+| `csharp_parsers_Roslyn-Analyzers.py` | 172 | ✅ COMPLETE — `dotnet build` SARIF 2.1 output parse |
+| `csharp_parsers_StyleCop.py` | 166 | ✅ COMPLETE — MSBuild SARIF 2.1 parse |
+| `csharp_parsers_SonarQube.py` | 258 | ✅ COMPLETE — enterprise JSON API parse (execute raises NotImplementedError by design) |
 
-**Gap**: 6 tool parser files + adapter + registry + shared SARIF helper
+**Tests**: `tests/languages/test_csharp_tool_parsers.py` — 75 tests passing [20260303_FEATURE]
+
+**Gap**: None — all 6 parsers + adapter + registry complete.
 
 ---
 
-### Go — `go_parsers/` (0/6 complete)
+### Go — `go_parsers/` (6/6 complete) ✅ COMPLETE [20260303_FEATURE]
 
-Phase 1: ✅ Complete | Adapter: ✅ Complete (`go_adapter.py` — [20260302_FEATURE]) | Registry: ❌ STUB
+Phase 1: ✅ Complete | Adapter: ✅ Complete (`go_adapter.py`) | Registry: ✅ Complete
 
 | File | Lines | Status |
 |------|-------|--------|
-| `go_parsers_golangci_lint.py` | 97 | ⚠️ PARTIAL — LintIssue/GolangciLintConfig dataclasses; methods raise `NotImplementedError` |
-| `go_parsers_gosec.py` | 92 | ⚠️ PARTIAL — dataclasses; methods raise `NotImplementedError` |
-| `go_parsers_staticcheck.py` | 37 | ⚠️ PARTIAL — dataclasses; methods raise `NotImplementedError` |
-| `go_parsers_gofmt.py` | 28 | ❌ STUB — class skeleton + `raise NotImplementedError` |
-| `go_parsers_golint.py` | 28 | ❌ STUB — class skeleton + `raise NotImplementedError` |
-| `go_parsers_govet.py` | 29 | ❌ STUB — class skeleton + `raise NotImplementedError` |
+| `__init__.py` | 113 | ✅ COMPLETE — `GoParserRegistry` with lazy-load factory |
+| `go_parsers_golangci_lint.py` | 238 | ✅ COMPLETE — `golangci-lint run --out-format json`; Issues array + CWE mapping |
+| `go_parsers_gosec.py` | 322 | ✅ COMPLETE — `gosec -fmt json`; built-in CWE IDs; execute + parse |
+| `go_parsers_staticcheck.py` | 205 | ✅ COMPLETE — `staticcheck -f json ./...`; code/message/location JSON |
+| `go_parsers_govet.py` | 166 | ✅ COMPLETE — `go vet ./...` stderr text parse; file:line:col format |
+| `go_parsers_golint.py` | 176 | ✅ COMPLETE — text `file:line:col: msg` parse; confidence scoring |
+| `go_parsers_gofmt.py` | 126 | ✅ COMPLETE — `gofmt -l .` file list; diff-based formatting issue report |
 
-**Gap**: 6 tool parser files + registry (adapter already done)
+**Tests**: `tests/languages/test_go_tool_parsers.py` — 48 tests passing [20260303_FEATURE]
+
+**Gap**: None — all 6 parsers + registry complete.
 
 ---
 
-### Kotlin — `kotlin_parsers/` (2/7 complete)
+### Kotlin — `kotlin_parsers/` (7/7 complete) ✅ COMPLETE [20260303_FEATURE]
 
-Phase 1: ❌ Not started | Adapter: ❌ STUB (`kotlin_adapter.py`) | Registry: ✅ Working (lazy-load `__getattr__`)
+Phase 1: ✅ Complete (`kotlin_normalizer.py` — 6 IR bugs fixed [20260303_BUGFIX]) | Adapter: ✅ Complete | Registry: ✅ Complete
 
 | File | Lines | Status |
 |------|-------|--------|
+| `__init__.py` | 220 | ✅ COMPLETE — `KotlinParserRegistry` with lazy-load + `__getattr__` |
 | `kotlin_parsers_Detekt.py` | 265 | ✅ COMPLETE — full integration with findings, severity, config |
 | `kotlin_parsers_ktlint.py` | 326 | ✅ COMPLETE — comprehensive with rule sets, auto-correct |
-| `kotlin_parsers_diktat.py` | 127 | ⚠️ PARTIAL — dataclasses only |
-| `kotlin_parsers_gradle.py` | 148 | ⚠️ PARTIAL — dataclasses only |
-| `kotlin_parsers_compose.py` | 123 | ⚠️ PARTIAL — dataclasses only |
-| `kotlin_parsers_Konsist.py` | 111 | ⚠️ PARTIAL — dataclasses only |
-| `kotlin_parsers_test.py` | 146 | ⚠️ PARTIAL — dataclasses only |
+| `kotlin_parsers_diktat.py` | 174 | ✅ COMPLETE — diktat SARIF/XML parse; CWE mapping; execute + parse |
+| `kotlin_parsers_gradle.py` | 214 | ✅ COMPLETE — Gradle Kotlin build output; dependency check; task scan |
+| `kotlin_parsers_compose.py` | 194 | ✅ COMPLETE — Android Lint SARIF parse; Compose-specific rules |
+| `kotlin_parsers_Konsist.py` | 157 | ✅ COMPLETE — JUnit XML test-based architecture rule results |
+| `kotlin_parsers_test.py` | 252 | ✅ COMPLETE — Test utilities; JUnit/Kotest/Spek result parsing |
 
-**Gap**: 5 partial files to complete (Phase 1 IR layer not yet started)
+**Tests**: `tests/languages/test_kotlin_tool_parsers.py` — 55 tests passing [20260303_FEATURE]
 
-> **Note**: Detekt and ktlint are already production-ready. The registry is also working. Kotlin's Phase 2 is partially underway before Phase 1 even began.
+**Gap**: None — all 7 parsers + Phase 1 IR complete.
+
+> **Normalizer note**: `kotlin_normalizer.py` had 6 bugs fixed [20260303_BUGFIX]: (1) class-level `_tree_cache` shared across instances; (2) dead branch in `visit_function_declaration`; (3) `visit_when_expression` passed entire `when_entry` to `_visit_block`; (4) `visit_for_statement` dropped no-brace single-statement body; (5) `visit_while_statement` same; (6) `visit_infix_expression` return type too narrow.
 
 ---
 
-### PHP — `php_parsers/` (0/7 complete)
+### PHP — `php_parsers/` (0/7 complete) 🚧 ACTIVE — Stage 6
 
-Phase 1: ❌ Not started | Adapter: ❌ STUB (`php_adapter.py`) | Registry: ✅ Working (lazy-load `__getattr__`)
+Phase 1: 🚧 In progress (`php_normalizer.py` — [20260303_FEATURE]) | Adapter: 🚧 In progress (`php_adapter.py`) | Registry: ✅ Working (lazy-load `__getattr__`)
 
 | File | Lines | Status |
 |------|-------|--------|
+| `__init__.py` | 171 | ✅ Registry structure in place — lazy `__getattr__` pattern |
 | `php_parsers_PHPCS.py` | 94 | ⚠️ PARTIAL — dataclasses; no execution |
 | `php_parsers_PHPStan.py` | 101 | ⚠️ PARTIAL — PHPStanError/PHPStanLevel dataclasses; no execution |
 | `php_parsers_Psalm.py` | 97 | ⚠️ PARTIAL — PsalmError/PsalmSeverity dataclasses; no execution |
@@ -241,7 +251,7 @@ Phase 1: ❌ Not started | Adapter: ❌ STUB (`php_adapter.py`) | Registry: ✅ 
 | `php_parsers_composer.py` | 98 | ⚠️ PARTIAL — package management; incomplete |
 | `php_parsers_exakat.py` | 94 | ⚠️ PARTIAL — static analysis; incomplete |
 
-**Gap**: 7 files to implement + Phase 1 IR layer (not yet started)
+**Gap**: Phase 1 IR layer + 7 tool parser execution bodies + adapter (work started [20260303_FEATURE])
 
 ---
 
@@ -295,12 +305,12 @@ Phase 1: ❌ Not started | No `rust_parsers/` directory exists yet
 | **JavaScript** | ✅ | ✅ | ✅ | 15/15 | 0 | Complete |
 | **Java** | ✅ | ✅ | ✅ | 16/16 | 0 | Complete |
 | **C++** | ✅ | ✅ | ✅ | 6/6 | **0 — DONE** | — |
-| **C#** | ✅ | ❌ STUB | ❌ STUB | 0/6 | 6 + adapter + registry + SARIF helper | **Stage 2** |
-| **Go** | ✅ | ✅ | ❌ STUB | 0/6 | 6 + registry | **Stage 3** |
-| **Kotlin** | ❌ | ❌ STUB | ✅ | 2/7 | 5 + Phase 1 | After stages 1–3 |
-| **PHP** | ❌ | ❌ STUB | ✅ | 0/7 | 7 + Phase 1 | After Kotlin |
-| **Ruby** | ❌ | ❌ STUB | ❌ STUB | 0/7 | 7 + Phase 1 + registry | After PHP |
-| **Swift** | ❌ | ❌ STUB | ❌ STUB | 0/4 | 4 + Phase 1 + registry | After Ruby |
+| **C#** | ✅ | ✅ | ✅ | 6/6 | **0 — DONE** [20260303_FEATURE] | — |
+| **Go** | ✅ | ✅ | ✅ | 6/6 | **0 — DONE** [20260303_FEATURE] | — |
+| **Kotlin** | ✅ | ✅ | ✅ | 7/7 | **0 — DONE** [20260303_FEATURE] | — |
+| **PHP** | 🚧 | 🚧 | ✅ | 0/7 | 7 + Phase 1 | **Stage 6** |
+| **Ruby** | ❌ | ❌ STUB | ❌ STUB | 0/7 | 7 + Phase 1 + registry | Stage 7 |
+| **Swift** | ❌ | ❌ STUB | ❌ STUB | 0/4 | 4 + Phase 1 + registry | Stage 8 |
 | **Rust** | ❌ | ❌ | none | 0/5 | 5 + dir + Phase 1 | After Swift |
 | **C** | ✅ | ✅ | n/a | n/a | 0 (served by C++ tools) | — |
 
@@ -331,7 +341,9 @@ All C++ tool parsers are fully implemented. Results are available via `analyze_c
 
 ---
 
-### Stage 2 — C# Tool Parsers
+### Stage 2 — C# Tool Parsers ✅ COMPLETE [20260303_FEATURE]
+
+All C# tool parsers, adapter, registry, and shared SARIF 2.1 helper are fully implemented. 75 tests passing in `tests/languages/test_csharp_tool_parsers.py`.
 
 **Why second**: .NET ecosystem is large; all 6 C# tools use SARIF 2.1 output, which means one shared `_parse_sarif()` helper in `__init__.py` covers Roslyn, StyleCop, and SecurityCodeScan. C# stubs are more minimal than C++ (28 lines each) — need both dataclass framework AND implementation.
 
@@ -352,7 +364,9 @@ All C++ tool parsers are fully implemented. Results are available via `analyze_c
 
 ---
 
-### Stage 3 — Go Tool Parsers
+### Stage 3 — Go Tool Parsers ✅ COMPLETE [20260303_FEATURE]
+
+All Go tool parsers and registry are fully implemented. 48 tests passing in `tests/languages/test_go_tool_parsers.py`.
 
 **Why third**: Cloud-native ecosystem. Go adapter is already done. Registry stub exists but is empty. golangci-lint aggregates 50+ linters into one JSON output — implementing it well provides coverage over govet, staticcheck, and many others. gosec provides built-in CWE IDs.
 
@@ -378,21 +392,11 @@ All parsers for Python, JavaScript, and Java are fully implemented. See the per-
 
 ---
 
-### Stage 5 — Kotlin Phase 2 Completion (then Phase 1)
+### Stage 5 — Kotlin Phase 2 Completion (then Phase 1) ✅ COMPLETE [20260303_FEATURE]
 
-**Why here**: Kotlin already has 2 production-ready parsers (Detekt, ktlint) and a working registry. The remaining 5 partials need implementation bodies. Phase 1 IR layer begins after Phase 2 partials are complete (or concurrently).
+All Kotlin tool parsers are fully implemented and Phase 1 IR normalizer is complete (with 6 bugs fixed). 55 tests passing in `tests/languages/test_kotlin_tool_parsers.py`.
 
-**Partial files to complete (5)**:
-
-| File | Tool | Output format |
-|------|------|--------------|
-| `kotlin_parsers_diktat.py` | diktat | SARIF / XML |
-| `kotlin_parsers_gradle.py` | Gradle Kotlin | `build.gradle.kts` + build output |
-| `kotlin_parsers_compose.py` | Compose Lint | Android Lint SARIF |
-| `kotlin_parsers_Konsist.py` | Konsist | JUnit XML (test-based) |
-| `kotlin_parsers_test.py` | Test utilities | — |
-
-Then begin **Kotlin Phase 1** IR layer — see [Adding-Kotlin.md](Adding-Kotlin.md).
+> **Phase 1 normalizer note**: `kotlin_normalizer.py` required 6 bug fixes [20260303_BUGFIX]: class-level `_tree_cache`, unreachable branch in function_declaration, when_entry body extraction, no-brace for/while body drop, return type narrowness. All corrected and verified.
 
 ---
 
@@ -538,11 +542,11 @@ class LanguageParserRegistry:
 | Version | Scope |
 |---------|-------|
 | `v2.1.x` | ✅ **Stage 1**: C++ tool parsers + adapter + registry; integrated into `analyze_code.static_tools` |
-| `v2.1.x` | ✅ **Stage 3**: Go tool parsers + registry |
+| `v2.1.x` | ✅ **Stage 2**: C# tool parsers + adapter + SARIF helper — 75 tests |
+| `v2.1.x` | ✅ **Stage 3**: Go tool parsers + registry — 48 tests |
 | `v2.1.x` | ✅ **Stage 4**: Python + JavaScript + Java quick-win stubs — all complete |
-| `v2.1.x` | **Stage 2**: C# tool parsers + adapter + SARIF helper |
-| `v2.2.0` | **Stage 5**: Kotlin Phase 2 completion + Phase 1 IR (full language) |
-| `v2.3.0` | **Stage 6**: PHP Phase 2 + Phase 1 |
+| `v2.2.0` | ✅ **Stage 5**: Kotlin Phase 2 completion + Phase 1 IR — 55 tests, 6 normalizer bugs fixed |
+| `v2.3.0` | 🚧 **Stage 6**: PHP Phase 1 IR + Phase 2 tool parsers (active) |
 | `v2.4.0` | **Stage 7**: Ruby Phase 2 + Phase 1 |
 | `v2.5.0` | **Stage 8**: Swift Phase 2 + Phase 1 |
 | `v2.6.0` | **Stage 9**: Rust Phase 1 + Phase 2 |
@@ -550,3 +554,4 @@ class LanguageParserRegistry:
 ---
 
 *Last audited: 2026-03-03 — full file-by-file review of all `code_parsers/` directories*
+*Updated: 2026-03-03 — Stages 2, 3, 5 confirmed complete via diagnostic; Stage 6 PHP active [20260303_FEATURE]*

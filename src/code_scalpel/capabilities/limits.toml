@@ -32,6 +32,7 @@ languages = [
     "csharp",
     "go",
     "kotlin",
+    "php",  # [20260303_FEATURE]
 ]
 # [20260303_REFACTOR] static_tools via analyze_code (merged from run_static_analysis)
 static_tools_available = ["cppcheck", "clang-tidy", "clang-sa", "cpplint"]
@@ -96,6 +97,7 @@ languages = [
     "csharp",
     "go",
     "kotlin",
+    "php",  # [20260303_FEATURE]
 ]
 max_sinks = 50
 
@@ -168,6 +170,7 @@ languages = [
     "csharp",
     "go",
     "kotlin",
+    "php",  # [20260303_FEATURE]
 ]
 # [20260303_REFACTOR] static_tools via analyze_code (merged from run_static_analysis)
 static_tools_available = ["cppcheck", "clang-tidy", "clang-sa", "cpplint"]
@@ -208,6 +211,7 @@ frontend_only = false
 vulnerability_types = "all"
 
 [pro.unified_sink_detect]
+# [20260303_FEATURE] php added to languages list below
 languages = [
     "python",
     "javascript",
@@ -218,6 +222,7 @@ languages = [
     "csharp",
     "go",
     "kotlin",
+    "php",  # [20260303_FEATURE]
 ]
 max_sinks = -1               # Unlimited (match Enterprise)
 
@@ -388,6 +393,7 @@ languages = [
     "csharp",
     "go",
     "kotlin",
+    "php",  # [20260303_FEATURE]
 ]
 max_sinks = -1               # Fixed: was 50 (same as Community)
 

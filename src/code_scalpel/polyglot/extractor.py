@@ -43,6 +43,7 @@ class Language(Enum):
     CPP = "cpp"  # [20260224_FEATURE] C++ language support
     CSHARP = "csharp"  # [20260224_FEATURE] C# language support
     GO = "go"  # [20260302_FEATURE] Go language support
+    PHP = "php"  # [20260303_FEATURE] PHP language support
     AUTO = "auto"  # Auto-detect from file extension
 
 
@@ -76,6 +77,13 @@ EXTENSION_MAP: dict[str, Language] = {
     ".cs": Language.CSHARP,
     # [20260302_FEATURE] Go extension
     ".go": Language.GO,
+    # [20260303_FEATURE] PHP language support
+    ".php": Language.PHP,
+    ".php3": Language.PHP,
+    ".php4": Language.PHP,
+    ".php5": Language.PHP,
+    ".php7": Language.PHP,
+    ".phtml": Language.PHP,
 }
 
 
