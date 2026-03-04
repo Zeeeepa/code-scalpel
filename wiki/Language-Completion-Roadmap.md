@@ -187,7 +187,10 @@ Phase 1: ✅ Complete | Adapter: ✅ Complete (`csharp_adapter.py`) | Registry: 
 | `csharp_parsers_StyleCop.py` | 166 | ✅ COMPLETE — MSBuild SARIF 2.1 parse |
 | `csharp_parsers_SonarQube.py` | 258 | ✅ COMPLETE — enterprise JSON API parse (execute raises NotImplementedError by design) |
 
-**Tests**: `tests/languages/test_csharp_tool_parsers.py` — 75 tests passing [20260303_FEATURE]
+**Tests**: `tests/languages/test_csharp_tool_parsers.py` — 46 tests passing [20260303_FEATURE]
+
+> **Integration note**: C# tool-parser results are accessed via `analyze_code(file_path=..., static_tools=["roslyn", "stylecop", "fxcop", "scs", "resharper", "sonarqube"])`. `resharper` and `sonarqube` are enterprise-only (gated in `_ENTERPRISE_EXEC_TOOLS`).
+> Wiring added to `_run_static_tools` in [20260304_FEATURE].
 
 **Gap**: None — all 6 parsers + adapter + registry complete.
 
@@ -236,22 +239,22 @@ Phase 1: ✅ Complete (`kotlin_normalizer.py` — 6 IR bugs fixed [20260303_BUGF
 
 ---
 
-### PHP — `php_parsers/` (0/7 complete) 🚧 ACTIVE — Stage 6
+### PHP — `php_parsers/` (7/7 complete) ✅ COMPLETE — Stage 6
 
-Phase 1: 🚧 In progress (`php_normalizer.py` — [20260303_FEATURE]) | Adapter: 🚧 In progress (`php_adapter.py`) | Registry: ✅ Working (lazy-load `__getattr__`)
+Phase 1: ✅ Complete (`php_normalizer.py` — [20260303_FEATURE]) | Adapter: ✅ Complete (`php_adapter.py`) | Registry: ✅ Working (lazy-load `__getattr__` with all 7 parsers)
 
-| File | Lines | Status |
-|------|-------|--------|
-| `__init__.py` | 171 | ✅ Registry structure in place — lazy `__getattr__` pattern |
-| `php_parsers_PHPCS.py` | 94 | ⚠️ PARTIAL — dataclasses; no execution |
-| `php_parsers_PHPStan.py` | 101 | ⚠️ PARTIAL — PHPStanError/PHPStanLevel dataclasses; no execution |
-| `php_parsers_Psalm.py` | 97 | ⚠️ PARTIAL — PsalmError/PsalmSeverity dataclasses; no execution |
-| `php_parsers_phpmd.py` | 114 | ⚠️ PARTIAL — Mess Detector; missing implementation |
-| `php_parsers_ast.py` | 104 | ⚠️ PARTIAL — AST analysis; incomplete |
-| `php_parsers_composer.py` | 98 | ⚠️ PARTIAL — package management; incomplete |
-| `php_parsers_exakat.py` | 94 | ⚠️ PARTIAL — static analysis; incomplete |
+| File | Status |
+|------|--------|
+| `__init__.py` | ✅ Registry expanded — all 7 parsers registered [20260304_FEATURE] |
+| `php_parsers_PHPCS.py` | ✅ Full implementation — execute, JSON/XML parse, report [20260304_FEATURE] |
+| `php_parsers_PHPStan.py` | ✅ Full implementation — execute, JSON parse, CWE map, report [20260304_FEATURE] |
+| `php_parsers_Psalm.py` | ✅ Full implementation — execute, JSON parse, taint, CWE, report [20260304_FEATURE] |
+| `php_parsers_phpmd.py` | ✅ Full implementation — execute, XML/JSON parse, CWE, report [20260304_FEATURE] |
+| `php_parsers_ast.py` | ✅ Full implementation — PHPNormalizer-based extraction, no CLI [20260304_FEATURE] |
+| `php_parsers_composer.py` | ✅ Full implementation — JSON parsing, vuln scan, report [20260304_FEATURE] |
+| `php_parsers_exakat.py` | ✅ Full implementation — JSON/CSV parse, CWE, NotImplementedError execute [20260304_FEATURE] |
 
-**Gap**: Phase 1 IR layer + 7 tool parser execution bodies + adapter (work started [20260303_FEATURE])
+**Tests**: 79/79 passing (`tests/languages/test_php_tool_parsers.py` — [20260304_TEST])
 
 ---
 
@@ -308,7 +311,7 @@ Phase 1: ❌ Not started | No `rust_parsers/` directory exists yet
 | **C#** | ✅ | ✅ | ✅ | 6/6 | **0 — DONE** [20260303_FEATURE] | — |
 | **Go** | ✅ | ✅ | ✅ | 6/6 | **0 — DONE** [20260303_FEATURE] | — |
 | **Kotlin** | ✅ | ✅ | ✅ | 7/7 | **0 — DONE** [20260303_FEATURE] | — |
-| **PHP** | 🚧 | 🚧 | ✅ | 0/7 | 7 + Phase 1 | **Stage 6** |
+| **PHP** | ✅ | ✅ | ✅ | 7/7 | **0 — DONE** [20260304_FEATURE] | — |
 | **Ruby** | ❌ | ❌ STUB | ❌ STUB | 0/7 | 7 + Phase 1 + registry | Stage 7 |
 | **Swift** | ❌ | ❌ STUB | ❌ STUB | 0/4 | 4 + Phase 1 + registry | Stage 8 |
 | **Rust** | ❌ | ❌ | none | 0/5 | 5 + dir + Phase 1 | After Swift |
@@ -343,7 +346,7 @@ All C++ tool parsers are fully implemented. Results are available via `analyze_c
 
 ### Stage 2 — C# Tool Parsers ✅ COMPLETE [20260303_FEATURE]
 
-All C# tool parsers, adapter, registry, and shared SARIF 2.1 helper are fully implemented. 75 tests passing in `tests/languages/test_csharp_tool_parsers.py`.
+All C# tool parsers, adapter, registry, shared SARIF 2.1 helper, and `analyze_code` MCP wiring are fully implemented. 46 tests passing in `tests/languages/test_csharp_tool_parsers.py`.
 
 **Why second**: .NET ecosystem is large; all 6 C# tools use SARIF 2.1 output, which means one shared `_parse_sarif()` helper in `__init__.py` covers Roslyn, StyleCop, and SecurityCodeScan. C# stubs are more minimal than C++ (28 lines each) — need both dataclass framework AND implementation.
 
@@ -400,9 +403,9 @@ All Kotlin tool parsers are fully implemented and Phase 1 IR normalizer is compl
 
 ---
 
-### Stage 6 — PHP Phase 2 + Phase 1
+### Stage 6 — PHP Phase 2 + Phase 1 ✅ COMPLETE [20260304_FEATURE]
 
-PHP has a working registry and 7 partial files. All 7 need execution logic written. Then PHP Phase 1 IR layer.
+PHP Phase 1 (IR normalizer, extractor, adapter, 32 tests) and Phase 2 (7 tool parsers, 79 tests) are complete. All 7 parsers implemented with execute/parse/report. 816 language tests passing total.
 
 ---
 
@@ -546,7 +549,7 @@ class LanguageParserRegistry:
 | `v2.1.x` | ✅ **Stage 3**: Go tool parsers + registry — 48 tests |
 | `v2.1.x` | ✅ **Stage 4**: Python + JavaScript + Java quick-win stubs — all complete |
 | `v2.2.0` | ✅ **Stage 5**: Kotlin Phase 2 completion + Phase 1 IR — 55 tests, 6 normalizer bugs fixed |
-| `v2.3.0` | 🚧 **Stage 6**: PHP Phase 1 IR + Phase 2 tool parsers (active) |
+| `v2.3.0` | ✅ **Stage 6**: PHP Phase 1 IR (32 tests) + Phase 2 tool parsers (79 tests) — 111 tests total [20260304_FEATURE] |
 | `v2.4.0` | **Stage 7**: Ruby Phase 2 + Phase 1 |
 | `v2.5.0` | **Stage 8**: Swift Phase 2 + Phase 1 |
 | `v2.6.0` | **Stage 9**: Rust Phase 1 + Phase 2 |
@@ -554,4 +557,4 @@ class LanguageParserRegistry:
 ---
 
 *Last audited: 2026-03-03 — full file-by-file review of all `code_parsers/` directories*
-*Updated: 2026-03-03 — Stages 2, 3, 5 confirmed complete via diagnostic; Stage 6 PHP active [20260303_FEATURE]*
+*Updated: 2026-03-04 — Stage 6 PHP complete: Phase 1 IR + Phase 2 (7 tool parsers, 79 tests, 816 total) [20260304_FEATURE]*

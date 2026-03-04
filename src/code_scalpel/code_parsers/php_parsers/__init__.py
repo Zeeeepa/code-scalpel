@@ -95,6 +95,28 @@ if TYPE_CHECKING:
         PsalmParser,
         PsalmSeverity,
     )
+    from .php_parsers_phpmd import (
+        PHPMDConfig,
+        PHPMDParser,
+        PHPMDPriority,
+        PHPMDRuleType,
+        PHPMDViolation,
+    )
+    from .php_parsers_ast import (
+        PHPClass,
+        PHPFunction,
+        PHPParserAST,
+    )
+    from .php_parsers_composer import (
+        ComposerConfig,
+        ComposerPackage,
+        ComposerParser,
+    )
+    from .php_parsers_exakat import (
+        ExakatCategory,
+        ExakatIssue,
+        ExakatParser,
+    )
 
 __all__ = [
     # PHPCS
@@ -115,6 +137,24 @@ __all__ = [
     "PsalmSeverity",
     "PsalmErrorType",
     "PsalmConfig",
+    # PHPMD — [20260304_FEATURE] Phase 2
+    "PHPMDParser",
+    "PHPMDViolation",
+    "PHPMDPriority",
+    "PHPMDRuleType",
+    "PHPMDConfig",
+    # PHP AST — [20260304_FEATURE] Phase 2
+    "PHPParserAST",
+    "PHPClass",
+    "PHPFunction",
+    # Composer — [20260304_FEATURE] Phase 2
+    "ComposerParser",
+    "ComposerPackage",
+    "ComposerConfig",
+    # Exakat — [20260304_FEATURE] Phase 2
+    "ExakatParser",
+    "ExakatIssue",
+    "ExakatCategory",
 ]
 
 
@@ -166,6 +206,38 @@ def __getattr__(name: str):
             PsalmParser,
             PsalmSeverity,
         )
+
+        return locals()[name]
+    elif name in (
+        "PHPMDParser",
+        "PHPMDViolation",
+        "PHPMDPriority",
+        "PHPMDRuleType",
+        "PHPMDConfig",
+    ):
+        from .php_parsers_phpmd import (
+            PHPMDConfig,
+            PHPMDParser,
+            PHPMDPriority,
+            PHPMDRuleType,
+            PHPMDViolation,
+        )
+
+        return locals()[name]
+    elif name in ("PHPParserAST", "PHPClass", "PHPFunction"):
+        from .php_parsers_ast import PHPClass, PHPFunction, PHPParserAST
+
+        return locals()[name]
+    elif name in ("ComposerParser", "ComposerPackage", "ComposerConfig"):
+        from .php_parsers_composer import (
+            ComposerConfig,
+            ComposerPackage,
+            ComposerParser,
+        )
+
+        return locals()[name]
+    elif name in ("ExakatParser", "ExakatIssue", "ExakatCategory"):
+        from .php_parsers_exakat import ExakatCategory, ExakatIssue, ExakatParser
 
         return locals()[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
