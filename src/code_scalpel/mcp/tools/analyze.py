@@ -19,6 +19,78 @@ from code_scalpel.mcp.v1_1_kernel_adapter import get_adapter
 mcp = import_module("code_scalpel.mcp.protocol").mcp
 
 
+_ENTERPRISE_EXEC_TOOLS = {"coverity", "sonarqube", "sonar", "sonar-cpp"}
+_COMMUNITY_MAX_TOOL_FINDINGS = 50
+
+
+def _run_static_tools(file_path: str, tools: list[str], tier: str) -> list[dict]:
+    """Synchronously dispatch to language tool parsers and return merged findings.
+
+    [20260303_REFACTOR] Moved from standalone run_static_analysis tool into analyze_code.
+    Supports C++ tools via CppParserRegistry.  Language determined from file extension.
+    Enterprise-only tools (coverity, sonarqube) are skipped unless tier == 'enterprise'.
+    Community tier caps total findings at 50.
+    """
+    import dataclasses
+    from pathlib import Path as _Path
+
+    ext = _Path(file_path).suffix.lower()
+    cpp_exts = {".cpp", ".cc", ".cxx", ".c++", ".c", ".h", ".hpp", ".hxx", ".hh", ".inl"}
+    if ext not in cpp_exts:
+        # No tool parsers wired for non-C++ languages yet.
+        return []
+
+    from code_scalpel.code_parsers.cpp_parsers import CppParserRegistry
+
+    registry = CppParserRegistry()
+    all_findings: list[dict] = []
+    _TOOL_EXEC_METHODS = {
+        "cppcheck": "execute_cppcheck",
+        "clang-tidy": "execute_clang_tidy",
+        "clang_tidy": "execute_clang_tidy",
+        "clang-sa": "execute_scan_build",
+        "clang-static-analyzer": "execute_scan_build",
+        "cpplint": "execute_cpplint",
+        "coverity": "execute_coverity",
+        "sonarqube": "execute_sonarqube",
+        "sonar": "execute_sonarqube",
+    }
+
+    for tool in tools:
+        tool_key = tool.lower()
+        if tool_key in _ENTERPRISE_EXEC_TOOLS and tier != "enterprise":
+            all_findings.append({
+                "tool": tool_key,
+                "skipped": True,
+                "reason": f"Executing '{tool_key}' requires Enterprise tier.",
+            })
+            continue
+        try:
+            parser = registry.get_parser(tool_key)
+        except (ValueError, Exception):
+            continue
+        method_name = _TOOL_EXEC_METHODS.get(tool_key)
+        if not method_name or not hasattr(parser, method_name):
+            continue
+        try:
+            raw = getattr(parser, method_name)([file_path]) or []
+        except (NotImplementedError, Exception):
+            continue
+        for f in raw:
+            if hasattr(f, "__dataclass_fields__"):
+                all_findings.append(dataclasses.asdict(f))
+            elif hasattr(f, "model_dump"):
+                all_findings.append(f.model_dump())
+            elif hasattr(f, "__dict__"):
+                all_findings.append({k: v for k, v in f.__dict__.items() if not k.startswith("_")})
+            else:
+                all_findings.append({"value": str(f)})
+
+    if tier == "community" and len(all_findings) > _COMMUNITY_MAX_TOOL_FINDINGS:
+        all_findings = all_findings[:_COMMUNITY_MAX_TOOL_FINDINGS]
+    return all_findings
+
+
 def _get_project_files(project_root: str | Path, max_files: int = 1000) -> list[str]:
     """Get list of all files in project for fuzzy matching suggestions.
 
@@ -141,10 +213,13 @@ def _find_similar_file_paths(
 
 
 @mcp.tool(
-    description="Parse and extract code structure (functions, classes, imports) from source text or a file."
+    description="Parse and extract code structure (functions, classes, imports) from source text or a file. Pass static_tools to also run external linters (cppcheck, clang-tidy, clang-sa, cpplint; coverity/sonarqube on Enterprise) against the file."
 )
 async def analyze_code(
-    code: str | None = None, language: str = "auto", file_path: str | None = None
+    code: str | None = None,
+    language: str = "auto",
+    file_path: str | None = None,
+    static_tools: list[str] | None = None,
 ) -> ToolResponseEnvelope:
     """Analyze source code structure with AST parsing and metrics.
 
@@ -167,6 +242,11 @@ async def analyze_code(
         language (str): Programming language for analysis. Default: "auto" (auto-detect).
                        Supported: python, javascript, typescript, java, c, cpp, csharp, go
         file_path (str, optional): Path to file to analyze. Either code or file_path required.
+        static_tools (list[str], optional): External static-analysis tools to run against
+            file_path in addition to AST analysis.  Requires file_path.
+            Community/Pro: ["cppcheck", "clang-tidy", "clang-sa", "cpplint"].
+            Enterprise: also ["coverity", "sonarqube"] (report files via parse path).
+            Results are returned in ``tool_findings`` of the response.
 
     **Returns:**
         ToolResponseEnvelope with AnalysisResult containing:
@@ -203,6 +283,8 @@ async def analyze_code(
         - suggested_fix (str, optional): Suggested fix for syntax error when applicable
         - sanitization_report (dict, optional): Parsing sanitization details
         - parser_warnings (list[str]): Parser warnings (e.g., sanitization notices)
+        - tool_findings (list[dict]): Findings from external static tools (when static_tools
+            requested and file_path provided). Empty when not requested.
         - error (str): Error message if analysis failed (invalid code, file not found, etc.)
         - tier_applied (str): Tier used for analysis
         - duration_ms (int): Analysis duration in milliseconds
@@ -298,6 +380,12 @@ async def analyze_code(
         result = await asyncio.to_thread(
             _analyze_code_sync, code or "", language, file_path
         )
+        # [20260303_REFACTOR] Run external static-analysis tools if requested.
+        if static_tools and file_path:
+            tier = _get_current_tier()
+            result.tool_findings = await asyncio.to_thread(
+                _run_static_tools, file_path, static_tools, tier
+            )
         duration_ms = int((time.perf_counter() - started) * 1000)
         tier = _get_current_tier()
         return make_envelope(

@@ -1523,20 +1523,6 @@ def handle_validate_paths(args: argparse.Namespace) -> int:
     return invoke_tool_with_format("validate_paths", tool_args, output_format)
 
 
-def handle_static_analysis(args: argparse.Namespace) -> int:  # [20260303_FEATURE]
-    """Handle 'codescalpel static-analysis' command."""
-    from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
-
-    tool_args = {
-        "paths": args.paths,
-        "tool": args.tool,
-        "language": "cpp",
-        "report_path": args.report,
-    }
-    output_format = "json" if args.json else "text"
-    return invoke_tool_with_format("run_static_analysis", tool_args, output_format)
-
-
 def handle_scan_dependencies(args: argparse.Namespace) -> int:
     """Handle 'codescalpel scan-dependencies' command."""
     from code_scalpel.cli_tools.tool_bridge import invoke_tool_with_format
@@ -2120,36 +2106,6 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         help="Output as JSON",
     )
 
-    # [20260303_FEATURE] C++ Static Analysis command
-    static_analysis_parser = subparsers.add_parser(
-        "static-analysis",
-        help="Run C++ static-analysis tools (cppcheck, clang-tidy, clang-sa, cpplint, coverity, sonarqube)",
-    )
-    static_analysis_parser.add_argument(
-        "paths",
-        nargs="+",
-        help="Source files or directories to analyse",
-    )
-    static_analysis_parser.add_argument(
-        "--tool",
-        "-t",
-        default="cppcheck",
-        choices=["cppcheck", "clang-tidy", "clang-sa", "cpplint", "coverity", "sonarqube"],
-        help="Static-analysis tool to use (default: cppcheck)",
-    )
-    static_analysis_parser.add_argument(
-        "--report",
-        "-r",
-        default=None,
-        help="Parse a pre-existing report file instead of running the tool",
-    )
-    static_analysis_parser.add_argument(
-        "--json",
-        "-j",
-        action="store_true",
-        help="Output as JSON",
-    )
-
     # Scan Dependencies command
     scan_deps_parser = subparsers.add_parser(
         "scan-dependencies",
@@ -2562,9 +2518,6 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     # [20260205_FEATURE] Phase 5: Validation & Policy Tool Dispatchers
     elif args.command == "validate-paths":
         return handle_validate_paths(args)
-
-    elif args.command == "static-analysis":  # [20260303_FEATURE]
-        return handle_static_analysis(args)
 
     elif args.command == "scan-dependencies":
         return handle_scan_dependencies(args)
