@@ -6,6 +6,39 @@ This document tracks the **verified** implementation status of every language's 
 
 ---
 
+## MCP Surface Expansion Policy
+
+> [20260303_DOCS] Established after the C++ static-analysis integration decision.
+
+**Rule**: A new MCP tool is only added when the feature **cannot** be correctly integrated into an existing tool.
+
+Before proposing a new tool, evaluate whether the feature belongs inside an existing one:
+
+| Feature type | Default home |
+|---|---|
+| Language-specific linter / static-analysis tool output | `analyze_code` (`static_tools` parameter, `tool_findings` in response) |
+| Security vulnerability detection (taint/sink) | `security_scan` or `cross_file_security_scan` |
+| Dependency CVE check | `scan_dependencies` |
+| Structural code query (call graph, refs) | `get_call_graph` / `get_symbol_references` |
+| Policy / compliance check | `code_policy_check` |
+
+**Rationale**
+
+Agents that consume MCP tools pay a context-window cost proportional to the number of tools they must reason about. Keeping the surface small means:
+- Agents can hold the full tool inventory in working memory without truncation.
+- Tool discovery is simpler — one tool does one *conceptual* job.
+- Tier gating stays centralised inside existing tools rather than spread across many.
+
+**Acceptable reasons to add a new tool**
+
+- The feature introduces a fundamentally different *interaction pattern* that would break existing callers if added as a parameter (e.g., it is async-streaming, or it returns a live session handle).
+- The response schema is incompatible with all existing tools and merging would require a breaking change.
+- The feature operates at a different granularity (project-wide vs. single-file) with no natural parent.
+
+If none of the above apply, **extend an existing tool**.
+
+---
+
 ## Audit: Verified Implementation Status (2026-03-03)
 
 ### Status Key
@@ -117,20 +150,26 @@ Phase 1: ✅ Complete | Adapter: ✅ Complete | Registry: ✅ Working (direct im
 
 ---
 
-### C++ — `cpp_parsers/` (0/6 complete)
+### C++ — `cpp_parsers/` (6/6 complete)
 
-Phase 1: ✅ Complete | Adapter: ❌ STUB (`cpp_adapter.py` — raises `NotImplementedError`) | Registry: ❌ STUB
+Phase 1: ✅ Complete | Adapter: ✅ Complete (`cpp_adapter.py` — [20260303_FEATURE]) | Registry: ✅ Complete (`CppParserRegistry` — [20260303_FEATURE])
 
 | File | Lines | Status |
 |------|-------|--------|
-| `cpp_parsers_Cppcheck.py` | 100 | ⚠️ PARTIAL — dataclasses + method signatures only |
-| `cpp_parsers_clang_tidy.py` | 98 | ⚠️ PARTIAL — dataclasses + method signatures only |
-| `cpp_parsers_Clang-Static-Analyzer.py` | 139 | ⚠️ PARTIAL — most scaffolded of the 5; missing execution |
-| `cpp_parsers_cpplint.py` | 83 | ⚠️ PARTIAL — dataclasses + method signatures only |
-| `cpp_parsers_coverity.py` | 100 | ⚠️ PARTIAL — dataclasses + method signatures only |
-| `cpp_parsers_SonarQube.py` | 1 | ❌ STUB — literally empty (1 newline) |
+| `cpp_parsers_Cppcheck.py` | 422 | ✅ COMPLETE — execute + XML parse + CWE mapping + report |
+| `cpp_parsers_clang_tidy.py` | 459 | ✅ COMPLETE — execute + diagnostic/JSON parse + report |
+| `cpp_parsers_Clang-Static-Analyzer.py` | 397 | ✅ COMPLETE — scan-build execute + plist parse + bug paths |
+| `cpp_parsers_cpplint.py` | 330 | ✅ COMPLETE — execute + stderr parse + style score |
+| `cpp_parsers_coverity.py` | 407 | ✅ COMPLETE — enterprise report parse only (execute raises NotImplementedError by design) |
+| `cpp_parsers_SonarQube.py` | 400 | ✅ COMPLETE — enterprise API JSON parse (execute raises NotImplementedError by design) |
 
-**Gap**: 6 tool parser files + adapter + registry
+**Gap**: None — all 6 parsers complete. [20260303_FEATURE]
+
+> **Integration note**: C++ tool-parser results are accessed via `analyze_code(file_path=..., static_tools=["cppcheck", ...])`.
+> The `static_tools` parameter was added to `analyze_code` in [20260303_REFACTOR] — no separate MCP tool was created
+> (see [MCP Surface Expansion Policy](#mcp-surface-expansion-policy)).
+> Results appear in `tool_findings` of the `AnalysisResult`.
+> Enterprise-only tools (coverity, sonarqube) require Enterprise tier for execution; all tiers can parse pre-existing report files.
 
 ---
 
@@ -255,7 +294,7 @@ Phase 1: ❌ Not started | No `rust_parsers/` directory exists yet
 | **Python** | ✅ | ✅ | ✅ | 10/15 | 5 | Quick win |
 | **JavaScript** | ✅ | ✅ | ✅ | 15/15 | 0 | Complete |
 | **Java** | ✅ | ✅ | ✅ | 16/16 | 0 | Complete |
-| **C++** | ✅ | ❌ STUB | ❌ STUB | 0/6 | 6 + adapter + registry | **Stage 1** |
+| **C++** | ✅ | ✅ | ✅ | 6/6 | **0 — DONE** | — |
 | **C#** | ✅ | ❌ STUB | ❌ STUB | 0/6 | 6 + adapter + registry + SARIF helper | **Stage 2** |
 | **Go** | ✅ | ✅ | ❌ STUB | 0/6 | 6 + registry | **Stage 3** |
 | **Kotlin** | ❌ | ❌ STUB | ✅ | 2/7 | 5 + Phase 1 | After stages 1–3 |
@@ -273,26 +312,22 @@ The ordering balances: (a) security ecosystem impact, (b) number of files to wri
 
 ---
 
-### Stage 1 — C++ Tool Parsers (IMMEDIATE)
+### Stage 1 — C++ Tool Parsers ✅ COMPLETE [20260303_FEATURE]
 
-**Why first**: Highest-impact security tools (Cppcheck finds memory/null/overflow bugs; Clang-SA finds use-after-free; clang-tidy enforces modern C++). The C/C++ ecosystem is the largest among incomplete languages. Phase 1 is already done. Scaffolding (dataclasses, config types) already exists in 5 of 6 files.
+All C++ tool parsers are fully implemented. Results are available via `analyze_code(file_path=..., static_tools=[...])` — no separate MCP tool was created (see [MCP Surface Expansion Policy](#mcp-surface-expansion-policy)).
 
-**Files to write**:
+| File | Status |
+|------|--------|
+| `cpp_adapter.py` | ✅ Done |
+| `cpp_parsers/__init__.py` | ✅ Done — `CppParserRegistry` |
+| `cpp_parsers_Cppcheck.py` | ✅ Done |
+| `cpp_parsers_clang_tidy.py` | ✅ Done |
+| `cpp_parsers_Clang-Static-Analyzer.py` | ✅ Done |
+| `cpp_parsers_cpplint.py` | ✅ Done |
+| `cpp_parsers_coverity.py` | ✅ Done (enterprise parse-only) |
+| `cpp_parsers_SonarQube.py` | ✅ Done (enterprise parse-only) |
 
-| File | Tool type | Output format | Notes |
-|------|-----------|--------------|-------|
-| `cpp_adapter.py` | Adapter | — | Thin wrapper over `CppNormalizer`; `parse()`, `get_functions()`, `get_classes()` |
-| `cpp_parsers/__init__.py` | Registry | — | `CppParserRegistry` with lazy-load factory |
-| `cpp_parsers_Cppcheck.py` | Free CLI | `--xml-version=2` XML | `execute_cppcheck()` + `parse_xml_string()` + CWE from `<error cwe="..."/>` |
-| `cpp_parsers_clang_tidy.py` | Free CLI | diagnostic stderr + YAML fixes | `execute_clang_tidy()` + `parse_diagnostic_output()` + `parse_json_report()` |
-| `cpp_parsers_Clang-Static-Analyzer.py` | Free CLI | `.plist` XML | `execute_scan_build()` + `parse_plist_report()` + `extract_bug_paths()` |
-| `cpp_parsers_cpplint.py` | Free CLI | `file:line: msg [cat/check] N` stderr | `execute_cpplint()` + `parse_cpplint_output()` + `calculate_style_score()` |
-| `cpp_parsers_coverity.py` | Enterprise | Coverity JSON export | `parse_json_report()` only; `execute_*()` raises `NotImplementedError` |
-| `cpp_parsers_SonarQube.py` | Enterprise | SonarQube JSON API | `parse_json_report()` only; `execute_*()` raises `NotImplementedError` |
-
-**Tests**: `tests/languages/test_cpp_tool_parsers.py` — fixture-based, 40+ cases
-
-See [Adding-A-Language.md](Adding-A-Language.md) and existing `wiki/Language-Completion-Roadmap.md` implementation specs for complete method signatures.
+**Tests**: `tests/languages/test_cpp_tool_parsers.py` — 85 tests passing
 
 ---
 
@@ -337,40 +372,9 @@ See [Adding-A-Language.md](Adding-A-Language.md) and existing `wiki/Language-Com
 
 ---
 
-### Stage 4 — Close Quick Wins (Python + JavaScript + Java)
+### Stage 4 — Close Quick Wins (Python + JavaScript + Java) ✅ COMPLETE [20260303_FEATURE]
 
-**Why here**: High ratio of impact per file written — languages already have Phase 1 complete and most tools done. Batch these together.
-
-#### Python gaps (5 files)
-
-| File | Tool | Output format |
-|------|------|--------------|
-| `python_parsers_safety.py` | Safety/pip-audit | JSON `{"vulnerabilities":[...]}` |
-| `python_parsers_isort.py` | isort | text diff or `--check` exit code |
-| `python_parsers_vulture.py` | vulture | text `file:line: unused code_type 'name'` |
-| `python_parsers_radon.py` | radon | JSON (cc, mi, hal subcommands) |
-| `python_parsers_interrogate.py` | interrogate | JSON or text coverage report |
-
-#### JavaScript gaps (5 files)
-
-| File | Tool | Output format |
-|------|------|--------------|
-| `javascript_parsers_npm_audit.py` | npm audit | JSON `{"advisories":{}, "vulnerabilities":{}}` |
-| `javascript_parsers_jsdoc.py` | jsdoc | JSON output + coverage metrics |
-| `javascript_parsers_package_json.py` | package.json | Parse JSON; extract deps/scripts/engines |
-| `javascript_parsers_test_detection.py` | (detect framework) | Inspect `package.json` devDependencies |
-| `javascript_parsers_webpack.py` | webpack.config.js | Parse JS config; extract entry points |
-
-#### Java gaps (6 files — all build tools / output parsers)
-
-| File | Tool | Output format |
-|------|------|--------------|
-| `java_parsers_Maven.py` | Maven | `pom.xml` + build output text |
-| `java_parsers_Gradle.py` | Gradle | `build.gradle(.kts)` + build output |
-| `java_parsers_DependencyCheck.py` | OWASP DependencyCheck | XML / JSON / SARIF report |
-| `java_parsers_JaCoCo.py` | JaCoCo | XML coverage report |
-| `java_parsers_Pitest.py` | PIT Mutation Testing | XML mutations report |
-| `java_parsers_Semgrep.py` | Semgrep | JSON `{"results":[...]}` |
+All parsers for Python, JavaScript, and Java are fully implemented. See the per-language audit tables above.
 
 ---
 
@@ -422,7 +426,7 @@ Six adapters raise `NotImplementedError` and must be implemented as thin wrapper
 
 | Adapter file | Fix alongside |
 |-------------|--------------|
-| `cpp_adapter.py` | Stage 1 (C++) |
+| `cpp_adapter.py` | ✅ Done — [20260303_FEATURE] |
 | `csharp_adapter.py` | Stage 2 (C#) |
 | `kotlin_adapter.py` | Stage 5 (Kotlin) |
 | `php_adapter.py` | Stage 6 (PHP) |
@@ -533,10 +537,10 @@ class LanguageParserRegistry:
 
 | Version | Scope |
 |---------|-------|
-| `v2.1.x` | **Stage 1**: C++ tool parsers + adapter (Cppcheck, clang-tidy, Clang-SA, cpplint, Coverity, SonarQube) |
+| `v2.1.x` | ✅ **Stage 1**: C++ tool parsers + adapter + registry; integrated into `analyze_code.static_tools` |
+| `v2.1.x` | ✅ **Stage 3**: Go tool parsers + registry |
+| `v2.1.x` | ✅ **Stage 4**: Python + JavaScript + Java quick-win stubs — all complete |
 | `v2.1.x` | **Stage 2**: C# tool parsers + adapter + SARIF helper |
-| `v2.1.x` | **Stage 3**: Go tool parsers + registry |
-| `v2.1.x` | **Stage 4**: Python + JavaScript + Java quick-win stubs |
 | `v2.2.0` | **Stage 5**: Kotlin Phase 2 completion + Phase 1 IR (full language) |
 | `v2.3.0` | **Stage 6**: PHP Phase 2 + Phase 1 |
 | `v2.4.0` | **Stage 7**: Ruby Phase 2 + Phase 1 |

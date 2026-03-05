@@ -121,8 +121,6 @@ def _get_tool_function(tool_name: str):
         "code_policy_check": "code_scalpel.mcp.tools.policy",
         # Policy tools
         "verify_policy_integrity": "code_scalpel.mcp.tools.policy",
-        # [20260303_FEATURE] C++ static analysis
-        "run_static_analysis": "code_scalpel.mcp.tools.static_analysis",
     }
 
     module_name = tool_module_map.get(tool_name)

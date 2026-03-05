@@ -180,9 +180,8 @@ class KotlinVisitor(TreeSitterVisitor):
             return results
 
         # Regular block: { statements... }
+        # Note: named_children never include "{" or "}" — they are unnamed tokens.
         for child in block_node.named_children:
-            if child.type in ("{", "}"):
-                continue
             res = self.visit(child)
             if res is None:
                 continue
@@ -324,13 +323,9 @@ class KotlinVisitor(TreeSitterVisitor):
         named = node.named_children
         for i, c in enumerate(named):
             if c.type in ("simple_identifier", "identifier"):
+                # [20260303_BUGFIX] removed dead `elif c.type == "identifier"` branch
                 if i > 0 and named[i - 1].type == "user_type":
-                    # Check if there's a dot between them (non-named child)
                     receiver = self._text_of(named[i - 1])
-                name = self._text_of(c)
-                func_name_idx = i
-                break
-            elif c.type == "identifier":
                 name = self._text_of(c)
                 func_name_idx = i
                 break
@@ -672,15 +667,51 @@ class KotlinVisitor(TreeSitterVisitor):
         )
 
     def visit_when_expression(self, node: Any) -> IRIf:
-        """when (x) { ... } — simplified to nested if/else stub."""
-        # Just collect all when_entry bodies as else_body
+        """when (x) { ... } — simplified to nested if/else stub.
+
+        [20260303_BUGFIX] Extract only the value (last named child) of each
+        when_entry rather than passing the whole entry to _visit_block, which
+        previously mixed conditions and bodies into all_stmts.
+        """
+        # Extract the when subject (condition) if present
+        subject_node = next(
+            (c for c in node.named_children if c.type == "when_subject"), None
+        )
+        test_ir: IRNode
+        if subject_node is not None:
+            expr = next(
+                (c for c in subject_node.named_children
+                 if c.type not in ("val", "var")), None
+            )
+            visited = self.visit(expr) if expr is not None else None
+            test_ir = cast(IRExpr, visited) if visited is not None else IRConstant(value=True)
+        else:
+            test_ir = IRConstant(value=True)
+
         all_stmts: List[IRNode] = []
         for child in node.named_children:
-            if child.type == "when_entry":
-                stmts = self._visit_block(child)
-                all_stmts.extend(stmts)
+            if child.type != "when_entry":
+                continue
+            entry_named = child.named_children
+            if not entry_named:
+                continue
+            # The body of the entry is its last named child; any earlier named
+            # children are the match conditions.  For `else ->` entries there is
+            # only one named child (the body expression / block).
+            body_child = entry_named[-1]
+            if body_child.type == "block":
+                all_stmts.extend(self._visit_block(body_child))
+            else:
+                res = self.visit(body_child)
+                if res is None:
+                    pass
+                elif isinstance(res, list):
+                    all_stmts.extend(r for r in res if r is not None)
+                else:
+                    all_stmts.append(cast(IRNode, res))
+
         return IRIf(
-            test=IRConstant(value=True),
+            test=cast(IRExpr, test_ir),
             body=all_stmts,
             orelse=[],
             loc=self._get_location(node),
@@ -692,10 +723,6 @@ class KotlinVisitor(TreeSitterVisitor):
         # Find loop variable (variable_declaration), iterable, and body
         var_node = next(
             (c for c in node.named_children if c.type == "variable_declaration"), None
-        )
-        # Iterable: the expression before the block
-        body_node = next(
-            (c for c in node.named_children if c.type == "block"), None
         )
         # Iterable is the named child between "in" keyword and ")"
         iterable_ir: Optional[IRExpr] = None
@@ -717,7 +744,24 @@ class KotlinVisitor(TreeSitterVisitor):
             n = next((c for c in var_node.named_children if c.type == "identifier"), None)
             loop_var = self._text_of(n) if n else None
 
-        body = self._visit_block(body_node)
+        # [20260303_BUGFIX] Support single-statement (no-brace) for bodies.
+        # tree-sitter gives the body as the last non-variable_declaration named child.
+        named_non_var = [c for c in node.named_children if c.type != "variable_declaration"]
+        body_node = next((c for c in named_non_var if c.type == "block"), None)
+        if body_node is not None:
+            body = self._visit_block(body_node)
+        elif len(named_non_var) >= 2:
+            # Last child is the body (second-to-last is the iterable)
+            stmt_node = named_non_var[-1]
+            res = self.visit(stmt_node)
+            if res is None:
+                body = []
+            elif isinstance(res, list):
+                body = [r for r in res if r is not None]
+            else:
+                body = [cast(IRNode, res)]
+        else:
+            body = []
         ir_for = IRFor(
             target=IRName(id=loop_var or "_"),
             iter=iterable_ir or IRConstant(value=None),
@@ -745,10 +789,23 @@ class KotlinVisitor(TreeSitterVisitor):
                     cond_ir = cast(IRExpr, visited)
                 break
 
-        body_node = next(
-            (c for c in node.named_children if c.type == "block"), None
-        )
-        body = self._visit_block(body_node)
+        # [20260303_BUGFIX] Support single-statement (no-brace) while bodies.
+        # tree-sitter places the body as the last named child in both cases.
+        body_node = next((c for c in node.named_children if c.type == "block"), None)
+        if body_node is not None:
+            body = self._visit_block(body_node)
+        else:
+            last = node.named_children[-1] if node.named_children else None
+            if last is not None and last.type != "block":
+                res = self.visit(last)
+                if res is None:
+                    body = []
+                elif isinstance(res, list):
+                    body = [r for r in res if r is not None]
+                else:
+                    body = [cast(IRNode, res)]
+            else:
+                body = []
         ir_for = IRFor(
             target=IRName(id="_while"),
             iter=cond_ir or IRConstant(value=True),
@@ -843,8 +900,12 @@ class KotlinVisitor(TreeSitterVisitor):
             source_language=self.language,
         )
 
-    def visit_infix_expression(self, node: Any) -> IRBinaryOp:
-        """a and b / a or b / a xor b"""
+    def visit_infix_expression(self, node: Any) -> IRNode:
+        """a and b / a or b / a xor b
+
+        [20260303_BUGFIX] Return type widened to IRNode: visit_binary_expression
+        can return IRConstant (for non-arithmetic operators) or IRBinaryOp.
+        """
         result = self.visit_binary_expression(node)
         # Store original infix operator in metadata
         children = node.children
@@ -988,9 +1049,9 @@ class KotlinNormalizer(BaseNormalizer):
         return "kotlin"
 
     _MAX_CACHE: int = 16
-    _tree_cache: Dict[int, Any] = {}
 
     def __init__(self) -> None:
+        self._tree_cache: Dict[int, Any] = {}  # [20260303_BUGFIX] instance-level, not class-level
         self._ts_language = Language(tree_sitter_kotlin.language())  # type: ignore[call-arg]
         self._parser = Parser()
         self._parser.language = self._ts_language

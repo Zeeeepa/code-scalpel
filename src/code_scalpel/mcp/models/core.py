@@ -164,6 +164,18 @@ class AnalysisResult(BaseModel):
         default_factory=list,
         description="Parser warnings (e.g., sanitization notices)",
     )
+    # [20260303_REFACTOR] Merged from standalone run_static_analysis tool.
+    # Populated when analyze_code is called with static_tools=[...] and a file_path.
+    # Community: free tools (cppcheck, clang-tidy, clang-sa, cpplint), max 50 findings.
+    # Pro: free tools, unlimited findings.
+    # Enterprise: all tools including coverity and sonarqube.
+    tool_findings: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description=(
+            "Structured findings from external static-analysis tools, populated when "
+            "static_tools is requested. Pro+ tier."
+        ),
+    )
 
     # [20251228_BUGFIX] Backward-compatible convenience counts used by tests.
     @property
