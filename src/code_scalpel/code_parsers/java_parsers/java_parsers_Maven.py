@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import re
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -100,20 +100,24 @@ class MavenParser:
 
         deps: List[MavenDependency] = []
         for dep in _findall(root, "dependencies/dependency"):
-            deps.append(MavenDependency(
-                group_id=_text(_find(dep, "groupId")),
-                artifact_id=_text(_find(dep, "artifactId")),
-                version=_text(_find(dep, "version")),
-                scope=_text(_find(dep, "scope")) or "compile",
-            ))
+            deps.append(
+                MavenDependency(
+                    group_id=_text(_find(dep, "groupId")),
+                    artifact_id=_text(_find(dep, "artifactId")),
+                    version=_text(_find(dep, "version")),
+                    scope=_text(_find(dep, "scope")) or "compile",
+                )
+            )
 
         plugins: List[MavenPlugin] = []
         for plugin in _findall(root, "build/plugins/plugin"):
-            plugins.append(MavenPlugin(
-                group_id=_text(_find(plugin, "groupId")),
-                artifact_id=_text(_find(plugin, "artifactId")),
-                version=_text(_find(plugin, "version")),
-            ))
+            plugins.append(
+                MavenPlugin(
+                    group_id=_text(_find(plugin, "groupId")),
+                    artifact_id=_text(_find(plugin, "artifactId")),
+                    version=_text(_find(plugin, "version")),
+                )
+            )
 
         props: Dict[str, str] = {}
         props_elem = _find(root, "properties")
@@ -150,9 +154,15 @@ class MavenParser:
             line = line.strip()
             if not line:
                 continue
-            for prefix, level in (("[ERROR]", "ERROR"), ("[WARNING]", "WARNING"), ("[INFO]", "INFO")):
+            for prefix, level in (
+                ("[ERROR]", "ERROR"),
+                ("[WARNING]", "WARNING"),
+                ("[INFO]", "INFO"),
+            ):
                 if line.startswith(prefix):
-                    results.append({"level": level, "message": line[len(prefix):].strip()})
+                    results.append(
+                        {"level": level, "message": line[len(prefix) :].strip()}
+                    )
                     break
         return results
 
@@ -166,13 +176,15 @@ class MavenParser:
                     ln, col = int(m.group("line")), int(m.group("col"))
                 except ValueError:
                     ln, col = 0, 0
-                errors.append(CompileError(
-                    file_path=m.group("file").strip(),
-                    line=ln,
-                    column=col,
-                    message=m.group("msg").strip(),
-                    error_type=m.group("type"),
-                ))
+                errors.append(
+                    CompileError(
+                        file_path=m.group("file").strip(),
+                        line=ln,
+                        column=col,
+                        message=m.group("msg").strip(),
+                        error_type=m.group("type"),
+                    )
+                )
         return errors
 
     def generate_report(
@@ -191,13 +203,22 @@ class MavenParser:
                     "dependencies": len(deps),
                     "compile_errors": len(errs),
                     "dependency_list": [
-                        {"group": d.group_id, "artifact": d.artifact_id,
-                         "version": d.version, "scope": d.scope}
+                        {
+                            "group": d.group_id,
+                            "artifact": d.artifact_id,
+                            "version": d.version,
+                            "scope": d.scope,
+                        }
                         for d in deps
                     ],
                     "errors": [
-                        {"file": e.file_path, "line": e.line, "column": e.column,
-                         "type": e.error_type, "message": e.message}
+                        {
+                            "file": e.file_path,
+                            "line": e.line,
+                            "column": e.column,
+                            "type": e.error_type,
+                            "message": e.message,
+                        }
                         for e in errs
                     ],
                 },

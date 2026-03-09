@@ -87,7 +87,11 @@ class StaticcheckParser:
         """
         if not shutil.which("staticcheck"):
             return []
-        target = str(paths) if not isinstance(paths, list) else " ".join(str(p) for p in paths)
+        target = (
+            str(paths)
+            if not isinstance(paths, list)
+            else " ".join(str(p) for p in paths)
+        )
         cmd = ["staticcheck", "-f", "json", target]
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
@@ -183,7 +187,9 @@ class StaticcheckParser:
                 {
                     "tool": "staticcheck",
                     "total": len(findings),
-                    "by_category": {k.value or "UNKNOWN": len(v) for k, v in by_cat.items()},
+                    "by_category": {
+                        k.value or "UNKNOWN": len(v) for k, v in by_cat.items()
+                    },
                     "findings": [
                         {
                             "code": f.code,

@@ -15,10 +15,10 @@ import textwrap
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helper: build minimal SARIF 2.1 JSON
 # ---------------------------------------------------------------------------
+
 
 def _make_sarif(
     tool_name: str,
@@ -59,6 +59,7 @@ def _make_sarif(
 # SarifFinding + _parse_sarif helper
 # ---------------------------------------------------------------------------
 
+
 class TestSarifHelper:
     """Tests for _parse_sarif shared helper in csharp_parsers __init__.py."""
 
@@ -94,7 +95,10 @@ class TestSarifHelper:
         from code_scalpel.code_parsers.csharp_parsers import _parse_sarif
 
         sarif = json.dumps(
-            {"version": "2.1.0", "runs": [{"tool": {"driver": {"name": "T"}}, "results": []}]}
+            {
+                "version": "2.1.0",
+                "runs": [{"tool": {"driver": {"name": "T"}}, "results": []}],
+            }
         )
         assert _parse_sarif(sarif) == []
 
@@ -134,6 +138,7 @@ class TestSarifHelper:
 # CSharpParserRegistry
 # ---------------------------------------------------------------------------
 
+
 class TestCSharpParserRegistry:
     """Tests for CSharpParserRegistry.get_parser() dispatch."""
 
@@ -171,6 +176,7 @@ class TestCSharpParserRegistry:
 # RoslynAnalyzersParser
 # ---------------------------------------------------------------------------
 
+
 class TestRoslynAnalyzersParser:
     """Tests for RoslynAnalyzersParser."""
 
@@ -181,7 +187,9 @@ class TestRoslynAnalyzersParser:
 
     def test_parse_sarif_output_basic(self):
         parser = self._get_parser()
-        sarif = _make_sarif("Roslyn", "CA1001", "Types that own disposable ...", line=15)
+        sarif = _make_sarif(
+            "Roslyn", "CA1001", "Types that own disposable ...", line=15
+        )
         findings = parser.parse_sarif_output(sarif)
         assert len(findings) == 1
         assert findings[0].rule_id == "CA1001"
@@ -225,7 +233,9 @@ class TestRoslynAnalyzersParser:
 
     def test_generate_report_text(self):
         parser = self._get_parser()
-        sarif = _make_sarif("Roslyn", "CA1234", "Some warning", file_path="Foo.cs", line=5)
+        sarif = _make_sarif(
+            "Roslyn", "CA1234", "Some warning", file_path="Foo.cs", line=5
+        )
         findings = parser.parse_sarif_output(sarif)
         report = parser.generate_report(findings, format="text")
         assert "CA1234" in report
@@ -235,6 +245,7 @@ class TestRoslynAnalyzersParser:
 # ---------------------------------------------------------------------------
 # StyleCopParser
 # ---------------------------------------------------------------------------
+
 
 class TestStyleCopParser:
     """Tests for StyleCopParser."""
@@ -279,6 +290,7 @@ class TestStyleCopParser:
 # SecurityCodeScanParser
 # ---------------------------------------------------------------------------
 
+
 class TestSecurityCodeScanParser:
     """Tests for SecurityCodeScanParser with CWE mapping."""
 
@@ -289,7 +301,9 @@ class TestSecurityCodeScanParser:
 
     def test_parse_sarif_scs_rule(self):
         parser = self._get_parser()
-        sarif = _make_sarif("SecurityCodeScan", "SCS0001", "SQL injection vulnerability")
+        sarif = _make_sarif(
+            "SecurityCodeScan", "SCS0001", "SQL injection vulnerability"
+        )
         findings = parser.parse_sarif_output(sarif)
         assert len(findings) >= 1
 
@@ -334,6 +348,7 @@ class TestSecurityCodeScanParser:
 # FxCopParser
 # ---------------------------------------------------------------------------
 
+
 class TestFxCopParser:
     """Tests for FxCopParser (XML + SARIF)."""
 
@@ -373,7 +388,10 @@ class TestFxCopParser:
         violations = parser.parse_xml_report(self._FXCOP_XML)
         assert len(violations) == 1
         v = violations[0]
-        assert "EnumsShouldHaveZeroValue" in v.rule_id or "EnumsShouldHaveZeroValue" in v.message
+        assert (
+            "EnumsShouldHaveZeroValue" in v.rule_id
+            or "EnumsShouldHaveZeroValue" in v.message
+        )
 
     def test_parse_sarif_report_basic(self):
         parser = self._get_parser()
@@ -407,6 +425,7 @@ class TestFxCopParser:
 # ---------------------------------------------------------------------------
 # ReSharperParser
 # ---------------------------------------------------------------------------
+
 
 class TestReSharperParser:
     """Tests for ReSharperParser — enterprise tool, execute raises NotImplementedError."""
@@ -444,7 +463,10 @@ class TestReSharperParser:
         issues = parser.parse_xml_report(self._INSPECTCODE_XML)
         assert len(issues) == 1
         issue = issues[0]
-        assert getattr(issue, 'rule_id', None) == "UnusedVariable" or getattr(issue, 'type_id', None) == "UnusedVariable"
+        assert (
+            getattr(issue, "rule_id", None) == "UnusedVariable"
+            or getattr(issue, "type_id", None) == "UnusedVariable"
+        )
         assert issue.line == 15
         assert "never used" in issue.message.lower() or "x" in issue.message
 
@@ -470,6 +492,7 @@ class TestReSharperParser:
 # ---------------------------------------------------------------------------
 # SonarQubeCSharpParser
 # ---------------------------------------------------------------------------
+
 
 class TestSonarQubeCSharpParser:
     """Tests for SonarQubeCSharpParser."""
@@ -526,7 +549,10 @@ class TestSonarQubeCSharpParser:
         parser = self._get_parser()
         issues = parser.parse_issues_json(self._ISSUES_JSON)
         cats = parser.categorize_issues(issues)
-        assert any("VULNERABILITY" in str(k).upper() or "vulnerability" in str(k).lower() for k in cats)
+        assert any(
+            "VULNERABILITY" in str(k).upper() or "vulnerability" in str(k).lower()
+            for k in cats
+        )
 
     def test_map_severity_blocker(self):
         parser = self._get_parser()

@@ -15,7 +15,6 @@ import textwrap
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # CppParserRegistry
 # ---------------------------------------------------------------------------
@@ -532,7 +531,9 @@ class TestCoverityParser:
     def test_parse_json_cwe_extraction(self):
         parser = self._get_parser()
         defects = parser.parse_json_string(_COVERITY_JSON)
-        null_def = next(d for d in defects if "NULL" in d.defect_id or d.cwe_id == "CWE-476")
+        null_def = next(
+            d for d in defects if "NULL" in d.defect_id or d.cwe_id == "CWE-476"
+        )
         assert null_def.cwe_id == "CWE-476"
 
     def test_parse_json_invalid_returns_empty(self):

@@ -150,9 +150,7 @@ class TestDetectionParser:
                 config[key] = package_json[key]
         return config
 
-    def generate_report(
-        self, findings: dict[str, Any], format: str = "json"
-    ) -> str:
+    def generate_report(self, findings: dict[str, Any], format: str = "json") -> str:
         """Generate a test detection report.
 
         Args:

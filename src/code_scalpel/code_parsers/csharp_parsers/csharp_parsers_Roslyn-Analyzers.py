@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -69,7 +69,9 @@ class RoslynAnalyzersParser:
         if not shutil.which("dotnet"):
             return []
 
-        target = paths if isinstance(paths, Path) else (paths[0] if paths else Path("."))
+        target = (
+            paths if isinstance(paths, Path) else (paths[0] if paths else Path("."))
+        )
         out_dir = output_dir or Path("/tmp/roslyn_out")
         out_dir.mkdir(parents=True, exist_ok=True)
         sarif_path = out_dir / "roslyn.sarif"
@@ -148,7 +150,9 @@ class RoslynAnalyzersParser:
         # Plain text
         lines = []
         for d in diags:
-            lines.append(f"{d.file_path}:{d.line}:{d.column}: {d.level}: {d.message} [{d.rule_id}]")
+            lines.append(
+                f"{d.file_path}:{d.line}:{d.column}: {d.level}: {d.message} [{d.rule_id}]"
+            )
         return "\n".join(lines)
 
 
@@ -169,4 +173,3 @@ def _sarif_to_roslyn(f: SarifFinding) -> RoslynDiagnostic:
         column=f.column,
         category=category,
     )
-

@@ -74,9 +74,7 @@ def _parse_sarif(sarif_source: Union[str, Path, dict]) -> List[SarifFinding]:
 
     findings: List[SarifFinding] = []
     for run in data.get("runs", []):
-        tool_name = (
-            run.get("tool", {}).get("driver", {}).get("name", "")
-        )
+        tool_name = run.get("tool", {}).get("driver", {}).get("name", "")
         for result in run.get("results", []):
             rule_id = result.get("ruleId", "")
             level = result.get("level", "warning")
@@ -155,7 +153,9 @@ class CSharpParserRegistry:
         module = _get_parser_module(key)
         return getattr(module, class_name)()
 
-    def analyze(self, path: Union[str, Path], tools: Optional[List[str]] = None) -> Dict[str, List]:
+    def analyze(
+        self, path: Union[str, Path], tools: Optional[List[str]] = None
+    ) -> Dict[str, List]:
         """Run all (or specified) parsers on *path* and aggregate results.
 
         [20260303_FEATURE] Returns a dict keyed by tool name; each value is
@@ -196,9 +196,15 @@ def _get_parser_module(key: str) -> Any:
     _KEY_ALIASES = {"security-code-scan": "scs"}
     key = _KEY_ALIASES.get(key, key)
     file_map = {
-        "roslyn": (_dir / "csharp_parsers_Roslyn-Analyzers.py", "csharp_parsers_Roslyn_Analyzers"),
+        "roslyn": (
+            _dir / "csharp_parsers_Roslyn-Analyzers.py",
+            "csharp_parsers_Roslyn_Analyzers",
+        ),
         "stylecop": (_dir / "csharp_parsers_StyleCop.py", "csharp_parsers_StyleCop"),
-        "scs": (_dir / "csharp_parsers_SecurityCodeScan.py", "csharp_parsers_SecurityCodeScan"),
+        "scs": (
+            _dir / "csharp_parsers_SecurityCodeScan.py",
+            "csharp_parsers_SecurityCodeScan",
+        ),
         "fxcop": (_dir / "csharp_parsers_fxcop.py", "csharp_parsers_fxcop"),
         "resharper": (_dir / "csharp_parsers_ReSharper.py", "csharp_parsers_ReSharper"),
         "sonarqube": (_dir / "csharp_parsers_SonarQube.py", "csharp_parsers_SonarQube"),
@@ -223,6 +229,7 @@ def _get_parser_module(key: str) -> Any:
 # ---------------------------------------------------------------------------
 # [20251222_BUGFIX] Provide placeholder parser symbols until implementations land.
 # [20260303_FEATURE] Now replaced with importable references.
+
 
 def __getattr__(name: str) -> Any:  # module-level __getattr__ (PEP 562)
     _class_to_key = {v: k for k, v in _TOOL_MAP.items()}

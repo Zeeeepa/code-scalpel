@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -97,9 +97,7 @@ class ReSharperParser:
             "and pass the result to parse_xml_report()."
         )
 
-    def parse_xml_report(
-        self, report_path: Union[str, Path]
-    ) -> List[ReSharperIssue]:
+    def parse_xml_report(self, report_path: Union[str, Path]) -> List[ReSharperIssue]:
         """Parse an InspectCode XML report.
 
         [20260303_FEATURE] Handles the standard InspectCode XML schema.
@@ -135,7 +133,9 @@ class ReSharperParser:
         for project in root.iter("Project"):
             for issue in project.iter("Issue"):
                 tid = issue.get("TypeId", "")
-                meta = issue_types.get(tid, IssueType(type_id=tid, category="", description=""))
+                meta = issue_types.get(
+                    tid, IssueType(type_id=tid, category="", description="")
+                )
                 cat_str = meta.category.lower()
                 category = _CATEGORY_MAP.get(cat_str, IssueCategory.OTHER)
                 try:
@@ -191,4 +191,3 @@ class ReSharperParser:
             f"{i.file_path}:{i.line}: {i.severity}: {i.type_id} - {i.message}"
             for i in issues
         )
-

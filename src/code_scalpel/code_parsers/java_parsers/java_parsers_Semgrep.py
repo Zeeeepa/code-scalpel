@@ -54,13 +54,15 @@ class SemgrepParser:
         """
         if not shutil.which("semgrep"):
             return []
-        target = str(paths) if not isinstance(paths, list) else " ".join(str(p) for p in paths)
+        target = (
+            str(paths)
+            if not isinstance(paths, list)
+            else " ".join(str(p) for p in paths)
+        )
         config = ruleset or "auto"
         cmd = ["semgrep", "--json", f"--config={config}", target]
         try:
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=300
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
             return self.parse_json_output(result.stdout)
         except (subprocess.TimeoutExpired, FileNotFoundError):
             return []
@@ -86,15 +88,17 @@ class SemgrepParser:
                 cwe_list = [cwe_list]
             start = item.get("start", {})
             end = item.get("end", {})
-            findings.append(SemgrepFinding(
-                rule_id=item.get("check_id", ""),
-                message=extra.get("message", ""),
-                file=item.get("path", ""),
-                line=start.get("line", 0),
-                end_line=end.get("line", 0),
-                severity=extra.get("severity", "WARNING").upper(),
-                cwe_ids=cwe_list,
-            ))
+            findings.append(
+                SemgrepFinding(
+                    rule_id=item.get("check_id", ""),
+                    message=extra.get("message", ""),
+                    file=item.get("path", ""),
+                    line=start.get("line", 0),
+                    end_line=end.get("line", 0),
+                    severity=extra.get("severity", "WARNING").upper(),
+                    cwe_ids=cwe_list,
+                )
+            )
         return findings
 
     def parse_json_report(self, path: Optional[Path] = None) -> List[SemgrepFinding]:

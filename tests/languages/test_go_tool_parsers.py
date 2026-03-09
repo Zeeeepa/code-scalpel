@@ -14,10 +14,10 @@ import json
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # GoParserRegistry
 # ---------------------------------------------------------------------------
+
 
 class TestGoParserRegistry:
     """Tests for GoParserRegistry.get_parser() dispatch."""
@@ -44,6 +44,7 @@ class TestGoParserRegistry:
 # ---------------------------------------------------------------------------
 # GolangciLintParser
 # ---------------------------------------------------------------------------
+
 
 class TestGolangciLintParser:
     """Tests for GolangciLintParser."""
@@ -97,7 +98,7 @@ class TestGolangciLintParser:
         parser = self._get_parser()
         issues = parser.parse_json_output(self._JSON_OUTPUT)
         errors = parser.filter_by_severity(issues, min_severity="error")
-        assert all(getattr(i.severity, 'value', i.severity) == "error" for i in errors)
+        assert all(getattr(i.severity, "value", i.severity) == "error" for i in errors)
 
     def test_execute_golangci_lint_no_binary(self, monkeypatch):
         import shutil
@@ -125,6 +126,7 @@ class TestGolangciLintParser:
 # GosecParser
 # ---------------------------------------------------------------------------
 
+
 class TestGosecParser:
     """Tests for GosecParser."""
 
@@ -135,7 +137,10 @@ class TestGosecParser:
                     {
                         "severity": "HIGH",
                         "confidence": "HIGH",
-                        "cwe": {"id": "89", "url": "https://cwe.mitre.org/data/definitions/89.html"},
+                        "cwe": {
+                            "id": "89",
+                            "url": "https://cwe.mitre.org/data/definitions/89.html",
+                        },
                         "rule_id": "G202",
                         "details": "SQL query construction using format string",
                         "code": "db.Query(fmt.Sprintf(...))",
@@ -146,7 +151,10 @@ class TestGosecParser:
                     {
                         "severity": "MEDIUM",
                         "confidence": "HIGH",
-                        "cwe": {"id": "22", "url": "https://cwe.mitre.org/data/definitions/22.html"},
+                        "cwe": {
+                            "id": "22",
+                            "url": "https://cwe.mitre.org/data/definitions/22.html",
+                        },
                         "rule_id": "G304",
                         "details": "File path provided as taint input",
                         "code": "os.Open(input)",
@@ -231,6 +239,7 @@ class TestGosecParser:
 # StaticcheckParser
 # ---------------------------------------------------------------------------
 
+
 class TestStaticcheckParser:
     """Tests for StaticcheckParser (JSONL format)."""
 
@@ -273,7 +282,9 @@ class TestStaticcheckParser:
         assert parser.parse_jsonl_output("") == []
 
     def test_categorize_by_code_sa(self):
-        from code_scalpel.code_parsers.go_parsers.go_parsers_staticcheck import CheckCategory
+        from code_scalpel.code_parsers.go_parsers.go_parsers_staticcheck import (
+            CheckCategory,
+        )
 
         parser = self._get_parser()
         findings = parser.parse_jsonl_output(self._JSONL)
@@ -299,6 +310,7 @@ class TestStaticcheckParser:
 # ---------------------------------------------------------------------------
 # GovetParser
 # ---------------------------------------------------------------------------
+
 
 class TestGovetParser:
     """Tests for GovetParser."""
@@ -361,12 +373,13 @@ class TestGovetParser:
 # GolintParser
 # ---------------------------------------------------------------------------
 
+
 class TestGolintParser:
     """Tests for GolintParser (deprecated)."""
 
     _LINT_OUTPUT = (
         "main.go:12:1: exported function Hello should have comment or be unexported\n"
-        "util.go:5:1: package comment should be of the form \"Package util ...\"\n"
+        'util.go:5:1: package comment should be of the form "Package util ..."\n'
     )
 
     def _get_parser(self):
@@ -396,7 +409,10 @@ class TestGolintParser:
     def test_deprecation_warning_present(self):
         parser = self._get_parser()
         assert parser.DEPRECATION_WARNING
-        assert "deprecated" in parser.DEPRECATION_WARNING.lower() or "archived" in parser.DEPRECATION_WARNING.lower()
+        assert (
+            "deprecated" in parser.DEPRECATION_WARNING.lower()
+            or "archived" in parser.DEPRECATION_WARNING.lower()
+        )
 
     def test_execute_golint_no_binary(self, monkeypatch):
         import shutil
@@ -415,6 +431,7 @@ class TestGolintParser:
 # ---------------------------------------------------------------------------
 # GofmtParser
 # ---------------------------------------------------------------------------
+
 
 class TestGofmtParser:
     """Tests for GofmtParser."""
@@ -457,7 +474,9 @@ class TestGofmtParser:
         assert parser.check_files(["main.go"]) == []
 
     def test_generate_report_json(self):
-        from code_scalpel.code_parsers.go_parsers.go_parsers_gofmt import FormattingIssue
+        from code_scalpel.code_parsers.go_parsers.go_parsers_gofmt import (
+            FormattingIssue,
+        )
 
         parser = self._get_parser()
         issues = [FormattingIssue(file_path="main.go", diff="--- main.go")]
@@ -466,7 +485,9 @@ class TestGofmtParser:
         assert data["total_unformatted"] == 1
 
     def test_generate_report_text(self):
-        from code_scalpel.code_parsers.go_parsers.go_parsers_gofmt import FormattingIssue
+        from code_scalpel.code_parsers.go_parsers.go_parsers_gofmt import (
+            FormattingIssue,
+        )
 
         parser = self._get_parser()
         issues = [FormattingIssue(file_path="main.go")]

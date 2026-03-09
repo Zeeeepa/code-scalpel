@@ -59,7 +59,6 @@ from ..nodes import (
     IRConstant,
     IRContinue,
     IRExpr,
-    IRExprStmt,
     IRFor,
     IRFunctionDef,
     IRIf,
@@ -85,13 +84,13 @@ _BINOP_MAP: Dict[str, BinaryOperator] = {
     "*": BinaryOperator.MUL,
     "/": BinaryOperator.DIV,
     "%": BinaryOperator.MOD,
-    "and": BinaryOperator.BIT_AND,   # Kotlin infix 'and'
-    "or": BinaryOperator.BIT_OR,     # Kotlin infix 'or'
+    "and": BinaryOperator.BIT_AND,  # Kotlin infix 'and'
+    "or": BinaryOperator.BIT_OR,  # Kotlin infix 'or'
     "xor": BinaryOperator.BIT_XOR,
-    "&&": BinaryOperator.BIT_AND,    # logical AND → closest IR op
-    "||": BinaryOperator.BIT_OR,     # logical OR  → closest IR op
-    "..": BinaryOperator.ADD,        # range operator fallback
-    ".": BinaryOperator.ADD,         # navigation fallback
+    "&&": BinaryOperator.BIT_AND,  # logical AND → closest IR op
+    "||": BinaryOperator.BIT_OR,  # logical OR  → closest IR op
+    "..": BinaryOperator.ADD,  # range operator fallback
+    ".": BinaryOperator.ADD,  # navigation fallback
     # NOTE: comparison operators (==, !=, <, <=, >, >=, is, in) are NOT in
     # BinaryOperator — they fall through to IRConstant (see visit_binary_expression).
 }
@@ -213,9 +212,12 @@ class KotlinVisitor(TreeSitterVisitor):
             if child.type == "parameter":
                 # parameter: identifier ":" user_type ["=" default_value]
                 name_nodes = [c for c in child.named_children if c.type == "identifier"]
-                type_nodes = [c for c in child.named_children
-                              if c.type in ("user_type", "nullable_type",
-                                            "function_type", "dynamic")]
+                type_nodes = [
+                    c
+                    for c in child.named_children
+                    if c.type
+                    in ("user_type", "nullable_type", "function_type", "dynamic")
+                ]
                 name = self._text_of(name_nodes[0]) if name_nodes else ""
                 type_ann = self._text_of(type_nodes[0]) if type_nodes else None
                 params.append(IRParameter(name=name, type_annotation=type_ann))
@@ -223,7 +225,10 @@ class KotlinVisitor(TreeSitterVisitor):
                 # Destructured parameter like (a, b)
                 for nc in child.named_children:
                     if nc.type == "variable_declaration":
-                        n = next((c for c in nc.named_children if c.type == "identifier"), None)
+                        n = next(
+                            (c for c in nc.named_children if c.type == "identifier"),
+                            None,
+                        )
                         params.append(IRParameter(name=self._text_of(n) if n else ""))
         return params
 
@@ -262,8 +267,14 @@ class KotlinVisitor(TreeSitterVisitor):
         for child in node.named_children:
             if child.type == "package_header":
                 # Extract package name from qualified_identifier
-                qi = next((c for c in child.named_children
-                           if c.type == "qualified_identifier"), None)
+                qi = next(
+                    (
+                        c
+                        for c in child.named_children
+                        if c.type == "qualified_identifier"
+                    ),
+                    None,
+                )
                 if qi:
                     module._metadata["package"] = self._text_of(qi)
                 continue
@@ -282,8 +293,9 @@ class KotlinVisitor(TreeSitterVisitor):
 
     def visit_import(self, node: Any) -> Optional[IRImport]:
         """import kotlin.io.println  /  import java.util.*"""
-        qi = next((c for c in node.named_children
-                   if c.type == "qualified_identifier"), None)
+        qi = next(
+            (c for c in node.named_children if c.type == "qualified_identifier"), None
+        )
         if qi is None:
             return None
         # Check for star import: next sibling after qi is "*"
@@ -351,8 +363,12 @@ class KotlinVisitor(TreeSitterVisitor):
                 if c is params_node:
                     after_params = True
                     continue
-                if after_params and c.type in ("user_type", "nullable_type",
-                                                "function_type", "dynamic"):
+                if after_params and c.type in (
+                    "user_type",
+                    "nullable_type",
+                    "function_type",
+                    "dynamic",
+                ):
                     return_type = self._text_of(c)
                     break
 
@@ -386,8 +402,11 @@ class KotlinVisitor(TreeSitterVisitor):
             for p in params_raw.named_children:
                 if p.type == "lambda_parameter":
                     names = [c for c in p.named_children if c.type == "identifier"]
-                    types = [c for c in p.named_children
-                             if c.type in ("user_type", "nullable_type")]
+                    types = [
+                        c
+                        for c in p.named_children
+                        if c.type in ("user_type", "nullable_type")
+                    ]
                     pname = self._text_of(names[0]) if names else "_"
                     ptype = self._text_of(types[0]) if types else None
                     params.append(IRParameter(name=pname, type_annotation=ptype))
@@ -458,9 +477,16 @@ class KotlinVisitor(TreeSitterVisitor):
 
         # Base classes
         bases: List[str] = []
-        supers = [c for c in node.named_children
-                  if c.type in ("delegation_specifier", "explicit_delegation",
-                                "annotated_delegation_specifier")]
+        supers = [
+            c
+            for c in node.named_children
+            if c.type
+            in (
+                "delegation_specifier",
+                "explicit_delegation",
+                "annotated_delegation_specifier",
+            )
+        ]
         for spec in supers:
             bases.append(self._text_of(spec))
 
@@ -482,21 +508,35 @@ class KotlinVisitor(TreeSitterVisitor):
         # Store primary constructor parameters
         if primary_ctor:
             params_node = next(
-                (c for c in primary_ctor.named_children
-                 if c.type == "class_parameters"), None
+                (
+                    c
+                    for c in primary_ctor.named_children
+                    if c.type == "class_parameters"
+                ),
+                None,
             )
             if params_node:
                 ctor_params: List[Dict[str, Any]] = []
                 for p in params_node.named_children:
                     if p.type == "class_parameter":
-                        n = next((c for c in p.named_children
-                                  if c.type == "identifier"), None)
-                        t = next((c for c in p.named_children
-                                  if c.type in ("user_type", "nullable_type")), None)
-                        ctor_params.append({
-                            "name": self._text_of(n) if n else "",
-                            "type": self._text_of(t) if t else None,
-                        })
+                        n = next(
+                            (c for c in p.named_children if c.type == "identifier"),
+                            None,
+                        )
+                        t = next(
+                            (
+                                c
+                                for c in p.named_children
+                                if c.type in ("user_type", "nullable_type")
+                            ),
+                            None,
+                        )
+                        ctor_params.append(
+                            {
+                                "name": self._text_of(n) if n else "",
+                                "type": self._text_of(t) if t else None,
+                            }
+                        )
                 cls._metadata["primary_constructor_params"] = ctor_params
         return cls
 
@@ -556,8 +596,12 @@ class KotlinVisitor(TreeSitterVisitor):
             (c for c in var_decl.named_children if c.type == "identifier"), None
         )
         type_node = next(
-            (c for c in var_decl.named_children
-             if c.type in ("user_type", "nullable_type", "function_type")), None
+            (
+                c
+                for c in var_decl.named_children
+                if c.type in ("user_type", "nullable_type", "function_type")
+            ),
+            None,
         )
         name = self._text_of(name_node) if name_node else ""
 
@@ -575,7 +619,9 @@ class KotlinVisitor(TreeSitterVisitor):
         value_ir: IRExpr
         if value_node is not None:
             visited = self.visit(value_node)
-            value_ir = cast(IRExpr, visited) if visited is not None else IRConstant(value=None)
+            value_ir = (
+                cast(IRExpr, visited) if visited is not None else IRConstant(value=None)
+            )
         else:
             value_ir = IRConstant(value=None)
 
@@ -602,7 +648,13 @@ class KotlinVisitor(TreeSitterVisitor):
         target_ir = self.visit(target)
         value_ir = self.visit(value)
         return IRAssign(
-            targets=[cast(IRExpr, target_ir) if target_ir else IRName(id=self._text_of(target))],
+            targets=[
+                (
+                    cast(IRExpr, target_ir)
+                    if target_ir
+                    else IRName(id=self._text_of(target))
+                )
+            ],
             value=cast(IRExpr, value_ir) if value_ir else IRConstant(value=None),
             loc=self._get_location(node),
             source_language=self.language,
@@ -616,8 +668,7 @@ class KotlinVisitor(TreeSitterVisitor):
         """return expr"""
         # Named children: at most one expression
         val_node = next(
-            (c for c in node.named_children
-             if c.type not in ("@", "return")), None
+            (c for c in node.named_children if c.type not in ("@", "return")), None
         )
         value: Optional[IRExpr] = None
         if val_node is not None:
@@ -656,7 +707,9 @@ class KotlinVisitor(TreeSitterVisitor):
         # consequence: first block after )
         blocks = [c for c in node.named_children if c.type == "block"]
         then_body: List[IRNode] = self._visit_block(blocks[0]) if blocks else []
-        else_body: List[IRNode] = self._visit_block(blocks[1]) if len(blocks) > 1 else []
+        else_body: List[IRNode] = (
+            self._visit_block(blocks[1]) if len(blocks) > 1 else []
+        )
 
         return IRIf(
             test=cond_ir or IRConstant(value=None),
@@ -680,11 +733,17 @@ class KotlinVisitor(TreeSitterVisitor):
         test_ir: IRNode
         if subject_node is not None:
             expr = next(
-                (c for c in subject_node.named_children
-                 if c.type not in ("val", "var")), None
+                (
+                    c
+                    for c in subject_node.named_children
+                    if c.type not in ("val", "var")
+                ),
+                None,
             )
             visited = self.visit(expr) if expr is not None else None
-            test_ir = cast(IRExpr, visited) if visited is not None else IRConstant(value=True)
+            test_ir = (
+                cast(IRExpr, visited) if visited is not None else IRConstant(value=True)
+            )
         else:
             test_ir = IRConstant(value=True)
 
@@ -741,12 +800,16 @@ class KotlinVisitor(TreeSitterVisitor):
 
         loop_var: Optional[str] = None
         if var_node:
-            n = next((c for c in var_node.named_children if c.type == "identifier"), None)
+            n = next(
+                (c for c in var_node.named_children if c.type == "identifier"), None
+            )
             loop_var = self._text_of(n) if n else None
 
         # [20260303_BUGFIX] Support single-statement (no-brace) for bodies.
         # tree-sitter gives the body as the last non-variable_declaration named child.
-        named_non_var = [c for c in node.named_children if c.type != "variable_declaration"]
+        named_non_var = [
+            c for c in node.named_children if c.type != "variable_declaration"
+        ]
         body_node = next((c for c in named_non_var if c.type == "block"), None)
         if body_node is not None:
             body = self._visit_block(body_node)
@@ -818,9 +881,7 @@ class KotlinVisitor(TreeSitterVisitor):
 
     def visit_do_while_statement(self, node: Any) -> IRFor:
         """do { ... } while (cond)"""
-        body_node = next(
-            (c for c in node.named_children if c.type == "block"), None
-        )
+        body_node = next((c for c in node.named_children if c.type == "block"), None)
         body = self._visit_block(body_node)
         ir_for = IRFor(
             target=IRName(id="_do_while"),
@@ -846,25 +907,28 @@ class KotlinVisitor(TreeSitterVisitor):
         """greet("world") / obj.method() / println(x)"""
         named = node.named_children
         if not named:
-            return IRCall(func=IRName(id="unknown"), args=[], loc=self._get_location(node),
-                          source_language=self.language)
+            return IRCall(
+                func=IRName(id="unknown"),
+                args=[],
+                loc=self._get_location(node),
+                source_language=self.language,
+            )
 
         func_node = named[0]
         func_ir = self.visit(func_node)
-        func_name_ir: IRExpr = cast(IRExpr, func_ir) if func_ir else IRName(
-            id=self._text_of(func_node)
+        func_name_ir: IRExpr = (
+            cast(IRExpr, func_ir) if func_ir else IRName(id=self._text_of(func_node))
         )
 
-        args_node = next(
-            (c for c in named if c.type == "value_arguments"), None
-        )
+        args_node = next((c for c in named if c.type == "value_arguments"), None)
         args: List[IRExpr] = []
         if args_node:
             for arg in args_node.named_children:
                 if arg.type in ("value_argument", "annotated_expression"):
                     # value_argument: optional name "=" expression; just get expression
                     expr_children = [
-                        c for c in arg.named_children
+                        c
+                        for c in arg.named_children
                         if c.type not in ("identifier", "=")
                     ]
                     if expr_children:
@@ -890,8 +954,12 @@ class KotlinVisitor(TreeSitterVisitor):
         if op is None:
             # Comparison / logical ops — return source text as constant
             return IRConstant(value=self._text_of(node), loc=self._get_location(node))
-        left_ir = self.visit(left_node) if left_node.is_named else IRConstant(value=None)
-        right_ir = self.visit(right_node) if right_node.is_named else IRConstant(value=None)
+        left_ir = (
+            self.visit(left_node) if left_node.is_named else IRConstant(value=None)
+        )
+        right_ir = (
+            self.visit(right_node) if right_node.is_named else IRConstant(value=None)
+        )
         return IRBinaryOp(
             op=op,
             left=cast(IRExpr, left_ir) if left_ir else IRConstant(value=None),
@@ -1051,7 +1119,9 @@ class KotlinNormalizer(BaseNormalizer):
     _MAX_CACHE: int = 16
 
     def __init__(self) -> None:
-        self._tree_cache: Dict[int, Any] = {}  # [20260303_BUGFIX] instance-level, not class-level
+        self._tree_cache: Dict[int, Any] = (
+            {}
+        )  # [20260303_BUGFIX] instance-level, not class-level
         self._ts_language = Language(tree_sitter_kotlin.language())  # type: ignore[call-arg]
         self._parser = Parser()
         self._parser.language = self._ts_language

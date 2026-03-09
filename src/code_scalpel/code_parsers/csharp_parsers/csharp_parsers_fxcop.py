@@ -122,7 +122,9 @@ class FxCopParser:
         if not shutil.which("dotnet"):
             return []
 
-        target = paths if isinstance(paths, Path) else (paths[0] if paths else Path("."))
+        target = (
+            paths if isinstance(paths, Path) else (paths[0] if paths else Path("."))
+        )
         sarif = Path("/tmp/fxcop.sarif")
         try:
             subprocess.run(
@@ -163,14 +165,20 @@ class FxCopParser:
             rule_name = rule_id
             category_raw = message.get("Category", "")
             # Normalize "Microsoft.Design" → "design"
-            category_key = category_raw.replace("Microsoft.", "").lower().replace(" ", "")
+            category_key = (
+                category_raw.replace("Microsoft.", "").lower().replace(" ", "")
+            )
             category = _CATEGORY_MAP.get(category_key, RuleCategory.OTHER)
             for issue in message.findall("Issue"):
                 level_str = message.get("Level", issue.get("Level", "Warning")).lower()
                 severity = (
-                    FxCopSeverity.ERROR if "error" in level_str
-                    else FxCopSeverity.WARNING if "warning" in level_str
-                    else FxCopSeverity.INFORMATION
+                    FxCopSeverity.ERROR
+                    if "error" in level_str
+                    else (
+                        FxCopSeverity.WARNING
+                        if "warning" in level_str
+                        else FxCopSeverity.INFORMATION
+                    )
                 )
                 violations.append(
                     FxCopViolation(
@@ -255,6 +263,3 @@ def _sarif_to_violation(f: SarifFinding) -> FxCopViolation:
         file_path=f.uri,
         line_number=f.line,
     )
-
-
-

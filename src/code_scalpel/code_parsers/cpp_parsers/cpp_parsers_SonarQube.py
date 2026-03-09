@@ -62,7 +62,7 @@ _RULE_CWE_MAP: Dict[str, str] = {
     "cpp:S2068": "CWE-798",  # Hardcoded credentials
     "cpp:S2278": "CWE-327",  # Weak cipher
     "cpp:S2755": "CWE-611",  # XXE
-    "cpp:S4036": "CWE-78",   # OS command injection
+    "cpp:S4036": "CWE-78",  # OS command injection
     "cpp:S5766": "CWE-476",  # Null dereference
     "cppcheck:nullPointer": "CWE-476",
     "cppcheck:arrayIndexOutOfBounds": "CWE-125",
@@ -82,9 +82,7 @@ def _to_sarif_result(issue: SonarCppIssue) -> Dict[str, Any]:
     level = (
         "error"
         if issue.severity in ("BLOCKER", "CRITICAL")
-        else "warning"
-        if issue.severity in ("MAJOR", "MINOR")
-        else "note"
+        else "warning" if issue.severity in ("MAJOR", "MINOR") else "note"
     )
     return {
         "ruleId": issue.rule,
@@ -325,9 +323,7 @@ class SonarQubeCppParser:
         """Filter issues by severity level."""
         return [i for i in issues if i.severity == severity.upper()]
 
-    def map_to_cwe(
-        self, issues: List[SonarCppIssue]
-    ) -> Dict[str, List[SonarCppIssue]]:
+    def map_to_cwe(self, issues: List[SonarCppIssue]) -> Dict[str, List[SonarCppIssue]]:
         """Map issues to CWE identifiers using known rule-to-CWE mappings."""
         result: Dict[str, List[SonarCppIssue]] = {}
         for issue in issues:
@@ -349,9 +345,7 @@ class SonarQubeCppParser:
     # Reporting                                                            #
     # ------------------------------------------------------------------ #
 
-    def generate_report(
-        self, issues: List[SonarCppIssue], format: str = "json"
-    ) -> str:
+    def generate_report(self, issues: List[SonarCppIssue], format: str = "json") -> str:
         """Generate a normalized report in JSON or SARIF 2.1 format."""
         if format == "sarif":
             sarif = {
@@ -359,9 +353,7 @@ class SonarQubeCppParser:
                 "version": "2.1.0",
                 "runs": [
                     {
-                        "tool": {
-                            "driver": {"name": "SonarQube", "version": "10.x"}
-                        },
+                        "tool": {"driver": {"name": "SonarQube", "version": "10.x"}},
                         "results": [_to_sarif_result(i) for i in issues],
                     }
                 ],

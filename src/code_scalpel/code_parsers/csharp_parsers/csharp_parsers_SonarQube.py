@@ -29,7 +29,7 @@ class SonarIssue:
 
     key: str
     rule: str
-    severity: str   # BLOCKER, CRITICAL, MAJOR, MINOR, INFO
+    severity: str  # BLOCKER, CRITICAL, MAJOR, MINOR, INFO
     component: str  # file path
     line: Optional[int]
     message: str
@@ -205,7 +205,9 @@ class SonarQubeCSharpParser:
             page += 1
         return issues
 
-    def categorize_issues(self, issues: List[SonarIssue]) -> Dict[str, List[SonarIssue]]:
+    def categorize_issues(
+        self, issues: List[SonarIssue]
+    ) -> Dict[str, List[SonarIssue]]:
         """Group issues by issue_type (BUG, VULNERABILITY, CODE_SMELL, …)."""
         result: Dict[str, List[SonarIssue]] = {}
         for issue in issues:
@@ -219,9 +221,7 @@ class SonarQubeCSharpParser:
             result.setdefault(issue.severity, []).append(issue)
         return result
 
-    def generate_report(
-        self, issues: List[SonarIssue], format: str = "json"
-    ) -> str:
+    def generate_report(self, issues: List[SonarIssue], format: str = "json") -> str:
         """Return JSON report of SonarQube C# issues."""
         by_type = self.categorize_issues(issues)
         if format == "json":
@@ -254,5 +254,6 @@ class SonarQubeCSharpParser:
     @staticmethod
     def _rating_to_letter(value: str) -> str:
         """Convert SonarQube numeric rating to letter grade."""
-        return {"1.0": "A", "2.0": "B", "3.0": "C", "4.0": "D", "5.0": "E"}.get(value, value)
-
+        return {"1.0": "A", "2.0": "B", "3.0": "C", "4.0": "D", "5.0": "E"}.get(
+            value, value
+        )
