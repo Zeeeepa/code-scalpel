@@ -51,6 +51,7 @@ from code_scalpel.mcp.helpers.analyze_helpers import (
     _analyze_code_sync as helper_analyze_code_sync,
     _analyze_java_code as helper_analyze_java_code,
     _analyze_javascript_code as helper_analyze_js_code,
+    _get_cache,
 )
 from code_scalpel.mcp.helpers.context_helpers import (
     EXT_TO_LANGUAGE,  # [20260306_REFACTOR] Canonical extension-to-language map
@@ -61,6 +62,10 @@ from code_scalpel.mcp.models.core import (
     FunctionInfo,
     GeneratedTestCase,  # noqa: F401 – re-exported for backward compatibility
     TestGenerationResult,  # noqa: F401 – re-exported for backward compatibility
+    SecurityResult,
+    VulnerabilityInfo,
+    ExecutionPath,
+    SymbolicResult,
 )
 from code_scalpel.mcp.models.policy import PolicyVerificationResult
 from code_scalpel.mcp.paths import (
