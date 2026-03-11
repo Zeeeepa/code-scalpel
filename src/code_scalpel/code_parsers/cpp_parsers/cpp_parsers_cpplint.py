@@ -54,7 +54,9 @@ class CppLintConfig:
     filter_rules: Optional[List[str]] = None
     max_line_length: int = 80
     root_dir: Optional[Path] = None
-    extensions: List[str] = field(default_factory=lambda: ["cpp", "cc", "cxx", "h", "hpp"])
+    extensions: List[str] = field(
+        default_factory=lambda: ["cpp", "cc", "cxx", "h", "hpp"]
+    )
 
 
 # --- Internal helpers ------------------------------------------------------- #

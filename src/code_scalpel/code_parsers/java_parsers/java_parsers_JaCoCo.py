@@ -110,18 +110,22 @@ class JaCoCoParser:
                 methods: List[Dict[str, Any]] = []
                 for method in cls.findall("method"):
                     m_metrics = _parse_counters(method)
-                    methods.append({
-                        "name": method.get("name", ""),
-                        "desc": method.get("desc", ""),
-                        "line": int(method.get("line", 0)),
-                        "line_coverage": m_metrics.line_coverage,
-                    })
-                classes.append(ClassCoverage(
-                    class_name=class_name,
-                    source_file=source_file,
-                    metrics=metrics,
-                    methods=methods,
-                ))
+                    methods.append(
+                        {
+                            "name": method.get("name", ""),
+                            "desc": method.get("desc", ""),
+                            "line": int(method.get("line", 0)),
+                            "line_coverage": m_metrics.line_coverage,
+                        }
+                    )
+                classes.append(
+                    ClassCoverage(
+                        class_name=class_name,
+                        source_file=source_file,
+                        metrics=metrics,
+                        methods=methods,
+                    )
+                )
         self._classes = classes
         return classes
 
@@ -152,7 +156,12 @@ class JaCoCoParser:
     def calculate_summary(self) -> Dict[str, Any]:
         """Calculate aggregate coverage summary across all classes."""
         if not self._classes:
-            return {"line_coverage": 0.0, "branch_coverage": 0.0, "method_coverage": 0.0, "classes": 0}
+            return {
+                "line_coverage": 0.0,
+                "branch_coverage": 0.0,
+                "method_coverage": 0.0,
+                "classes": 0,
+            }
         totals = CoverageMetrics()
         for c in self._classes:
             totals.line_covered += c.metrics.line_covered

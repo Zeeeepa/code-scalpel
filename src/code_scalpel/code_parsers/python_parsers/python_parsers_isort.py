@@ -384,9 +384,7 @@ class IsortParser:
 
     def generate_report(self, findings: list, format: str = "json") -> str:
         """Return JSON report of unsorted files."""
-        unsorted = [
-            f["file"] if isinstance(f, dict) else str(f) for f in findings
-        ]
+        unsorted = [f["file"] if isinstance(f, dict) else str(f) for f in findings]
         return json.dumps(
             {"tool": "isort", "total_unsorted": len(unsorted), "files": unsorted},
             indent=2,

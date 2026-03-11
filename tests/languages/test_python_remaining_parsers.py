@@ -4,13 +4,13 @@ Tests for Python remaining parsers: safety, isort, vulture, radon, interrogate.
 [20260303_FEATURE] Stage 4a test suite – no tools need to be installed.
 All subprocess/shutil.which calls are mocked via monkeypatch.
 """
+
 from __future__ import annotations
 
 import json
 import shutil
 import subprocess
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -34,7 +34,6 @@ from code_scalpel.code_parsers.python_parsers.python_parsers_radon import (
 from code_scalpel.code_parsers.python_parsers.python_parsers_interrogate import (
     InterrogateParser,
 )
-
 
 # ---------------------------------------------------------------------------
 # TestSafetyParser
@@ -207,9 +206,7 @@ class TestVultureParser:
         """categorize_dead_code buckets items by type."""
         parser = VultureParser()
         items = [
-            UnusedItem(
-                "fn1", "function", SourceLocation(line=1), confidence=80
-            ),
+            UnusedItem("fn1", "function", SourceLocation(line=1), confidence=80),
             UnusedItem("Cls1", "class", SourceLocation(line=5), confidence=90),
             UnusedItem("x", "variable", SourceLocation(line=9), confidence=60),
         ]
@@ -260,7 +257,13 @@ class TestRadonParser:
         payload = json.dumps(
             {
                 "example.py": [
-                    {"type": "F", "name": "my_func", "lineno": 5, "complexity": 3, "rank": "A"}
+                    {
+                        "type": "F",
+                        "name": "my_func",
+                        "lineno": 5,
+                        "complexity": 3,
+                        "rank": "A",
+                    }
                 ]
             }
         )
@@ -373,7 +376,9 @@ class TestInterrogateParser:
     def test_generate_report_json(self):
         """generate_report returns valid JSON with expected structure."""
         parser = InterrogateParser()
-        findings = [{"filename": "src/main.py", "docstring_coverage": 50.0, "missing": []}]
+        findings = [
+            {"filename": "src/main.py", "docstring_coverage": 50.0, "missing": []}
+        ]
         data = json.loads(parser.generate_report(findings))
         assert data["tool"] == "interrogate"
         assert data["total"] == 1

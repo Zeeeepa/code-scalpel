@@ -283,16 +283,12 @@ class CoverityParser:
         self, defects: List[CoverityDefect]
     ) -> Dict[DefectType, List[CoverityDefect]]:
         """Group defects by DefectType."""
-        result: Dict[DefectType, List[CoverityDefect]] = {
-            dt: [] for dt in DefectType
-        }
+        result: Dict[DefectType, List[CoverityDefect]] = {dt: [] for dt in DefectType}
         for defect in defects:
             result[defect.defect_type].append(defect)
         return result
 
-    def analyze_security_risks(
-        self, defects: List[CoverityDefect]
-    ) -> Dict[str, Any]:
+    def analyze_security_risks(self, defects: List[CoverityDefect]) -> Dict[str, Any]:
         """Summarize security-relevant defects and CWE coverage."""
         security = [d for d in defects if d.defect_type == DefectType.SECURITY]
         high = [d for d in defects if d.severity == DefectSeverity.HIGH]
@@ -334,7 +330,9 @@ class CoverityParser:
         counts = [entry.get("total", 0) for entry in historical_data]
         if len(counts) > 1:
             delta = counts[-1] - counts[-2]
-            trend = "improving" if delta < 0 else ("worsening" if delta > 0 else "stable")
+            trend = (
+                "improving" if delta < 0 else ("worsening" if delta > 0 else "stable")
+            )
         else:
             trend = "baseline"
 

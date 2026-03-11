@@ -130,7 +130,9 @@ class SecurityCodeScanParser:
 
         import subprocess
 
-        target = paths if isinstance(paths, Path) else (paths[0] if paths else Path("."))
+        target = (
+            paths if isinstance(paths, Path) else (paths[0] if paths else Path("."))
+        )
         sarif_path = Path("/tmp/scs.sarif")
         try:
             subprocess.run(
@@ -158,11 +160,7 @@ class SecurityCodeScanParser:
     ) -> List[SecurityVulnerability]:
         """Parse SARIF 2.1 output and return security vulnerabilities."""
         findings = _parse_sarif(sarif_source)
-        return [
-            _sarif_to_vuln(f)
-            for f in findings
-            if f.rule_id.startswith("SCS")
-        ]
+        return [_sarif_to_vuln(f) for f in findings if f.rule_id.startswith("SCS")]
 
     def load_config(self, config_file: Path) -> SecurityCodeScanConfig:
         """Load SecurityCodeScan configuration from YAML/JSON file."""
@@ -253,7 +251,3 @@ def _sarif_to_vuln(f: SarifFinding) -> SecurityVulnerability:
 
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
-from typing import Dict, List, Optional
-
-

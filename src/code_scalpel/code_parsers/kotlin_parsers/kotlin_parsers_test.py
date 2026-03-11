@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 
 class TestStatus(Enum):
@@ -91,13 +91,15 @@ class KotlinTestParser:
             return []
         suites: List[TestSuite] = []
         # Handle both <testsuites> wrapper and bare <testsuite>
-        suite_elements = (root.findall("testsuite")
-                          if root.tag == "testsuites" else [root])
+        suite_elements = (
+            root.findall("testsuite") if root.tag == "testsuites" else [root]
+        )
         for suite_el in suite_elements:
             suite = TestSuite(
                 name=suite_el.get("name", ""),
                 test_count=int(suite_el.get("tests", 0)),
-                failed=int(suite_el.get("failures", 0)) + int(suite_el.get("errors", 0)),
+                failed=int(suite_el.get("failures", 0))
+                + int(suite_el.get("errors", 0)),
                 skipped=int(suite_el.get("skipped", 0)),
                 duration_ms=float(suite_el.get("time", 0)) * 1000,
                 framework=TestFramework.JUNIT.value,
@@ -124,7 +126,9 @@ class KotlinTestParser:
                 else:
                     tc.status = TestStatus.PASSED.value
                 suite.tests.append(tc)
-            suite.passed = sum(1 for t in suite.tests if t.status == TestStatus.PASSED.value)
+            suite.passed = sum(
+                1 for t in suite.tests if t.status == TestStatus.PASSED.value
+            )
             suites.append(suite)
         self.suites = suites
         return suites
@@ -133,21 +137,41 @@ class KotlinTestParser:
     def parse_kotest_results(self, report_data: Dict[str, Any]) -> List[TestSuite]:
         suites: List[TestSuite] = []
         for spec in report_data.get("specs", report_data.get("testSuites", [])):
-            suite = TestSuite(name=spec.get("name", ""), framework=TestFramework.KOTEST.value)
+            suite = TestSuite(
+                name=spec.get("name", ""), framework=TestFramework.KOTEST.value
+            )
             for tc in spec.get("tests", spec.get("testCases", [])):
                 status_raw = tc.get("status", "passed").lower()
-                status = status_raw if status_raw in {e.value for e in TestStatus} else TestStatus.UNKNOWN.value if hasattr(TestStatus, "UNKNOWN") else TestStatus.PASSED.value
-                suite.tests.append(TestCase(
-                    name=tc.get("name", ""),
-                    status=status,
-                    duration_ms=float(tc.get("duration", tc.get("durationMs", 0))),
-                    failure_message=tc.get("error", tc.get("failureMessage")),
-                    framework=TestFramework.KOTEST.value,
-                ))
+                status = (
+                    status_raw
+                    if status_raw in {e.value for e in TestStatus}
+                    else (
+                        TestStatus.UNKNOWN.value
+                        if hasattr(TestStatus, "UNKNOWN")
+                        else TestStatus.PASSED.value
+                    )
+                )
+                suite.tests.append(
+                    TestCase(
+                        name=tc.get("name", ""),
+                        status=status,
+                        duration_ms=float(tc.get("duration", tc.get("durationMs", 0))),
+                        failure_message=tc.get("error", tc.get("failureMessage")),
+                        framework=TestFramework.KOTEST.value,
+                    )
+                )
             suite.test_count = len(suite.tests)
-            suite.passed = sum(1 for t in suite.tests if t.status == TestStatus.PASSED.value)
-            suite.failed = sum(1 for t in suite.tests if t.status in {TestStatus.FAILED.value, TestStatus.ERROR.value})
-            suite.skipped = sum(1 for t in suite.tests if t.status == TestStatus.SKIPPED.value)
+            suite.passed = sum(
+                1 for t in suite.tests if t.status == TestStatus.PASSED.value
+            )
+            suite.failed = sum(
+                1
+                for t in suite.tests
+                if t.status in {TestStatus.FAILED.value, TestStatus.ERROR.value}
+            )
+            suite.skipped = sum(
+                1 for t in suite.tests if t.status == TestStatus.SKIPPED.value
+            )
             suites.append(suite)
         self.suites = (self.suites or []) + suites
         return suites
@@ -172,7 +196,9 @@ class KotlinTestParser:
             return 0.0
 
         report = root if root.tag == "report" else root.find("report") or root
-        line_ctr = next((c for c in report.iter("counter") if c.get("type") == "LINE"), None)
+        line_ctr = next(
+            (c for c in report.iter("counter") if c.get("type") == "LINE"), None
+        )
         covered_lines = int(line_ctr.get("covered", 0)) if line_ctr is not None else 0
         missed_lines = int(line_ctr.get("missed", 0)) if line_ctr is not None else 0
         metrics = CoverageMetrics(
@@ -199,12 +225,16 @@ class KotlinTestParser:
             "total": total,
             "passed": passed,
             "failed": sum(1 for t in all_tests if t.status == TestStatus.FAILED.value),
-            "skipped": sum(1 for t in all_tests if t.status == TestStatus.SKIPPED.value),
+            "skipped": sum(
+                1 for t in all_tests if t.status == TestStatus.SKIPPED.value
+            ),
             "pass_rate": round(passed / total * 100, 2),
             "avg_duration_ms": round(sum(t.duration_ms for t in all_tests) / total, 2),
         }
 
-    def detect_flaky_tests(self, historical_data: List[Dict[str, Any]]) -> List[TestCase]:
+    def detect_flaky_tests(
+        self, historical_data: List[Dict[str, Any]]
+    ) -> List[TestCase]:
         """Return tests with high failure rate from historical run data."""
         FLAKY_THRESHOLD = 0.3
         counts: Dict[str, Dict[str, int]] = {}
@@ -219,12 +249,17 @@ class KotlinTestParser:
         for key, stats in counts.items():
             if stats["total"] and stats["failed"] / stats["total"] >= FLAKY_THRESHOLD:
                 parts = key.rsplit(".", 1)
-                flaky.append(TestCase(
-                    name=parts[-1], class_name=parts[0] if len(parts) > 1 else None,
-                    status=TestStatus.FAILED.value,
-                    metadata={"fail_rate": round(stats["failed"] / stats["total"], 2),
-                               "total_runs": stats["total"]},
-                ))
+                flaky.append(
+                    TestCase(
+                        name=parts[-1],
+                        class_name=parts[0] if len(parts) > 1 else None,
+                        status=TestStatus.FAILED.value,
+                        metadata={
+                            "fail_rate": round(stats["failed"] / stats["total"], 2),
+                            "total_runs": stats["total"],
+                        },
+                    )
+                )
         return flaky
 
     def generate_test_report(
@@ -235,18 +270,38 @@ class KotlinTestParser:
         vs = suites if suites is not None else self.suites
         quality = self.analyze_test_quality()
         if format == "json":
-            return json.dumps({
-                "tool": "kotlin-test",
-                "quality": quality,
-                "coverage": {
-                    "line": self.coverage.line_coverage if self.coverage else None,
-                    "branch": self.coverage.branch_coverage if self.coverage else None,
-                } if self.coverage else {},
-                "suites": [{"name": s.name, "tests": s.test_count,
-                            "passed": s.passed, "failed": s.failed} for s in vs],
-            }, indent=2)
-        lines = [f"Kotlin Tests: {quality.get('total', 0)} tests, "
-                 f"pass rate {quality.get('pass_rate', 0):.1f}%"]
+            return json.dumps(
+                {
+                    "tool": "kotlin-test",
+                    "quality": quality,
+                    "coverage": (
+                        {
+                            "line": (
+                                self.coverage.line_coverage if self.coverage else None
+                            ),
+                            "branch": (
+                                self.coverage.branch_coverage if self.coverage else None
+                            ),
+                        }
+                        if self.coverage
+                        else {}
+                    ),
+                    "suites": [
+                        {
+                            "name": s.name,
+                            "tests": s.test_count,
+                            "passed": s.passed,
+                            "failed": s.failed,
+                        }
+                        for s in vs
+                    ],
+                },
+                indent=2,
+            )
+        lines = [
+            f"Kotlin Tests: {quality.get('total', 0)} tests, "
+            f"pass rate {quality.get('pass_rate', 0):.1f}%"
+        ]
         for s in vs:
             lines.append(f"  {s.name}: {s.passed}/{s.test_count} passed")
         return "\n".join(lines)

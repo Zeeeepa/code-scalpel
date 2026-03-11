@@ -28,7 +28,9 @@ _JSDOC_RE = re.compile(
 _EXPORT_RE = re.compile(
     r"(?:^|\n)(?:export\s+)?(?:async\s+)?(?:function|const|class)\s+(\w+)"
 )
-_TAG_RE = re.compile(r"@(\w+)(?:\s+\{([^}]*)\})?(?:\s+(\S+))?(?:\s+(.+))?", re.MULTILINE)
+_TAG_RE = re.compile(
+    r"@(\w+)(?:\s+\{([^}]*)\})?(?:\s+(\S+))?(?:\s+(.+))?", re.MULTILINE
+)
 
 
 @dataclass
@@ -103,7 +105,9 @@ class JsDocParser:
 
             # Approximate line number by counting newlines before match start
             line_number = code[: match.start()].count("\n") + 1
-            results.append(JsDocComment(description=description, tags=tags, line=line_number))
+            results.append(
+                JsDocComment(description=description, tags=tags, line=line_number)
+            )
         return results
 
     def parse_jsdoc_json(self, output: str) -> list[JsDocComment]:

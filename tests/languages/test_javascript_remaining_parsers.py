@@ -15,10 +15,7 @@ from __future__ import annotations
 
 import json
 import shutil
-import tempfile
 from pathlib import Path
-
-import pytest
 
 
 # ---------------------------------------------------------------------------
@@ -389,7 +386,10 @@ class TestTestDetectionParser:
     def test_detect_unknown_framework(self):
         """'unknown' is returned when no test dep is present."""
         parser = self._get_parser()
-        assert parser.detect_test_framework({"devDependencies": {"lodash": "^4"}}) == "unknown"
+        assert (
+            parser.detect_test_framework({"devDependencies": {"lodash": "^4"}})
+            == "unknown"
+        )
 
     def test_find_test_files(self, tmp_path):
         """find_test_files discovers .test.js and .spec.js files."""

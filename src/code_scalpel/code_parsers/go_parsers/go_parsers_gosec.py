@@ -17,7 +17,7 @@ import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 
 class VulnerabilityType(Enum):
@@ -143,7 +143,11 @@ class GosecParser:
         if not shutil.which("gosec"):
             return []
 
-        target = str(paths) if not isinstance(paths, list) else " ".join(str(p) for p in paths)
+        target = (
+            str(paths)
+            if not isinstance(paths, list)
+            else " ".join(str(p) for p in paths)
+        )
         cmd = ["gosec", "-fmt=json", target]
         if config and config.exclude_rules:
             cmd += ["-exclude=" + ",".join(config.exclude_rules)]
@@ -219,9 +223,7 @@ class GosecParser:
         """Load gosec configuration file."""
         return GosecConfig(config_file=config_file)
 
-    def map_to_cwe(
-        self, issues: List[SecurityIssue]
-    ) -> Dict[str, List[SecurityIssue]]:
+    def map_to_cwe(self, issues: List[SecurityIssue]) -> Dict[str, List[SecurityIssue]]:
         """Group issues by CWE ID (from the ``cwe.id`` field).
 
         [20260303_FEATURE] Uses the cwe_id populated during parse_json_output.
@@ -278,9 +280,7 @@ class GosecParser:
             found=stats.get("found", 0),
         )
 
-    def generate_report(
-        self, issues: List[SecurityIssue], format: str = "json"
-    ) -> str:
+    def generate_report(self, issues: List[SecurityIssue], format: str = "json") -> str:
         """Return a JSON or text security report."""
         cwe_map = self.map_to_cwe(issues)
         if format == "json":
@@ -290,7 +290,8 @@ class GosecParser:
                     "total": len(issues),
                     "cwe_map": {k: len(v) for k, v in cwe_map.items()},
                     "by_severity": {
-                        k: len(v) for k, v in self.categorize_by_severity(issues).items()
+                        k: len(v)
+                        for k, v in self.categorize_by_severity(issues).items()
                     },
                     "issues": [
                         {
@@ -316,7 +317,3 @@ class GosecParser:
 
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
-from typing import Dict, List, Optional
-
-

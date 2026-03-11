@@ -539,9 +539,7 @@ class RadonParser:
             "F": [],
         }
         for item in items:
-            grade = item.get(
-                "rank", self.get_grade(item.get("complexity", 0))
-            )
+            grade = item.get("rank", self.get_grade(item.get("complexity", 0)))
             cats.setdefault(grade, []).append(item)
         return cats
 

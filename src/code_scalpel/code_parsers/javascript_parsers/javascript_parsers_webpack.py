@@ -22,9 +22,7 @@ from typing import Any
 # entry: './src/index.js'  or  entry: "src/index"
 _ENTRY_STRING_RE = re.compile(r"entry\s*:\s*['\"]([^'\"]+)['\"]")
 # entry: { main: './src/main.js', app: './src/app.js' }
-_ENTRY_OBJECT_RE = re.compile(
-    r"entry\s*:\s*\{([^}]+)\}", re.DOTALL
-)
+_ENTRY_OBJECT_RE = re.compile(r"entry\s*:\s*\{([^}]+)\}", re.DOTALL)
 _ENTRY_OBJECT_VALUE_RE = re.compile(r":\s*['\"]([^'\"]+)['\"]")
 
 # resolve.alias: { '@': path.resolve(..., 'src') }
@@ -196,7 +194,7 @@ class WebpackConfigParser:
             if single:
                 loaders.add(single)
             if multi:
-                for item in re.findall(r"['\"]([^'\"]+)['\"]" ,multi):
+                for item in re.findall(r"['\"]([^'\"]+)['\"]", multi):
                     loaders.add(item)
             if loader_in_obj:
                 loaders.add(loader_in_obj)
