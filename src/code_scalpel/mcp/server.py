@@ -4667,6 +4667,24 @@ def run_server(
         f"DEBUG: run_server called transport={transport!r} host={host!r} port={port!r} allow_lan={allow_lan!r} root_path={root_path!r} tier={tier!r}"
     )
 
+    # [20260311_FEATURE] Apply --root before license validation so dependent
+    # environment placeholders (for example ${root} in license path env) resolve
+    # consistently during startup tier detection.
+    if root_path:
+        resolved_root = Path(root_path).resolve()
+        if not resolved_root.exists():
+            # Use stderr for warnings to avoid corrupting stdio transport.
+            print(
+                f"Warning: Root path {resolved_root} does not exist. Using current directory.",
+                file=sys.stderr,
+            )
+            resolved_root = Path.cwd()
+        set_project_root(resolved_root)
+
+    # [20260311_FEATURE] Expose effective project root as an env var for
+    # downstream consumers (for example license path resolution).
+    os.environ["CODE_SCALPEL_PROJECT_ROOT"] = str(get_project_root())
+
     # [20260116_REFACTOR] Register tools, resources, and prompts from dedicated modules
     try:
         from code_scalpel.mcp.tools import register_tools
