@@ -83,6 +83,7 @@ _DIAG_RE = re.compile(
     r"(?P<msg>.+?)\s+\[(?P<check>[^\]]+)\]$"
 )
 
+
 def _check_to_category(check_id: str) -> CheckCategory:
     """Map a clang-tidy check ID prefix to its CheckCategory."""
     for prefix, category in _CHECK_PREFIX_MAP:
@@ -313,9 +314,9 @@ class ClangTidyParser:
                 text=True,
             )
             # Count "fix applied" in output as a proxy
-            count = result.stdout.lower().count("fix applied") + result.stderr.lower().count(
+            count = result.stdout.lower().count(
                 "fix applied"
-            )
+            ) + result.stderr.lower().count("fix applied")
             fixes_applied[file_path] = count
         return fixes_applied
 

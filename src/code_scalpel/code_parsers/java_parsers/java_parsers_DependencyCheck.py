@@ -94,14 +94,16 @@ class DependencyCheckParser:
                 except (TypeError, ValueError):
                     score = 0.0
                 severity = vuln.get("severity", _cvss_to_severity(score)).upper()
-                findings.append(CVEFinding(
-                    component=component,
-                    version=version,
-                    cve_id=name,
-                    cvss_score=score,
-                    severity=severity,
-                    description=vuln.get("description", ""),
-                ))
+                findings.append(
+                    CVEFinding(
+                        component=component,
+                        version=version,
+                        cve_id=name,
+                        cvss_score=score,
+                        severity=severity,
+                        description=vuln.get("description", ""),
+                    )
+                )
         return findings
 
     def parse_xml_report(self, path: Optional[Path] = None) -> List[CVEFinding]:
@@ -129,12 +131,19 @@ class DependencyCheckParser:
                     score = float(vuln.findtext(f"{ns}cvssScore") or 0)
                 except ValueError:
                     score = 0.0
-                severity = (vuln.findtext(f"{ns}severity") or _cvss_to_severity(score)).upper()
-                findings.append(CVEFinding(
-                    component=fname, version=ver,
-                    cve_id=name, cvss_score=score, severity=severity,
-                    description=vuln.findtext(f"{ns}description") or "",
-                ))
+                severity = (
+                    vuln.findtext(f"{ns}severity") or _cvss_to_severity(score)
+                ).upper()
+                findings.append(
+                    CVEFinding(
+                        component=fname,
+                        version=ver,
+                        cve_id=name,
+                        cvss_score=score,
+                        severity=severity,
+                        description=vuln.findtext(f"{ns}description") or "",
+                    )
+                )
         return findings
 
     def map_to_cve(self, findings: List[CVEFinding]) -> Dict[str, List[CVEFinding]]:
@@ -161,9 +170,7 @@ class DependencyCheckParser:
                 out.append(f.component)
         return out
 
-    def generate_report(
-        self, findings: List[CVEFinding], format: str = "json"
-    ) -> str:
+    def generate_report(self, findings: List[CVEFinding], format: str = "json") -> str:
         """Return a JSON or text report of CVE findings."""
         by_sev = self.map_to_cvss(findings)
         if format == "json":

@@ -7,7 +7,7 @@
 import json
 import shutil
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -75,53 +75,62 @@ class ComposeLinterParser:
                     loc = result.get("locations", [{}])[0]
                     physical = loc.get("physicalLocation", {})
                     region = physical.get("region", {})
-                    file_path = (
-                        physical.get("artifactLocation", {}).get("uri", "")
-                    )
-                    sev_map = {"error": ComposeSeverity.ERROR.value,
-                               "warning": ComposeSeverity.WARNING.value,
-                               "note": ComposeSeverity.INFORMATION.value}
+                    file_path = physical.get("artifactLocation", {}).get("uri", "")
+                    sev_map = {
+                        "error": ComposeSeverity.ERROR.value,
+                        "warning": ComposeSeverity.WARNING.value,
+                        "note": ComposeSeverity.INFORMATION.value,
+                    }
                     level = result.get("level", "warning")
-                    issues.append(ComposeIssue(
-                        issue_type=ComposeIssueType.OTHER.value,
-                        severity=sev_map.get(level, level),
-                        message=result.get("message", {}).get("text", ""),
-                        file_path=file_path,
-                        line_number=region.get("startLine"),
-                        column=region.get("startColumn"),
-                        rule_id=result.get("ruleId"),
-                    ))
+                    issues.append(
+                        ComposeIssue(
+                            issue_type=ComposeIssueType.OTHER.value,
+                            severity=sev_map.get(level, level),
+                            message=result.get("message", {}).get("text", ""),
+                            file_path=file_path,
+                            line_number=region.get("startLine"),
+                            column=region.get("startColumn"),
+                            rule_id=result.get("ruleId"),
+                        )
+                    )
             self.issues = issues
             return issues
         except (json.JSONDecodeError, KeyError):
             pass
         # Plain-text fallback: "file.kt:12: error: …"
         import re
+
         pattern = re.compile(r"^(.+):(\d+):\s+(error|warning|info):\s+(.+)$")
         for line in output.splitlines():
             m = pattern.match(line.strip())
             if m:
-                issues.append(ComposeIssue(
-                    issue_type=ComposeIssueType.OTHER.value,
-                    severity=m.group(3),
-                    message=m.group(4),
-                    file_path=m.group(1),
-                    line_number=int(m.group(2)),
-                ))
+                issues.append(
+                    ComposeIssue(
+                        issue_type=ComposeIssueType.OTHER.value,
+                        severity=m.group(3),
+                        message=m.group(4),
+                        file_path=m.group(1),
+                        line_number=int(m.group(2)),
+                    )
+                )
         self.issues = issues
         return issues
 
-    def parse_stability_analysis(self, report_data: Dict[str, Any]) -> List[ComposeIssue]:
+    def parse_stability_analysis(
+        self, report_data: Dict[str, Any]
+    ) -> List[ComposeIssue]:
         """Parse Compose stability analysis report dict."""
         issues: List[ComposeIssue] = []
         for cls in report_data.get("unstableClasses", []):
-            issues.append(ComposeIssue(
-                issue_type=ComposeIssueType.STABILITY.value,
-                severity=ComposeSeverity.WARNING.value,
-                message=f"Unstable class: {cls.get('name', cls)} — {cls.get('reason', '')}",
-                file_path=cls.get("file"),
-                line_number=cls.get("line"),
-            ))
+            issues.append(
+                ComposeIssue(
+                    issue_type=ComposeIssueType.STABILITY.value,
+                    severity=ComposeSeverity.WARNING.value,
+                    message=f"Unstable class: {cls.get('name', cls)} — {cls.get('reason', '')}",
+                    file_path=cls.get("file"),
+                    line_number=cls.get("line"),
+                )
+            )
         return issues
 
     def analyze_recompositions(self, trace_data: Dict[str, Any]) -> ComposeMetrics:
@@ -164,17 +173,29 @@ class ComposeLinterParser:
                 "avg_recompositions": m.avg_recompositions,
             }
         if format == "json":
-            return json.dumps({
-                "tool": "compose-compiler",
-                "total_issues": len(vs),
-                "issues": [{"type": i.issue_type, "severity": i.severity,
-                            "message": i.message, "file": i.file_path,
-                            "line": i.line_number} for i in vs],
-                "metrics": metrics_dict,
-            }, indent=2)
+            return json.dumps(
+                {
+                    "tool": "compose-compiler",
+                    "total_issues": len(vs),
+                    "issues": [
+                        {
+                            "type": i.issue_type,
+                            "severity": i.severity,
+                            "message": i.message,
+                            "file": i.file_path,
+                            "line": i.line_number,
+                        }
+                        for i in vs
+                    ],
+                    "metrics": metrics_dict,
+                },
+                indent=2,
+            )
         lines = [f"Compose Analysis: {len(vs)} issue(s)"]
         for i in vs:
-            lines.append(f"  [{i.severity}] {i.file_path}:{i.line_number} — {i.message}")
+            lines.append(
+                f"  [{i.severity}] {i.file_path}:{i.line_number} — {i.message}"
+            )
         if metrics_dict:
             lines.append(f"  Metrics: {metrics_dict}")
         return "\n".join(lines)
@@ -186,8 +207,9 @@ class ComposeLinterParser:
             return {"issues": [], "error": "gradle not found"}
         cmd = [str(gradlew), "lint"] if gradlew.exists() else ["gradle", "lint"]
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True,
-                                    timeout=180, cwd=str(project_path))
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=180, cwd=str(project_path)
+            )
         except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
             return {"issues": [], "error": str(exc)}
         issues = self.parse_compiler_output(result.stdout + result.stderr)

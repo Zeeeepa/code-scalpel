@@ -49,7 +49,5 @@ class CppParserAdapter(IParser):
         from code_scalpel.ir.nodes import IRClassDef
 
         return [
-            n.name
-            for n in getattr(ast_tree, "body", [])
-            if isinstance(n, IRClassDef)
+            n.name for n in getattr(ast_tree, "body", []) if isinstance(n, IRClassDef)
         ]

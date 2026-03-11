@@ -19,7 +19,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 _LINT_LINE_RE = re.compile(
     r"^(?P<file>[^\s:]+):(?P<line>\d+):(?P<col>\d+): (?P<msg>.+)$"
@@ -171,6 +171,5 @@ class GolintParser:
                 indent=2,
             )
         return "\n".join(
-            f"{s.file_path}:{s.line}:{s.column}: {s.message}"
-            for s in suggestions
+            f"{s.file_path}:{s.line}:{s.column}: {s.message}" for s in suggestions
         )

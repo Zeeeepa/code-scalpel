@@ -12,14 +12,12 @@ from __future__ import annotations
 
 import json
 import textwrap
-import xml.etree.ElementTree as ET
-
-import pytest
 
 
 # ---------------------------------------------------------------------------
 # MavenParser
 # ---------------------------------------------------------------------------
+
 
 class TestMavenParser:
     """Tests for MavenParser."""
@@ -62,7 +60,10 @@ class TestMavenParser:
     """)
 
     def _get_parser(self, tmp_path):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import MavenParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import (
+            MavenParser,
+        )
+
         pom = tmp_path / "pom.xml"
         pom.write_text(self._POM_XML, encoding="utf-8")
         return MavenParser(pom_path=pom), pom
@@ -95,7 +96,10 @@ class TestMavenParser:
         assert plugins[0].version == "3.11.0"
 
     def test_parse_build_output(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import MavenParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import (
+            MavenParser,
+        )
+
         parser = MavenParser()
         records = parser.parse_build_output(self._BUILD_OUTPUT)
         levels = [r["level"] for r in records]
@@ -104,7 +108,10 @@ class TestMavenParser:
         assert "INFO" in levels
 
     def test_extract_compile_errors(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import MavenParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import (
+            MavenParser,
+        )
+
         parser = MavenParser()
         errors = parser.extract_compile_errors(self._BUILD_OUTPUT)
         assert len(errors) == 1
@@ -115,7 +122,10 @@ class TestMavenParser:
         assert err.error_type == "ERROR"
 
     def test_extract_compile_errors_empty(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import MavenParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import (
+            MavenParser,
+        )
+
         parser = MavenParser()
         assert parser.extract_compile_errors("") == []
         assert parser.extract_compile_errors("[INFO] BUILD SUCCESS") == []
@@ -128,13 +138,19 @@ class TestMavenParser:
         assert data["dependencies"] == 2
 
     def test_get_dependencies_before_parse(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import MavenParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import (
+            MavenParser,
+        )
+
         parser = MavenParser()
         assert parser.get_dependencies() == []
         assert parser.get_plugins() == []
 
     def test_parse_bad_pom(self, tmp_path):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import MavenParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Maven import (
+            MavenParser,
+        )
+
         bad = tmp_path / "pom.xml"
         bad.write_text("NOT XML", encoding="utf-8")
         parser = MavenParser()
@@ -145,6 +161,7 @@ class TestMavenParser:
 # ---------------------------------------------------------------------------
 # GradleParser
 # ---------------------------------------------------------------------------
+
 
 class TestGradleParser:
     """Tests for GradleParser."""
@@ -168,7 +185,10 @@ class TestGradleParser:
     """)
 
     def _get_parser(self, tmp_path):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import GradleParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import (
+            GradleParser,
+        )
+
         gradle = tmp_path / "build.gradle"
         gradle.write_text(self._BUILD_GRADLE, encoding="utf-8")
         return GradleParser(build_path=gradle), gradle
@@ -180,7 +200,10 @@ class TestGradleParser:
         assert len(data["dependencies"]) == 3
 
     def test_get_dependencies_from_content(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import GradleParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import (
+            GradleParser,
+        )
+
         parser = GradleParser()
         deps = parser.get_dependencies(content=self._BUILD_GRADLE)
         assert len(deps) == 3
@@ -189,7 +212,10 @@ class TestGradleParser:
         assert "testImplementation" in configs
 
     def test_get_dependencies_names(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import GradleParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import (
+            GradleParser,
+        )
+
         parser = GradleParser()
         deps = parser.get_dependencies(content=self._BUILD_GRADLE)
         names = {d.name for d in deps}
@@ -197,7 +223,10 @@ class TestGradleParser:
         assert "h2" in names
 
     def test_parse_build_output_levels(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import GradleParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import (
+            GradleParser,
+        )
+
         parser = GradleParser()
         records = parser.parse_build_output(self._BUILD_OUTPUT)
         # Should include at least ERROR and FAILED records
@@ -205,7 +234,10 @@ class TestGradleParser:
         assert "ERROR" in levels or "FAILED" in levels
 
     def test_extract_compile_errors(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import GradleParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import (
+            GradleParser,
+        )
+
         parser = GradleParser()
         errors = parser.extract_compile_errors(self._BUILD_OUTPUT)
         assert len(errors) == 1
@@ -215,7 +247,10 @@ class TestGradleParser:
         assert "cannot find symbol" in e.message
 
     def test_generate_report_json(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import GradleParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import (
+            GradleParser,
+        )
+
         parser = GradleParser()
         deps = parser.get_dependencies(content=self._BUILD_GRADLE)
         data = json.loads(parser.generate_report(dependencies=deps, format="json"))
@@ -223,7 +258,10 @@ class TestGradleParser:
         assert data["dependencies"] == 3
 
     def test_get_dependencies_no_path(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import GradleParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Gradle import (
+            GradleParser,
+        )
+
         parser = GradleParser()
         assert parser.get_dependencies() == []
 
@@ -232,36 +270,39 @@ class TestGradleParser:
 # DependencyCheckParser
 # ---------------------------------------------------------------------------
 
+
 class TestDependencyCheckParser:
     """Tests for DependencyCheckParser."""
 
-    _JSON_REPORT = json.dumps({
-        "dependencies": [
-            {
-                "fileName": "log4j-1.2.17.jar",
-                "version": "1.2.17",
-                "vulnerabilities": [
-                    {
-                        "name": "CVE-2019-17571",
-                        "severity": "CRITICAL",
-                        "description": "Log4j insecure deserialization",
-                        "cvssv3": {"baseScore": 9.8},
-                    },
-                    {
-                        "name": "CVE-2020-9488",
-                        "severity": "HIGH",
-                        "description": "SMTP connection",
-                        "cvssv2": {"score": 7.5},
-                    },
-                ],
-            },
-            {
-                "fileName": "commons-lang-2.6.jar",
-                "version": "2.6",
-                "vulnerabilities": [],
-            },
-        ]
-    })
+    _JSON_REPORT = json.dumps(
+        {
+            "dependencies": [
+                {
+                    "fileName": "log4j-1.2.17.jar",
+                    "version": "1.2.17",
+                    "vulnerabilities": [
+                        {
+                            "name": "CVE-2019-17571",
+                            "severity": "CRITICAL",
+                            "description": "Log4j insecure deserialization",
+                            "cvssv3": {"baseScore": 9.8},
+                        },
+                        {
+                            "name": "CVE-2020-9488",
+                            "severity": "HIGH",
+                            "description": "SMTP connection",
+                            "cvssv2": {"score": 7.5},
+                        },
+                    ],
+                },
+                {
+                    "fileName": "commons-lang-2.6.jar",
+                    "version": "2.6",
+                    "vulnerabilities": [],
+                },
+            ]
+        }
+    )
 
     _XML_REPORT = textwrap.dedent("""\
         <?xml version="1.0"?>
@@ -284,7 +325,10 @@ class TestDependencyCheckParser:
     """)
 
     def _get_parser(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_DependencyCheck import DependencyCheckParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_DependencyCheck import (
+            DependencyCheckParser,
+        )
+
         return DependencyCheckParser()
 
     def test_parse_json_output_basic(self):
@@ -322,7 +366,10 @@ class TestDependencyCheckParser:
         assert "commons-lang-2.6.jar" not in vulns
 
     def test_parse_xml_report_from_string(self, tmp_path):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_DependencyCheck import DependencyCheckParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_DependencyCheck import (
+            DependencyCheckParser,
+        )
+
         xml_file = tmp_path / "report.xml"
         xml_file.write_text(self._XML_REPORT, encoding="utf-8")
         parser = DependencyCheckParser()
@@ -342,6 +389,7 @@ class TestDependencyCheckParser:
 # ---------------------------------------------------------------------------
 # JaCoCoParser
 # ---------------------------------------------------------------------------
+
 
 class TestJaCoCoParser:
     """Tests for JaCoCoParser."""
@@ -370,7 +418,10 @@ class TestJaCoCoParser:
     """)
 
     def _get_parser(self, tmp_path):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_JaCoCo import JaCoCoParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_JaCoCo import (
+            JaCoCoParser,
+        )
+
         xml_file = tmp_path / "jacoco.xml"
         xml_file.write_text(self._JACOCO_XML, encoding="utf-8")
         return JaCoCoParser(report_path=xml_file), xml_file
@@ -413,7 +464,10 @@ class TestJaCoCoParser:
         assert 0.0 <= summary["line_coverage"] <= 100.0
 
     def test_calculate_summary_empty(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_JaCoCo import JaCoCoParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_JaCoCo import (
+            JaCoCoParser,
+        )
+
         parser = JaCoCoParser()
         summary = parser.calculate_summary()
         assert summary["classes"] == 0
@@ -438,6 +492,7 @@ class TestJaCoCoParser:
 # ---------------------------------------------------------------------------
 # PitestParser
 # ---------------------------------------------------------------------------
+
 
 class TestPitestParser:
     """Tests for PitestParser."""
@@ -470,7 +525,10 @@ class TestPitestParser:
     """)
 
     def _get_parser(self, tmp_path):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Pitest import PitestParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Pitest import (
+            PitestParser,
+        )
+
         xml_file = tmp_path / "mutations.xml"
         xml_file.write_text(self._MUTATIONS_XML, encoding="utf-8")
         return PitestParser(report_path=xml_file), xml_file
@@ -484,7 +542,10 @@ class TestPitestParser:
         assert results[0].source_file == "UserService.java"
 
     def test_parse_xml_string(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Pitest import PitestParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Pitest import (
+            PitestParser,
+        )
+
         parser = PitestParser()
         results = parser.parse_xml_string(self._MUTATIONS_XML)
         assert len(results) == 3
@@ -526,7 +587,10 @@ class TestPitestParser:
         assert data["survived"] == 1
 
     def test_parse_xml_string_empty(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Pitest import PitestParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Pitest import (
+            PitestParser,
+        )
+
         parser = PitestParser()
         assert parser.parse_xml_string("") == []
 
@@ -535,64 +599,72 @@ class TestPitestParser:
 # SemgrepParser
 # ---------------------------------------------------------------------------
 
+
 class TestSemgrepParser:
     """Tests for SemgrepParser."""
 
-    _SEMGREP_JSON = json.dumps({
-        "results": [
-            {
-                "check_id": "java.lang.security.insecure-object-deserialization",
-                "path": "src/UserController.java",
-                "start": {"line": 42, "col": 5},
-                "end": {"line": 42, "col": 60},
-                "extra": {
-                    "message": "Insecure deserialization detected",
-                    "severity": "ERROR",
-                    "metadata": {
-                        "cwe": ["CWE-502"],
-                        "confidence": "HIGH",
+    _SEMGREP_JSON = json.dumps(
+        {
+            "results": [
+                {
+                    "check_id": "java.lang.security.insecure-object-deserialization",
+                    "path": "src/UserController.java",
+                    "start": {"line": 42, "col": 5},
+                    "end": {"line": 42, "col": 60},
+                    "extra": {
+                        "message": "Insecure deserialization detected",
+                        "severity": "ERROR",
+                        "metadata": {
+                            "cwe": ["CWE-502"],
+                            "confidence": "HIGH",
+                        },
                     },
                 },
-            },
-            {
-                "check_id": "java.spring.security.spring-csrf-disabled",
-                "path": "src/SecurityConfig.java",
-                "start": {"line": 20, "col": 1},
-                "end": {"line": 20, "col": 30},
-                "extra": {
-                    "message": "CSRF protection disabled",
-                    "severity": "WARNING",
-                    "metadata": {
-                        "cwe": ["CWE-352"],
+                {
+                    "check_id": "java.spring.security.spring-csrf-disabled",
+                    "path": "src/SecurityConfig.java",
+                    "start": {"line": 20, "col": 1},
+                    "end": {"line": 20, "col": 30},
+                    "extra": {
+                        "message": "CSRF protection disabled",
+                        "severity": "WARNING",
+                        "metadata": {
+                            "cwe": ["CWE-352"],
+                        },
                     },
                 },
-            },
-            {
-                "check_id": "java.lang.security.sql-injection",
-                "path": "src/DAO.java",
-                "start": {"line": 10, "col": 3},
-                "end": {"line": 10, "col": 50},
-                "extra": {
-                    "message": "SQL injection vulnerability",
-                    "severity": "ERROR",
-                    "metadata": {
-                        "cwe": ["CWE-89"],
+                {
+                    "check_id": "java.lang.security.sql-injection",
+                    "path": "src/DAO.java",
+                    "start": {"line": 10, "col": 3},
+                    "end": {"line": 10, "col": 50},
+                    "extra": {
+                        "message": "SQL injection vulnerability",
+                        "severity": "ERROR",
+                        "metadata": {
+                            "cwe": ["CWE-89"],
+                        },
                     },
                 },
-            },
-        ],
-        "errors": [],
-    })
+            ],
+            "errors": [],
+        }
+    )
 
     def _get_parser(self):
-        from code_scalpel.code_parsers.java_parsers.java_parsers_Semgrep import SemgrepParser
+        from code_scalpel.code_parsers.java_parsers.java_parsers_Semgrep import (
+            SemgrepParser,
+        )
+
         return SemgrepParser()
 
     def test_parse_json_output_basic(self):
         parser = self._get_parser()
         findings = parser.parse_json_output(self._SEMGREP_JSON)
         assert len(findings) == 3
-        assert findings[0].rule_id == "java.lang.security.insecure-object-deserialization"
+        assert (
+            findings[0].rule_id == "java.lang.security.insecure-object-deserialization"
+        )
         assert findings[0].file == "src/UserController.java"
         assert findings[0].line == 42
         assert findings[0].severity == "ERROR"
@@ -627,6 +699,7 @@ class TestSemgrepParser:
 
     def test_execute_semgrep_no_binary(self, monkeypatch):
         import shutil
+
         monkeypatch.setattr(shutil, "which", lambda _: None)
         parser = self._get_parser()
         assert parser.execute_semgrep("./src") == []

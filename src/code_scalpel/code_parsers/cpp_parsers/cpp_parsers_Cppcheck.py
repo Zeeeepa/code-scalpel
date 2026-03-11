@@ -331,9 +331,7 @@ class CppcheckParser:
         """Return only memory-related issues."""
         return [i for i in issues if i.category == IssueCategory.MEMORY]
 
-    def map_to_cwe(
-        self, issues: List[CppcheckIssue]
-    ) -> Dict[str, List[CppcheckIssue]]:
+    def map_to_cwe(self, issues: List[CppcheckIssue]) -> Dict[str, List[CppcheckIssue]]:
         """Group issues by their CWE identifier (e.g. 'CWE-476')."""
         result: Dict[str, List[CppcheckIssue]] = {}
         for issue in issues:
@@ -341,9 +339,7 @@ class CppcheckParser:
                 result.setdefault(issue.cwe_id, []).append(issue)
         return result
 
-    def calculate_quality_metrics(
-        self, issues: List[CppcheckIssue]
-    ) -> Dict[str, Any]:
+    def calculate_quality_metrics(self, issues: List[CppcheckIssue]) -> Dict[str, Any]:
         """Return a summary metrics dict."""
         by_severity: Dict[str, int] = {}
         by_category: Dict[str, int] = {}
@@ -370,9 +366,7 @@ class CppcheckParser:
     # Reporting                                                            #
     # ------------------------------------------------------------------ #
 
-    def generate_report(
-        self, issues: List[CppcheckIssue], format: str = "json"
-    ) -> str:
+    def generate_report(self, issues: List[CppcheckIssue], format: str = "json") -> str:
         """
         Generate a normalized report.
 

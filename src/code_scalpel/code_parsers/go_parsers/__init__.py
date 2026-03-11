@@ -81,7 +81,14 @@ class GoParserRegistry:
 
         [20260303_FEATURE] Returns ``{tool: [findings]}`` — empty list on error.
         """
-        canonical_tools = ["golangci", "gosec", "staticcheck", "govet", "golint", "gofmt"]
+        canonical_tools = [
+            "golangci",
+            "gosec",
+            "staticcheck",
+            "govet",
+            "golint",
+            "gofmt",
+        ]
         selected = [t.lower() for t in tools] if tools else canonical_tools
         results: Dict[str, List] = {}
         for tool in selected:
@@ -96,6 +103,7 @@ class GoParserRegistry:
 def _import_parser_module(module_basename: str) -> Any:
     """Import a go_parsers sub-module by basename."""
     import importlib
+
     return importlib.import_module(
         f"code_scalpel.code_parsers.go_parsers.{module_basename}"
     )
@@ -110,4 +118,3 @@ def __getattr__(name: str) -> Any:
         mod = _import_parser_module(_MODULE_MAP[name])
         return getattr(mod, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-

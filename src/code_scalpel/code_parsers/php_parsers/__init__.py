@@ -95,6 +95,28 @@ if TYPE_CHECKING:
         PsalmParser,
         PsalmSeverity,
     )
+    from .php_parsers_phpmd import (
+        PHPMDConfig,
+        PHPMDParser,
+        PHPMDPriority,
+        PHPMDRuleType,
+        PHPMDViolation,
+    )
+    from .php_parsers_ast import (
+        PHPClass,
+        PHPFunction,
+        PHPParserAST,
+    )
+    from .php_parsers_composer import (
+        ComposerConfig,
+        ComposerPackage,
+        ComposerParser,
+    )
+    from .php_parsers_exakat import (
+        ExakatCategory,
+        ExakatIssue,
+        ExakatParser,
+    )
 
 __all__ = [
     # PHPCS
@@ -115,6 +137,24 @@ __all__ = [
     "PsalmSeverity",
     "PsalmErrorType",
     "PsalmConfig",
+    # PHPMD — [20260304_FEATURE] Phase 2
+    "PHPMDParser",
+    "PHPMDViolation",
+    "PHPMDPriority",
+    "PHPMDRuleType",
+    "PHPMDConfig",
+    # PHP AST — [20260304_FEATURE] Phase 2
+    "PHPParserAST",
+    "PHPClass",
+    "PHPFunction",
+    # Composer — [20260304_FEATURE] Phase 2
+    "ComposerParser",
+    "ComposerPackage",
+    "ComposerConfig",
+    # Exakat — [20260304_FEATURE] Phase 2
+    "ExakatParser",
+    "ExakatIssue",
+    "ExakatCategory",
 ]
 
 
@@ -168,4 +208,73 @@ def __getattr__(name: str):
         )
 
         return locals()[name]
+    elif name in (
+        "PHPMDParser",
+        "PHPMDViolation",
+        "PHPMDPriority",
+        "PHPMDRuleType",
+        "PHPMDConfig",
+    ):
+        from .php_parsers_phpmd import (
+            PHPMDConfig,
+            PHPMDParser,
+            PHPMDPriority,
+            PHPMDRuleType,
+            PHPMDViolation,
+        )
+
+        return locals()[name]
+    elif name in ("PHPParserAST", "PHPClass", "PHPFunction"):
+        from .php_parsers_ast import PHPClass, PHPFunction, PHPParserAST
+
+        return locals()[name]
+    elif name in ("ComposerParser", "ComposerPackage", "ComposerConfig"):
+        from .php_parsers_composer import (
+            ComposerConfig,
+            ComposerPackage,
+            ComposerParser,
+        )
+
+        return locals()[name]
+    elif name in ("ExakatParser", "ExakatIssue", "ExakatCategory"):
+        from .php_parsers_exakat import ExakatCategory, ExakatIssue, ExakatParser
+
+        return locals()[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+class PHPParserRegistry:
+    """Registry for PHP static-analysis tool parsers.
+
+    [20260304_FEATURE] Polyglot Phase 2: lazy-load factory pattern.
+    All execute_* methods accept a single str/Path; use call_style='single_str'.
+    """
+
+    _TOOL_MAP: dict = {
+        "phpcs": ("php_parsers_PHPCS", "PHPCSParser"),
+        "phpstan": ("php_parsers_PHPStan", "PHPStanParser"),
+        "psalm": ("php_parsers_Psalm", "PsalmParser"),
+        "phpmd": ("php_parsers_phpmd", "PHPMDParser"),
+        "exakat": ("php_parsers_exakat", "ExakatParser"),
+    }
+
+    def get_parser(self, tool_name: str):
+        """Return an instantiated parser for *tool_name*.
+
+        Args:
+            tool_name: One of the recognised tool identifiers (case-insensitive).
+
+        Raises:
+            ValueError: If *tool_name* is not a recognised tool.
+        """
+        import importlib
+
+        key = tool_name.lower()
+        if key not in self._TOOL_MAP:
+            raise ValueError(
+                f"Unknown PHP parser tool: {tool_name!r}. "
+                f"Valid options: {sorted(set(self._TOOL_MAP.keys()))}"
+            )
+        module_name, class_name = self._TOOL_MAP[key]
+        module = importlib.import_module(f".{module_name}", package=__package__)
+        return getattr(module, class_name)()

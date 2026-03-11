@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import shutil
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Union
 from pathlib import Path
@@ -25,12 +25,12 @@ class StyleCopCategory(Enum):
     """StyleCop rule categories based on SA1xxx rule ranges."""
 
     DOCUMENTATION = "documentation"  # SA1600–SA1655
-    SPACING = "spacing"              # SA1000–SA1028
-    READABILITY = "readability"      # SA1100–SA1124
-    ORDERING = "ordering"            # SA1200–SA1217
-    NAMING = "naming"                # SA1300–SA1314
+    SPACING = "spacing"  # SA1000–SA1028
+    READABILITY = "readability"  # SA1100–SA1124
+    ORDERING = "ordering"  # SA1200–SA1217
+    NAMING = "naming"  # SA1300–SA1314
     MAINTAINABILITY = "maintainability"  # SA1400–SA1412
-    LAYOUT = "layout"                # SA1500–SA1519
+    LAYOUT = "layout"  # SA1500–SA1519
     OTHER = "other"
 
 
@@ -163,4 +163,3 @@ def _sarif_to_violation(f: SarifFinding) -> StyleCopViolation:
         line=f.line,
         column=f.column,
     )
-

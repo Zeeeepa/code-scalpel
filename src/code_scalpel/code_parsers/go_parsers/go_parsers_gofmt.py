@@ -17,7 +17,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Union
 
 
 @dataclass
@@ -59,7 +59,9 @@ class GofmtParser:
         try:
             list_result = subprocess.run(
                 ["gofmt", "-l", target],
-                capture_output=True, text=True, timeout=300,
+                capture_output=True,
+                text=True,
+                timeout=300,
             )
             issues: List[FormattingIssue] = []
             for fp in self.parse_file_list(list_result.stdout):
@@ -87,7 +89,9 @@ class GofmtParser:
         try:
             result = subprocess.run(
                 ["gofmt", "-d", str(file_path)],
-                capture_output=True, text=True, timeout=60,
+                capture_output=True,
+                text=True,
+                timeout=60,
             )
             return result.stdout
         except (subprocess.TimeoutExpired, FileNotFoundError):
@@ -105,21 +109,27 @@ class GofmtParser:
         for p in paths:
             result = subprocess.run(
                 ["gofmt", "-l", str(p)],
-                capture_output=True, text=True, timeout=300,
+                capture_output=True,
+                text=True,
+                timeout=300,
             )
             for fp in self.parse_file_list(result.stdout):
                 diff = self.get_diff(fp) if include_diff else ""
                 issues.append(FormattingIssue(file_path=fp, diff=diff))
         return issues
 
-    def generate_report(self, issues: List[FormattingIssue], format: str = "json") -> str:
+    def generate_report(
+        self, issues: List[FormattingIssue], format: str = "json"
+    ) -> str:
         """Return a JSON or text report of formatting issues."""
         if format == "json":
             return json.dumps(
                 {
                     "tool": "gofmt",
                     "total_unformatted": len(issues),
-                    "files": [{"file": i.file_path, "has_diff": bool(i.diff)} for i in issues],
+                    "files": [
+                        {"file": i.file_path, "has_diff": bool(i.diff)} for i in issues
+                    ],
                 },
                 indent=2,
             )

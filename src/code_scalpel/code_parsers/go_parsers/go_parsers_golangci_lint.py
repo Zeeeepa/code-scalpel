@@ -14,10 +14,10 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 
 class IssueSeverity(Enum):
@@ -52,8 +52,8 @@ class LinterType(Enum):
 class LintIssue:
     """Represents a linting issue from golangci-lint."""
 
-    linter: str             # raw FromLinter string (e.g. "govet", "errcheck")
-    linter_type: LinterType # mapped enum (UNKNOWN if not in map)
+    linter: str  # raw FromLinter string (e.g. "govet", "errcheck")
+    linter_type: LinterType  # mapped enum (UNKNOWN if not in map)
     severity: IssueSeverity
     message: str
     file_path: str
@@ -106,16 +106,20 @@ class GolangciLintParser:
         if not shutil.which("golangci-lint"):
             return []
 
-        target = str(paths) if not isinstance(paths, (list, Path)) else (
-            str(paths) if isinstance(paths, Path) else (str(paths[0]) if paths else ".")
+        target = (
+            str(paths)
+            if not isinstance(paths, (list, Path))
+            else (
+                str(paths)
+                if isinstance(paths, Path)
+                else (str(paths[0]) if paths else ".")
+            )
         )
         cmd = ["golangci-lint", "run", "--out-format", "json", target]
         if config and config.config_file:
             cmd += ["--config", str(config.config_file)]
         try:
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=300
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
             return self.parse_json_output(result.stdout)
         except (subprocess.TimeoutExpired, FileNotFoundError):
             return []
@@ -144,7 +148,9 @@ class GolangciLintParser:
             linter_type = _LINTER_TYPE_MAP.get(linter_name.lower(), LinterType.UNKNOWN)
             severity_str = item.get("Severity", "warning").lower()
             severity = (
-                IssueSeverity.ERROR if severity_str == "error" else IssueSeverity.WARNING
+                IssueSeverity.ERROR
+                if severity_str == "error"
+                else IssueSeverity.WARNING
             )
             pos = item.get("Pos", {})
             issues.append(
@@ -200,16 +206,16 @@ class GolangciLintParser:
             return [i for i in issues if i.severity == IssueSeverity.ERROR]
         return list(issues)
 
-    def generate_report(
-        self, issues: List[LintIssue], format: str = "json"
-    ) -> str:
+    def generate_report(self, issues: List[LintIssue], format: str = "json") -> str:
         """Return a JSON or text report of lint issues."""
         if format == "json":
             return json.dumps(
                 {
                     "tool": "golangci-lint",
                     "total": len(issues),
-                    "by_linter": {k: len(v) for k, v in self.categorize_by_linter(issues).items()},
+                    "by_linter": {
+                        k: len(v) for k, v in self.categorize_by_linter(issues).items()
+                    },
                     "issues": [
                         {
                             "linter": i.linter,
@@ -232,7 +238,3 @@ class GolangciLintParser:
 
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
-from typing import Dict, List, Optional
-
-

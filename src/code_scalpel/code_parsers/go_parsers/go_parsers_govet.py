@@ -17,7 +17,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 # Pattern: ./main.go:42:13: fmt.Sprintf format %d has arg x of wrong type float64
 # or:      ./pkg/foo.go:10: exported function Foo should have comment
@@ -145,7 +145,8 @@ class GovetParser:
                     "tool": "go vet",
                     "total": len(issues),
                     "by_analyzer": {
-                        k: len(v) for k, v in self.categorize_by_analyzer(issues).items()
+                        k: len(v)
+                        for k, v in self.categorize_by_analyzer(issues).items()
                     },
                     "issues": [
                         {

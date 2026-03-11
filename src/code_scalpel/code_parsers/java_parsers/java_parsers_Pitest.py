@@ -22,8 +22,8 @@ class MutationResult:
     """Result from a single PIT mutation test."""
 
     mutation_id: str
-    status: str          # KILLED, SURVIVED, TIMED_OUT, NO_COVERAGE
-    operator: str        # mutator class name (short form)
+    status: str  # KILLED, SURVIVED, TIMED_OUT, NO_COVERAGE
+    operator: str  # mutator class name (short form)
     source_file: str
     mutated_class: str
     mutated_method: str
@@ -76,16 +76,18 @@ class PitestParser:
                 line_number = 0
             mutator = _short_mutator((mut.findtext("mutator") or "").strip())
             mutation_id = f"{mutated_class}:{mutated_method}:{line_number}:{mutator}"
-            results.append(MutationResult(
-                mutation_id=mutation_id,
-                status=status,
-                operator=mutator,
-                source_file=source_file,
-                mutated_class=mutated_class,
-                mutated_method=mutated_method,
-                line_number=line_number,
-                detected=detected,
-            ))
+            results.append(
+                MutationResult(
+                    mutation_id=mutation_id,
+                    status=status,
+                    operator=mutator,
+                    source_file=source_file,
+                    mutated_class=mutated_class,
+                    mutated_method=mutated_method,
+                    line_number=line_number,
+                    detected=detected,
+                )
+            )
         return results
 
     def parse_xml_string(self, xml_content: str) -> List[MutationResult]:
@@ -109,16 +111,18 @@ class PitestParser:
                 line_number = 0
             mutator = _short_mutator((mut.findtext("mutator") or "").strip())
             mutation_id = f"{mutated_class}:{mutated_method}:{line_number}:{mutator}"
-            results.append(MutationResult(
-                mutation_id=mutation_id,
-                status=status,
-                operator=mutator,
-                source_file=source_file,
-                mutated_class=mutated_class,
-                mutated_method=mutated_method,
-                line_number=line_number,
-                detected=detected,
-            ))
+            results.append(
+                MutationResult(
+                    mutation_id=mutation_id,
+                    status=status,
+                    operator=mutator,
+                    source_file=source_file,
+                    mutated_class=mutated_class,
+                    mutated_method=mutated_method,
+                    line_number=line_number,
+                    detected=detected,
+                )
+            )
         return results
 
     def get_mutation_score(self, results: List[MutationResult]) -> float:
@@ -129,7 +133,9 @@ class PitestParser:
         killed = sum(1 for r in eligible if r.detected)
         return round(killed / len(eligible) * 100, 2)
 
-    def get_survived_mutations(self, results: List[MutationResult]) -> List[MutationResult]:
+    def get_survived_mutations(
+        self, results: List[MutationResult]
+    ) -> List[MutationResult]:
         """Return only mutations that survived (were NOT killed)."""
         return [r for r in results if not r.detected and r.status != "NO_COVERAGE"]
 

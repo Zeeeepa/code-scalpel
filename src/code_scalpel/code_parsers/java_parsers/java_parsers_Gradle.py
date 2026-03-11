@@ -98,12 +98,14 @@ class GradleParser:
                 return []
         deps: List[GradleDependency] = []
         for m in _DEP_RE.finditer(content):
-            deps.append(GradleDependency(
-                group=m.group("group"),
-                name=m.group("name"),
-                version=m.group("version"),
-                configuration=m.group("config"),
-            ))
+            deps.append(
+                GradleDependency(
+                    group=m.group("group"),
+                    name=m.group("name"),
+                    version=m.group("version"),
+                    configuration=m.group("config"),
+                )
+            )
         return deps
 
     def parse_build_output(self, text: str) -> List[Dict[str, Any]]:
@@ -120,7 +122,7 @@ class GradleParser:
                 results.append({"level": "FAILED", "message": line})
             elif upper.startswith("ERROR:") or upper.startswith("> TASK"):
                 results.append({"level": "ERROR", "message": line})
-            elif upper.startswith("W:" ) or "> Configure" in upper:
+            elif upper.startswith("W:") or "> Configure" in upper:
                 results.append({"level": "WARNING", "message": line})
             else:
                 results.append({"level": "INFO", "message": line})
@@ -136,13 +138,15 @@ class GradleParser:
                     ln, col = int(m.group("line")), int(m.group("col"))
                 except ValueError:
                     ln, col = 0, 0
-                errors.append(GradleCompileError(
-                    file_path=m.group("file").strip(),
-                    line=ln,
-                    column=col,
-                    message=m.group("msg").strip(),
-                    error_type=m.group("type").upper(),
-                ))
+                errors.append(
+                    GradleCompileError(
+                        file_path=m.group("file").strip(),
+                        line=ln,
+                        column=col,
+                        message=m.group("msg").strip(),
+                        error_type=m.group("type").upper(),
+                    )
+                )
         return errors
 
     def generate_report(
@@ -161,13 +165,22 @@ class GradleParser:
                     "dependencies": len(deps),
                     "compile_errors": len(errs),
                     "dependency_list": [
-                        {"group": d.group, "name": d.name,
-                         "version": d.version, "configuration": d.configuration}
+                        {
+                            "group": d.group,
+                            "name": d.name,
+                            "version": d.version,
+                            "configuration": d.configuration,
+                        }
                         for d in deps
                     ],
                     "errors": [
-                        {"file": e.file_path, "line": e.line, "column": e.column,
-                         "type": e.error_type, "message": e.message}
+                        {
+                            "file": e.file_path,
+                            "line": e.line,
+                            "column": e.column,
+                            "type": e.error_type,
+                            "message": e.message,
+                        }
                         for e in errs
                     ],
                 },

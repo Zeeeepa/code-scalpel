@@ -180,7 +180,9 @@ class ClangStaticAnalyzerParser(base_parser.BaseParser):
         self.findings: List[AnalyzerFinding] = []
 
     # [20260120_BUGFIX] Implemented abstract method to satisfy BaseParser interface
-    def parse_code(self, code: str, preprocess: bool = True, config: Any = None) -> None:  # noqa: ARG002
+    def parse_code(
+        self, code: str, preprocess: bool = True, config: Any = None
+    ) -> None:  # noqa: ARG002
         """Stub implementation to satisfy BaseParser ABC."""
         _ = code, preprocess, config
 

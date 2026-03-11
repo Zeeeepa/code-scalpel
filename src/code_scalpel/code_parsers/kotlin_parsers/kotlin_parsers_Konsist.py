@@ -5,10 +5,9 @@
 """
 
 import json
-import shutil
 import subprocess
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -58,9 +57,7 @@ class KonsistParser:
         self.violations: List[KonsistViolation] = []
         self.rules: List[KonsistRule] = []
 
-    def parse_violations(
-        self, violations: Any
-    ) -> List[KonsistViolation]:
+    def parse_violations(self, violations: Any) -> List[KonsistViolation]:
         """Parse violations from JUnit XML string or a list of dicts."""
         if isinstance(violations, str):
             return self._parse_junit_xml(violations)
@@ -69,15 +66,17 @@ class KonsistParser:
         result: List[KonsistViolation] = []
         for v in violations:
             rule_name = v.get("ruleName", v.get("rule", ""))
-            result.append(KonsistViolation(
-                rule_name=rule_name,
-                rule_type=v.get("ruleType", KonsistRuleType.OTHER.value),
-                message=v.get("message", v.get("description", "")),
-                file_path=v.get("file", v.get("filePath")),
-                class_name=v.get("className"),
-                line_number=int(v["line"]) if v.get("line") else None,
-                severity=v.get("severity", KonsistSeverity.ERROR.value),
-            ))
+            result.append(
+                KonsistViolation(
+                    rule_name=rule_name,
+                    rule_type=v.get("ruleType", KonsistRuleType.OTHER.value),
+                    message=v.get("message", v.get("description", "")),
+                    file_path=v.get("file", v.get("filePath")),
+                    class_name=v.get("className"),
+                    line_number=int(v["line"]) if v.get("line") else None,
+                    severity=v.get("severity", KonsistSeverity.ERROR.value),
+                )
+            )
         self.violations = result
         return result
 
@@ -90,25 +89,29 @@ class KonsistParser:
         for tc in root.iter("testcase"):
             for failure in tc.iter("failure"):
                 msg = failure.get("message", failure.text or "")
-                result.append(KonsistViolation(
-                    rule_name=tc.get("name", "unknown"),
-                    rule_type=KonsistRuleType.OTHER.value,
-                    message=msg,
-                    class_name=tc.get("classname"),
-                ))
+                result.append(
+                    KonsistViolation(
+                        rule_name=tc.get("name", "unknown"),
+                        rule_type=KonsistRuleType.OTHER.value,
+                        message=msg,
+                        class_name=tc.get("classname"),
+                    )
+                )
         self.violations = result
         return result
 
     def parse_rules(self, rule_definitions: List[Dict[str, Any]]) -> List[KonsistRule]:
         rules: List[KonsistRule] = []
         for rd in rule_definitions:
-            rules.append(KonsistRule(
-                name=rd.get("name", ""),
-                rule_type=rd.get("type", KonsistRuleType.OTHER.value),
-                description=rd.get("description", ""),
-                enabled=bool(rd.get("enabled", True)),
-                severity=rd.get("severity", KonsistSeverity.ERROR.value),
-            ))
+            rules.append(
+                KonsistRule(
+                    name=rd.get("name", ""),
+                    rule_type=rd.get("type", KonsistRuleType.OTHER.value),
+                    description=rd.get("description", ""),
+                    enabled=bool(rd.get("enabled", True)),
+                    severity=rd.get("severity", KonsistSeverity.ERROR.value),
+                )
+            )
         self.rules = rules
         return rules
 
@@ -119,8 +122,9 @@ class KonsistParser:
             return {"violations": [], "error": "gradlew not found"}
         cmd = [str(gradlew), "test", "--tests", "*Konsist*"]
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True,
-                                    timeout=300, cwd=str(project_path))
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=300, cwd=str(project_path)
+            )
         except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
             return {"violations": [], "error": str(exc)}
         # Try to find JUnit XML reports
@@ -133,8 +137,11 @@ class KonsistParser:
                 pass
         if not violations:
             violations = self._parse_junit_xml(result.stdout + result.stderr)
-        return {"violations": violations, "error": None,
-                "return_code": result.returncode}
+        return {
+            "violations": violations,
+            "error": None,
+            "return_code": result.returncode,
+        }
 
     def generate_report(
         self,
@@ -143,14 +150,24 @@ class KonsistParser:
     ) -> str:
         vs = violations if violations is not None else self.violations
         if format == "json":
-            return json.dumps({
-                "tool": "konsist",
-                "total": len(vs),
-                "violations": [{"rule": v.rule_name, "type": v.rule_type,
-                                "message": v.message, "file": v.file_path,
-                                "class": v.class_name, "severity": v.severity}
-                               for v in vs],
-            }, indent=2)
+            return json.dumps(
+                {
+                    "tool": "konsist",
+                    "total": len(vs),
+                    "violations": [
+                        {
+                            "rule": v.rule_name,
+                            "type": v.rule_type,
+                            "message": v.message,
+                            "file": v.file_path,
+                            "class": v.class_name,
+                            "severity": v.severity,
+                        }
+                        for v in vs
+                    ],
+                },
+                indent=2,
+            )
         lines = [f"Konsist: {len(vs)} violation(s)"]
         for v in vs:
             lines.append(f"  [{v.severity}] {v.rule_name}: {v.message} ({v.file_path})")

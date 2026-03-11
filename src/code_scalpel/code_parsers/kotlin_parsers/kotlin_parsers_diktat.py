@@ -49,8 +49,12 @@ class DiktatConfig:
 
 
 _RULE_SET_MAP: Dict[str, str] = {
-    "STYLE": "style", "COMMENT": "comments", "NAMING": "naming",
-    "CODE_SMELL": "smells", "BUG": "potential-bugs", "PERF": "performance",
+    "STYLE": "style",
+    "COMMENT": "comments",
+    "NAMING": "naming",
+    "CODE_SMELL": "smells",
+    "BUG": "potential-bugs",
+    "PERF": "performance",
 }
 
 
@@ -107,6 +111,7 @@ class DiktatParser:
         config = DiktatConfig(config_file=config_path)
         try:
             import yaml  # type: ignore[import]
+
             raw = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
             for rule in raw.get("rules", []):
                 name = rule.get("name", "")
@@ -120,19 +125,26 @@ class DiktatParser:
         self.config = config
         return config
 
-    def execute_diktat(self, project_path: Path, format_code: bool = False) -> Dict[str, Any]:
+    def execute_diktat(
+        self, project_path: Path, format_code: bool = False
+    ) -> Dict[str, Any]:
         """Execute diktat via Gradle or standalone binary."""
         gradlew = Path(project_path) / "gradlew"
         if not gradlew.exists() and not shutil.which("diktat"):
             return {"violations": [], "error": "diktat not found"}
         task = "diktatFix" if format_code else "diktat"
-        cmd = [str(gradlew), task] if gradlew.exists() else ["diktat", str(project_path)]
+        cmd = (
+            [str(gradlew), task] if gradlew.exists() else ["diktat", str(project_path)]
+        )
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=120,
-                                    cwd=str(project_path))
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=120, cwd=str(project_path)
+            )
         except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
             return {"violations": [], "error": str(exc)}
-        report_path = Path(project_path) / "build" / "reports" / "diktat" / "diktat.json"
+        report_path = (
+            Path(project_path) / "build" / "reports" / "diktat" / "diktat.json"
+        )
         if report_path.exists():
             violations = self.parse_json_report(report_path.read_text())
         else:
@@ -144,31 +156,61 @@ class DiktatParser:
         suggestions: List[str] = []
         for v in self.violations:
             if v.fix_available:
-                suggestions.append(f"{v.file_path}:{v.line_number}: auto-fix available for {v.rule_id}")
+                suggestions.append(
+                    f"{v.file_path}:{v.line_number}: auto-fix available for {v.rule_id}"
+                )
             else:
-                suggestions.append(f"{v.file_path}:{v.line_number}: manual fix — {v.message}")
+                suggestions.append(
+                    f"{v.file_path}:{v.line_number}: manual fix — {v.message}"
+                )
         return suggestions
 
     def compare_with_detekt(self, detekt_violations: List[Any]) -> Dict[str, Any]:
         """Compare diktat vs Detekt violations."""
         dk = {(v.rule_id, v.file_path, v.line_number) for v in self.violations}
-        dt = {(getattr(d, "rule_id", ""), getattr(d, "file_path", ""), getattr(d, "line", None))
-              for d in detekt_violations}
-        return {"diktat_only": len(dk - dt), "detekt_only": len(dt - dk),
-                "overlap": len(dk & dt), "total_diktat": len(dk), "total_detekt": len(dt)}
+        dt = {
+            (
+                getattr(d, "rule_id", ""),
+                getattr(d, "file_path", ""),
+                getattr(d, "line", None),
+            )
+            for d in detekt_violations
+        }
+        return {
+            "diktat_only": len(dk - dt),
+            "detekt_only": len(dt - dk),
+            "overlap": len(dk & dt),
+            "total_diktat": len(dk),
+            "total_detekt": len(dt),
+        }
 
-    def generate_report(self, violations: Optional[List[DiktatViolation]] = None,
-                        format: str = "json") -> str:
+    def generate_report(
+        self, violations: Optional[List[DiktatViolation]] = None, format: str = "json"
+    ) -> str:
         """Generate summary report."""
         vs = violations if violations is not None else self.violations
         if format == "json":
-            return json.dumps({
-                "tool": "diktat", "total": len(vs),
-                "violations": [{"rule_id": v.rule_id, "rule_set": v.rule_set,
-                                "message": v.message, "file": v.file_path,
-                                "line": v.line_number, "severity": v.severity} for v in vs],
-            }, indent=2)
+            return json.dumps(
+                {
+                    "tool": "diktat",
+                    "total": len(vs),
+                    "violations": [
+                        {
+                            "rule_id": v.rule_id,
+                            "rule_set": v.rule_set,
+                            "message": v.message,
+                            "file": v.file_path,
+                            "line": v.line_number,
+                            "severity": v.severity,
+                        }
+                        for v in vs
+                    ],
+                },
+                indent=2,
+            )
         lines = [f"diktat: {len(vs)} violation(s)"]
         for v in vs:
-            lines.append(f"  [{v.severity or 'warn'}] {v.file_path}:{v.line_number} — {v.rule_id}: {v.message}")
+            lines.append(
+                f"  [{v.severity or 'warn'}] {v.file_path}:{v.line_number} — {v.rule_id}: {v.message}"
+            )
         return "\n".join(lines)
