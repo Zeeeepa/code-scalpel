@@ -36,8 +36,8 @@ For AI agent integrations:
 # [20260302_RELEASE] v2.1.0 - Go language support (GoNormalizer, GoVisitor, GoParserAdapter, tree-sitter-go)
 # [20260309_RELEASE] v2.1.1 - Metadata-only patch release to sync PyPI/Marketplace copy and 22-core-tool wording
 # [20260311_RELEASE] v2.1.2 - MCP --root startup env propagation and ${root} license path support
-# [20260312_RELEASE] v2.1.3 - CLI/Oracle patch release for guided error handling and CLI bridge hardening
-__version__ = "2.1.3"
+# [20260312_RELEASE] v2.1.4 - Mainline follow-up release to carry the CLI Oracle patch and align VS Code Marketplace publishing
+__version__ = "2.1.4"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 
@@ -278,10 +278,7 @@ def security_scan(code: str | None = None, file_path: str | None = None):
 
 
 def symbolic_execute(
-    code: str,
-    max_paths: int | None = None,
-    max_depth: int | None = None,
-    language: str | None = None,
+    code: str, max_paths: int | None = None, max_depth: int | None = None
 ):
     """[20251228_FEATURE] Sync wrapper for MCP symbolic_execute tool."""
     from code_scalpel.mcp.tools.symbolic import (
@@ -294,8 +291,6 @@ def symbolic_execute(
         kwargs["max_paths"] = max_paths
     if max_depth is not None:
         kwargs["max_depth"] = max_depth
-    if language is not None:
-        kwargs["language"] = language
     return _run_mcp_tool_sync(_symbolic_execute_async, **kwargs)
 
 
@@ -303,7 +298,6 @@ def generate_unit_tests(
     code: str | None = None,
     file_path: str | None = None,
     function_name: str | None = None,
-    language: str | None = None,
     framework: str = "pytest",
 ):
     """[20251228_FEATURE] Sync wrapper for MCP generate_unit_tests tool."""
@@ -316,7 +310,6 @@ def generate_unit_tests(
         code=code,
         file_path=file_path,
         function_name=function_name,
-        language=language,
         framework=framework,
     )
 
