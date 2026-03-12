@@ -58,8 +58,25 @@ def get_effective_tier() -> str:
             get_current_tier as _jwt_tier,
         )
         return _jwt_tier()
-    except Exception:
-        pass
+    except ImportError:
+        # [20260312_BUGFIX] Expected in community-only installs where the JWT
+        # dependency is not present.  Debug-level — not actionable noise.
+        import logging
+
+        logging.getLogger(__name__).debug(
+            "JWT validator not available (ImportError), defaulting to community tier",
+        )
+    except Exception as exc:
+        # [20260312_BUGFIX] Any other failure (corrupt license, validator bug,
+        # file-permission error…) MUST be observable.  Previously this was a
+        # bare ``except: pass`` which silently swallowed all errors (P2).
+        import logging
+
+        logging.getLogger(__name__).warning(
+            "JWT tier resolution failed, falling back to community: %s",
+            exc,
+            exc_info=True,
+        )
 
     # 4. Fallback.
     return "community"
