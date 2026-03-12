@@ -19,6 +19,52 @@ if TYPE_CHECKING:
 _FORCE_ENTERPRISE_MODE = True
 
 
+def get_effective_tier() -> str:
+    """Canonical tier resolution — the ONE function all code should call.
+
+    [20260312_FEATURE] Unified tier getter that the entire codebase delegates
+    to.  This eliminates the previous fragmentation where ``protocol.py``,
+    ``server.py``, ``jwt_validator.py``, ``tier_detector.py``, and
+    ``license_manager.py`` each had independent tier getters with different
+    behaviour.
+
+    Resolution order:
+        1. ``_FORCE_ENTERPRISE_MODE`` flag  →  ``"enterprise"`` (hard override)
+        2. ``CODE_SCALPEL_TIER`` / ``SCALPEL_TIER`` env vars  →  explicit tier
+        3. JWT-based license validation  →  whatever the license says
+        4. Default  →  ``"community"``
+
+    Returns:
+        str: One of ``"community"``, ``"pro"``, or ``"enterprise"``.
+    """
+    # 1. Hard override — short-circuit when enterprise mode is forced.
+    if _FORCE_ENTERPRISE_MODE:
+        return "enterprise"
+
+    import os
+
+    # 2. Environment variable override (useful for testing / downgrade).
+    env_tier = (
+        os.environ.get("CODE_SCALPEL_TIER")
+        or os.environ.get("SCALPEL_TIER")
+        or ""
+    ).strip().lower()
+    if env_tier in {"community", "pro", "enterprise"}:
+        return env_tier
+
+    # 3. JWT licence validation (lazy import to avoid circular deps).
+    try:
+        from code_scalpel.licensing.jwt_validator import (
+            get_current_tier as _jwt_tier,
+        )
+        return _jwt_tier()
+    except Exception:
+        pass
+
+    # 4. Fallback.
+    return "community"
+
+
 def compute_effective_tier_for_startup(
     *,
     requested_tier: str | None,

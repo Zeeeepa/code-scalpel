@@ -137,9 +137,16 @@ from .jwt_validator import (
     JWTAlgorithm,
     JWTLicenseData,
     JWTLicenseValidator,
-    get_current_tier,
+    get_current_tier as _jwt_get_current_tier,
     get_license_info,
 )
+
+# [20260312_FEATURE] Canonical tier getter — ALL callers should use this.
+# Re-wires the package-level ``get_current_tier`` to honor _FORCE_ENTERPRISE_MODE.
+# Previously this pointed at jwt_validator.get_current_tier which bypassed the flag.
+from .authorization import get_effective_tier
+
+get_current_tier = get_effective_tier  # backward-compatible alias
 from .license_manager import LicenseInfo, LicenseManager
 
 # [20251225_FEATURE] Runtime imports after Tier enum definition
@@ -154,7 +161,8 @@ __all__ = [
     "JWTLicenseValidator",
     "JWTLicenseData",
     "JWTAlgorithm",
-    "get_current_tier",  # Primary function for v3.3.0+
+    "get_effective_tier",  # Canonical tier getter — honors _FORCE_ENTERPRISE_MODE
+    "get_current_tier",  # Backward-compat alias → get_effective_tier
     "get_license_info",
     # Legacy tier detection
     "TierDetector",
