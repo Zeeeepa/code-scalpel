@@ -108,6 +108,9 @@ async def _get_call_graph_tool(
     if max_nodes is not None:
         max_nodes = int(max_nodes)
 
+    # [20260311_BUGFIX] Coerce user-provided depth; MCP clients send strings.
+    depth = int(depth)
+
     actual_depth = depth
     if max_depth is not None and depth > max_depth:
         actual_depth = max_depth
@@ -258,12 +261,15 @@ async def _get_graph_neighborhood_tool(
         )
 
     # Pre-validation: Check parameter ranges
+    # [20260311_BUGFIX] Coerce all numeric params; MCP clients send strings.
     try:
         k = int(k)
         max_nodes = int(max_nodes)
+        min_confidence = float(min_confidence)
     except (ValueError, TypeError):
         raise ValueError(
-            "Invalid parameters: 'k' and 'max_nodes' must be valid integers"
+            "Invalid parameters: 'k' and 'max_nodes' must be valid integers, "
+            "'min_confidence' must be a valid float"
         )
 
     if k < 1:
@@ -357,6 +363,10 @@ async def _get_project_map_tool(
     """
     if ctx:
         await ctx.report_progress(0, 100, "Scanning project structure...")
+
+    # [20260311_BUGFIX] Coerce numeric params; MCP clients send strings.
+    complexity_threshold = int(complexity_threshold)
+    min_isolation_score = float(min_isolation_score)
 
     tier = _get_current_tier()
     caps = get_tool_capabilities("get_project_map", tier) or {}
@@ -513,6 +523,14 @@ async def _get_cross_file_dependencies_tool(
         - error (str): Error message if analysis failed
         - duration_ms (int): Analysis duration in milliseconds
     """
+    # [20260311_BUGFIX] Coerce numeric params; MCP clients send strings.
+    max_depth = int(max_depth)
+    confidence_decay_factor = float(confidence_decay_factor)
+    if max_files is not None:
+        max_files = int(max_files)
+    if timeout_seconds is not None:
+        timeout_seconds = float(timeout_seconds)
+
     tier = _get_current_tier()
     caps = get_tool_capabilities("get_cross_file_dependencies", tier) or {}
     limits = caps.get("limits", {}) or {}
@@ -637,6 +655,14 @@ async def _cross_file_security_scan_tool(
         await ctx.report_progress(
             progress=0, total=100, message="Starting cross-file security scan..."
         )
+
+    # [20260311_BUGFIX] Coerce numeric params; MCP clients send strings.
+    max_depth = int(max_depth)
+    confidence_threshold = float(confidence_threshold)
+    if timeout_seconds is not None:
+        timeout_seconds = float(timeout_seconds)
+    if max_modules is not None:
+        max_modules = int(max_modules)
 
     tier = _get_current_tier()
     caps = get_tool_capabilities("cross_file_security_scan", tier)
