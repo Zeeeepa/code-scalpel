@@ -97,57 +97,22 @@ def _requested_tier_from_env() -> str | None:
 
 
 def _get_current_tier() -> str:
-    """Get the current tier from license validation with env var override.
+    """Get the current effective tier.
 
-    [20260214_FEATURE] When _FORCE_ENTERPRISE_MODE is True, returns 'enterprise'
-    unconditionally so all users get full feature access. Enterprise tier is a
-    superset of Pro and Community, so all lower-tier capabilities are included.
+    [20260312_FEATURE] Delegates to the canonical ``get_effective_tier()`` in
+    ``licensing.authorization`` so that ``_FORCE_ENTERPRISE_MODE``, env-var
+    overrides, and JWT license validation are all resolved in ONE place.
 
-    [20260116_FEATURE] Original license-based tier detection (active when
-    _FORCE_ENTERPRISE_MODE is False):
-    1. License file determines the MAXIMUM tier you're entitled to
-    2. Environment variable can REQUEST a tier (for testing/downgrade)
-    3. The effective tier is the MINIMUM of licensed and requested
+    Kept as a thin wrapper so existing callers that import
+    ``_get_current_tier`` from this module continue to work unchanged.
 
     Returns:
         str: One of 'community', 'pro', or 'enterprise'
     """
-    # [20260214_FEATURE] Tier unification: enterprise mode for all users
-    if _FORCE_ENTERPRISE_MODE:
-        return "enterprise"
+    # [20260312_FEATURE] Unified delegation — single source of truth
+    from code_scalpel.licensing.authorization import get_effective_tier
 
-    import time as time_module
-
-    global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
-
-    requested = _requested_tier_from_env()
-    validator = JWTLicenseValidator()
-    license_data = validator.validate()
-    licensed = "community"
-
-    if license_data.is_valid:
-        licensed = _normalize_tier(license_data.tier)
-        _LAST_VALID_LICENSE_TIER = licensed
-        _LAST_VALID_LICENSE_AT = time_module.time()
-    else:
-        # Revocation is immediate: no grace.
-        err = (license_data.error_message or "").lower()
-        if "revoked" in err:
-            licensed = "community"
-        # Expiration mid-session: allow 24h grace based on last known valid tier.
-        elif getattr(license_data, "is_expired", False) and _LAST_VALID_LICENSE_AT:
-            now = time_module.time()
-            if now - _LAST_VALID_LICENSE_AT <= _MID_SESSION_EXPIRY_GRACE_SECONDS:
-                if _LAST_VALID_LICENSE_TIER in {"pro", "enterprise"}:
-                    licensed = _LAST_VALID_LICENSE_TIER
-
-    # If no tier requested via env var, use the licensed tier
-    if requested is None:
-        return licensed
-
-    # Allow downgrade only: effective tier = min(requested, licensed)
-    rank = {"community": 0, "pro": 1, "enterprise": 2}
-    return requested if rank[requested] <= rank[licensed] else licensed
+    return get_effective_tier()
 
 
 def set_current_tier(tier: str) -> None:

@@ -68,10 +68,21 @@ def clean_env():
         os.environ.pop("CODE_SCALPEL_ALLOW_HS256", None)
 
 
+
+# [20260312_TEST] Fixture to disable _FORCE_ENTERPRISE_MODE for tests that need
+# to exercise real license-based tier detection rather than the hard override.
+@pytest.fixture(autouse=False)
+def disable_enterprise_mode(monkeypatch):
+    """Temporarily disable _FORCE_ENTERPRISE_MODE so tests can exercise
+    license-based tier detection."""
+    import code_scalpel.licensing.authorization as auth_mod
+    monkeypatch.setattr(auth_mod, "_FORCE_ENTERPRISE_MODE", False)
+
+
 class TestToolCapabilitiesByTier:
     """Test tool capabilities for each tier."""
 
-    def test_community_tier_capabilities(self, clean_env):
+    def test_community_tier_capabilities(self, clean_env, disable_enterprise_mode):
         """Test Community tier has basic capabilities."""
         with tempfile.TemporaryDirectory() as tmpdir:
             original_cwd = os.getcwd()
@@ -92,7 +103,7 @@ class TestToolCapabilitiesByTier:
             finally:
                 os.chdir(original_cwd)
 
-    def test_pro_tier_capabilities(self, clean_env):
+    def test_pro_tier_capabilities(self, clean_env, disable_enterprise_mode):
         """Test Pro tier has enhanced capabilities."""
         token = generate_license(
             tier="pro",
@@ -153,7 +164,7 @@ class TestToolCapabilitiesByTier:
 class TestToolHandlerIntegration:
     """Test integration with tool handlers."""
 
-    def test_tool_handler_respects_tier_limits(self, clean_env):
+    def test_tool_handler_respects_tier_limits(self, clean_env, disable_enterprise_mode):
         """Test that tool handlers respect tier-based limits."""
 
         # Simulate security_scan tool handler
@@ -192,7 +203,7 @@ class TestToolHandlerIntegration:
             finally:
                 os.chdir(original_cwd)
 
-    def test_tool_handler_adds_features(self, clean_env):
+    def test_tool_handler_adds_features(self, clean_env, disable_enterprise_mode):
         """Test that tool handlers add tier-specific features."""
 
         # Simulate tool with conditional features
@@ -321,7 +332,7 @@ class TestLicenseInfoDisplay:
 class TestMultipleTiersSequence:
     """Test switching between different tiers."""
 
-    def test_switch_from_community_to_pro(self, clean_env):
+    def test_switch_from_community_to_pro(self, clean_env, disable_enterprise_mode):
         """Test that switching from Community to Pro works."""
         # Start with Community
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -357,7 +368,7 @@ class TestMultipleTiersSequence:
             finally:
                 os.chdir(original_cwd)
 
-    def test_license_expiration_downgrade(self, clean_env):
+    def test_license_expiration_downgrade(self, clean_env, disable_enterprise_mode):
         """Test that license expiration downgrades to Community."""
         from datetime import datetime, timedelta
 

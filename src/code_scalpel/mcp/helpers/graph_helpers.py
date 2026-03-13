@@ -3872,11 +3872,26 @@ def _get_cross_file_dependencies_sync(
             truncated=files_truncated > 0,
             files_analyzed=files_analyzed,
             max_depth_reached=max_depth_reached,
+            # [20260312_FIX] Include tier metadata on success path — was missing,
+            # causing tier_applied to default to "community" even when enterprise.
+            tier_applied=tier,
+            max_depth_applied=depth_limit,
+            max_files_applied=max_files_limit,
+            pro_features_enabled=pro_features_enabled,
+            enterprise_features_enabled=enterprise_features_enabled,
         )
 
     except Exception as e:
+        # [20260312_FIX] Include tier metadata in outer exception handler.
+        # All tier variables are computed before the try block (lines 3115-3129)
+        # so they are always in scope here.
         return CrossFileDependenciesResult(
             success=False,
+            tier_applied=tier,
+            max_depth_applied=depth_limit,
+            max_files_applied=max_files_limit,
+            pro_features_enabled=pro_features_enabled,
+            enterprise_features_enabled=enterprise_features_enabled,
             error=f"Cross-file dependency analysis failed: {str(e)}",
         )
 
