@@ -36,7 +36,8 @@ For AI agent integrations:
 # [20260302_RELEASE] v2.1.0 - Go language support (GoNormalizer, GoVisitor, GoParserAdapter, tree-sitter-go)
 # [20260309_RELEASE] v2.1.1 - Metadata-only patch release to sync PyPI/Marketplace copy and 22-core-tool wording
 # [20260311_RELEASE] v2.1.2 - MCP --root startup env propagation and ${root} license path support
-__version__ = "2.1.2"
+# [20260312_RELEASE] v2.1.4 - Mainline follow-up release to carry the CLI Oracle patch and align VS Code Marketplace publishing
+__version__ = "2.1.4"
 __author__ = "Timmothy Escolopio"
 __email__ = "time@3dtechsolutions.us"
 
